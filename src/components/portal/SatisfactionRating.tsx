@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { SATISFACTION_EMOJIS, SATISFACTION_LABELS, SATISFACTION_SURVEY_LABELS, PORTAL_LABELS } from '@/lib/constants'
+import { SATISFACTION_EMOJIS, SATISFACTION_LABELS, SATISFACTION_SURVEY_LABELS } from '@/lib/constants'
+import { useT } from '@/lib/i18n/LocaleProvider'
 import { daysBetween } from '@/lib/utils'
 
 interface SatisfactionRatingProps {
@@ -10,6 +11,7 @@ interface SatisfactionRatingProps {
 }
 
 export function SatisfactionRating({ currentRating, lastCheckInDate }: SatisfactionRatingProps) {
+  const t = useT()
   const [rating, setRating] = useState<number | null>(null)
   const [concerns, setConcerns] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -75,14 +77,14 @@ export function SatisfactionRating({ currentRating, lastCheckInDate }: Satisfact
         <div className="text-center py-6">
           <span className="text-5xl mb-4 block">✓</span>
           <h2 className="text-xl font-semibold text-status-success-text mb-2">
-            {PORTAL_LABELS.satisfaction.thankYouTitle}
+            {t('satisfaction.thankYouTitle')}
           </h2>
           <p className="text-status-success-text">
-            {PORTAL_LABELS.satisfaction.thankYouMessage}
+            {t('satisfaction.thankYouMessage')}
           </p>
           {rating && rating <= 2 && submittedWithConcerns && (
             <p className="text-sm text-status-success mt-3">
-              {PORTAL_LABELS.satisfaction.concernsForwarded}
+              {t('satisfaction.concernsForwarded')}
             </p>
           )}
         </div>
@@ -94,14 +96,14 @@ export function SatisfactionRating({ currentRating, lastCheckInDate }: Satisfact
   if (!shouldPrompt && !rating && !forceShowForm) {
     // Format days display — "Heute" instead of "vor 0 Tagen"
     const daysDisplay = daysSinceLastCheckIn === 0
-      ? PORTAL_LABELS.satisfaction.today
+      ? t('satisfaction.today')
       : `vor ${daysSinceLastCheckIn} ${daysSinceLastCheckIn === 1 ? SATISFACTION_SURVEY_LABELS.day : SATISFACTION_SURVEY_LABELS.days}`
 
     return (
       <div className="card bg-ui-subtle">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-ui-muted">{PORTAL_LABELS.satisfaction.lastFeedback}</p>
+            <p className="text-sm text-ui-muted">{t('satisfaction.lastFeedback')}</p>
             <div className="flex items-center gap-2 mt-1">
               {currentRating && (
                 <span className="text-2xl">{SATISFACTION_EMOJIS[currentRating - 1]}</span>
@@ -115,7 +117,7 @@ export function SatisfactionRating({ currentRating, lastCheckInDate }: Satisfact
             onClick={() => setForceShowForm(true)}
             className="text-sm text-brand-primary hover:underline min-h-[44px] flex items-center"
           >
-            {PORTAL_LABELS.satisfaction.newFeedback}
+            {t('satisfaction.newFeedback')}
           </button>
         </div>
       </div>
@@ -126,10 +128,10 @@ export function SatisfactionRating({ currentRating, lastCheckInDate }: Satisfact
     <div className="card border-brand-primary/20 bg-ui-surface">
       <div className="text-center mb-6">
         <h2 className="text-xl font-semibold text-ui-text mb-2">
-          {PORTAL_LABELS.satisfaction.title}
+          {t('satisfaction.title')}
         </h2>
         <p className="text-ui-muted">
-          {PORTAL_LABELS.satisfaction.subtitle}
+          {t('satisfaction.subtitle')}
         </p>
       </div>
 
@@ -217,7 +219,7 @@ export function SatisfactionRating({ currentRating, lastCheckInDate }: Satisfact
       )}
 
       <p className="text-xs text-ui-muted mt-4 text-center">
-        {PORTAL_LABELS.satisfaction.privacyNote}
+        {t('satisfaction.privacyNote')}
       </p>
     </div>
   )

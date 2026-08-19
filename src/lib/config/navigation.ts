@@ -155,12 +155,12 @@ export function visibleMegaMenuGroups(role: StaffRole): MegaMenuGroup[] {
 // PORTAL NAV (resident-facing)
 // =============================================================================
 
-export type PortalNavGroup = 'living' | 'together' | 'concerns' | 'account'
+export type PortalNavGroup = 'living' | 'together' | 'integration' | 'account'
 
 export const PORTAL_NAV_GROUP_ORDER: readonly PortalNavGroup[] = [
   'living',
   'together',
-  'concerns',
+  'integration',
   'account',
 ]
 
@@ -190,22 +190,26 @@ export const PORTAL_NAV_HIDDEN_ROUTES = ['/portal/apartment', '/portal/roommates
 export const PORTAL_SIDEBAR_GROUPS: readonly PortalNavGroup[] = [
   'living',
   'together',
-  'concerns',
+  'integration',
 ]
 
 export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
+  // Alltag — the daily routine of living here + city activities
   { href: '/portal', labelKey: 'overview', icon: 'home', primary: true, tab: 1, aozTab: 1, group: 'living' },
   { href: '/portal/chores', labelKey: 'chores', icon: 'calendar', primary: true, tab: 2, group: 'living' },
   { href: '/portal/expenses', labelKey: 'expenses', icon: 'wallet', primary: true, tab: 3, group: 'living', requiresFeature: 'householdMoney' },
+  { href: '/portal/housing', labelKey: 'housing', icon: 'house-plus', group: 'living' },
+  { href: '/portal/transfer', labelKey: 'transfer', icon: 'transfer', group: 'living' },
+  { href: '/portal/activities', labelKey: 'activities', icon: 'heart', group: 'living' },
+  // Miteinander — shared life, rules, reporting
   { href: '/portal/rules', labelKey: 'rules', icon: 'scroll', primary: true, aozTab: 3, group: 'together' },
   { href: '/portal/decisions', labelKey: 'decisions', icon: 'vote', primary: true, group: 'together', requiresFeature: 'householdVotes' },
-  { href: '/portal/messages', labelKey: 'messages', icon: 'message', primary: true, group: 'concerns' },
-  { href: '/portal/report', labelKey: 'report', icon: 'alert', primary: true, aozTab: 2, group: 'concerns' },
-  { href: '/portal/reports', labelKey: 'reports', icon: 'clipboard', group: 'concerns' },
-  { href: '/portal/learning', labelKey: 'learning', icon: 'learning', primary: true, tab: 4, group: 'concerns' },
-  { href: '/portal/activities', labelKey: 'activities', icon: 'heart', group: 'concerns' },
-  { href: '/portal/housing', labelKey: 'housing', icon: 'house-plus', group: 'concerns' },
-  { href: '/portal/transfer', labelKey: 'transfer', icon: 'transfer', group: 'concerns' },
+  { href: '/portal/messages', labelKey: 'messages', icon: 'message', primary: true, group: 'together' },
+  { href: '/portal/report', labelKey: 'report', icon: 'alert', primary: true, aozTab: 2, group: 'together' },
+  { href: '/portal/reports', labelKey: 'reports', icon: 'clipboard', group: 'together' },
+  // Integration & Beruf — language, courses, volunteering, qualifications (Jobcoach domain)
+  { href: '/portal/learning', labelKey: 'learning', icon: 'learning', primary: true, tab: 4, group: 'integration' },
+  // Account
   { href: '/portal/profile', labelKey: 'profile', icon: 'settings', group: 'account' },
   { href: '/portal/preferences', labelKey: 'preferences', icon: 'wrench', group: 'account' },
   { href: '/portal/help', labelKey: 'help', icon: 'help', aozTab: 4, group: 'account' },

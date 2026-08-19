@@ -28,9 +28,9 @@ export const sq: Dictionary = {
   'nav.moreTitle': 'Gjithçka me një vështrim',
   'nav.closeMore': 'Mbyll menynë',
 
-  'navGroup.living': 'Përditshmëria',
-  'navGroup.together': 'Vendosim bashkë',
-  'navGroup.concerns': 'Kërkesa dhe oferta',
+  'navGroup.living': 'Jeta e përditshme dhe strehimi',
+  'navGroup.together': 'Bashkë',
+  'navGroup.integration': 'Integrimi dhe puna',
   'navGroup.account': 'Llogaria ime',
 
   'reports.title': 'Raportimet e tua',

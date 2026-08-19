@@ -51,8 +51,8 @@ describe('PortalSidebar', () => {
     mockPathname = '/portal/learning'
     render(<PortalSidebar />)
 
-    const concerns = screen.getByText(PORTAL_LABELS.navGroups.concerns).closest('details')
-    expect(concerns).toHaveAttribute('open')
+    const integration = screen.getByText(PORTAL_LABELS.navGroups.integration).closest('details')
+    expect(integration).toHaveAttribute('open')
 
     const living = screen.getByText(PORTAL_LABELS.navGroups.living).closest('details')
     expect(living).not.toHaveAttribute('open')

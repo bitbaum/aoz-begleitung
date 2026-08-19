@@ -38,9 +38,9 @@ export const PORTAL_LABELS = {
    * rota thinks "Alltag", never "Chores".
    */
   navGroups: {
-    living: 'Alltag',
-    together: 'Zusammen entscheiden',
-    concerns: 'Anliegen & Angebote',
+    living: 'Alltag & Wohnen',
+    together: 'Miteinander',
+    integration: 'Integration & Beruf',
     account: 'Mein Konto',
   },
   /**

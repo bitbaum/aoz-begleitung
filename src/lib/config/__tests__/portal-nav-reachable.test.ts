@@ -142,14 +142,14 @@ describe('the mobile tab bar', () => {
     }
   })
 
-  it('lists sidebar destinations in living → together → concerns', () => {
+  it('lists sidebar destinations in living → together → opportunities', () => {
     const items = portalSidebarItems()
     const groups = items.map((item: { group: string }) => item.group)
     const seen: string[] = []
     for (const group of groups) {
       if (seen[seen.length - 1] !== group) seen.push(group)
     }
-    expect(seen).toEqual(['living', 'together', 'concerns'])
+    expect(seen).toEqual(['living', 'together', 'integration'])
     expect(items[0]?.href).toBe('/portal')
   })
 })

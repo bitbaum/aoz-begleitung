@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { PORTAL_LABELS } from '@/lib/constants'
+import { getRequestTranslator } from '@/lib/i18n/request'
 import { formatDate } from '@/lib/utils'
 
 interface HousingUnitData {
@@ -22,34 +23,36 @@ interface PortalHousingCardProps {
   roommatesCount: number
 }
 
-export function PortalHousingCard({ placement, housingUnit, roommatesCount }: PortalHousingCardProps) {
+export async function PortalHousingCard({ placement, housingUnit, roommatesCount }: PortalHousingCardProps) {
+  const { t } = await getRequestTranslator()
+
   return (
     <div className="card mb-6">
       <div className="flex items-start justify-between mb-4">
         <div>
           <h2 className="text-lg font-semibold text-ui-text">
-            {housingUnit?.nickname || PORTAL_LABELS.dashboard.housing}
+            {housingUnit?.nickname || t('dashboard.housing')}
           </h2>
           <p className="text-ui-muted">{housingUnit?.address}</p>
         </div>
-        <span className="badge badge-active">{PORTAL_LABELS.dashboard.active}</span>
+        <span className="badge badge-active">{t('dashboard.active')}</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4">
         <InfoBox
-          label={PORTAL_LABELS.dashboard.moveIn}
+          label={t('dashboard.moveIn')}
           value={formatDate(placement.startDate)}
         />
         <InfoBox
-          label={PORTAL_LABELS.dashboard.rooms}
+          label={t('dashboard.rooms')}
           value={`${housingUnit?.totalRooms || 0}`}
         />
         <InfoBox
-          label={PORTAL_LABELS.dashboard.roommates}
+          label={t('dashboard.roommatesCount')}
           value={`${roommatesCount}`}
         />
         <InfoBox
-          label={PORTAL_LABELS.dashboard.compatibility}
+          label={t('dashboard.compatibility')}
           value={placement.compatibilityScore
             ? `${Math.round(placement.compatibilityScore)}%`
             : '--'}
@@ -59,27 +62,27 @@ export function PortalHousingCard({ placement, housingUnit, roommatesCount }: Po
       {/* House Rules Summary */}
       <div className="pt-4 border-t border-ui-border">
         <Link href="/portal/rules" className="inline-flex items-center min-h-[44px] text-sm text-brand-primary hover:underline">
-          {PORTAL_LABELS.dashboard.houseRules}
+          {t('dashboard.houseRules')}
         </Link>
         <div className="flex flex-wrap gap-3 text-sm">
           {housingUnit?.quietHours && (
             <span className="px-3 py-1 bg-brand-secondary/10 text-brand-secondary rounded-sm">
-              {PORTAL_LABELS.dashboard.quietHours}: {housingUnit.quietHours}
+              {t('dashboard.quietHours')}: {housingUnit.quietHours}
             </span>
           )}
           <span className={`px-3 py-1 rounded-sm ${
             housingUnit?.smokingAllowed
-              ? 'bg-status-success/10 text-status-success-text'
+              ? 'bg-status-success/15 text-status-success-text'
               : 'bg-status-error/10 text-status-error-text'
           }`}>
-            {housingUnit?.smokingAllowed ? PORTAL_LABELS.dashboard.smokingAllowed : PORTAL_LABELS.dashboard.noSmoking}
+            {housingUnit?.smokingAllowed ? t('dashboard.smokingAllowed') : t('dashboard.noSmoking')}
           </span>
           <span className={`px-3 py-1 rounded-sm ${
             housingUnit?.petsAllowed
-              ? 'bg-status-success/10 text-status-success-text'
+              ? 'bg-status-success/15 text-status-success-text'
               : 'bg-ui-subtle text-ui-muted'
           }`}>
-            {housingUnit?.petsAllowed ? PORTAL_LABELS.dashboard.petsAllowed : PORTAL_LABELS.dashboard.noPets}
+            {housingUnit?.petsAllowed ? t('dashboard.petsAllowed') : t('dashboard.noPets')}
           </span>
         </div>
       </div>
@@ -91,18 +94,24 @@ interface PortalOnboardingCardProps {
   preferencesCompleted: boolean
 }
 
-export function PortalOnboardingCard({ preferencesCompleted }: PortalOnboardingCardProps) {
-  const steps = PORTAL_LABELS.dashboard.onboarding.steps
+export async function PortalOnboardingCard({ preferencesCompleted }: PortalOnboardingCardProps) {
+  const { t } = await getRequestTranslator()
+  const steps = [
+    t('dashboard.onboarding.step1'),
+    t('dashboard.onboarding.step2'),
+    t('dashboard.onboarding.step3'),
+    t('dashboard.onboarding.step4'),
+  ]
   const stepDone = [true, preferencesCompleted, false, false]
   const activeStep = stepDone.indexOf(false)
 
   return (
     <div className="card mb-6 py-6">
       <h2 className="text-lg font-semibold text-ui-text mb-1">
-        {PORTAL_LABELS.dashboard.onboarding.title}
+        {t('dashboard.onboarding.title')}
       </h2>
       <p className="text-ui-muted text-sm mb-6">
-        {PORTAL_LABELS.dashboard.onboarding.subtitle}
+        {t('dashboard.onboarding.subtitle')}
       </p>
 
       {/* Progress timeline */}
@@ -149,16 +158,16 @@ export function PortalOnboardingCard({ preferencesCompleted }: PortalOnboardingC
       <div className="bg-brand-primary/5 rounded-lg p-4">
         <p className="text-sm text-ui-muted mb-3">
           {preferencesCompleted
-            ? PORTAL_LABELS.dashboard.onboarding.browseHousingHint
-            : PORTAL_LABELS.dashboard.onboarding.completePreferencesHint}
+            ? t('dashboard.onboarding.browseHousingHint')
+            : t('dashboard.onboarding.completePreferencesHint')}
         </p>
         <Link
           href={preferencesCompleted ? '/portal/housing' : '/portal/preferences'}
           className="btn-primary inline-flex items-center min-h-[44px] px-6"
         >
           {preferencesCompleted
-            ? PORTAL_LABELS.dashboard.onboarding.browseHousing
-            : PORTAL_LABELS.dashboard.onboarding.completePreferences} →
+            ? t('dashboard.onboarding.browseHousing')
+            : t('dashboard.onboarding.completePreferences')} →
         </Link>
       </div>
 

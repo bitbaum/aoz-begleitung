@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { PORTAL_LABELS } from '@/lib/constants'
+import { getRequestTranslator } from '@/lib/i18n/request'
 import { RESIDENT_REPORTS_ANCHOR, type ResidentReport } from '@/lib/reports/resident-reports'
 import { ResidentReportItem } from './ResidentReportItem'
 
@@ -13,21 +13,22 @@ interface PortalReportsCardProps {
   totalCount: number
 }
 
-export function PortalReportsCard({ reports, totalCount }: PortalReportsCardProps) {
+export async function PortalReportsCard({ reports, totalCount }: PortalReportsCardProps) {
+  const { t } = await getRequestTranslator()
   const hasMore = totalCount > reports.length
 
   return (
     <div className="card" id={RESIDENT_REPORTS_ANCHOR}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-ui-text">{PORTAL_LABELS.dashboard.myReports}</h2>
+        <h2 className="text-lg font-semibold text-ui-text">{t('dashboard.myReports')}</h2>
         <Link href="/portal/report" className="inline-flex items-center min-h-[44px] px-1 text-sm text-brand-primary hover:underline">
-          {PORTAL_LABELS.dashboard.newReport}
+          {t('dashboard.newReport')}
         </Link>
       </div>
 
       {reports.length === 0 ? (
         <p className="text-ui-muted text-center py-6">
-          {PORTAL_LABELS.dashboard.noReports}
+          {t('dashboard.noReports')}
         </p>
       ) : (
         <>
@@ -48,8 +49,8 @@ export function PortalReportsCard({ reports, totalCount }: PortalReportsCardProp
             className="mt-4 inline-flex items-center min-h-[44px] text-sm text-brand-primary hover:underline"
           >
             {hasMore
-              ? `${PORTAL_LABELS.reports.showAllCount} (${totalCount})`
-              : PORTAL_LABELS.reports.showAll}
+              ? `${t('reports.showAllCount')} (${totalCount})`
+              : t('reports.showAll')}
           </Link>
         </>
       )}

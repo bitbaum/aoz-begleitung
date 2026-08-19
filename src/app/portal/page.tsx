@@ -3,7 +3,6 @@ import { prisma } from '@/lib/db'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = { title: 'Mein Bereich' }
-import { PORTAL_LABELS } from '@/lib/constants'
 import { DISPLAY_LIMITS } from '@/lib/config/thresholds'
 import { SatisfactionRating } from '@/components/portal/SatisfactionRating'
 import { PortalHousingCard, PortalOnboardingCard } from '@/components/portal/PortalHousingCard'
@@ -161,13 +160,13 @@ export default async function ResidentPortal() {
       <div className="flex items-start justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-ui-text">
-            {PORTAL_LABELS.pages.dashboard}, {residentName(resident)}
+            {t('dashboard.welcome')}, {residentName(resident)}
           </h1>
           <p className="text-ui-muted mt-1">
-            {PORTAL_LABELS.pages.dashboardSubtitle}
+            {t('dashboard.subtitle')}
           </p>
         </div>
-        <Link href="/portal/profile" aria-label={PORTAL_LABELS.nav.profile} className="shrink-0">
+        <Link href="/portal/profile" aria-label={t('nav.profile')} className="shrink-0">
           <ResidentAvatar resident={resident} photoVersion={resident.photo?.updatedAt} />
         </Link>
       </div>
