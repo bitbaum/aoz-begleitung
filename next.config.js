@@ -21,7 +21,7 @@ const nextConfig = {
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           {
             key: 'Content-Security-Policy',
-            value: `default-src 'self'; script-src ${scriptSrc} https://fleetcrown.orangecat.ch; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.sentry.io https://fleetcrown.orangecat.ch; frame-ancestors 'self'`,
+            value: `default-src 'self'; script-src ${scriptSrc} https://loki.orangecat.ch; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.sentry.io https://loki.orangecat.ch; frame-ancestors 'self'`,
           },
           { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },

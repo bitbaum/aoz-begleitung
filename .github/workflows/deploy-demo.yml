@@ -94,8 +94,8 @@ jobs:
             echo "live page does not carry the AOZ brand — stale build?"
             exit 1
           }
-          echo "$html" | grep -q 'fleetcrown.orangecat.ch/widget.js' || {
-            echo "live page does not carry the FleetCrown widget — stale build?"
+          echo "$html" | grep -q 'loki.orangecat.ch/widget.js' || {
+            echo "live page does not carry the Loki widget — stale build?"
             exit 1
           }
           echo "health 200, AOZ brand present, widget snippet present"
