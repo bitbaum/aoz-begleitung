@@ -24,7 +24,7 @@ Do not treat gitignored env files as SSOT. This laptop's Postgres is not
 
 Uncommitted work, and any branch that is not `master`, is not what residents
 see. Deploy is push to `master` → `.github/workflows/deploy.yml` (waits for
-CI, applies pending `drizzle/*.sql` via fleetcrown's apply-schema.sh, build,
+CI, applies pending `drizzle/*.sql` via loki's apply-schema.sh, build,
 rsync). Manual:
 `gh workflow run deploy.yml -R bitbaum/aoz-housing`.
 
@@ -1366,7 +1366,7 @@ One email namespace across the whole product, because there is exactly one
 ### Email transport
 
 Resend (`lib/email/service.ts`), fleet key, sender on the verified
-`fleetcrown.orangecat.ch` domain. `EMAIL_CONFIG.enabled` is false without
+`loki.orangecat.ch` domain. `EMAIL_CONFIG.enabled` is false without
 `RESEND_API_KEY` — notification emails then no-op quietly, but the
 password-reset flow REFUSES loudly (see above). Absolute links come from
 `NEXT_PUBLIC_APP_URL` (`lib/config/app-url.ts`).

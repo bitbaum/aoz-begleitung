@@ -9,7 +9,7 @@ import type { ContentBlock } from 'bip-kit'
  * `output: "standalone"`: bip-kit's zero-config shiki load goes through a
  * bundler-hidden dynamic import that Next's file tracer cannot see, so the
  * literal `() => import('shiki')` must live HERE, in our code, where the
- * bundler resolves it (FleetCrown shipped that exact hole twice, in its PRs
+ * bundler resolves it (Loki shipped that exact hole twice, in its PRs
  * 510 to 513; OrangeCat needed a deploy-time symlink before this seam
  * existed). Those PR numbers are written bare on purpose: prefixed with a
  * hash they read as hex colour literals to the design-system scan in

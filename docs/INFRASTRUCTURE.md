@@ -39,10 +39,10 @@ Do not:
 ## How code reaches the box
 
 Push to `master` → `.github/workflows/deploy.yml` → reusable
-`bitbaum/fleetcrown/.github/workflows/selfhost-deploy.yml`.
+`bitbaum/loki/.github/workflows/selfhost-deploy.yml`.
 
 That pipeline waits for this commit's CI, pulls `/opt/aoz-wohnen/shared/.env`
-from the box (the box stays env SSOT), applies pending `drizzle/*.sql` (fleetcrown apply-schema.sh, ledgered in `_deploy_schema_history`) against
+from the box (the box stays env SSOT), applies pending `drizzle/*.sql` (loki apply-schema.sh, ledgered in `_deploy_schema_history`) against
 `aoz_wohnen` over the deploy tunnel, builds, rsyncs, health-checks.
 
 If CI on `master` is red, deploy is blocked. Auto-merge must set
@@ -69,7 +69,7 @@ ssh root@167.233.22.31
 # DATABASE_URL in /opt/aoz-wohnen/shared/.env is already aoz_wohnen@localhost
 ```
 
-Migrations are applied by the deploy itself: fleetcrown's `deploy.sh` runs
+Migrations are applied by the deploy itself: loki's `deploy.sh` runs
 `apply-schema.sh` (drizzle-kit over an SSH tunnel) before building, and no-ops
 when the journal is current. There is no drizzle-kit installed on the box, so
 do not try `pnpm run db:migrate` there.
@@ -78,7 +78,7 @@ Do not point this laptop's db client at Neon. Do not assume `localhost:5432` on 
 
 Local development uses a **local** Postgres and `.env.example` as the template (`aoz_wohnen` as the name so it matches production). Copy credentials from the box only when you are deliberately tunnelling, and rewrite the host/port to the tunnel — never keep a `neon.tech` host "for convenience".
 
-## AI (fleet keys — same as Kivvi / FleetCrown)
+## AI (fleet keys — same as Kivvi / Loki)
 
 All AI surfaces share one provider chain in `src/lib/ai/provider.ts`:
 

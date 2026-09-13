@@ -16,4 +16,4 @@ AOZ ships the BiP triad on the public site:
 
 Shared **parser / types / video allowlist**: npm [`bip-kit`](https://github.com/bitbaum/bip-kit) via `src/lib/bip.ts`. HTML rendering stays on `marked` until a full block renderer is worth the swap.
 
-Company voice only — not resident UGC. Studio programme: FleetCrown `docs/architecture/building-in-public-ssot.md`.
+Company voice only — not resident UGC. Studio programme: Loki `docs/architecture/building-in-public-ssot.md`.

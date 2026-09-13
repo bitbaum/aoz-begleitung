@@ -84,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ToastContainer />
         {/* Token is a literal so next build cannot tree-shake the Script away. */}
         <Script
-          src="https://fleetcrown.orangecat.ch/widget.js"
+          src="https://loki.orangecat.ch/widget.js"
           strategy="afterInteractive"
           data-fc-project="fcw_757c716fede237047d988f8d715a144d"
         />

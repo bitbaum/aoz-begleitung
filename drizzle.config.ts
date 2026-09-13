@@ -4,7 +4,7 @@ import { defineConfig } from 'drizzle-kit'
 // ./drizzle are applied two ways:
 //   - fresh databases (dev, CI service containers): `npm run db:migrate`
 //     (drizzle-kit's own journal)
-//   - the live box: fleetcrown's scripts/hetzner/apply-schema.sh on every
+//   - the live box: loki's scripts/hetzner/apply-schema.sh on every
 //     deploy — forward-only, ledgered in public._deploy_schema_history,
 //     refuses destructive statements
 export default defineConfig({

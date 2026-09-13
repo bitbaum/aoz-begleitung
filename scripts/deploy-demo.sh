@@ -5,9 +5,9 @@
 # WHY THIS EXISTS, AND WHAT IT IS NOT
 # -----------------------------------
 # The real deployment (aoz-wohnen.orangecat.ch) is push-to-master CD via
-# fleetcrown's reusable `selfhost-deploy.yml`. This demo instance is NOT on
+# loki's reusable `selfhost-deploy.yml`. This demo instance is NOT on
 # that pipeline yet: it is a second app on the same box, and registering a new
-# app is a change in the fleetcrown repo, not this one.
+# app is a change in the loki repo, not this one.
 #
 # So this script is the honest interim — a named, committed, repeatable
 # procedure rather than a sequence someone has to remember. Until the instance
@@ -85,7 +85,7 @@ echo "==> migrate the demo database"
 #
 # Drizzle migrations are plain forward-only SQL, applied with psql against the
 # demo's own DATABASE_URL and ledgered in public._deploy_schema_history — the
-# same ledger fleetcrown's apply-schema.sh keeps for the real instance, so both
+# same ledger loki's apply-schema.sh keeps for the real instance, so both
 # databases answer "what has been applied" the same way. Each file runs in a
 # single transaction (-1); a failure aborts the deploy before the restart.
 rsync -az --delete drizzle/ "$BOX:/opt/aoz-demo/drizzle/"
@@ -119,8 +119,8 @@ html=$(curl -s "$URL/login")
 echo "$html" | grep -q 'AOZ Begleitung' || {
   echo "live page does not carry the AOZ brand — stale build?"; exit 1;
 }
-echo "$html" | grep -q 'fleetcrown.orangecat.ch/widget.js' || {
-  echo "live page does not carry the FleetCrown widget — stale build?"; exit 1;
+echo "$html" | grep -q 'loki.orangecat.ch/widget.js' || {
+  echo "live page does not carry the Loki widget — stale build?"; exit 1;
 }
 doors=$(curl -s "$URL/api/auth/demo" | grep -o '"id"' | wc -l)
 
