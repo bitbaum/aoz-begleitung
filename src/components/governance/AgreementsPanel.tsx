@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { formatDateNumeric } from '@/lib/utils/formatting'
 import type { AgreementStatus } from '@/lib/db'
 import { createAgreement, reviewAgreement } from '@/lib/actions/governance'
 import {
@@ -109,7 +110,7 @@ export function AgreementsPanel({
 
               <p className="mt-2 text-xs text-ui-muted">
                 Beteiligt: {agreement.parties.map((p) => p.residentName).join(', ')} · Überprüfung:{' '}
-                {formatDate(agreement.reviewDate)}
+                {formatDateNumeric(agreement.reviewDate)}
                 {agreement.mediatorName ? ` · Vermittlung: ${agreement.mediatorName}` : ''}
               </p>
 
@@ -231,12 +232,4 @@ export function AgreementsPanel({
       )}
     </section>
   )
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('de-CH', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
 }

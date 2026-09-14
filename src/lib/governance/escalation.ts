@@ -205,7 +205,7 @@ export function recommendNextStep(
     ...base,
     recommendedStage: incident.resolutionStage,
     shouldEscalate: false,
-    reason: `Läuft. Nächste Überprüfung bis ${formatDate(dueDate)}.`,
+    reason: `Läuft. Nächste Überprüfung bis ${formatDateNumeric(dueDate)}.`,
   }
 }
 
@@ -233,8 +233,4 @@ function addDays(date: Date, days: number): Date {
 /** Whole days from `from` to `to`; negative when `to` is earlier. */
 function daysBetween(from: Date, to: Date): number {
   return Math.floor((to.getTime() - from.getTime()) / MS_PER_DAY)
-}
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }

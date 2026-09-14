@@ -4,17 +4,12 @@
  */
 
 import { EXPORT_COLUMN_HEADERS } from '@/lib/constants/labels/export'
+import { formatDateISOCell } from '@/lib/utils/formatting'
 
 export interface ExportColumn<T = Record<string, unknown>> {
   key: string
   header: string // German — from EXPORT_COLUMN_HEADERS
   transform?: (value: unknown, row: T) => string
-}
-
-function formatDate(v: unknown): string {
-  if (v instanceof Date) return v.toISOString().split('T')[0]
-  if (typeof v === 'string' && v) return new Date(v).toISOString().split('T')[0]
-  return ''
 }
 
 function formatArray(v: unknown): string {
@@ -40,22 +35,22 @@ export const EXPORT_COLUMNS: Record<string, ExportColumn[]> = {
     { key: 'mobilityNeeds', header: h.mobilityNeeds },
     { key: 'supportLevel', header: h.supportLevel },
     { key: 'languages', header: h.languages, transform: formatArray },
-    { key: 'createdAt', header: h.createdAt, transform: formatDate },
+    { key: 'createdAt', header: h.createdAt, transform: formatDateISOCell },
   ],
   incidents: [
     { key: 'id', header: h.id },
-    { key: 'date', header: h.date, transform: formatDate },
+    { key: 'date', header: h.date, transform: formatDateISOCell },
     { key: 'category', header: h.category },
     { key: 'type', header: h.type },
     { key: 'severity', header: h.severity },
     { key: 'description', header: h.description },
     { key: 'resolution', header: h.resolution },
-    { key: 'resolvedAt', header: h.resolvedAt, transform: formatDate },
+    { key: 'resolvedAt', header: h.resolvedAt, transform: formatDateISOCell },
   ],
   placements: [
     { key: 'id', header: h.id },
-    { key: 'startDate', header: h.startDate, transform: formatDate },
-    { key: 'endDate', header: h.endDate, transform: formatDate },
+    { key: 'startDate', header: h.startDate, transform: formatDateISOCell },
+    { key: 'endDate', header: h.endDate, transform: formatDateISOCell },
     { key: 'status', header: h.status },
     { key: 'endReason', header: h.endReason },
     { key: 'compatibilityScore', header: h.compatibilityScore },
@@ -63,7 +58,7 @@ export const EXPORT_COLUMNS: Record<string, ExportColumn[]> = {
   ],
   satisfaction: [
     { key: 'id', header: h.id },
-    { key: 'createdAt', header: h.date, transform: formatDate },
+    { key: 'createdAt', header: h.date, transform: formatDateISOCell },
     { key: 'checkInType', header: h.checkInType },
     { key: 'overallSatisfaction', header: h.overallSatisfaction },
     { key: 'roommateRelations', header: h.roommateRelations },

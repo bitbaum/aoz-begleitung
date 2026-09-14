@@ -28,6 +28,21 @@ export function formatDate(date: Date | string): string {
   return new Date(date).toLocaleDateString(DATE_LOCALE)
 }
 
+/**
+ * Zero-padded numeric form, e.g. "05.01.2026".
+ *
+ * What the emails, governance panels and the opportunities pages print. Same
+ * output as `Intl.DateTimeFormat('de-CH', { dateStyle: 'medium' })`, which two
+ * of the deleted copies used — the de-CH medium pattern IS dd.MM.y.
+ */
+export function formatDateNumeric(date: Date | string): string {
+  return new Date(date).toLocaleDateString(DATE_LOCALE, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
 export function formatDateTime(date: Date | string): string {
   return new Date(date).toLocaleString(DATE_LOCALE)
 }
@@ -62,6 +77,16 @@ export function formatCalendarDateLong(isoDate: string): string {
 /** ISO date for CSV export, e.g. "2026-05-27" */
 export function formatDateISO(date: Date | string): string {
   return new Date(date).toISOString().split('T')[0]
+}
+
+/**
+ * `formatDateISO` for a CSV cell whose shape is not known: a Date or a
+ * non-empty date string is formatted, anything else is an empty cell.
+ */
+export function formatDateISOCell(value: unknown): string {
+  if (value instanceof Date) return formatDateISO(value)
+  if (typeof value === 'string' && value) return formatDateISO(value)
+  return ''
 }
 
 export function formatRelativeDate(date: Date | string): string {

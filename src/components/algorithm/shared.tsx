@@ -46,25 +46,6 @@ export function getDimensionRationale(
   )
 }
 
-export function formatDate(isoDate: string): string {
-  const months = [
-    'Januar',
-    'Februar',
-    'März',
-    'April',
-    'Mai',
-    'Juni',
-    'Juli',
-    'August',
-    'September',
-    'Oktober',
-    'November',
-    'Dezember',
-  ]
-  const [year, month, day] = isoDate.split('-').map(Number)
-  return `${day}. ${months[month - 1]} ${year}`
-}
-
 // =============================================================================
 // Shared Components
 // =============================================================================

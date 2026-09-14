@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { formatDateNumeric } from '@/lib/utils/formatting'
 import type {
   DecisionMode,
   ProposalStatus,
@@ -150,7 +151,8 @@ function ProposalCard({ proposal }: { proposal: ProposalView }) {
 
       {proposal.status === 'DISCUSSION' && proposal.discussionEndsAt && (
         <p className="mt-3 rounded-md bg-status-info/10 p-3 text-sm text-status-info-text">
-          Noch in der Diskussion. Die Abstimmung startet am {formatDate(proposal.discussionEndsAt)}.
+          Noch in der Diskussion. Die Abstimmung startet am{' '}
+          {formatDateNumeric(proposal.discussionEndsAt)}.
         </p>
       )}
 
@@ -158,7 +160,7 @@ function ProposalCard({ proposal }: { proposal: ProposalView }) {
         <div className="mt-4 border-t border-ui-border pt-4">
           <p className="text-sm text-ui-muted">
             Abstimmung läuft
-            {proposal.votingEndsAt ? ` bis ${formatDate(proposal.votingEndsAt)}` : ''} ·{' '}
+            {proposal.votingEndsAt ? ` bis ${formatDateNumeric(proposal.votingEndsAt)}` : ''} ·{' '}
             {proposal.tally.castVotes} von {proposal.tally.eligibleVoterCount} haben abgestimmt
           </p>
 
@@ -228,12 +230,4 @@ function ProposalCard({ proposal }: { proposal: ProposalView }) {
       )}
     </article>
   )
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('de-CH', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
 }
