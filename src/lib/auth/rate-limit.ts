@@ -1,94 +1,59 @@
 /**
- * Rate Limiting for Login Attempts
+ * Rate limiting — owned by `limitkit` (fleet/SHARED.md); this file is the shim.
  *
- * In-memory rate limiting. Simple but effective for single-instance deployments.
- * For multi-instance, replace with Redis-based solution.
+ * It keeps the call signatures its callers and their test mocks were written
+ * against, so adopting the package changed no route. The LIMIT VALUES stay
+ * here in AUTH_CONFIG: how many attempts a login route allows is this app's
+ * semantics, not the package's.
+ *
+ * What changed underneath, for the better: the hand-rolled version kept a
+ * bare Map keyed by client IP, pruned by a five-minute timer — limitkit's
+ * MemoryStore is bounded (LRU past 5 000 keys), so a stranger-fed leak is
+ * impossible by construction. And `getClientIp` now reads the LAST hop of
+ * X-Forwarded-For — the one Caddy wrote — instead of the first, which a
+ * client could set to anything and so mint itself a fresh bucket per request.
+ *
+ * Keep this a shim. A local re-implementation "just for one tweak" is how the
+ * shared version becomes the stale version.
  */
 
+import { slidingWindow, clientIp, MemoryStore, type LimitResult, type HeadersLike } from 'limitkit'
 import { AUTH_CONFIG } from './config'
 
-interface RateLimitEntry {
-  attempts: number
-  firstAttempt: number
-}
+const store = new MemoryStore()
+const limiter = slidingWindow(
+  { limit: AUTH_CONFIG.rateLimit.maxAttempts, windowMs: AUTH_CONFIG.rateLimit.windowMs },
+  store,
+)
 
-// In-memory store (cleared on server restart)
-const loginAttempts = new Map<string, RateLimitEntry>()
+type Decision = { allowed: true } | { allowed: false; retryAfter: number }
 
-// Cleanup interval (every 5 minutes)
-const CLEANUP_INTERVAL = 5 * 60 * 1000
-
-// Start cleanup timer — skip in test environments where the interval
-// leaks into Jest worker processes and prevents clean shutdown.
-if (typeof setInterval !== 'undefined' && process.env.NODE_ENV !== 'test') {
-  const cleanupTimer = setInterval(() => {
-    const now = Date.now()
-    loginAttempts.forEach((entry, key) => {
-      if (now - entry.firstAttempt > AUTH_CONFIG.rateLimit.windowMs) {
-        loginAttempts.delete(key)
-      }
-    })
-  }, CLEANUP_INTERVAL)
-
-  // Belt-and-suspenders: unref so a running process doesn't stay alive for this alone
-  if (typeof (cleanupTimer as NodeJS.Timeout).unref === 'function') {
-    ;(cleanupTimer as NodeJS.Timeout).unref()
-  }
+function decision(result: LimitResult): Decision {
+  return result.allowed
+    ? { allowed: true }
+    : { allowed: false, retryAfter: result.retryAfterSeconds }
 }
 
 /**
- * Check if an IP/identifier is rate limited
+ * Check if an IP/identifier is rate limited — READS ONLY, counts nothing.
  * Returns { allowed: true } or { allowed: false, retryAfter: seconds }
  */
-export function checkRateLimit(
-  identifier: string,
-): { allowed: true } | { allowed: false; retryAfter: number } {
-  const now = Date.now()
-  const entry = loginAttempts.get(identifier)
-
-  // No previous attempts
-  if (!entry) {
-    return { allowed: true }
-  }
-
-  // Window expired, reset
-  if (now - entry.firstAttempt > AUTH_CONFIG.rateLimit.windowMs) {
-    loginAttempts.delete(identifier)
-    return { allowed: true }
-  }
-
-  // Still within window, check attempts
-  if (entry.attempts >= AUTH_CONFIG.rateLimit.maxAttempts) {
-    const retryAfter = Math.ceil(
-      (AUTH_CONFIG.rateLimit.windowMs - (now - entry.firstAttempt)) / 1000,
-    )
-    return { allowed: false, retryAfter }
-  }
-
-  return { allowed: true }
+export function checkRateLimit(identifier: string): Decision {
+  return decision(limiter.peek(identifier))
 }
 
 /**
  * Record a login attempt (call after failed login)
  */
 export function recordLoginAttempt(identifier: string): void {
-  const now = Date.now()
-  const entry = loginAttempts.get(identifier)
-
-  if (!entry || now - entry.firstAttempt > AUTH_CONFIG.rateLimit.windowMs) {
-    // New window
-    loginAttempts.set(identifier, { attempts: 1, firstAttempt: now })
-  } else {
-    // Increment attempts
-    entry.attempts++
-  }
+  limiter.check(identifier)
 }
 
 /**
  * Clear login attempts (call after successful login)
  */
 export function clearLoginAttempts(identifier: string): void {
-  loginAttempts.delete(identifier)
+  store.set(identifier, { hits: [] })
 }
 
 /**
@@ -101,26 +66,16 @@ export function clearLoginAttempts(identifier: string): void {
  * identical in review to one that works.
  *
  * For a metered endpoint every call counts, so there is nothing to decide and
- * no second call to forget.
+ * no second call to forget. A refused call counts nothing, so a hammered key
+ * recovers the moment the caller stops.
  */
-export function consumeRateLimit(
-  identifier: string,
-): { allowed: true } | { allowed: false; retryAfter: number } {
-  const result = checkRateLimit(identifier)
-  if (result.allowed) {
-    recordLoginAttempt(identifier)
-  }
-  return result
+export function consumeRateLimit(identifier: string): Decision {
+  return decision(limiter.check(identifier))
 }
 
 /**
  * The client IP behind Caddy — SSOT for the rate-limit identifier.
- * (Third route needed this; the copies in login/invite/demo now import it.)
  */
-export function getClientIp(request: { headers: { get(name: string): string | null } }): string {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip') ||
-    'unknown'
-  )
+export function getClientIp(request: { headers: HeadersLike }): string {
+  return clientIp(request.headers)
 }
