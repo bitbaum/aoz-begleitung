@@ -40,4 +40,19 @@ export default defineConfig([
       'react-hooks/immutability': 'warn',
     },
   },
+  {
+    // console is not a logger. `src/lib/logger.ts` is the ONE sink in this
+    // repo — it redacts PII and switches to JSON in production — so app code
+    // goes through it. warn/error stay allowed for what must speak before or
+    // beside the logger (a boot-time failure, an unrecoverable error).
+    // scripts/ is deliberately not covered: those are CLIs whose stdout IS
+    // their output.
+    files: ['src/**/*.{ts,tsx}'],
+    rules: { 'no-console': ['error', { allow: ['warn', 'error'] }] },
+  },
+  {
+    // The logger is the console sink; it is the one file that may call it.
+    files: ['src/lib/logger.ts'],
+    rules: { 'no-console': 'off' },
+  },
 ])
