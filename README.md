@@ -167,7 +167,7 @@ The system detects when conflicts are likely to emerge and estimates timeframes.
 ### Setup
 
 ```bash
-git clone <repo-url> && cd aoz-housing
+git clone <repo-url> && cd aoz-begleitung
 pnpm install
 cp .env.example .env          # local Postgres; production is aoz_wohnen on Hetzner — see docs/INFRASTRUCTURE.md
 pnpm db:migrate
