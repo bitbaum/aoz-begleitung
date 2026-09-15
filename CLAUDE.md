@@ -26,7 +26,7 @@ Uncommitted work, and any branch that is not `master`, is not what residents
 see. Deploy is push to `master` → `.github/workflows/deploy.yml` (waits for
 CI, applies pending `drizzle/*.sql` via loki's apply-schema.sh, build,
 rsync). Manual:
-`gh workflow run deploy.yml -R bitbaum/aoz-housing`.
+`gh workflow run deploy.yml -R bitbaum/aoz-begleitung`.
 
 Full table: `docs/INFRASTRUCTURE.md`.
 
@@ -273,7 +273,7 @@ ssh root@167.233.22.31 \
      || echo 'NEXT_PUBLIC_BRAND=aoz' >> /opt/aoz-wohnen/shared/.env"
 
 # 2. rebuild + redeploy
-gh workflow run deploy.yml -R bitbaum/aoz-housing
+gh workflow run deploy.yml -R bitbaum/aoz-begleitung
 
 # 3. confirm what a user actually sees
 curl -s https://aoz.orangecat.ch/login | grep -oE 'AOZH?' | sort -u
@@ -319,7 +319,8 @@ user benefit:
 
 | Thing | Why it stays |
 |---|---|
-| Repo, deploy app `aoz-wohnen`, domain, DB `aoz_wohnen`, systemd units | Addresses. Renaming means DNS/Caddy/service churn. |
+| Deploy app `aoz-wohnen`, domain, DB `aoz_wohnen`, systemd units | Addresses. Renaming means DNS/Caddy/service churn. |
+| ~~Repo~~ — **renamed to `aoz-begleitung` on 2026-09-15** | It was listed here as an address, but nothing keyed on it: no systemd unit, Caddy file or database name contains the repo name, so the rename cost no churn at all. It was also the last public place the product was still called Housing. `JWT_ISSUER` below is a different matter and did not move. |
 | `JWT_ISSUER` (`aoz-housing`) | Changing it invalidates every live session. |
 | Theme key `aoz-theme` | Changing it silently resets everyone's light/dark choice. |
 | **Existing resident codes** | `codePrefix` applies to NEW codes only; login resolves by exact string, so old `AOZ-` codes keep working forever. |
