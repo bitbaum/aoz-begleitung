@@ -11,10 +11,10 @@ import {
 import {
   getFactorsByDimension,
   getDimensionRationale,
-  formatDate,
   EvidenceStrengthBadge,
   EvidenceStrengthBar,
 } from './shared'
+import { formatCalendarDateLong } from '@/lib/utils/formatting'
 import { TECHNICAL_TAB_LABELS } from '@/lib/constants'
 
 export function TechnicalTab() {
@@ -236,7 +236,9 @@ export function TechnicalTab() {
                     <h4 className="font-semibold text-ui-text">
                       {TECHNICAL_TAB_LABELS.versionPrefix} {version.version}
                     </h4>
-                    <span className="text-xs text-ui-muted">{formatDate(version.date)}</span>
+                    <span className="text-xs text-ui-muted">
+                      {formatCalendarDateLong(version.date)}
+                    </span>
                     {versionIndex === 0 && (
                       <span className="chip bg-brand-primary/10 text-brand-primary">
                         {TECHNICAL_TAB_LABELS.currentBadge}

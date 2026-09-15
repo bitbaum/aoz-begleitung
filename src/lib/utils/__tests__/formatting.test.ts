@@ -1,6 +1,7 @@
 import {
   formatDate,
   formatDateNumeric,
+  formatCalendarDateLong,
   formatDateISOCell,
   formatDateTime,
   formatRelativeDate,
@@ -56,6 +57,17 @@ describe('formatDateNumeric', () => {
     expect(formatDateNumeric(d)).toBe(
       new Intl.DateTimeFormat('de-CH', { dateStyle: 'medium' }).format(d),
     )
+  })
+})
+
+describe('formatCalendarDateLong', () => {
+  // Pinned literally: the algorithm docs printed a version date through a
+  // hand-written German month table ("10. Februar 2026"). That copy is gone;
+  // the de-CH long form must print the same characters for the same date.
+  it('prints the German long form of a bare ISO date', () => {
+    expect(formatCalendarDateLong('2026-02-10')).toBe('10. Februar 2026')
+    expect(formatCalendarDateLong('2025-12-01')).toBe('1. Dezember 2025')
+    expect(formatCalendarDateLong('2026-03-03')).toBe('3. März 2026')
   })
 })
 
