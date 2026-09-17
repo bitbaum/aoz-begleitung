@@ -116,10 +116,17 @@ export function consumeRateLimit(
 /**
  * The client IP behind Caddy — SSOT for the rate-limit identifier.
  * (Third route needed this; the copies in login/invite/demo now import it.)
+ *
+ * Take the LAST hop, never the first. Caddy APPENDS the real peer address to
+ * whatever `X-Forwarded-For` already arrived, so the rightmost entry is the
+ * only one we wrote; everything to its left is a string the caller typed.
+ * Reading `[0]` meant an attacker could send a different leading value on
+ * every request and land in a fresh bucket each time — the login throttle
+ * gating code entry could never trip.
  */
 export function getClientIp(request: { headers: { get(name: string): string | null } }): string {
   return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim() ||
     request.headers.get('x-real-ip') ||
     'unknown'
   )

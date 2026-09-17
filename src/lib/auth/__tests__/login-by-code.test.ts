@@ -30,11 +30,11 @@ vi.mock('@/lib/db', async () => ({
   },
 }))
 
-vi.mock('@/lib/auth/rate-limit', async () => ({
-  getClientIp: (request: { headers: { get(name: string): string | null } }) =>
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip') ||
-    'unknown',
+vi.mock('@/lib/auth/rate-limit', async (importOriginal) => ({
+  // Re-export the REAL client-IP reader rather than restating it: a mocked
+  // copy is how the spoofable first-hop version survived here after the
+  // module was fixed.
+  getClientIp: (await importOriginal<typeof import('@/lib/auth/rate-limit')>()).getClientIp,
   recordLoginAttempt: vi.fn(),
   clearLoginAttempts: vi.fn(),
 }))
