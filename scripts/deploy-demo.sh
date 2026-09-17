@@ -27,7 +27,7 @@
 # unit and its own session secret — a cookie minted here is not valid there.
 set -euo pipefail
 
-BOX=${BOX:-root@167.233.22.31}
+BOX="${BOX:-root@${HETZNER_IP:?set HETZNER_IP or BOX}}"
 APP_DIR=/opt/aoz-demo/app
 URL=https://aoz.orangecat.ch
 
