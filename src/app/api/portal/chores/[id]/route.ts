@@ -8,19 +8,14 @@ import {
 } from '@/lib/db'
 import { eq, and, ne, desc } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
-import { getPortalAuth } from '@/lib/portal-auth'
+import { requirePortalAuth } from '@/lib/chores/portal-task-route'
 import { logger } from '@/lib/logger'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { QUERY_LIMITS } from '@/lib/config/thresholds'
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await getPortalAuth()
-  if (!auth) {
-    return NextResponse.json(
-      { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED },
-      { status: 401 },
-    )
-  }
+  const { auth, refusal } = await requirePortalAuth()
+  if (refusal) return refusal
 
   const { id } = await params
 

@@ -1,19 +1,14 @@
 import { db, householdTask, taskAttentionFlag } from '@/lib/db'
 import { eq, and } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
-import { getPortalAuth } from '@/lib/portal-auth'
+import { findOwnTask, requirePortalAuth } from '@/lib/chores/portal-task-route'
 import { portalAttentionFlagSchema } from '@/lib/validation/schemas'
 import { logger } from '@/lib/logger'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await getPortalAuth()
-  if (!auth) {
-    return NextResponse.json(
-      { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED },
-      { status: 401 },
-    )
-  }
+  const { auth, refusal } = await requirePortalAuth()
+  if (refusal) return refusal
 
   const { id } = await params
 
@@ -32,26 +27,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   try {
-    const task = await db.query.householdTask.findFirst({
-      where: and(
-        eq(householdTask.id, id),
-        eq(householdTask.housingUnitId, auth.placement.housingUnitId),
-      ),
-    })
-
-    if (!task) {
-      return NextResponse.json(
-        { success: false, error: ERROR_MESSAGES.TASK_NOT_FOUND },
-        { status: 404 },
-      )
-    }
-
-    if (task.isCompleted) {
-      return NextResponse.json(
-        { success: false, error: ERROR_MESSAGES.TASK_ALREADY_COMPLETED },
-        { status: 400 },
-      )
-    }
+    const { task, refusal: taskRefusal } = await findOwnTask(auth, id)
+    if (taskRefusal) return taskRefusal
 
     const [flag] = await db
       .insert(taskAttentionFlag)

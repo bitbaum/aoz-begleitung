@@ -11,6 +11,7 @@
  */
 
 import { z } from 'zod'
+import { logger } from '@/lib/logger'
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -72,7 +73,7 @@ if (!result.success) {
   if (process.env.NODE_ENV === 'production') {
     throw new Error(`Invalid environment configuration:\n${issues}`)
   } else {
-    console.warn(`[env] Invalid environment (non-fatal in development):\n${issues}`)
+    logger.warn(`[env] Invalid environment (non-fatal in development):\n${issues}`)
   }
 }
 

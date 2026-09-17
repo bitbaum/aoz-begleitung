@@ -17,6 +17,7 @@ import {
 import { getOpportunityDetail, residentsAvailableFor } from '@/lib/data/opportunities'
 import { openSeats } from '@/lib/opportunities/pipeline'
 import { residentName } from '@/lib/utils/resident-name'
+import { formatDateNumeric } from '@/lib/utils/formatting'
 import { OPPORTUNITIES_ADMIN_LABELS as L } from '@/lib/constants'
 
 export const dynamic = 'force-dynamic'
@@ -29,10 +30,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const opportunity = await getOpportunityDetail(id)
   return { title: opportunity?.title ?? L.pageTitle }
-}
-
-function formatDate(value: Date | null): string | null {
-  return value ? new Intl.DateTimeFormat('de-CH', { dateStyle: 'medium' }).format(value) : null
 }
 
 function Detail({ label, value }: { label: string; value: string | null | undefined }) {
@@ -96,8 +93,14 @@ export default async function OpportunityDetailPage({ params }: Props) {
             label={L.hoursPerWeek}
             value={opportunity.hoursPerWeek ? String(opportunity.hoursPerWeek) : null}
           />
-          <Detail label={L.startsAt} value={formatDate(opportunity.startsAt)} />
-          <Detail label={L.endsAt} value={formatDate(opportunity.endsAt)} />
+          <Detail
+            label={L.startsAt}
+            value={opportunity.startsAt ? formatDateNumeric(opportunity.startsAt) : null}
+          />
+          <Detail
+            label={L.endsAt}
+            value={opportunity.endsAt ? formatDateNumeric(opportunity.endsAt) : null}
+          />
         </dl>
       </section>
 

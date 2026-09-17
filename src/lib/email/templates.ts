@@ -14,6 +14,7 @@ import {
 import { BRAND } from '@/lib/config/brand'
 import { getAppUrl } from '@/lib/config/app-url'
 import { EMAIL_COLORS } from './tokens'
+import { formatDateNumeric } from '@/lib/utils/formatting'
 
 // -- Template data interfaces --
 
@@ -127,14 +128,6 @@ function supportLevelColor(level: string): string {
   }
 }
 
-function formatDate(date: Date): string {
-  return new Date(date).toLocaleDateString('de-CH', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
-}
-
 function stars(rating: number): string {
   return '\u2605'.repeat(rating) + '\u2606'.repeat(5 - rating)
 }
@@ -159,7 +152,7 @@ export function incidentFollowUpReminder(incidents: OverdueIncident[]): {
       <td style="${STYLES.td}">${escapeHtml(i.description)}</td>
       <td style="${STYLES.td}"><span style="color: ${severityColor(i.severity)}; font-weight: 600;">${severityLabel(i.severity)}</span></td>
       <td style="${STYLES.td}">${i.housingUnitCode ? escapeHtml(i.housingUnitCode) : '-'}</td>
-      <td style="${STYLES.td}">${formatDate(i.nextFollowUpDate)}</td>
+      <td style="${STYLES.td}">${formatDateNumeric(i.nextFollowUpDate)}</td>
     </tr>
   `,
     )
@@ -200,7 +193,7 @@ export function checkInReminder(overdueResidents: OverdueResident[]): {
     <tr>
       <td style="${STYLES.td}">${escapeHtml(r.code)}</td>
       <td style="${STYLES.td}"><span style="color: ${supportLevelColor(r.supportLevel)}; font-weight: 600;">${supportLevelLabel(r.supportLevel)}</span></td>
-      <td style="${STYLES.td}">${r.lastCheckInDate ? formatDate(r.lastCheckInDate) : 'Nie'}</td>
+      <td style="${STYLES.td}">${r.lastCheckInDate ? formatDateNumeric(r.lastCheckInDate) : 'Nie'}</td>
       <td style="${STYLES.td}">${r.daysSinceLastCheckIn} Tage</td>
     </tr>
   `,

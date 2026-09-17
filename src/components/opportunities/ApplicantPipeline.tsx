@@ -26,12 +26,9 @@ import {
 import { isTerminalStage, nextPipelineStage } from '@/lib/opportunities/pipeline'
 import { isAwaitingAnswer } from '@/lib/jobcoach/queue'
 import { residentName } from '@/lib/utils/resident-name'
+import { formatDateNumeric } from '@/lib/utils/formatting'
 import { OPPORTUNITIES_ADMIN_LABELS as L } from '@/lib/constants'
 import type { ApplicationRow } from '@/lib/data/opportunities'
-
-function formatDate(value: Date): string {
-  return new Intl.DateTimeFormat('de-CH', { dateStyle: 'medium' }).format(value)
-}
 
 /** Whole days a thread has been open. Only ever shown for unanswered ones. */
 function daysSince(value: Date): number {
@@ -160,7 +157,7 @@ export function ApplicantPipeline({
           </div>
 
           <p className="mt-1 text-xs text-ui-muted">
-            {L.stageChanged}: {formatDate(application.stageChangedAt)}
+            {L.stageChanged}: {formatDateNumeric(application.stageChangedAt)}
             {' · '}
             {L.supportedBy}: {application.supportedBy?.name ?? L.supportedByNobody}
           </p>

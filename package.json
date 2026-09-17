@@ -5,7 +5,7 @@
     "node": ">=24"
   },
   "private": true,
-  "description": "Support platform for refugee care work: housing stability with compatibility matching, daily-life coordination, conflict resolution, and learning & participation tracking \u2014 one system for staff and residents",
+  "description": "Support platform for refugee care work: housing stability with compatibility matching, daily-life coordination, conflict resolution, and learning & participation tracking — one system for staff and residents",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -36,6 +36,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
     "jose": "^6.2.12",
+    "limitkit": "^0.2.0",
     "lucide-react": "^1.43.0",
     "marked": "18.0.12",
     "mermaid": "^11.17.2",

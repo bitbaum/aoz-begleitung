@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { db, marketplacePost } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth'
-import { getPortalAuth } from '@/lib/portal-auth'
+import { getPortalAuth, type PortalAuthResult } from '@/lib/portal-auth'
 import { hasPermission } from '@/lib/auth/role-policy'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { RESIDENT_NAME_SELECT, residentName } from '@/lib/utils/resident-name'
@@ -56,6 +56,37 @@ function parseCategory(value: FormDataEntryValue | null): string {
 function revalidateMarketplace() {
   revalidatePath('/portal/marketplace')
   revalidatePath('/marketplace')
+}
+
+type ActionResult = { success: boolean; error?: string }
+
+/**
+ * How every resident action on an existing post opens: the signed-in
+ * resident and the post the form names. `post` may then be in any state —
+ * which states an action accepts is that action's own rule, stated inline.
+ */
+async function residentAndPost(
+  formData: FormData,
+): Promise<
+  | { ok: true; auth: PortalAuthResult; post: typeof marketplacePost.$inferSelect }
+  | { ok: false; error: string }
+> {
+  const auth = await getPortalAuth()
+  if (!auth) return { ok: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED }
+
+  const id = String(formData.get('id') || '')
+  const post = await db.query.marketplacePost.findFirst({ where: eq(marketplacePost.id, id) })
+  if (!post) return { ok: false, error: ERROR_MESSAGES.SAVE_ERROR }
+
+  return { ok: true, auth, post }
+}
+
+/** The error a staff moderation action returns, or null when the user may moderate. */
+async function moderationRefusal(): Promise<string | null> {
+  const user = await getCurrentUser()
+  if (!user) return ERROR_MESSAGES.NOT_AUTHENTICATED
+  if (!hasPermission(user, 'marketplace:moderate')) return ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS
+  return null
 }
 
 const POST_INCLUDE = {
@@ -194,9 +225,7 @@ function mapPost(
   }
 }
 
-export async function createMarketplacePost(
-  formData: FormData,
-): Promise<{ success: boolean; error?: string }> {
+export async function createMarketplacePost(formData: FormData): Promise<ActionResult> {
   const auth = await getPortalAuth()
   if (!auth) return { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED }
 
@@ -230,15 +259,11 @@ export async function createMarketplacePost(
   return { success: true }
 }
 
-export async function claimMarketplacePost(
-  formData: FormData,
-): Promise<{ success: boolean; error?: string }> {
-  const auth = await getPortalAuth()
-  if (!auth) return { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED }
-
-  const id = String(formData.get('id') || '')
-  const post = await db.query.marketplacePost.findFirst({ where: eq(marketplacePost.id, id) })
-  if (!post || post.status !== 'OPEN' || post.hiddenByStaff) {
+export async function claimMarketplacePost(formData: FormData): Promise<ActionResult> {
+  const opened = await residentAndPost(formData)
+  if (!opened.ok) return { success: false, error: opened.error }
+  const { auth, post } = opened
+  if (post.status !== 'OPEN' || post.hiddenByStaff) {
     return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
   }
 
@@ -255,7 +280,7 @@ export async function claimMarketplacePost(
   const claimed = await db
     .update(marketplacePost)
     .set({ status: 'CLAIMED', claimedById: auth.resident.id, claimedAt: new Date() })
-    .where(and(eq(marketplacePost.id, id), eq(marketplacePost.status, 'OPEN')))
+    .where(and(eq(marketplacePost.id, post.id), eq(marketplacePost.status, 'OPEN')))
     .returning({ id: marketplacePost.id })
   if (claimed.length === 0) {
     return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
@@ -272,15 +297,11 @@ export async function claimMarketplacePost(
  * item off the board entirely — so one person's second thoughts destroyed the
  * offer for everybody. Releasing puts it back where it was.
  */
-export async function releaseMarketplaceClaim(
-  formData: FormData,
-): Promise<{ success: boolean; error?: string }> {
-  const auth = await getPortalAuth()
-  if (!auth) return { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED }
-
-  const id = String(formData.get('id') || '')
-  const post = await db.query.marketplacePost.findFirst({ where: eq(marketplacePost.id, id) })
-  if (!post || post.status !== 'CLAIMED') {
+export async function releaseMarketplaceClaim(formData: FormData): Promise<ActionResult> {
+  const opened = await residentAndPost(formData)
+  if (!opened.ok) return { success: false, error: opened.error }
+  const { auth, post } = opened
+  if (post.status !== 'CLAIMED') {
     return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
   }
   // The poster may also release — a claimer who never turned up should not be
@@ -293,43 +314,34 @@ export async function releaseMarketplaceClaim(
   await db
     .update(marketplacePost)
     .set({ status: 'OPEN', claimedById: null, claimedAt: null })
-    .where(eq(marketplacePost.id, id))
+    .where(eq(marketplacePost.id, post.id))
 
   revalidateMarketplace()
   return { success: true }
 }
 
-export async function closeMarketplacePost(
-  formData: FormData,
-): Promise<{ success: boolean; error?: string }> {
-  const auth = await getPortalAuth()
-  if (!auth) return { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED }
-
-  const id = String(formData.get('id') || '')
-  const post = await db.query.marketplacePost.findFirst({ where: eq(marketplacePost.id, id) })
-  if (!post) return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
+export async function closeMarketplacePost(formData: FormData): Promise<ActionResult> {
+  const opened = await residentAndPost(formData)
+  if (!opened.ok) return { success: false, error: opened.error }
+  const { auth, post } = opened
   const isOwner = post.postedById === auth.resident.id || post.claimedById === auth.resident.id
   if (!isOwner) return { success: false, error: ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS }
 
   await db
     .update(marketplacePost)
     .set({ status: 'CLOSED', closedAt: new Date() })
-    .where(eq(marketplacePost.id, id))
+    .where(eq(marketplacePost.id, post.id))
 
   revalidateMarketplace()
   return { success: true }
 }
 
 /** The handover fell through, or the thing came back. Poster only. */
-export async function reopenMarketplacePost(
-  formData: FormData,
-): Promise<{ success: boolean; error?: string }> {
-  const auth = await getPortalAuth()
-  if (!auth) return { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED }
-
-  const id = String(formData.get('id') || '')
-  const post = await db.query.marketplacePost.findFirst({ where: eq(marketplacePost.id, id) })
-  if (!post || post.status === 'OPEN') {
+export async function reopenMarketplacePost(formData: FormData): Promise<ActionResult> {
+  const opened = await residentAndPost(formData)
+  if (!opened.ok) return { success: false, error: opened.error }
+  const { auth, post } = opened
+  if (post.status === 'OPEN') {
     return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
   }
   if (post.postedById !== auth.resident.id) {
@@ -339,7 +351,7 @@ export async function reopenMarketplacePost(
   await db
     .update(marketplacePost)
     .set({ status: 'OPEN', claimedById: null, claimedAt: null, closedAt: null })
-    .where(eq(marketplacePost.id, id))
+    .where(eq(marketplacePost.id, post.id))
 
   revalidateMarketplace()
   return { success: true }
@@ -351,33 +363,23 @@ export async function reopenMarketplacePost(
  * Deleting a post somebody has already answered would erase their side of an
  * arrangement without telling them, so a claimed post can only be closed.
  */
-export async function deleteMarketplacePost(
-  formData: FormData,
-): Promise<{ success: boolean; error?: string }> {
-  const auth = await getPortalAuth()
-  if (!auth) return { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED }
-
-  const id = String(formData.get('id') || '')
-  const post = await db.query.marketplacePost.findFirst({ where: eq(marketplacePost.id, id) })
-  if (!post) return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
+export async function deleteMarketplacePost(formData: FormData): Promise<ActionResult> {
+  const opened = await residentAndPost(formData)
+  if (!opened.ok) return { success: false, error: opened.error }
+  const { auth, post } = opened
   if (post.postedById !== auth.resident.id || post.status !== 'OPEN') {
     return { success: false, error: ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS }
   }
 
-  await db.delete(marketplacePost).where(eq(marketplacePost.id, id))
+  await db.delete(marketplacePost).where(eq(marketplacePost.id, post.id))
 
   revalidateMarketplace()
   return { success: true }
 }
 
-export async function hideMarketplacePost(
-  formData: FormData,
-): Promise<{ success: boolean; error?: string }> {
-  const user = await getCurrentUser()
-  if (!user) return { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED }
-  if (!hasPermission(user, 'marketplace:moderate')) {
-    return { success: false, error: ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS }
-  }
+export async function hideMarketplacePost(formData: FormData): Promise<ActionResult> {
+  const refused = await moderationRefusal()
+  if (refused) return { success: false, error: refused }
 
   const id = String(formData.get('id') || '')
   const reason = String(formData.get('reason') || '').trim() || null
@@ -395,14 +397,9 @@ export async function hideMarketplacePost(
   return { success: true }
 }
 
-export async function unhideMarketplacePost(
-  formData: FormData,
-): Promise<{ success: boolean; error?: string }> {
-  const user = await getCurrentUser()
-  if (!user) return { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED }
-  if (!hasPermission(user, 'marketplace:moderate')) {
-    return { success: false, error: ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS }
-  }
+export async function unhideMarketplacePost(formData: FormData): Promise<ActionResult> {
+  const refused = await moderationRefusal()
+  if (refused) return { success: false, error: refused }
 
   const id = String(formData.get('id') || '')
   if (!id) return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }

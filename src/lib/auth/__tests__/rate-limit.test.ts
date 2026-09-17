@@ -4,6 +4,7 @@ import {
   checkRateLimit,
   clearLoginAttempts,
   consumeRateLimit,
+  getClientIp,
   recordLoginAttempt,
 } from '@/lib/auth/rate-limit'
 import { AUTH_CONFIG } from '@/lib/auth/config'
@@ -103,5 +104,25 @@ describe('no route may gate on a counter nothing increments', () => {
     })
 
     expect(offenders.map((f) => f.replace(process.cwd() + '/', ''))).toEqual([])
+  })
+})
+
+describe('getClientIp', () => {
+  // A reverse proxy APPENDS to X-Forwarded-For, so the only hop a client
+  // cannot forge is the LAST one. Reading the first — what the hand-rolled
+  // limiter did — let a caller mint a fresh bucket per request and never
+  // trip the limit at all. limitkit reads the last; this pins that we do too.
+  const withHeaders = (headers: Record<string, string>) => ({ headers: new Headers(headers) })
+
+  test('keys on the hop Caddy wrote, not the one the client sent', () => {
+    expect(getClientIp(withHeaders({ 'x-forwarded-for': 'forged, 203.0.113.9' }))).toBe(
+      '203.0.113.9',
+    )
+    expect(getClientIp(withHeaders({ 'x-forwarded-for': '203.0.113.9' }))).toBe('203.0.113.9')
+  })
+
+  test('falls back to x-real-ip, then to a shared "unknown" bucket', () => {
+    expect(getClientIp(withHeaders({ 'x-real-ip': '198.51.100.4' }))).toBe('198.51.100.4')
+    expect(getClientIp(withHeaders({}))).toBe('unknown')
   })
 })

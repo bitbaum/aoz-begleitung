@@ -1,5 +1,8 @@
 import {
   formatDate,
+  formatDateNumeric,
+  formatCalendarDateLong,
+  formatDateISOCell,
   formatDateTime,
   formatRelativeDate,
   getDateDaysAgo,
@@ -36,6 +39,46 @@ describe('formatDate', () => {
   it('formats date string', () => {
     const result = formatDate('2024-06-15')
     expect(typeof result).toBe('string')
+  })
+})
+
+describe('formatDateNumeric', () => {
+  // Pinned literally: this one export replaced six local copies (emails,
+  // governance, opportunities), two of which used Intl's `dateStyle: 'medium'`
+  // and four the explicit 2-digit options. Both produce dd.MM.yyyy for
+  // de-CH, and a call site must print exactly what it printed before.
+  it('zero-pads day and month', () => {
+    expect(formatDateNumeric(new Date(2026, 0, 5))).toBe('05.01.2026')
+    expect(formatDateNumeric(new Date(2026, 11, 31))).toBe('31.12.2026')
+  })
+
+  it('matches the Intl medium style the deleted copies used', () => {
+    const d = new Date(2025, 9, 1)
+    expect(formatDateNumeric(d)).toBe(
+      new Intl.DateTimeFormat('de-CH', { dateStyle: 'medium' }).format(d),
+    )
+  })
+})
+
+describe('formatCalendarDateLong', () => {
+  // Pinned literally: the algorithm docs printed a version date through a
+  // hand-written German month table ("10. Februar 2026"). That copy is gone;
+  // the de-CH long form must print the same characters for the same date.
+  it('prints the German long form of a bare ISO date', () => {
+    expect(formatCalendarDateLong('2026-02-10')).toBe('10. Februar 2026')
+    expect(formatCalendarDateLong('2025-12-01')).toBe('1. Dezember 2025')
+    expect(formatCalendarDateLong('2026-03-03')).toBe('3. März 2026')
+  })
+})
+
+describe('formatDateISOCell', () => {
+  it('formats a Date or a date string, and empties anything else', () => {
+    expect(formatDateISOCell(new Date('2026-05-27T10:00:00Z'))).toBe('2026-05-27')
+    expect(formatDateISOCell('2026-05-27T10:00:00Z')).toBe('2026-05-27')
+    expect(formatDateISOCell('')).toBe('')
+    expect(formatDateISOCell(null)).toBe('')
+    expect(formatDateISOCell(undefined)).toBe('')
+    expect(formatDateISOCell(42)).toBe('')
   })
 })
 
