@@ -4,9 +4,48 @@ import {
   checkRateLimit,
   clearLoginAttempts,
   consumeRateLimit,
+  getClientIp,
   recordLoginAttempt,
 } from '@/lib/auth/rate-limit'
 import { AUTH_CONFIG } from '@/lib/auth/config'
+
+const requestWith = (headers: Record<string, string>) => ({
+  headers: { get: (name: string) => headers[name.toLowerCase()] ?? null },
+})
+
+// Caddy APPENDS the real peer address to whatever X-Forwarded-For arrived, so
+// the rightmost hop is the only one we wrote. Reading the leftmost let a caller
+// pick their own throttle bucket, and pick a new one on every request.
+describe('getClientIp', () => {
+  test('takes the last hop, not the caller-supplied first one', () => {
+    expect(getClientIp(requestWith({ 'x-forwarded-for': '192.0.2.10, 198.51.100.9' }))).toBe(
+      '198.51.100.9',
+    )
+  })
+
+  test('ignores a spoofed leading value: every variation keys the same bucket', () => {
+    const keys = ['1.1.1.1', '2.2.2.2', '3.3.3.3'].map((spoofed) =>
+      getClientIp(requestWith({ 'x-forwarded-for': `${spoofed}, 198.51.100.9` })),
+    )
+
+    expect(new Set(keys)).toEqual(new Set(['198.51.100.9']))
+  })
+
+  test('trims surrounding whitespace on the trusted hop', () => {
+    expect(getClientIp(requestWith({ 'x-forwarded-for': '192.0.2.10 ,  198.51.100.9  ' }))).toBe(
+      '198.51.100.9',
+    )
+  })
+
+  test('uses a single hop as-is', () => {
+    expect(getClientIp(requestWith({ 'x-forwarded-for': '198.51.100.9' }))).toBe('198.51.100.9')
+  })
+
+  test('falls back to x-real-ip, then to "unknown"', () => {
+    expect(getClientIp(requestWith({ 'x-real-ip': '172.16.0.1' }))).toBe('172.16.0.1')
+    expect(getClientIp(requestWith({}))).toBe('unknown')
+  })
+})
 
 describe('auth rate-limit', () => {
   test('allows initial attempts', () => {
@@ -101,6 +140,24 @@ describe('no route may gate on a counter nothing increments', () => {
       // records failed attempts itself.
       return !source.includes('recordLoginAttempt(') && !source.includes('loginByCode(')
     })
+
+    expect(offenders.map((f) => f.replace(process.cwd() + '/', ''))).toEqual([])
+  })
+
+  // Same shape of class-ender for the spoofable key. A hand-rolled
+  // `x-forwarded-for`.split(',')[0] anywhere in src/ reads the value the caller
+  // typed; getClientIp is the one place allowed to touch the header at all.
+  test('no file re-derives the client IP from the first forwarded hop', () => {
+    const sourceFiles = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+        const path = join(dir, entry.name)
+        if (entry.isDirectory()) return sourceFiles(path)
+        return /\.(ts|tsx)$/.test(entry.name) ? [path] : []
+      })
+
+    const offenders = sourceFiles(join(process.cwd(), 'src')).filter((file) =>
+      /x-forwarded-for'\)\s*(\?\.)?\s*\.?split\([^)]*\)\s*\[0\]/.test(readFileSync(file, 'utf8')),
+    )
 
     expect(offenders.map((f) => f.replace(process.cwd() + '/', ''))).toEqual([])
   })

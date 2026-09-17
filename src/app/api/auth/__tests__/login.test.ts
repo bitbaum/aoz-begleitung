@@ -19,11 +19,11 @@ vi.mock('@/lib/auth', async () => ({
 const mockCheckRateLimit = vi.fn()
 const mockRecordLoginAttempt = vi.fn()
 const mockClearLoginAttempts = vi.fn()
-vi.mock('@/lib/auth/rate-limit', async () => ({
-  getClientIp: (request: { headers: { get(name: string): string | null } }) =>
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip') ||
-    'unknown',
+vi.mock('@/lib/auth/rate-limit', async (importOriginal) => ({
+  // Re-export the REAL client-IP reader rather than restating it: a mocked
+  // copy is how the spoofable first-hop version survived here after the
+  // module was fixed.
+  getClientIp: (await importOriginal<typeof import('@/lib/auth/rate-limit')>()).getClientIp,
   checkRateLimit: (...args: unknown[]) => mockCheckRateLimit(...args),
   recordLoginAttempt: (...args: unknown[]) => mockRecordLoginAttempt(...args),
   clearLoginAttempts: (...args: unknown[]) => mockClearLoginAttempts(...args),
@@ -210,7 +210,9 @@ describe('POST /api/auth/login', () => {
     expect(mockLoginByCode).toHaveBeenCalledWith('AOZ-ABC123', expect.any(String))
   })
 
-  test('extracts IP from x-forwarded-for header (first IP)', async () => {
+  // Caddy APPENDS the real peer address, so the last hop is the only one we
+  // wrote; every earlier hop is a string the caller typed.
+  test('keys the login throttle on the last x-forwarded-for hop, ignoring the spoofable leading one', async () => {
     mockLoginByCode.mockResolvedValue({ success: true, type: 'staff', user: STAFF_USER })
     mockSetSessionCookie.mockResolvedValue(undefined)
 
@@ -220,8 +222,31 @@ describe('POST /api/auth/login', () => {
     )
     await POST(req)
 
-    expect(mockCheckRateLimit).toHaveBeenCalledWith('192.168.1.1')
-    expect(mockLoginByCode).toHaveBeenCalledWith('AOZ-ABC123', '192.168.1.1')
+    expect(mockCheckRateLimit).toHaveBeenCalledWith('10.0.0.1')
+    expect(mockLoginByCode).toHaveBeenCalledWith('AOZ-ABC123', '10.0.0.1')
+  })
+
+  // The regression guard: varying the leading hop per request used to hand the
+  // caller a fresh bucket every time, so the throttle could never trip.
+  test('a caller varying the leading hop still lands in one throttle bucket', async () => {
+    mockLoginByCode.mockResolvedValue({ success: false, error: 'Ungültiger Code' })
+    mockSetSessionCookie.mockResolvedValue(undefined)
+    mockCheckRateLimit.mockClear()
+
+    for (const spoofed of ['1.1.1.1', '2.2.2.2', '3.3.3.3']) {
+      await POST(
+        createJsonRequest(
+          { code: 'AOZ-WRONG1' },
+          { 'x-forwarded-for': `${spoofed}, 198.51.100.9` },
+        ),
+      )
+    }
+
+    expect(mockCheckRateLimit.mock.calls.map((call) => call[0])).toEqual([
+      '198.51.100.9',
+      '198.51.100.9',
+      '198.51.100.9',
+    ])
   })
 
   test('falls back to x-real-ip when x-forwarded-for is absent', async () => {
