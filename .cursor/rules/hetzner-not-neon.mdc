@@ -7,7 +7,7 @@ alwaysApply: true
 
 ## Database
 
-Live instance: https://aoz-wohnen.orangecat.ch on Hetzner `bitbaum` (`167.233.22.31`). App `/opt/aoz-wohnen/`. Database **`aoz_wohnen`** on that box's Postgres (`127.0.0.1:5432`). Env SSOT: `/opt/aoz-wohnen/shared/.env`.
+Live instance: https://aoz.orangecat.ch on Hetzner `bitbaum`. App `/opt/aoz-wohnen/`. Database **`aoz_wohnen`** on that box's Postgres (`127.0.0.1:5432`). Env SSOT: `/opt/aoz-wohnen/shared/.env`.
 
 Neon is not the database. A laptop `.env` naming `neon.tech` is stale. Read `docs/INFRASTRUCTURE.md` before Prisma. Deploy is push to `master` (`.github/workflows/deploy.yml`); that job runs `prisma migrate deploy`. Uncommitted work is not live.
 

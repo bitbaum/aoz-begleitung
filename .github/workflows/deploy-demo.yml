@@ -20,6 +20,11 @@ jobs:
       group: aoz-demo-deploy
       cancel-in-progress: false
 
+    # The box address has ONE home: the org-level Actions variable. Steps read
+    # it from here, and so does scripts/deploy-demo.sh when run from a step.
+    env:
+      HETZNER_IP: ${{ vars.HETZNER_IP }}
+
     steps:
       - name: Require deploy key
         env:
@@ -48,15 +53,21 @@ jobs:
           SSH_KEY: ${{ secrets.HETZNER_SSH_PRIVATE_KEY }}
         run: |
           set -euo pipefail
+          # An unset variable interpolates to the empty string, and every ssh,
+          # scp and rsync below would then address `ubuntu@` — fail here, loudly.
+          if [ -z "${HETZNER_IP:-}" ]; then
+            echo "::error::org variable HETZNER_IP is unset"
+            exit 1
+          fi
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H 167.233.22.31 >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -H "${{ vars.HETZNER_IP }}" >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Pull demo runtime env from the box
         run: |
           set -euo pipefail
-          scp ubuntu@167.233.22.31:/opt/aoz-demo/shared/.env .env.production.local
+          scp ubuntu@${{ vars.HETZNER_IP }}:/opt/aoz-demo/shared/.env .env.production.local
           # Brand is the reason this is a separate build. Pin it even if the
           # box env drifts — a WG-branded binary on aoz.orangecat.ch is a lie.
           grep -q '^NEXT_PUBLIC_BRAND=' .env.production.local \
@@ -79,8 +90,8 @@ jobs:
         run: |
           set -euo pipefail
           rsync -az --delete --exclude launch.sh \
-            .next/standalone/ ubuntu@167.233.22.31:/opt/aoz-demo/app/
-          ssh ubuntu@167.233.22.31 \
+            .next/standalone/ ubuntu@${{ vars.HETZNER_IP }}:/opt/aoz-demo/app/
+          ssh ubuntu@${{ vars.HETZNER_IP }} \
             'sudo chown -R ubuntu:ubuntu /opt/aoz-demo/app && sudo systemctl restart aoz-demo-app'
 
       - name: Verify live

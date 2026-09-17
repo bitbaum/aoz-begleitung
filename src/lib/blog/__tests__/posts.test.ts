@@ -111,7 +111,7 @@ describe('blog block rendering', () => {
     // `../ROADMAP.md` is a real link in a real post. It reads correctly in the
     // repo and 404s on the web, so it resolves to where the file is published.
     expect(hrefsOf('the [roadmap](../ROADMAP.md)')).toEqual([
-      'https://github.com/bitbaum/aoz-housing/blob/master/docs/ROADMAP.md',
+      'https://github.com/bitbaum/aoz-begleitung/blob/master/docs/ROADMAP.md',
     ])
   })
 
