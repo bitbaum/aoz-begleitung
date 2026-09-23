@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@bitbaum/ai-kit':
-        specifier: ^1.4.0
-        version: 1.4.0(react@19.2.8)
+        specifier: ^1.11.0
+        version: 1.11.0(react@19.2.8)
       '@bitbaum/mail-kit':
         specifier: ^0.1.1
         version: 0.1.1
@@ -30,8 +30,8 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3
       bip-kit:
-        specifier: ^0.2.7
-        version: 0.2.7(katex@0.16.47)(mermaid@12.0.0)(react@19.2.8)(shiki@4.4.3)
+        specifier: ^0.3.1
+        version: 0.3.1(katex@0.16.47)(mermaid@12.0.0)(react@19.2.8)(shiki@4.4.3)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -251,8 +251,8 @@ packages:
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
 
-  '@bitbaum/ai-kit@1.4.0':
-    resolution: {integrity: sha512-ZHN2Vxqszq2xNU7RudI4zEnXMzhxZLIBsE8ZqZo8q1EBYN+WFWOgrsPeHHwWPl5ckw8g2l7r1sZ0G920dDnLHA==}
+  '@bitbaum/ai-kit@1.11.0':
+    resolution: {integrity: sha512-WNprP0kydOfxyFz4itnkbc1Khu2R7CP+z4809usXKFukc+xEiooKT1qKnf0RWu0ti4CIFikz3BluoNlF1Di83w==}
     engines: {node: '>=20'}
     peerDependencies:
       react: '>=18'
@@ -2358,8 +2358,8 @@ packages:
   bignumber.js@9.3.1:
     resolution: {integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==}
 
-  bip-kit@0.2.7:
-    resolution: {integrity: sha512-oe4f2IXAYuOQ1ocDLg0ET27qpNfb7nOSVobFEbu+xLyvluZ1rLygjOhg4b9tB9CxTKb9R35Bh3RdibVLxFAYkw==}
+  bip-kit@0.3.1:
+    resolution: {integrity: sha512-OnkaJiDCRz0UeMifgI8NHnHoaBWyvpYOgdDIfOcxMiIWDWliVyHU+jg5aYX6zccIH15G5uze1vaGJV1XdRDDJg==}
     engines: {node: '>=20'}
     peerDependencies:
       katex: '>=0.16'
@@ -4841,7 +4841,7 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@bitbaum/ai-kit@1.4.0(react@19.2.8)':
+  '@bitbaum/ai-kit@1.11.0(react@19.2.8)':
     dependencies:
       ai-forms: 0.1.2(react@19.2.8)
     optionalDependencies:
@@ -6611,7 +6611,7 @@ snapshots:
 
   bignumber.js@9.3.1: {}
 
-  bip-kit@0.2.7(katex@0.16.47)(mermaid@12.0.0)(react@19.2.8)(shiki@4.4.3):
+  bip-kit@0.3.1(katex@0.16.47)(mermaid@12.0.0)(react@19.2.8)(shiki@4.4.3):
     dependencies:
       react: 19.2.8
     optionalDependencies:
