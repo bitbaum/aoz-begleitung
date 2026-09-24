@@ -26,7 +26,7 @@ export const APP_LABELS = {
  * makes the compiler reject unknown keys instead.
  */
 export const PAGE_TITLES = {
-  dashboard: 'Dashboard',
+  dashboard: 'Eingang',
   residents: 'Klient*innen',
   housing: 'Unterkünfte',
   newHousing: 'Neue Unterkunft',

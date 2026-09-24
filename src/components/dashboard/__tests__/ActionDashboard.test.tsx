@@ -42,6 +42,12 @@ vi.mock('../AllClearState', async () => ({
   ),
 }))
 
+// The claim is a server action; the component only needs something to call.
+const claimApplication = vi.fn()
+vi.mock('@/lib/actions/opportunities', async () => ({
+  claimApplication: (formData: FormData) => claimApplication(formData),
+}))
+
 vi.mock('@/lib/config/thresholds', async () => ({
   ...(await vi.importActual<object>('@/lib/config/thresholds')),
   DISPLAY_LIMITS: { dashboardItems: 3 },
@@ -63,6 +69,8 @@ const BASE_PROPS = {
   // Oversight over every domain: no single seat, so "nobody is assigned to
   // you" is not a question that applies. Specialists are exercised below.
   assignedResidentCount: null,
+  waitingApplications: [],
+  pendingApprovals: [],
   jobQueue: [],
   volunteeringQueue: [],
   waitingThreads: [],
@@ -620,5 +628,84 @@ describe('ActionDashboard', () => {
       />,
     )
     expect(screen.queryByText('Noch keine Klient*innen zugewiesen')).not.toBeInTheDocument()
+  })
+
+  describe('Eingang: people waiting on an answer', () => {
+    const request = (residentId: string, opportunityId: string) => ({
+      applicationId: `app-${residentId}-${opportunityId}`,
+      opportunityId,
+      opportunityTitle: 'Velowerkstatt',
+      residentId,
+      name: `Person ${residentId}`,
+      since: new Date(),
+    })
+
+    it('lists each request with its own Übernehmen button and counts it', () => {
+      render(
+        <ActionDashboard
+          {...BASE_PROPS}
+          waitingApplications={[request('r1', 'o1'), request('r2', 'o1')]}
+        />,
+      )
+      expect(screen.getByText('Anfragen zu Einsatzplätzen')).toBeInTheDocument()
+      expect(screen.getAllByRole('button', { name: 'Übernehmen' })).toHaveLength(2)
+      expect(screen.getByText('Person r1').closest('a')).toHaveAttribute('href', '/residents/r1')
+      expect(screen.getByText('2 Aufgaben warten auf Sie.')).toBeInTheDocument()
+      expect(screen.queryByTestId('all-clear-state')).not.toBeInTheDocument()
+    })
+
+    it('does not list a request twice when the caseload tile holds it too', () => {
+      render(
+        <ActionDashboard
+          {...BASE_PROPS}
+          viewer={{ role: 'FREIWILLIGENARBEIT', scope: 'OWN_DOMAIN', isSystemAdmin: false }}
+          waitingApplications={[request('r1', 'opp-1')]}
+          volunteeringQueue={[
+            {
+              residentId: 'r1',
+              name: 'Amina',
+              signal: 'INTEREST_UNANSWERED',
+              opportunityId: 'opp-1',
+            },
+          ]}
+        />,
+      )
+      const tiles = screen.queryAllByTestId('action-tile').map((el) => el.textContent ?? '')
+      expect(tiles.some((t) => t.includes('Interesse wartet auf Antwort'))).toBe(false)
+      expect(screen.getByText('1 Aufgabe wartet auf Sie.')).toBeInTheDocument()
+    })
+
+    it('keeps a caseload request the section does not show', () => {
+      // Her client asked about a JOB — outside her half, so not in her section.
+      // Dropping it from the caseload tile too would leave it on no screen.
+      render(
+        <ActionDashboard
+          {...BASE_PROPS}
+          viewer={{ role: 'FREIWILLIGENARBEIT', scope: 'OWN_DOMAIN', isSystemAdmin: false }}
+          waitingApplications={[request('r9', 'vol-1')]}
+          volunteeringQueue={[
+            {
+              residentId: 'r1',
+              name: 'Amina',
+              signal: 'INTEREST_UNANSWERED',
+              opportunityId: 'job-7',
+            },
+          ]}
+        />,
+      )
+      const tiles = screen.getAllByTestId('action-tile').map((el) => el.textContent ?? '')
+      expect(tiles.some((t) => t.includes('Interesse wartet auf Antwort'))).toBe(true)
+    })
+
+    it('shows pending Freigaben as work', () => {
+      render(
+        <ActionDashboard
+          {...BASE_PROPS}
+          pendingApprovals={[{ id: 'f1', name: 'Amina', summary: 'Ausweis B' }]}
+        />,
+      )
+      const tiles = screen.getAllByTestId('action-tile').map((el) => el.textContent ?? '')
+      expect(tiles).toContain('Freigaben (1)')
+    })
   })
 })

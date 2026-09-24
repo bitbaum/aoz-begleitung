@@ -10,6 +10,7 @@
  * @see CLAUDE.md "Measuring Success" section
  */
 
+import { IN_CARE_RESIDENT_STATUSES } from '@/lib/config/resident-status'
 import { and, asc, eq, gte, inArray, ne } from 'drizzle-orm'
 import { db, incident, placement, resident } from '@/lib/db'
 import { zurichMonthKey, getZurichParts } from '@/lib/utils'
@@ -126,7 +127,7 @@ export async function calculateMissionKPIs(months: number = 6): Promise<MissionK
       db.query.resident.findMany({
         where: and(
           gte(resident.createdAt, startDate),
-          inArray(resident.status, ['PLACED', 'ACTIVE']),
+          inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]),
         ),
         columns: { id: true, createdAt: true, code: true },
       }),

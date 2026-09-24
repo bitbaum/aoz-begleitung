@@ -22,6 +22,9 @@ import { QuickStat } from './QuickStatsRow'
 import { ActionTile } from './ActionTilesGrid'
 import { AllClearState } from './AllClearState'
 import { EmptyWorkspaceState } from './EmptyWorkspaceState'
+import { WaitingApplications } from './WaitingApplications'
+import type { WaitingApplication } from '@/lib/inbox/waiting'
+import { AWAITING_ANSWER_SIGNAL } from '@/lib/care/queue'
 import { UnassignedWorkspaceState } from './UnassignedWorkspaceState'
 import type {
   OverdueCheckIn,
@@ -62,6 +65,13 @@ interface ActionDashboardProps {
    * you", which the global count above cannot see.
    */
   assignedResidentCount: number | null
+  /**
+   * Requests residents raised on a listing that nobody has taken up — for
+   * every viewer who may answer them. @see lib/inbox/waiting.ts
+   */
+  waitingApplications: WaitingApplication[]
+  /** Client-entered facts awaiting a first look. */
+  pendingApprovals: { id: string; name: string; summary: string }[]
   /**
    * The Job domain's own work, one row per (client, signal).
    *
@@ -152,6 +162,8 @@ export function ActionDashboard({
   residentCount,
   housingUnitCount,
   assignedResidentCount,
+  waitingApplications,
+  pendingApprovals,
   jobQueue,
   volunteeringQueue,
   waitingThreads,
@@ -218,24 +230,48 @@ export function ActionDashboard({
   const rowHref = (row: { residentId: string; opportunityId: string | null }) =>
     row.opportunityId ? `/opportunities/${row.opportunityId}` : `/residents/${row.residentId}`
 
+  // A request nobody has answered is listed ONCE, in the applications section
+  // with its own "Übernehmen" button. The caseload tiles carry the same signal
+  // for the specialist's own clients, so a row the section already shows is
+  // dropped from them — by (person, listing), not by signal: a coordinator's
+  // client who asked about a JOB is outside her section and must stay visible
+  // in her caseload tile, or it would be on no screen of hers at all.
+  const listedInSection = new Set(
+    waitingApplications.map((row) => `${row.residentId}:${row.opportunityId}`),
+  )
+  const notListedAbove = (row: {
+    residentId: string
+    signal: string
+    opportunityId: string | null
+  }) =>
+    !(
+      row.signal === AWAITING_ANSWER_SIGNAL &&
+      listedInSection.has(`${row.residentId}:${row.opportunityId}`)
+    )
+
   // One rendering, two domains. The signal ids are each domain's priority
   // order, and the tiles render in it — the same list the queue sorts by.
   const careTiles = [
     ...JOB_SIGNAL_IDS.map((signal) => ({
       key: `job:${signal}`,
       copy: JOB_SIGNAL_COPY[signal],
-      rows: jobQueue.filter((row) => row.signal === signal),
-      allHref: '/learning?board=job',
+      rows: jobQueue.filter((row) => row.signal === signal && notListedAbove(row)),
+      // The rows are threads on listings, so "alle" opens the listings board —
+      // it used to open /learning, a page of certificates, from a tile about
+      // people waiting on a place.
+      allHref: '/opportunities?board=job',
     })),
     ...VOLUNTEERING_SIGNAL_IDS.map((signal) => ({
       key: `volunteering:${signal}`,
       copy: VOLUNTEERING_SIGNAL_COPY[signal],
-      rows: volunteeringQueue.filter((row) => row.signal === signal),
-      allHref: '/learning?board=volunteering',
+      rows: volunteeringQueue.filter((row) => row.signal === signal && notListedAbove(row)),
+      allHref: '/opportunities?board=volunteering',
     })),
   ].filter((tile) => tile.rows.length > 0)
 
   const totalIssues =
+    waitingApplications.length +
+    pendingApprovals.length +
     criticalIncidents.length +
     overdueCheckIns.length +
     unplacedResidents.length +
@@ -413,6 +449,17 @@ export function ActionDashboard({
         )}
       </div>
 
+      {/* People waiting on an answer — what the Eingang badge counts, so the
+          number in the navigation and the rows here are the same set. */}
+      {waitingApplications.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-ui-muted uppercase tracking-wide mb-3">
+            {DASHBOARD_LABELS.sectionWaiting}
+          </h2>
+          <WaitingApplications applications={waitingApplications} />
+        </div>
+      )}
+
       {/* Action Tiles - Only show what needs action */}
       {(totalIssues > 0 || problemUnits.length > 0) && (
         <div>
@@ -476,6 +523,22 @@ export function ActionDashboard({
                     row.daysLeft < 0
                       ? DASHBOARD_LABELS.tileRenewalExpired(Math.abs(row.daysLeft))
                       : DASHBOARD_LABELS.tileRenewalDue(row.daysLeft),
+                  href: '/approvals',
+                }))}
+                allHref="/approvals"
+              />
+            )}
+
+            {pendingApprovals.length > 0 && (
+              <ActionTile
+                title={DASHBOARD_LABELS.tileApprovals}
+                count={pendingApprovals.length}
+                description={DASHBOARD_LABELS.tileApprovalsAction}
+                href="/approvals"
+                urgency={urgencyForOpenCount(pendingApprovals.length)}
+                items={pendingApprovals.slice(0, DISPLAY_LIMITS.dashboardItems).map((row) => ({
+                  label: row.name,
+                  sublabel: row.summary,
                   href: '/approvals',
                 }))}
                 allHref="/approvals"

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { requirePermission } from '@/lib/auth'
 import { getResidentCookie } from '@/lib/portal-auth'
 import { isFull } from '@/lib/opportunities/pipeline'
@@ -338,6 +338,47 @@ export async function addApplicant(formData: FormData): Promise<void> {
   }
 
   revalidateOpportunity(data.opportunityId)
+}
+
+/**
+ * "Ich kümmere mich darum" — take up a request a resident raised, from the
+ * Eingang, without opening the listing first.
+ *
+ * Claiming is exactly what ends `isAwaitingAnswer`: the row stays INTERESTED
+ * (nothing about the application has been decided yet) but now names the
+ * person answering it. Conditional on still being unclaimed, so two colleagues
+ * pressing it in the same minute cannot silently overwrite each other — the
+ * second press is a no-op and their Eingang simply no longer lists the row.
+ */
+export async function claimApplication(formData: FormData): Promise<void> {
+  const user = await requirePermission('opportunities:write')
+  const applicationId = formData.get('applicationId')
+  if (typeof applicationId !== 'string' || applicationId === '') {
+    throw new Error('Anfrage nicht gefunden')
+  }
+
+  const [claimed] = await db
+    .update(opportunityApplication)
+    .set({ supportedByUserId: user.id })
+    .where(
+      and(
+        eq(opportunityApplication.id, applicationId),
+        isNull(opportunityApplication.supportedByUserId),
+      ),
+    )
+    .returning({ opportunityId: opportunityApplication.opportunityId })
+
+  if (claimed) {
+    await logAudit({
+      action: 'UPDATE',
+      entity: 'OPPORTUNITY_APPLICATION',
+      entityId: applicationId,
+      userId: user.id,
+      changes: { supportedByUserId: user.id },
+    })
+    revalidateOpportunity(claimed.opportunityId)
+  }
+  revalidatePath('/', 'layout')
 }
 
 /**

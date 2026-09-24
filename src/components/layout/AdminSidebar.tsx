@@ -11,6 +11,7 @@ import {
   type MegaMenuGroup,
 } from '@/lib/config/navigation'
 import { isRouteActive } from '@/components/layout/AdminHeader'
+import { NavBadge } from '@/components/layout/NavBadge'
 
 /**
  * The staff navigation, as a vertical panel.
@@ -61,6 +62,7 @@ export function AdminSidebar({ groups = MEGAMENU_GROUPS }: { groups?: MegaMenuGr
               icon={group.icon}
               label={group.label}
               active={isRouteActive(pathname, group.href)}
+              badge={group.badge}
             />
           ),
         )}
@@ -123,11 +125,13 @@ function SidebarLink({
   icon,
   label,
   active,
+  badge,
 }: {
   href: string
   icon: string
   label: string
   active: boolean
+  badge?: number | null
 }) {
   const Icon = NAV_ICONS[icon] || NAV_ICONS.home
   return (
@@ -141,6 +145,7 @@ function SidebarLink({
         aria-hidden="true"
       />
       <span className="min-w-0 truncate">{label}</span>
+      <NavBadge count={badge} />
     </Link>
   )
 }

@@ -13,7 +13,8 @@ import { APP_LABELS, PAGE_TITLES, ROLE_LABELS } from '@/lib/constants/labels'
 import { ImpersonationBanner } from '@/components/layout/ImpersonationBanner'
 import { getCurrentUser } from '@/lib/auth'
 import { RESIDENT_COOKIE } from '@/lib/auth/constants'
-import { visibleMegaMenuGroups, visibleSystemLinks } from '@/lib/config/navigation'
+import { visibleMegaMenuGroups, visibleSystemLinks, withInboxBadge } from '@/lib/config/navigation'
+import { waitingBadgeCount } from '@/lib/inbox/waiting'
 
 export const metadata: Metadata = {
   title: {
@@ -31,7 +32,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect('/login')
   }
 
-  const megaMenuGroups = visibleMegaMenuGroups(user)
+  // The one number in the navigation: people waiting on this staff member.
+  // @see lib/inbox/waiting.ts
+  const megaMenuGroups = withInboxBadge(visibleMegaMenuGroups(user), await waitingBadgeCount(user))
   const systemLinks = visibleSystemLinks(user)
 
   return (

@@ -227,7 +227,7 @@ export const PORTAL_LABELS = {
       'Bei Rückfragen oder bei hoher Priorität meldet sich die Betreuung zeitnah.',
     ],
     successTip:
-      'Tipp: Unter "Meine Meldungen" im Dashboard siehst du, ob ein Bericht offen oder gelöst ist.',
+      'Tipp: Unter "Meine Meldungen" in der Übersicht siehst du, ob ein Bericht offen oder gelöst ist.',
   },
   preferences: {
     saving: 'Wird gespeichert...',

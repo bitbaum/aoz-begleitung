@@ -17,6 +17,22 @@ export const DASHBOARD_LABELS = {
   oneTaskWaiting: '1 Aufgabe wartet auf Sie.',
   tasksWaitingSuffix: 'Aufgaben warten auf Sie.',
 
+  pageTitle: 'Eingang',
+
+  /** People who asked and are waiting — the section the nav badge counts. */
+  sectionWaiting: 'Wartet auf eine Antwort',
+  applicationsTitle: 'Anfragen zu Einsatzplätzen',
+  applicationsHint:
+    'Klient*innen haben im Portal «Ich habe Interesse» gedrückt. Übernimm eine Anfrage, dann weiss dein Team, dass sich jemand kümmert.',
+  applicationInterest: (title: string) => `Interesse an «${title}»`,
+  applicationSince: (days: number) =>
+    days === 0 ? 'seit heute' : days === 1 ? 'seit gestern' : `seit ${days} Tagen`,
+  applicationClaim: 'Übernehmen',
+  applicationOpen: 'Ansehen',
+  applicationsMore: (count: number) => `+ ${count} weitere`,
+  tileApprovals: 'Freigaben',
+  tileApprovalsAction: 'Selbst erfasste Angaben prüfen',
+
   sectionOpenTasks: 'Offene Aufgaben',
   sectionDueSoon: 'Bald fällig',
   sectionQuickActions: 'Schnellaktionen',

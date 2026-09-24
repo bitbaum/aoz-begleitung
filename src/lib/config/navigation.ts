@@ -33,6 +33,7 @@ import {
   ShoppingBag,
   HandHeart,
   Handshake,
+  Inbox,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { BRAND, isAozSurface, type BrandFeatures } from '@/lib/config/brand'
@@ -45,6 +46,7 @@ import {
 
 export const NAV_ICONS: Record<string, LucideIcon> = {
   home: Home,
+  inbox: Inbox,
   users: Users,
   building: Building2,
   puzzle: Puzzle,
@@ -137,8 +139,33 @@ export interface MegaMenuDropdownItem {
 }
 
 export type MegaMenuGroup =
-  | { label: string; href: string; icon: string; permission?: StaffPermission }
+  | {
+      label: string
+      href: string
+      icon: string
+      permission?: StaffPermission
+      /** People waiting on the viewer, rendered as a count. Set per request. */
+      badge?: number | null
+    }
   | { label: string; items: MegaMenuDropdownItem[] }
+
+/**
+ * The staff landing page: everything waiting on this person, across areas.
+ *
+ * It was called "Dashboard", which named the layout rather than the job. What
+ * the page actually answers is "who is waiting for me?" — an application, a
+ * Freigabe, a message, a transfer request — so it is named for that, and it is
+ * the one destination that carries a number. @see lib/inbox/waiting.ts
+ */
+export const INBOX_HREF = '/'
+export const INBOX_LABEL = 'Eingang'
+
+/** Attach the waiting count to the Eingang entry; other entries are untouched. */
+export function withInboxBadge(groups: MegaMenuGroup[], count: number | null): MegaMenuGroup[] {
+  return groups.map((group) =>
+    'href' in group && group.href === INBOX_HREF ? { ...group, badge: count } : group,
+  )
+}
 
 // Grouped by mission area (Wohnen/Alltag/Konflikte/Lernen & Engagement),
 // not by database entity — each of AOZ's four staff roles
@@ -164,7 +191,7 @@ export type MegaMenuGroup =
 // scroll container and edge-fade affordance that kept a ROW from spilling into
 // the user menu. That whole apparatus is gone; a column does not need it.
 export const MEGAMENU_GROUPS: MegaMenuGroup[] = [
-  { href: '/', icon: 'home', label: 'Dashboard', permission: 'dashboard:read' },
+  { href: INBOX_HREF, icon: 'inbox', label: INBOX_LABEL, permission: 'dashboard:read' },
   {
     // People-first: every role lands here. This group is ONLY about the
     // person and the placement decision — everything about buildings and

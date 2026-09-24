@@ -1,5 +1,6 @@
 'use server'
 
+import { IN_CARE_RESIDENT_STATUSES } from '@/lib/config/resident-status'
 import { revalidatePath } from 'next/cache'
 import { db, learningRecord, resident, careAssignment, placement, escapeLike } from '@/lib/db'
 import { and, asc, count, desc, eq, ilike, inArray, notInArray, or, sql } from 'drizzle-orm'
@@ -160,7 +161,10 @@ export async function listLearningQueue(kind?: LearningKind) {
     kind
       ? Promise.resolve([])
       : db.query.resident.findMany({
-          where: and(inArray(resident.status, ['ACTIVE', 'PLACED']), missingGermanTestFilter()),
+          where: and(
+            inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]),
+            missingGermanTestFilter(),
+          ),
           columns: { id: true, code: true, displayName: true, languages: true },
           orderBy: [asc(resident.code)],
           limit: 40,
@@ -251,7 +255,7 @@ export async function listLearningBoard(filters: LearningBoardFilters) {
       ? Promise.resolve([])
       : db.query.resident.findMany({
           where: and(
-            inArray(resident.status, ['ACTIVE', 'PLACED']),
+            inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]),
             missingGermanTestFilter(),
             ...(residentWhere ? [residentWhere] : []),
           ),
