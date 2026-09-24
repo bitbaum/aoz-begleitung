@@ -134,8 +134,10 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
     'Inserat, E-Mail oder Telefonnotiz einfügen — das Formular wird ausgefüllt. Überprüfe jede Angabe, bevor du speicherst. Den Bewilligungsweg setzt du selbst.',
   aiFillPlaceholder: 'Inserat, E-Mail oder Notiz aus dem Telefonat hier einfügen …',
   aiRefineTitle: 'Angaben anpassen',
-  aiRefineHint: 'Sag, was anders sein soll — der Rest bleibt stehen.',
-  aiRefinePlaceholder: 'z.B. «Start ist der 1. Oktober, 8 Stunden pro Woche»',
+  aiRefineHint:
+    'Sag, was anders sein soll, füge weitere Angaben ein — oder lass dir Verbesserungen vorschlagen. Leere Felder werden ergänzt, der Rest bleibt stehen.',
+  aiRefinePlaceholder:
+    'z.B. «Beschreibung schreiben» oder «Start ist der 1. Oktober, 8 Stunden pro Woche»',
 
   save: 'Speichern',
   saving: 'Wird gespeichert…',

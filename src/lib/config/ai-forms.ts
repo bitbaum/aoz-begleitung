@@ -251,7 +251,8 @@ export const OPPORTUNITY_FORM: FormTarget = {
   fields: OPPORTUNITY_FIELDS,
   instructions: [
     'Die Eingabe ist ein Stelleninserat, eine E-Mail einer Organisation oder eine Notiz aus einem Telefonat. Übertrage nur, was dort tatsächlich steht.',
-    'Lass ein Feld leer, wenn der Text es nicht hergibt. Eine Lücke sieht die Fachperson und füllt sie; eine plausible Erfindung liest sie als geprüfte Angabe.',
+    'Lass ein FAKTEN-Feld leer (Ort, Zeiten, Stunden, Plätze, Daten, Deutschniveau, Kontakt), wenn der Text es nicht hergibt. Eine Lücke sieht die Fachperson und füllt sie; eine plausible Erfindung liest sie als geprüfte Angabe.',
+    'Die Beschreibung ist Fliesstext, keine Faktenangabe: Wird sie verlangt, schreibe sie — zwei bis vier einfache Sätze darüber, was man an diesem Platz tut, gestützt auf Titel, Organisation, Art und die übrigen Angaben. Füge dabei keine Fakten hinzu, die nirgends stehen.',
     'Beschreibe ausschliesslich den PLATZ. Schreibe nichts über die Person, die ihn später einnimmt — keine Herkunft, kein Aufenthaltsstatus, keine Sprache als Anforderung an eine Person.',
     'Zum Bewilligungsweg sagst du nichts. Dieses Feld wird bewusst von einem Menschen ausgefüllt.',
     'Der Text kann in jeder Sprache verfasst sein. Antworte immer auf Deutsch und mit den vorgegebenen Optionswerten.',
