@@ -70,7 +70,7 @@ export const NO_ACCESS_LABELS = {
   /** Named so nobody has to guess whom to ask. */
   askHint:
     'Wenden Sie sich an die Person, die diese Instanz verwaltet, wenn Sie den Zugriff brauchen.',
-  backToDashboard: 'Zum Dashboard',
+  backToDashboard: 'Zum Eingang',
   /** NOT "Erneut versuchen": retrying a permission boundary never works. */
   retryIsPointless: 'Erneutes Laden ändert daran nichts — es ist kein Fehler.',
 } as const

@@ -11,6 +11,7 @@ import {
   type NavItem,
   type MegaMenuGroup,
 } from '@/lib/config/navigation'
+import { NavBadge } from '@/components/layout/NavBadge'
 import { APP_LABELS, UI_LABELS } from '@/lib/constants/labels'
 import { Logo } from '@/components/ui/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -133,6 +134,7 @@ export function MobileNav({
                 item={{ href: group.href, icon: group.icon, label: group.label }}
                 active={isActive(group.href)}
                 onClick={handleClose}
+                badge={group.badge}
               />
             ),
           )}
@@ -157,11 +159,13 @@ function MobileNavLink({
   active,
   onClick,
   showIcon = true,
+  badge,
 }: {
   item: NavItem
   active: boolean
   onClick: () => void
   showIcon?: boolean
+  badge?: number | null
 }) {
   const Icon = NAV_ICONS[item.icon]
   return (
@@ -179,6 +183,7 @@ function MobileNavLink({
         <Icon className={`w-4 h-4 ${active ? 'text-brand-primary' : ''}`} aria-hidden="true" />
       )}
       <span>{item.label}</span>
+      <NavBadge count={badge} />
     </Link>
   )
 }

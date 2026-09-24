@@ -92,6 +92,17 @@ export const DASHBOARD_SECTIONS = {
    * tile never names a conversation its viewer may not read.
    */
   messages: 'messages:read',
+  /**
+   * Residents who pressed «Ich habe Interesse» and nobody has answered.
+   *
+   * Gated on being able to ANSWER (`opportunities:write`), for everyone who
+   * may, rather than only for whoever holds that resident's care seat. The seat
+   * rule meant an unassigned resident's request appeared on no screen at all.
+   * @see lib/inbox/waiting.ts
+   */
+  applications: 'opportunities:write',
+  /** Client-entered facts awaiting a first look — resolved on /approvals. */
+  approvals: 'clientFacts:read',
 } as const satisfies Record<string, StaffPermission>
 
 export type DashboardSection = keyof typeof DASHBOARD_SECTIONS

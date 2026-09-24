@@ -51,7 +51,7 @@ export const UI_LABELS = {
   // Error boundaries — shared UI text
   errorTitle: 'Etwas ist schiefgelaufen',
   errorRetry: 'Erneut versuchen',
-  errorToDashboard: 'Zum Dashboard',
+  errorToDashboard: 'Zum Eingang',
   // Error boundaries — page-specific descriptions
   errorGenericDesc: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.',
   errorHousingDesc:
@@ -817,4 +817,10 @@ export const PROBLEM_DETECTION_LABELS = {
   tipMessage:
     'Klient*innen mit Anpassungsproblemen könnten in einer anderen Wohnung besser passen. Nutzen Sie "Umplatzieren", um passende Alternativen zu finden.',
   relocate: 'Umplatzieren',
+} as const
+
+/** The count beside Eingang in the navigation. */
+export const NAV_BADGE_LABELS = {
+  waiting: (count: number) =>
+    count === 1 ? '1 Person wartet auf eine Antwort' : `${count} Personen warten auf eine Antwort`,
 } as const

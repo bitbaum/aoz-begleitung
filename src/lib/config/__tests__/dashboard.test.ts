@@ -50,8 +50,11 @@ describe('DASHBOARD_SECTIONS', () => {
     // OPERATIONAL permission and `BETREUUNG: [...OPERATIONAL]`. Leitung's five
     // extra permissions were all page-level, so nothing on the dashboard could
     // tell the two apart.
+    // `applications` is absent too, and deliberately: Betreuung READS the
+    // Einsatzplätze board but may not act on it, and a request queue shown to
+    // someone who cannot answer it is a list of things they must watch undone.
     expect(visibleSections('BETREUUNG')).toEqual(
-      ALL_SECTIONS.filter((section) => section !== 'team'),
+      ALL_SECTIONS.filter((section) => section !== 'team' && section !== 'applications'),
     )
   })
 
@@ -84,12 +87,14 @@ describe('DASHBOARD_SECTIONS', () => {
     expect(canSeeTeam).toEqual(canManageUsers)
   })
 
-  it('JOBCOACH sees exactly the learning section — their dashboard is their board', () => {
-    expect(visibleSections('JOBCOACH')).toEqual(['learning'])
+  it('JOBCOACH sees their board and the requests they answer — nothing housing', () => {
+    // `applications`: the residents waiting on a listing of theirs.
+    // `approvals`: the permits of the clients they coach (@see client-facts).
+    expect(visibleSections('JOBCOACH')).toEqual(['learning', 'applications', 'approvals'])
   })
 
-  it('FREIWILLIGENARBEIT sees learning and events, nothing housing', () => {
-    expect(visibleSections('FREIWILLIGENARBEIT')).toEqual(['learning', 'events'])
+  it('FREIWILLIGENARBEIT sees learning, events and her requests, nothing housing', () => {
+    expect(visibleSections('FREIWILLIGENARBEIT')).toEqual(['learning', 'events', 'applications'])
   })
 
   it('SOZIALARBEIT sees people/conflict/governance sections but no placement writes', () => {

@@ -1,3 +1,4 @@
+import { IN_CARE_RESIDENT_STATUSES } from '@/lib/config/resident-status'
 import type { Metadata } from 'next'
 import {
   db,
@@ -16,7 +17,7 @@ import {
 import { eq, and, gte, inArray, isNull, desc, asc } from 'drizzle-orm'
 import { daysSinceCeil, getDateDaysAgo } from '@/lib/utils'
 
-export const metadata: Metadata = { title: 'Dashboard' }
+export const metadata: Metadata = { title: DASHBOARD_LABELS.pageTitle }
 import { ActionDashboard } from '@/components/dashboard/ActionDashboard'
 import { DASHBOARD_LABELS } from '@/lib/constants/labels'
 import { dayPartAt, formatWeekdayDate, type DayPart } from '@/lib/utils/local-time'
@@ -49,6 +50,9 @@ import { sectionVisible, type DashboardSection } from '@/lib/config/dashboard'
 import { placeableBeds } from '@/lib/config/capacity'
 import { LEARNING_PULSE_WINDOW_DAYS } from '@/lib/config/learning'
 import { getProposalsAwaitingStaff } from '@/lib/governance/queries'
+import { waitingApplications } from '@/lib/inbox/waiting'
+import { pendingFactQueue } from '@/lib/client-facts/queue'
+import { ownSeat } from '@/lib/client-facts/access'
 import {
   NARROWEST_CAPABILITIES,
   type StaffCapabilities,
@@ -109,6 +113,8 @@ export default async function AdminDashboard() {
     neverSignedInStaffCount,
     assignedResidentCount,
     jobCaseload,
+    applicationsWaiting,
+    approvalsPending,
   ] = await Promise.all([
     db.$count(resident),
     // Only used to pick the first setup step, which requires housing:write —
@@ -116,7 +122,7 @@ export default async function AdminDashboard() {
     show('occupancy') ? db.$count(housingUnit) : 0,
     show('matching')
       ? db.query.resident.findMany({
-          where: inArray(resident.status, ['ACTIVE', 'PLACED']),
+          where: inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]),
           columns: { ...RESIDENT_NAME_SELECT, status: true, createdAt: true },
         })
       : [],
@@ -298,6 +304,13 @@ export default async function AdminDashboard() {
             },
           },
         })
+      : [],
+    // Every request a resident raised that nobody has taken up, for everyone
+    // who may answer it — not only the holder of that resident's seat.
+    // @see lib/inbox/waiting.ts
+    show('applications') ? waitingApplications(viewer) : [],
+    show('approvals') && user
+      ? pendingFactQueue({ userId: user.id, scope: viewer.scope, ownDomain: ownSeat(viewer.role) })
       : [],
   ])
 
@@ -573,6 +586,12 @@ export default async function AdminDashboard() {
       residentCount={residentCount}
       housingUnitCount={housingUnitCount}
       assignedResidentCount={assignedResidentCount}
+      waitingApplications={applicationsWaiting}
+      pendingApprovals={approvalsPending.map((item) => ({
+        id: item.id,
+        name: residentName(item.resident),
+        summary: item.summary,
+      }))}
       jobQueue={jobQueue}
       volunteeringQueue={volunteeringQueue}
       waitingThreads={waitingThreads}

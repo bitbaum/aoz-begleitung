@@ -3,6 +3,7 @@
  * `lib/opportunities/pipeline.ts` so they can be tested without a database.
  */
 
+import { IN_CARE_RESIDENT_STATUSES } from '@/lib/config/resident-status'
 import { and, asc, desc, eq, ilike, inArray, isNull, notInArray, or, type SQL } from 'drizzle-orm'
 import { db, escapeLike, opportunity, opportunityApplication, resident } from '@/lib/db'
 import { RESIDENT_NAME_SELECT } from '@/lib/utils/resident-name'
@@ -185,7 +186,12 @@ export async function residentsAvailableFor(opportunityId: string) {
 
   return db.query.resident.findMany({
     where: and(
-      eq(resident.status, 'ACTIVE'),
+      // Everyone still in AOZ's care, housed or not. This was `ACTIVE` alone,
+      // and a placement sets a resident to `PLACED` — so the moment someone had
+      // a roof over their head they vanished from this list, and a coach could
+      // not put forward exactly the people most ready for a job. Housing is one
+      // part of a person's situation, not a gate on the others.
+      inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]),
       // `notInArray` with an empty list is invalid SQL; with nobody attached
       // there is nothing to exclude.
       ...(attachedIds.length ? [notInArray(resident.id, attachedIds)] : []),

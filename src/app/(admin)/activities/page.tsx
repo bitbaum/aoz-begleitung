@@ -15,6 +15,7 @@ import {
 import { countActivities, listActivities } from '@/lib/data/activities'
 import { ACTIVITIES_ADMIN_LABELS } from '@/lib/constants'
 import { requirePermission } from '@/lib/auth'
+import { hasPermission } from '@/lib/auth/role-policy'
 
 export const metadata: Metadata = { title: ACTIVITIES_ADMIN_LABELS.pageTitle }
 export const dynamic = 'force-dynamic'
@@ -24,7 +25,10 @@ type Props = {
 }
 
 export default async function ActivitiesAdminPage({ searchParams }: Props) {
-  await requirePermission('activities:read')
+  const viewer = await requirePermission('activities:read')
+  // Betreuung reads the catalogue but may not add to it; a button that ends at
+  // /kein-zugriff is worse than no button.
+  const canWrite = hasPermission(viewer, 'activities:write')
   const { status } = await searchParams
   const statusFilter =
     status && status in ACTIVITY_STATUS_LABELS ? (status as ActivityStatus) : undefined
@@ -43,7 +47,9 @@ export default async function ActivitiesAdminPage({ searchParams }: Props) {
         title={ACTIVITIES_ADMIN_LABELS.pageTitle}
         description={ACTIVITIES_ADMIN_LABELS.pageDescription}
         actions={
-          <ButtonLink href="/activities/new">{ACTIVITIES_ADMIN_LABELS.newAction}</ButtonLink>
+          canWrite ? (
+            <ButtonLink href="/activities/new">{ACTIVITIES_ADMIN_LABELS.newAction}</ButtonLink>
+          ) : undefined
         }
       />
 
@@ -77,9 +83,11 @@ export default async function ActivitiesAdminPage({ searchParams }: Props) {
         <EmptyState
           title={ACTIVITIES_ADMIN_LABELS.emptyTitle}
           action={
-            <ButtonLink href="/activities/new" variant="outline">
-              {ACTIVITIES_ADMIN_LABELS.emptyAction}
-            </ButtonLink>
+            canWrite ? (
+              <ButtonLink href="/activities/new" variant="outline">
+                {ACTIVITIES_ADMIN_LABELS.emptyAction}
+              </ButtonLink>
+            ) : undefined
           }
         />
       ) : (
