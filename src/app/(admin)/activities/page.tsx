@@ -15,6 +15,9 @@ import {
 import { countActivities, listActivities } from '@/lib/data/activities'
 import { ACTIVITIES_ADMIN_LABELS } from '@/lib/constants'
 import { requirePermission } from '@/lib/auth'
+import { BoardSwitcher } from '@/components/ui/BoardSwitcher'
+import { ACTIVITIES_TAB_ID, catalogueTabs } from '@/lib/config/catalogue'
+import { OPPORTUNITIES_ADMIN_LABELS } from '@/lib/constants/labels/opportunities'
 import { hasPermission } from '@/lib/auth/role-policy'
 
 export const metadata: Metadata = { title: ACTIVITIES_ADMIN_LABELS.pageTitle }
@@ -51,6 +54,18 @@ export default async function ActivitiesAdminPage({ searchParams }: Props) {
             <ButtonLink href="/activities/new">{ACTIVITIES_ADMIN_LABELS.newAction}</ButtonLink>
           ) : undefined
         }
+      />
+
+      {/* The same tabs as the listings page: one catalogue of places a person
+          can go, whichever page of it this is. @see config/catalogue.ts */}
+      <BoardSwitcher
+        label={OPPORTUNITIES_ADMIN_LABELS.boardSwitcherLabel}
+        current={ACTIVITIES_TAB_ID}
+        items={catalogueTabs({
+          boardHref: (board) => `/opportunities?board=${board}`,
+          canReadListings: hasPermission(viewer, 'opportunities:read'),
+          canReadActivities: true,
+        })}
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

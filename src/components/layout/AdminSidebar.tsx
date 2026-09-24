@@ -61,7 +61,9 @@ export function AdminSidebar({ groups = MEGAMENU_GROUPS }: { groups?: MegaMenuGr
               href={group.href}
               icon={group.icon}
               label={group.label}
-              active={isRouteActive(pathname, group.href)}
+              active={[group.href, ...(group.activeFor ?? [])].some((href) =>
+                isRouteActive(pathname, href),
+              )}
               badge={group.badge}
             />
           ),

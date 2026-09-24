@@ -3,7 +3,6 @@
  */
 
 import { LEARNING_AREA_NAME } from './learning'
-import { OPPORTUNITY_AREA_NAME } from './opportunities'
 
 import {
   Home,
@@ -146,6 +145,11 @@ export type MegaMenuGroup =
       permission?: StaffPermission
       /** People waiting on the viewer, rendered as a count. Set per request. */
       badge?: number | null
+      /**
+       * Other routes this entry stands for, so it stays highlighted there — a
+       * single entry for a catalogue that spans two pages.
+       */
+      activeFor?: readonly string[]
     }
   | { label: string; items: MegaMenuDropdownItem[] }
 
@@ -160,6 +164,9 @@ export type MegaMenuGroup =
 export const INBOX_HREF = '/'
 export const INBOX_LABEL = 'Eingang'
 
+/** One entry for every place a person can go. @see config/catalogue.ts */
+export const CATALOGUE_LABEL = 'Einsatzplätze & Angebote'
+
 /** Attach the waiting count to the Eingang entry; other entries are untouched. */
 export function withInboxBadge(groups: MegaMenuGroup[], count: number | null): MegaMenuGroup[] {
   return groups.map((group) =>
@@ -167,57 +174,41 @@ export function withInboxBadge(groups: MegaMenuGroup[], count: number | null): M
   )
 }
 
-// Grouped by mission area (Wohnen/Alltag/Konflikte/Lernen & Engagement),
-// not by database entity — each of AOZ's four staff roles
-// (Betreuung, Sozialarbeit, Jobcoach, Freiwilligenarbeit) should be able to
-// find their own daily work as one group, not hunt across "Personen"/
-// "Unterkünfte"/"Monitoring". Wartung/Vorfälle/Regeln moved out of the old
-// catch-all "Monitoring" into the role that actually owns them day to day;
-// Statistiken folded into Wohnen (occupancy/placement reporting is a housing
-// concern) rather than staying its own single-item "Monitoring" group.
-// Lernen/Freiwilligenarbeit share one group since both are a resident's
-// development work outside the roof over their head. Deliberately NOT called
-// "Soziales" — the resident form has its own "Soziales" section (a different
-// concept: that resident's own social factors) and two same-named things on
-// one screen is confusing for staff, not just ambiguous for a test selector
-// — "Konflikte" is also the more accurate name for what this group actually
-// holds (incidents, house rules), not general social-work administration.
-//
-// There is no item-count budget to "fit". These render as a vertical panel
-// (`AdminSidebar`), so the budget is the page's height and the panel scrolls
-// itself. Add a mission area here without checking whether it fits a viewport.
-//
-// This used to be a horizontal megamenu, and the note here explained the
-// scroll container and edge-fade affordance that kept a ROW from spilling into
-// the user menu. That whole apparatus is gone; a column does not need it.
+// The staff navigation. It renders as a vertical panel (`AdminSidebar`), so
+// there is no width budget to fit — but there IS an attention budget, and the
+// grouping below is spent on that. Deliberately not "Soziales" anywhere: the
+// resident form has its own "Soziales" section (that person's social factors),
+// and two same-named things on one screen confuse staff.
 export const MEGAMENU_GROUPS: MegaMenuGroup[] = [
+  // ─────────────────────────────────────────────────────────────────────────
+  // PERSON-CENTRED (decided 2026-09-24). The product began as housing
+  // placement and grew into accompanying a person — work, volunteering,
+  // learning, living together, a roof. The nav used to be sorted by DATA TYPE
+  // (Wohnen, Gemeinschaft, Konflikte, Integration…), which made staff translate
+  // their question into our filing system. It is now sorted by the two
+  // questions staff actually arrive with:
+  //
+  //   1. "Who is waiting for me?"            → Eingang (the one number)
+  //   2. "How is this person doing?"         → Klient*innen
+  //
+  // and then the three things staff maintain FOR people: places to go
+  // (Einsatzplätze & Angebote), a roof (Wohnen), living together
+  // (Zusammenleben). Seven entries at most, fewer for every specialist role.
+  // ─────────────────────────────────────────────────────────────────────────
   { href: INBOX_HREF, icon: 'inbox', label: INBOX_LABEL, permission: 'dashboard:read' },
   {
-    // People-first: every role lands here. This group is ONLY about the
-    // person and the placement decision — everything about buildings and
-    // beds lives in "Wohnen" below. It used to be one 9-item dropdown named
-    // "Klient*innen" that also held Unterkünfte, Wartung and Statistiken:
-    // the label lied about the content, and the list outgrew short viewports.
-    // BETREUUNG sees all three; JOBCOACH and SOZIALARBEIT see only /residents.
+    // Everything that is about the PERSON. "Lernen & Beruf" lives here, not
+    // with the listings: it is a record of what people have done — progress
+    // per person — and a coach opens it to ask about people, not about places.
     label: 'Klient*innen',
     items: [
       // "Alle …", not "Klient*innen" again: an item whose label repeats its own
       // group reads as a broken menu, and gives the reader nothing to choose by.
-      // Angaben Klient*innen have entered themselves, awaiting a first look.
-      // A noun, not a verb: the group is about the people, and what sits here
-      // is their entries — the queue survives whatever we later do with them.
-      {
-        href: '/approvals',
-        icon: 'clipboard',
-        label: 'Freigaben',
-        desc: 'Selbst erfasste Angaben prüfen',
-        permission: 'clientFacts:read',
-      },
       {
         href: '/residents',
         icon: 'users',
         label: 'Alle Klient*innen',
-        desc: 'Übersicht & Karten-Board',
+        desc: 'Übersicht & Dossiers',
         permission: 'residents:read',
       },
       {
@@ -227,19 +218,41 @@ export const MEGAMENU_GROUPS: MegaMenuGroup[] = [
         desc: 'Person erfassen',
         permission: 'residents:write',
       },
+      // Angaben Klient*innen have entered themselves, awaiting a first look.
       {
-        href: '/matching',
-        icon: 'puzzle',
-        label: 'Matching',
-        desc: 'Passende Unterkunft finden',
-        permission: 'placements:write',
+        href: '/approvals',
+        icon: 'clipboard',
+        label: 'Freigaben',
+        desc: 'Selbst erfasste Angaben prüfen',
+        permission: 'clientFacts:read',
+      },
+      {
+        href: '/learning',
+        icon: 'learning',
+        label: LEARNING_AREA_NAME,
+        desc: 'Kurse, Sprachtests & Nachweise pro Person',
+        permission: 'learning:read',
       },
     ],
   },
+  // ONE catalogue of places a person can go: jobs, internships, volunteering
+  // and the external activities offered in the portal. They were three entries
+  // (Lernen & Beruf, Einsatzplätze, Aktivitäten) sharing one board switcher,
+  // so staff had to know our data model to find an offer. The two pages keep
+  // their own routes — an activity has no applicants and no seats — but share
+  // one tab strip (config/catalogue.ts) and this one entry, which stays
+  // highlighted on both.
   {
-    // The roof: units, occupancy, moves, repairs, and the reporting on all
-    // of it. Mirrors AOZ's own split between Betreuung (people work) and the
-    // Fachbereiche Wohnen/Immobilienverwaltung (building work).
+    href: '/opportunities',
+    icon: 'opportunities',
+    label: CATALOGUE_LABEL,
+    permission: 'opportunities:read',
+    activeFor: ['/activities'],
+  },
+  {
+    // The roof: units, the placement decision, moves and repairs. Matching
+    // lives here now — "which home fits this person?" is a housing decision,
+    // and it was the one housing verb filed under the people.
     label: 'Wohnen',
     items: [
       {
@@ -255,6 +268,13 @@ export const MEGAMENU_GROUPS: MegaMenuGroup[] = [
         label: 'Neue Unterkunft',
         desc: 'Einheit hinzufügen',
         permission: 'housing:write',
+      },
+      {
+        href: '/matching',
+        icon: 'puzzle',
+        label: 'Matching',
+        desc: 'Passende Unterkunft finden',
+        permission: 'placements:write',
       },
       {
         href: '/placements',
@@ -280,37 +300,10 @@ export const MEGAMENU_GROUPS: MegaMenuGroup[] = [
     ],
   },
   {
-    // Named "Gemeinschaft" on BOTH sides of the product, matching the portal
-    // group of the same name. Staff and residents talking about the same
-    // surface with two different words is how a shared vocabulary rots — and
-    // "Alltag" had stopped describing the contents anyway.
-    label: 'Gemeinschaft',
-    items: [
-      {
-        href: '/chores',
-        icon: 'calendar',
-        label: 'Aufgaben',
-        desc: 'Haushaltsaufgaben & Rotation',
-        permission: 'housing:read',
-      },
-      {
-        href: '/marketplace',
-        icon: 'shop',
-        label: 'Marktplatz',
-        desc: 'Sachen & Hilfe unter Klient*innen',
-        permission: 'marketplace:read',
-      },
-      {
-        href: '/events',
-        icon: 'event',
-        label: 'Veranstaltungen',
-        desc: 'Hausversammlungen & Events',
-        permission: 'events:read',
-      },
-    ],
-  },
-  {
-    label: 'Konflikte',
+    // "Gemeinschaft" and "Konflikte" were two groups about one thing: how the
+    // people in a house get on. Conflicts first, because they are the work;
+    // the rest is what keeps them rare.
+    label: 'Zusammenleben',
     items: [
       {
         href: '/incidents',
@@ -326,69 +319,31 @@ export const MEGAMENU_GROUPS: MegaMenuGroup[] = [
         desc: 'Hausregeln & Beschlüsse',
         permission: 'housing:read',
       },
-    ],
-  },
-  // Lernen, Jobcoaching und Freiwilligenarbeit — the integration domain.
-  //
-  // This was once a three-item dropdown whose entries were
-  // `/learning?board=overview`, `?board=job` and `?board=volunteering`: the
-  // same page three times, competing with the board switcher that page already
-  // renders. It was collapsed to a single top-level link, and the lesson still
-  // holds — a menu must not offer tabs of one page as if they were places.
-  //
-  // A group is right again now that there are genuinely TWO destinations:
-  // `/learning` is the record of what people have DONE, `/opportunities` the
-  // directory of what they could do next and who is going. Different
-  // questions, different pages.
-  //
-  // Keeping both at top level instead is what forced this: measured at
-  // 1280px as Leitung, a second top-level entry pushed the nav 90px past its
-  // container (0px without it) — re-breaking the fit that #86 fixed, on the
-  // widest role, which is the one that sees every item.
-  {
-    label: 'Integration',
-    items: [
       {
-        href: '/learning',
-        icon: 'learning',
-        label: LEARNING_AREA_NAME,
-        desc: 'Kurse, Sprachtests & Nachweise',
-        permission: 'learning:read',
+        href: '/chores',
+        icon: 'calendar',
+        label: 'Aufgaben',
+        desc: 'Haushaltsaufgaben & Rotation',
+        permission: 'housing:read',
       },
       {
-        href: '/opportunities',
-        icon: 'opportunities',
-        label: OPPORTUNITY_AREA_NAME,
-        desc: 'Freiwilligenarbeit & Einsätze',
-        permission: 'opportunities:read',
+        href: '/events',
+        icon: 'event',
+        label: 'Veranstaltungen',
+        desc: 'Hausversammlungen & Events',
+        permission: 'events:read',
       },
-      // Moved out of "Alltag": a curated catalogue of external sport, language,
-      // culture and family offers is the integration domain, not the daily
-      // running of a house. It reads on `activities:read` rather than
-      // `residents:write`, which had shut out precisely the two roles whose job
-      // this is — JOBCOACH and FREIWILLIGENARBEIT.
       {
-        href: '/activities',
-        icon: 'heart',
-        label: 'Aktivitäten',
-        desc: 'Externe Angebote fürs Portal',
-        permission: 'activities:read',
+        href: '/marketplace',
+        icon: 'shop',
+        label: 'Marktplatz',
+        desc: 'Sachen & Hilfe unter Klient*innen',
+        permission: 'marketplace:read',
       },
     ],
   },
-  // Top level, and no longer inside "Wohnen".
-  //
-  // It sat there while it was purely housing reporting. It is not any more:
-  // /analytics now renders the viewer's OWN domain KPIs, and for a Jobcoach or
-  // a Freiwilligenarbeit coordinator the housing half is not even fetched. A
-  // cross-cutting page filed under one mission area is mislabelled for every
-  // other one.
-  //
-  // It was also the only survivor of "Wohnen" for those two roles — every other
-  // item there needs `housing:read`, which they do not hold — so the group
-  // rendered as an accordion named for the roof over someone's head containing
-  // a single reporting link. Moving it fixes the label and empties the group in
-  // the same stroke.
+  // Top level, not filed under one area: /analytics renders the viewer's OWN
+  // domain KPIs, so filing it under housing mislabels it for everyone else.
   { href: '/analytics', icon: 'chart', label: 'Statistiken', permission: 'dashboard:read' },
   { href: '/messages', icon: 'message', label: 'Nachrichten', permission: 'messages:read' },
 ]

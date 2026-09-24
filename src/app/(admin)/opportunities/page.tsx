@@ -6,11 +6,8 @@ import { StatCard } from '@/components/ui/Card'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ListShell, PageHeader, PageShell, Toolbar } from '@/components/ui/Page'
 import { BoardSwitcher } from '@/components/ui/BoardSwitcher'
-import {
-  INTEGRATION_BOARD_IDS,
-  resolveIntegrationBoard,
-  type IntegrationBoardId,
-} from '@/lib/config/integration-boards'
+import { catalogueTabs } from '@/lib/config/catalogue'
+import { resolveIntegrationBoard, type IntegrationBoardId } from '@/lib/config/integration-boards'
 import {
   boardOpportunityKinds,
   OPPORTUNITY_KIND_ICONS,
@@ -94,11 +91,11 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
       <BoardSwitcher
         label={L.boardSwitcherLabel}
         current={board}
-        items={INTEGRATION_BOARD_IDS.map((id) => ({
-          id,
-          label: L.boards[id],
-          href: boardHref(id),
-        }))}
+        items={catalogueTabs({
+          boardHref,
+          canReadListings: true,
+          canReadActivities: hasPermission(staff, 'activities:read'),
+        })}
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
