@@ -1,17 +1,16 @@
 'use client'
 
 /**
- * AI assistance bar for a form.
+ * AI assistance bar for a form — AOZ's words and design tokens on the shared
+ * `AiFormAssistant` from ai-forms.
  *
- * Generic over any `useAiForm` store, so a second assisted form needs no
- * changes here. It renders nothing app-specific beyond labels: the intent
- * (fill an empty form vs. change a filled one) is inferred by the hook, and
- * this only reflects it back so the user can see which one they are about to
- * do.
+ * The behaviour (fill, change, undo, suggestions) lives in the package so an
+ * improvement there reaches every app that uses it; this file only says it in
+ * German and in AOZ's classes. Do not grow logic back in here — fix it in
+ * ai-forms instead.
  */
 
-import { useState } from 'react'
-import type { UseAiForm } from '@fleet/ai-forms/react'
+import { AiFormAssistant, type UseAiForm } from '@fleet/ai-forms/react'
 import { AI_FORM_LABELS } from '@/lib/constants'
 
 interface AiFormBarProps {
@@ -31,6 +30,24 @@ interface AiFormBarProps {
   refineTitle?: string
   fillHint?: string
   refineHint?: string
+  /** Propose improvements right after a fill. One extra model call per fill. */
+  suggestAfterFill?: boolean
+}
+
+const CLASS_NAMES = {
+  root: 'card border-brand-primary/30',
+  header: 'flex flex-wrap items-baseline justify-between gap-2 mb-1',
+  title: 'text-lg font-semibold text-ui-text',
+  hint: 'text-sm text-ui-muted mb-3',
+  textarea: 'input',
+  actions: 'mt-3 flex flex-wrap items-center gap-3',
+  submit: 'btn-primary min-h-[44px] disabled:opacity-60 disabled:cursor-not-allowed',
+  secondary: 'btn-ghost min-h-[44px] px-3 text-sm disabled:opacity-60',
+  status: 'text-sm text-ui-muted',
+  error: 'alert-error mt-3',
+  suggestions: 'mt-4 flex flex-wrap items-center gap-2',
+  suggestionsTitle: 'w-full text-sm font-medium text-ui-text',
+  suggestion: 'btn-outline min-h-[44px] px-3 text-sm text-left disabled:opacity-60',
 }
 
 export function AiFormBar({
@@ -41,91 +58,30 @@ export function AiFormBar({
   refineTitle,
   fillHint,
   refineHint,
+  suggestAfterFill,
 }: AiFormBarProps) {
-  const [instruction, setInstruction] = useState('')
-  const isFill = form.isEmpty
-
-  const title = isFill
-    ? (fillTitle ?? AI_FORM_LABELS.fillTitle)
-    : (refineTitle ?? AI_FORM_LABELS.refineTitle)
-  const hint = isFill
-    ? (fillHint ?? AI_FORM_LABELS.fillHint)
-    : (refineHint ?? AI_FORM_LABELS.refineHint)
-  const submit = isFill ? AI_FORM_LABELS.fillSubmit : AI_FORM_LABELS.refineSubmit
-  const placeholder =
-    (isFill ? fillPlaceholder : refinePlaceholder) ??
-    (isFill ? AI_FORM_LABELS.fillPlaceholder : AI_FORM_LABELS.refinePlaceholder)
-
-  async function run() {
-    if (form.busy || instruction.trim() === '') return
-    const result = await form.ask(instruction)
-    // Only clear on success — a failed instruction is the one the user most
-    // wants to edit and retry, not retype from memory.
-    if (result.ok) setInstruction('')
-  }
-
   return (
-    <div className="card border-brand-primary/30">
-      <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
-        <h2 className="text-lg font-semibold text-ui-text">{title}</h2>
-        {form.canUndo && (
-          <button
-            type="button"
-            onClick={form.undo}
-            disabled={form.busy}
-            className="btn-ghost min-h-[44px] px-3 text-sm disabled:opacity-60"
-          >
-            {AI_FORM_LABELS.undo}
-          </button>
-        )}
-      </div>
-      <p className="text-sm text-ui-muted mb-3">{hint}</p>
-
-      <label htmlFor="ai-form-instruction" className="sr-only">
-        {title}
-      </label>
-      <textarea
-        id="ai-form-instruction"
-        rows={3}
-        value={instruction}
-        onChange={(e) => setInstruction(e.target.value)}
-        onKeyDown={(e) => {
-          if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-            e.preventDefault()
-            void run()
-          }
-        }}
-        placeholder={placeholder}
-        disabled={form.busy}
-        className="input"
-      />
-
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        {/* type="button": this sits inside the resident <form>, and the default
-            submit type would post the form instead of asking the assistant. */}
-        <button
-          type="button"
-          onClick={() => void run()}
-          disabled={form.busy || instruction.trim() === ''}
-          className="btn-primary min-h-[44px] disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {form.busy ? AI_FORM_LABELS.working : submit}
-        </button>
-
-        {form.changed.length > 0 && !form.busy && (
-          <span className="text-sm text-ui-muted">
-            {form.changed.length === 1
-              ? AI_FORM_LABELS.changedOne
-              : AI_FORM_LABELS.changedMany(form.changed.length)}
-          </span>
-        )}
-      </div>
-
-      {form.error && (
-        <p role="alert" className="alert-error mt-3">
-          {form.error}
-        </p>
-      )}
-    </div>
+    <AiFormAssistant
+      form={form}
+      suggestAfterFill={suggestAfterFill}
+      classNames={CLASS_NAMES}
+      labels={{
+        fillTitle: fillTitle ?? AI_FORM_LABELS.fillTitle,
+        refineTitle: refineTitle ?? AI_FORM_LABELS.refineTitle,
+        fillHint: fillHint ?? AI_FORM_LABELS.fillHint,
+        refineHint: refineHint ?? AI_FORM_LABELS.refineHint,
+        fillPlaceholder: fillPlaceholder ?? AI_FORM_LABELS.fillPlaceholder,
+        refinePlaceholder: refinePlaceholder ?? AI_FORM_LABELS.refinePlaceholder,
+        fillSubmit: AI_FORM_LABELS.fillSubmit,
+        refineSubmit: AI_FORM_LABELS.refineSubmit,
+        working: AI_FORM_LABELS.working,
+        undo: AI_FORM_LABELS.undo,
+        changed: (count) =>
+          count === 1 ? AI_FORM_LABELS.changedOne : AI_FORM_LABELS.changedMany(count),
+        suggest: AI_FORM_LABELS.suggest,
+        suggesting: AI_FORM_LABELS.suggesting,
+        suggestionsTitle: AI_FORM_LABELS.suggestionsTitle,
+      }}
+    />
   )
 }

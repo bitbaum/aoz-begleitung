@@ -17,7 +17,7 @@ import { hasPermission } from '@/lib/auth/role-policy'
 import { consumeRateLimit } from '@/lib/auth/rate-limit'
 import { completeText, hasAIProvider } from '@/lib/ai/provider'
 import { AI_FORMS } from '@/lib/config/ai-forms'
-import { AI_FORM_ERRORS } from '@/lib/constants'
+import { AI_FORM_ERRORS, AI_FORM_MESSAGES } from '@/lib/constants'
 
 async function authorize(): Promise<AuthorizeResult> {
   if (!hasAIProvider()) {
@@ -48,4 +48,5 @@ export const POST = createFormAssistHandler({
   targets: AI_FORMS,
   complete: completeText,
   authorize,
+  messages: AI_FORM_MESSAGES,
 })
