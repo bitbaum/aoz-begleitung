@@ -74,12 +74,12 @@ describe('flattening keeps the boundary it had inside the group', () => {
     // Without this the flattened entry would be offered to roles the grouped
     // version correctly hid it from — a dead end dressed as a destination.
     //
-    // Freiwilligenarbeit, not Jobcoach: the coach now holds `clientFacts:read`
-    // and so keeps TWO items in this group (Freigaben and Klient*innen), which
-    // means it stays an accordion and never promotes. This role still sees
-    // exactly one, which is the shape the flattening rule is about.
+    // Liegenschaften: since "Lernen & Beruf" moved in with the people, every
+    // integration role keeps two or more items in "Klient*innen" and stays an
+    // accordion. The building team reads the register and nothing else of it,
+    // which is the one-survivor shape the flattening rule is about.
     const coordinator: StaffCapabilities = {
-      role: 'FREIWILLIGENARBEIT',
+      role: 'LIEGENSCHAFTEN',
       scope: 'OWN_DOMAIN',
       isSystemAdmin: false,
     }

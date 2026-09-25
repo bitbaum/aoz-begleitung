@@ -69,7 +69,7 @@ async function assertNoViolations(page: import('@playwright/test').Page, label: 
 
 test.describe('Accessibility — admin pages', () => {
   const adminPages = [
-    { name: 'Dashboard', url: '/' },
+    { name: 'Eingang', url: '/' },
     { name: 'Residents list', url: '/residents' },
     { name: 'Housing list', url: '/housing' },
     { name: 'Matching', url: '/matching' },

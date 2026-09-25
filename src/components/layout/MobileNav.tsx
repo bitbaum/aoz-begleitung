@@ -132,7 +132,7 @@ export function MobileNav({
               <MobileNavLink
                 key={group.href}
                 item={{ href: group.href, icon: group.icon, label: group.label }}
-                active={isActive(group.href)}
+                active={[group.href, ...(group.activeFor ?? [])].some(isActive)}
                 onClick={handleClose}
                 badge={group.badge}
               />
