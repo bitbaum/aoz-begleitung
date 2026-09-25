@@ -713,6 +713,19 @@ export const RESIDENT_FACTORS: Record<string, CompatibilityFactorDef> = {
   },
 }
 
+/**
+ * How many factors actually move a compatibility score — the ONE number every
+ * surface quotes (landing page, /algorithm, the offer).
+ *
+ * A factor counts only if it has a weight AND a scoring rule. It used to be
+ * `weight > 0` alone, defined twice, which counted factors that are captured
+ * but never scored (`rule: 'NONE'`) — so the public page claimed more matching
+ * factors than the algorithm uses, and the offer quoted a third number.
+ */
+export const SCORED_FACTOR_COUNT = Object.values(RESIDENT_FACTORS).filter(
+  (factor) => factor.weight > 0 && factor.rule !== 'NONE',
+).length
+
 // =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================

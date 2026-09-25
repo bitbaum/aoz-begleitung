@@ -1,6 +1,6 @@
 'use client'
 
-import { RESIDENT_DIMENSIONS, RESIDENT_FACTORS } from '@/lib/config/resident-factors'
+import { RESIDENT_DIMENSIONS, RESIDENT_FACTORS, SCORED_FACTOR_COUNT } from '@/lib/config/resident-factors'
 import {
   RESEARCH_SOURCES,
   EVIDENCE_STRENGTH_CONFIG,
@@ -11,7 +11,8 @@ import {
 // Derived Constants from Config (SSOT)
 // =============================================================================
 
-export const FACTOR_COUNT = Object.values(RESIDENT_FACTORS).filter((f) => f.weight > 0).length
+/** @see SCORED_FACTOR_COUNT — one definition, re-exported here for existing imports. */
+export const FACTOR_COUNT = SCORED_FACTOR_COUNT
 export const DIMENSION_COUNT = RESIDENT_DIMENSIONS.length
 export const SOURCE_COUNT = RESEARCH_SOURCES.length
 

@@ -1,4 +1,4 @@
-import { RESIDENT_FACTORS } from '@/lib/config/resident-factors'
+import { SCORED_FACTOR_COUNT } from '@/lib/config/resident-factors'
 import { RESEARCH_SOURCES } from '@/lib/config/algorithm-docs'
 
 /**
@@ -16,7 +16,8 @@ import { RESEARCH_SOURCES } from '@/lib/config/algorithm-docs'
 // hand-writes "27 Faktoren" starts lying the day a factor is added. Exported
 // because every language has to state the same number, and a translator
 // re-typing "27" into French is exactly the drift this avoids.
-export const FACTOR_COUNT = Object.values(RESIDENT_FACTORS).filter((f) => f.weight > 0).length
+/** @see SCORED_FACTOR_COUNT — one definition, re-exported here for existing imports. */
+export const FACTOR_COUNT = SCORED_FACTOR_COUNT
 export const SOURCE_COUNT = RESEARCH_SOURCES.length
 
 export interface MarketingSection {

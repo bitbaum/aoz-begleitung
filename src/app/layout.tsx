@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
-import Script from 'next/script'
 import { APP_LABELS } from '@/lib/constants/labels'
 import { ToastContainer } from '@/components/ui/Toast'
 import './globals.css'
@@ -82,12 +81,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-ui-canvas text-ui-text font-sans">
         {children}
         <ToastContainer />
-        {/* Token is a literal so next build cannot tree-shake the Script away. */}
-        <Script
-          src="https://loki.orangecat.ch/widget.js"
-          strategy="afterInteractive"
-          data-fc-project="fcw_757c716fede237047d988f8d715a144d"
-        />
+        {/* The feedback widget is NOT here. It loads only on the public
+            marketing pages — (public)/layout.tsx. The root layout wraps the
+            portal and the staff screens too, and a third-party script on the
+            pages that show residents' data is a data flow nobody consented to.
+            Pinned by src/app/__tests__/no-third-party-script-on-private-pages.test.ts */}
       </body>
     </html>
   )
