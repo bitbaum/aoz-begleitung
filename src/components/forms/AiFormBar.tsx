@@ -12,6 +12,7 @@
 
 import { AiFormAssistant, type UseAiForm } from '@fleet/ai-forms/react'
 import { AI_FORM_LABELS } from '@/lib/constants'
+import { AiBadge } from '@/components/ai/AiBadge'
 
 interface AiFormBarProps {
   form: UseAiForm
@@ -63,6 +64,13 @@ export function AiFormBar({
   return (
     <AiFormAssistant
       form={form}
+      // Before the title: whoever types into this box is told first that it is
+      // AI, in test mode, and where to read what is sent. @see config/ai-disclosure
+      icon={
+        <span className="me-2 align-middle">
+          <AiBadge />
+        </span>
+      }
       suggestAfterFill={suggestAfterFill}
       classNames={CLASS_NAMES}
       labels={{
