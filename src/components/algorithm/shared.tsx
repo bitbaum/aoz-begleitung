@@ -1,6 +1,10 @@
 'use client'
 
-import { RESIDENT_DIMENSIONS, RESIDENT_FACTORS, SCORED_FACTOR_COUNT } from '@/lib/config/resident-factors'
+import {
+  RESIDENT_DIMENSIONS,
+  RESIDENT_FACTORS,
+  SCORED_FACTOR_COUNT,
+} from '@/lib/config/resident-factors'
 import {
   RESEARCH_SOURCES,
   EVIDENCE_STRENGTH_CONFIG,
