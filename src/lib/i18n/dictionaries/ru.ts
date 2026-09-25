@@ -652,6 +652,8 @@ export const ru: Dictionary = {
   'opportunities.withdraw': 'Отозвать интерес',
   'opportunities.seatsFree': 'Свободных мест:',
   'opportunities.seatsFull': 'Сейчас занято',
+  'opportunities.filterAll': 'Все места',
+  'opportunities.filterLabel': 'Тип места',
   'opportunities.germanLevel': 'Немецкий',
   'opportunities.perWeek': 'ч./неделя',
   'opportunities.okInterest': 'Записано — команда свяжется с тобой.',

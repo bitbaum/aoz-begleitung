@@ -648,6 +648,8 @@ export const fr: Dictionary = {
   'opportunities.withdraw': 'Retirer mon intérêt',
   'opportunities.seatsFree': 'Places libres :',
   'opportunities.seatsFull': 'Complet pour le moment',
+  'opportunities.filterAll': 'Toutes les places',
+  'opportunities.filterLabel': 'Type de place',
   'opportunities.germanLevel': 'Allemand',
   'opportunities.perWeek': 'h/semaine',
   'opportunities.okInterest': 'C’est noté — votre équipe vous contactera.',

@@ -641,6 +641,8 @@ export const uk: Dictionary = {
   'opportunities.withdraw': 'Відкликати зацікавлення',
   'opportunities.seatsFree': 'Вільних місць:',
   'opportunities.seatsFull': 'Наразі зайнято',
+  'opportunities.filterAll': 'Усі місця',
+  'opportunities.filterLabel': 'Тип місця',
   'opportunities.germanLevel': 'Німецька',
   'opportunities.perWeek': 'год./тиждень',
   'opportunities.okInterest': 'Записано — команда зв’яжеться з тобою.',

@@ -626,6 +626,8 @@ export const ar: Dictionary = {
   'opportunities.withdraw': 'سحب الاهتمام',
   'opportunities.seatsFree': 'الأماكن المتاحة:',
   'opportunities.seatsFull': 'مكتمل حالياً',
+  'opportunities.filterAll': 'كل الأماكن',
+  'opportunities.filterLabel': 'نوع المكان',
   'opportunities.germanLevel': 'الألمانية',
   'opportunities.perWeek': 'ساعة/أسبوع',
   'opportunities.okInterest': 'تم التسجيل — سيتواصل معك فريقك.',
