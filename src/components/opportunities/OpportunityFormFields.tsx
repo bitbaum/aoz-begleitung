@@ -126,7 +126,6 @@ export function OpportunityFormFields({ opportunity, action, cancelHref }: Props
         refineHint={L.aiRefineHint}
         fillPlaceholder={L.aiFillPlaceholder}
         refinePlaceholder={L.aiRefinePlaceholder}
-        suggestAfterFill
       />
 
       <section className="space-y-4">
