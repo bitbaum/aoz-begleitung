@@ -4,6 +4,7 @@ import { Logo } from '@/components/ui/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { PublicLanguageSwitcher } from '@/components/marketing/PublicLanguageSwitcher'
 import { BLOG_LABELS } from '@/lib/constants/labels'
+import { AI_DISCLOSURE_HREF } from '@/lib/config/ai-disclosure'
 
 /**
  * The route group for pages that are readable without an account.
@@ -77,6 +78,9 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               </Link>
               <Link href="/changelog" className="hover:text-ui-text">
                 Changelog
+              </Link>
+              <Link href={AI_DISCLOSURE_HREF} className="hover:text-ui-text">
+                KI und Datenschutz
               </Link>
             </div>
           </div>

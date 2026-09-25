@@ -96,6 +96,9 @@ export const PUBLIC_ROUTES = [
   '/blog',
   '/changelog',
   '/roadmap',
+  // Where AI is used and what it sends — readable BEFORE anyone logs in, by
+  // whoever is deciding whether to trust this product with people's data.
+  '/ki-datenschutz',
   // The landing page, in every language it comes in. `/` rewrites to the
   // German one for anonymous visitors, so it must be reachable without a
   // session — and each is also a real URL of its own.
