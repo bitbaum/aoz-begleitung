@@ -39,7 +39,7 @@ export function isDemoInstance(): boolean {
  *
  * SECURITY: a production build opens demo doors ONLY on the dedicated demo
  * instance. Until 2026-09-25 the doors opened into the live database — real
- * AOZ staff, real residents — with system-admin reach (#256 closed that).
+ * AOZ staff, real residents — with system-admin reach (PR 256 closed that).
  * A production build without `DEMO_INSTANCE=true` answers no, whatever
  * DEMO_ACCESS_ENABLED says, so a copied env line cannot reopen it.
  *
