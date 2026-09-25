@@ -285,6 +285,8 @@ export const de = {
   'opportunities.withdraw': 'Interesse zurückziehen',
   'opportunities.seatsFree': 'Freie Plätze:',
   'opportunities.seatsFull': 'Zurzeit besetzt',
+  'opportunities.filterAll': 'Alle Plätze',
+  'opportunities.filterLabel': 'Art des Platzes',
   'opportunities.germanLevel': 'Deutsch',
   'opportunities.perWeek': 'Std./Woche',
   'opportunities.okInterest': 'Notiert — dein Team meldet sich bei dir.',

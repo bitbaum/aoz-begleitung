@@ -458,7 +458,7 @@ export interface PortalNavItem {
   icon: keyof typeof NAV_ICONS
   primary?: boolean
   tab?: 1 | 2 | 3 | 4
-  /** AOZ tab bar: Übersicht, Melden, Regeln, Hilfe. */
+  /** AOZ tab bar: Übersicht, Melden, Einsatzplätze, Hilfe. */
   aozTab?: 1 | 2 | 3 | 4
   group: PortalNavGroup
   requiresFeature?: keyof BrandFeatures
@@ -529,7 +529,6 @@ export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
     labelKey: 'rules',
     icon: 'scroll',
     primary: true,
-    aozTab: 3,
     group: 'community',
   },
   {
@@ -572,10 +571,15 @@ export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
     tab: 4,
     group: 'integration',
   },
+  // In the AOZ tab bar since 2026-09-25: finding a place to work or
+  // volunteer is the resident's main move toward integration, and it was
+  // reachable only through the "Mehr" sheet. Regeln gave up the slot; it
+  // stays one tap away in the menu.
   {
     href: '/portal/opportunities',
     labelKey: 'opportunities',
     icon: 'opportunities',
+    aozTab: 3,
     group: 'integration',
   },
   { href: '/portal/activities', labelKey: 'activities', icon: 'heart', group: 'integration' },
@@ -591,6 +595,7 @@ export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
 
 const AOZ_PRIMARY_HREFS = new Set([
   '/portal',
+  '/portal/opportunities',
   '/portal/report',
   '/portal/rules',
   '/portal/help',

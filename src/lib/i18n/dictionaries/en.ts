@@ -632,6 +632,8 @@ export const en: Dictionary = {
   'opportunities.withdraw': 'Withdraw interest',
   'opportunities.seatsFree': 'Places free:',
   'opportunities.seatsFull': 'Currently full',
+  'opportunities.filterAll': 'All places',
+  'opportunities.filterLabel': 'Kind of place',
   'opportunities.germanLevel': 'German',
   'opportunities.perWeek': 'hrs/week',
   'opportunities.okInterest': 'Noted — your team will get in touch with you.',

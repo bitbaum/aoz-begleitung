@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = 'force-dynamic'
 
 type Props = {
-  searchParams: Promise<{ ok?: string; error?: string }>
+  searchParams: Promise<{ ok?: string; error?: string; kind?: string }>
 }
 
 /** URL params the actions redirect back with, mapped to what the reader sees. */
@@ -67,6 +67,15 @@ export default async function PortalOpportunitiesPage(props: Props) {
 
   const okKey =
     params.ok && params.ok in OK_KEYS ? OK_KEYS[params.ok as keyof typeof OK_KEYS] : null
+  // One tap narrows the list to a kind of place. Offered only for kinds that
+  // are actually open — a filter that leads to "nothing here" is a dead end.
+  const kindsOpen = [...new Set(open.map((opportunity) => opportunity.kind as OpportunityKindId))]
+  const kindFilter =
+    params.kind && kindsOpen.includes(params.kind as OpportunityKindId)
+      ? (params.kind as OpportunityKindId)
+      : null
+  const shown = kindFilter ? open.filter((opportunity) => opportunity.kind === kindFilter) : open
+
   const errorKey =
     params.error && params.error in ERROR_KEYS
       ? ERROR_KEYS[params.error as keyof typeof ERROR_KEYS]
@@ -202,11 +211,39 @@ export default async function PortalOpportunitiesPage(props: Props) {
 
       <section className="mb-8">
         <h2 className="text-lg font-semibold text-ui-text mb-3">{t('opportunities.open')}</h2>
+        <nav aria-label={t('opportunities.filterLabel')} className="mb-4 flex flex-wrap gap-2">
+          {[null, ...kindsOpen].map((kind) => {
+            const active = kind === kindFilter
+            return (
+              <Link
+                key={kind ?? 'all'}
+                href={kind ? `/portal/opportunities?kind=${kind}` : '/portal/opportunities'}
+                aria-current={active ? 'page' : undefined}
+                className={`inline-flex min-h-[44px] items-center rounded-lg border px-4 text-sm font-medium ${
+                  active
+                    ? 'border-brand-primary bg-brand-primary/10 text-brand-primary'
+                    : 'border-ui-border text-ui-muted hover:text-ui-text'
+                }`}
+              >
+                {kind ? opportunityKindLabel(t, kind) : t('opportunities.filterAll')}
+              </Link>
+            )
+          })}
+          {/* Activities are the other half of "places I could go" — the same
+                catalogue on the staff side. One link, so a resident does not
+                have to know the two are stored apart. */}
+          <Link
+            href="/portal/activities"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-ui-border px-4 text-sm font-medium text-ui-muted hover:text-ui-text"
+          >
+            {t('nav.activities')}
+          </Link>
+        </nav>
         {open.length === 0 ? (
           <EmptyState title={t('opportunities.openEmpty')} />
         ) : (
           <ul className="space-y-3">
-            {open.map((opportunity) => {
+            {shown.map((opportunity) => {
               const permit = opportunity.permitRequirement as PermitRequirementId
               const full = opportunity.seatsLeft === 0
 
