@@ -1100,7 +1100,7 @@ Some incompatibilities are **blocking** (cannot place together):
 absolute line, and that was too blunt to survive contact with the product.**
 Extending a health insurance every six months, or getting a dentist
 appointment, meant writing to your Betreuerin and waiting — the facts lived in
-her inbox rather than in the profile of the person they belong to.
+their inbox rather than in the profile of the person they belong to.
 
 The distinction that holds is between **what is wrong with you** and **who you
 call and when a form is due.** A diagnosis is a judgment about a person and
@@ -1138,10 +1138,10 @@ build goes red.
 | Gesundheitsfachpersonen | ✓ | ✓ | — | — |
 | Aufenthaltsstatus | ✓ | ✓ | ✓ | — |
 
-The Jobcoach holds the permit and only the permit: which work is lawful is his
+The Jobcoach holds the permit and only the permit: which work is lawful is that role's
 job, and `permitRequirement` on an opportunity is already a claim about exactly
-this. He has no business knowing which doctors somebody visits. A single "the
-care team may see the client's facts" grant reads as reasonable and hands him
+this. It has no business knowing which doctors somebody visits. A single "the
+care team may see the client's facts" grant reads as reasonable and hands that role
 both — which is why `clientFacts:read` is its own permission and not
 `residents:read`, a check all four care roles pass.
 
@@ -1277,10 +1277,10 @@ the mistake this section exists to prevent:
 **Why it is split.** The house this runs for has four people and the old
 single enum could not describe them. One is a **Betreuerin who
 also sees every client**; the only way to say that was `ADMIN`, which erased
-that housing is her domain *and* handed her the settings page as a side effect.
+that housing is that person's domain *and* handed them the settings page as a side effect.
 The Jobcoach and the Freiwilligenarbeit coordinator work one domain each.
-The Liegenschaften lead is the fourth, and he is the reason `role` cannot simply mean "care
-domain": he runs the housing STOCK — which flats exist, who is placed where,
+The Liegenschaften lead is the fourth, and that role is the reason `role` cannot simply mean "care
+domain": it runs the housing STOCK — which flats exist, who is placed where,
 what is broken — and supports nobody. `LIEGENSCHAFTEN` maps to no `CareRole`
 at all, which is why `STAFF_ROLE_CARE_DOMAIN` is a `Partial<Record<…>>`.
 

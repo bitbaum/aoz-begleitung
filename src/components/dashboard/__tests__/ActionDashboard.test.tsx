@@ -285,13 +285,13 @@ describe('ActionDashboard', () => {
   })
 
   /**
-   * The bug this pins: the Freiwilligenarbeit coordinator's dashboard could not show her an open task.
-   * Every term of `totalIssues` needed a permission she does not hold, and the
-   * sixth — the coach queue — was fetched with a hardcoded `'JOB'` while her
+   * The bug this pins: the Freiwilligenarbeit coordinator's dashboard could not show an open task.
+   * Every term of `totalIssues` needed a permission the role does not hold, and the
+   * sixth — the coach queue — was fetched with a hardcoded `'JOB'` while the
    * seats are `VOLUNTEERING`. The count was structurally zero, so the page
-   * resolved to `quiet` and congratulated her, every morning.
+   * resolved to `quiet` and congratulated them, every morning.
    */
-  it('shows FREIWILLIGENARBEIT her own queue instead of congratulating her', () => {
+  it('shows FREIWILLIGENARBEIT its own queue instead of congratulating it', () => {
     render(
       <ActionDashboard
         {...BASE_PROPS}
@@ -319,7 +319,7 @@ describe('ActionDashboard', () => {
     expect(screen.queryByText(/Alles unter Kontrolle/)).not.toBeInTheDocument()
   })
 
-  it('still congratulates her when there is genuinely nothing', () => {
+  it('still congratulates FREIWILLIGENARBEIT when there is genuinely nothing', () => {
     // The other half. "Nothing to do" must stay sayable, or the fix just
     // replaces a false calm with a false alarm.
     render(
@@ -676,7 +676,7 @@ describe('ActionDashboard', () => {
     })
 
     it('keeps a caseload request the section does not show', () => {
-      // Her client asked about a JOB — outside her half, so not in her section.
+      // The client asked about a JOB — outside the volunteering half, so not in that section.
       // Dropping it from the caseload tile too would leave it on no screen.
       render(
         <ActionDashboard

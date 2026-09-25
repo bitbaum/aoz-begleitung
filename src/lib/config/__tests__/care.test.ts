@@ -120,7 +120,7 @@ describe('care domains', () => {
 describe('a role either carries a caseload or does not', () => {
   /**
    * Counting somebody's care assignments cannot answer this. The Freiwilligenarbeit coordinator with zero
-   * clients is WAITING to be assigned; the Liegenschaften lead with zero is doing his job. Both
+   * clients is WAITING to be assigned; the Liegenschaften lead with zero is doing the job. Both
    * count 0, and the dashboard must say different things to them.
    */
   it('says yes for the four care domains', () => {

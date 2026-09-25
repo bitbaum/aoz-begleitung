@@ -365,11 +365,10 @@ describe('calculateCompatibility — practical', () => {
       const a = makeResident({ smokingStatus: 'NON_SMOKER' })
       const b = makeResident({ id: '2', smokingStatus: 'INDOOR_SMOKER' })
       const result = calculateCompatibility(a, b)
-      // smoking=20 (w45), sharedSpaces=100 (w25), pets=100 (w10), dietary=100 (w5), chores=100 (w15)
-      // Total weight = 100
-      // (20*45 + 100*25 + 100*10 + 100*5 + 100*15) / 100
-      // = (900 + 2500 + 1000 + 500 + 1500) / 100 = 6400/100 = 64
-      expect(result.practical).toBe(64)
+      // smoking=20 (w45), sharedSpaces=100 (w25), pets=100 (w10), chores=100 (w15)
+      // Food practice is no longer a factor, so the total weight is 95:
+      // (20*45 + 100*25 + 100*10 + 100*15) / 95 = 5900/95 = 62.1 → 62
+      expect(result.practical).toBe(62)
     })
 
     it('NON_SMOKER + OUTDOOR_SMOKER → smoking factor 80', () => {
@@ -402,29 +401,22 @@ describe('calculateCompatibility — practical', () => {
     })
   })
 
-  describe('dietary', () => {
-    it('both halal → 100', () => {
-      const a = makeResident({ dietaryNeeds: ['halal'] })
-      const b = makeResident({ id: '2', dietaryNeeds: ['halal'] })
-      const result = calculateCompatibility(a, b)
-      expect(result.practical).toBe(100)
-    })
-
-    it('no special needs → 100', () => {
-      const a = makeResident({ dietaryNeeds: [] })
-      const b = makeResident({ id: '2', dietaryNeeds: [] })
-      const result = calculateCompatibility(a, b)
-      expect(result.practical).toBe(100)
-    })
-
-    it('one has special needs, other does not → 75', () => {
-      const a = makeResident({ dietaryNeeds: ['halal'] })
-      const b = makeResident({ id: '2', dietaryNeeds: [] })
-      const result = calculateCompatibility(a, b)
-      // diet=75 (w5), rest=100
-      // (100*45 + 100*25 + 100*10 + 75*5 + 100*15) / 100
-      // = (4500 + 2500 + 1000 + 375 + 1500) / 100 = 9875/100 = 98.75 → 99
-      expect(result.practical).toBe(99)
+  describe('food practice', () => {
+    it('never moves a compatibility score — it is a kitchen note, not a match factor', () => {
+      // It used to be scored and offered HALAL/KOSHER: religion as an input to
+      // who lives with whom. Any value, on either side, now scores the same.
+      const plain = calculateCompatibility(
+        makeResident({ dietaryNeeds: [] }),
+        makeResident({ id: '2', dietaryNeeds: [] }),
+      )
+      for (const needs of [['SEPARATE_COOKWARE'], ['VEGAN'], ['VEGETARIAN', 'SEPARATE_COOKWARE']]) {
+        const result = calculateCompatibility(
+          makeResident({ dietaryNeeds: needs }),
+          makeResident({ id: '2', dietaryNeeds: [] }),
+        )
+        expect(result.overall).toBe(plain.overall)
+        expect(result.practical).toBe(plain.practical)
+      }
     })
   })
 })

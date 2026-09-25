@@ -11,9 +11,9 @@ import type { StaffCapabilities, StaffRole } from '@/lib/auth/role-policy'
  * entry is `learning:write` — documented in that file as "the coaching roles'
  * home". True of a Jobcoach. False of the Freiwilligenarbeit coordinator, who
  * also holds `learning:write`: the Freiwilligenarbeit coordinator's "Alles unter Kontrolle" screen offered
- * her one button, and it opened the Jobcoach's surface.
+ * one button, and it opened the Jobcoach's surface.
  *
- * Found by opening her dashboard during a walk of the live product. Nothing
+ * Found by opening that dashboard during a walk of the live product. Nothing
  * failed, because a CTA that resolves is indistinguishable from a CTA that
  * resolves CORRECTLY.
  */
@@ -31,18 +31,18 @@ describe('a specialist lands on their own board', () => {
     expect(cta.href).toContain('board=volunteering')
   })
 
-  it('leaves the Jobcoach on Lernen & Beruf, which is his by name', () => {
+  it('leaves the Jobcoach on Lernen & Beruf, which it owns by name', () => {
     // Deliberate, and pinned by two older tests: the surface is called
     // "Lernen & Beruf" — learning AND work — so the generic ladder already
-    // lands the Jobcoach somewhere that belongs to him. Redirecting him too was an
+    // lands the Jobcoach somewhere that belongs to that role. Redirecting the Jobcoach too was an
     // over-reach in the first version of this change.
     expect(fallbackCta(viewer('JOBCOACH')).labelKey).toBe('actionOpenLearning')
   })
 
   it('agrees with the board the nav opens for that role', () => {
     // One SSOT decides which board a role belongs on. If this button and the
-    // nav ever disagree, a coordinator is invited somewhere her own menu does
-    // not take her.
+    // nav ever disagree, a coordinator is invited somewhere their own menu does
+    // not take them.
     expect(fallbackCta(viewer('FREIWILLIGENARBEIT')).href).toContain(
       `board=${defaultIntegrationBoardForRole('FREIWILLIGENARBEIT')}`,
     )
@@ -75,9 +75,9 @@ describe('everyone else keeps the generic ladder', () => {
     }
   })
 
-  it('gives Liegenschaften something he can actually open', () => {
-    // He holds neither residents:write nor learning:write, so he falls through
-    // to the guaranteed last resort rather than to a page he cannot reach.
+  it('gives Liegenschaften something it can actually open', () => {
+    // It holds neither residents:write nor learning:write, so it falls through
+    // to the guaranteed last resort rather than to a page it cannot reach.
     const cta = fallbackCta(viewer('LIEGENSCHAFTEN'))
     expect(cta.labelKey).toBe('actionViewStats')
   })

@@ -51,10 +51,10 @@ const client = (over: Partial<JobClientInput> = {}): JobClientInput => ({
 
 describe('the production case this was built from', () => {
   /**
-   * The Jobcoach had one client assigned the day he was created — job-seeking, two
+   * The Jobcoach had one client assigned the day the account was created — job-seeking, two
    * years without work, an unrecognised trade qualification, German at A2 —
    * and the dashboard said "Alles unter Kontrolle! Keine dringenden Aufgaben"
-   * without naming him. Every component of `openTaskCount` was a housing
+   * without naming them. Every component of `openTaskCount` was a housing
    * queue, and a Jobcoach holds none of those permissions.
    */
   it('a newly registered job-seeker with nothing arranged is not "nothing to do"', () => {

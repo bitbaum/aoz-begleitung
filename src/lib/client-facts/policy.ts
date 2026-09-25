@@ -21,7 +21,7 @@
  *    someone visits. One blanket "care team" grant would have handed over both.
  *
  * 3. CONFIRMED MEANS SEEN, NOT TRUE. The all-domains Betreuerin cannot ring the insurer to check
- *    a policy number. A product that implied she had would be asserting
+ *    a policy number. A product that implied they had would be asserting
  *    something about a person's insurance or permit that it cannot know — the
  *    same failure as an opportunity defaulting to "Keine Bewilligung nötig".
  *    Every label for this state says *geprüft*, never *gültig*.

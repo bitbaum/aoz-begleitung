@@ -128,8 +128,8 @@ describe("The Freiwilligenarbeit coordinator's queue", () => {
   })
 
   it('ignores a stalled record that belongs to the job coach', () => {
-    // A language course going nowhere is the Jobcoach's signal, not the Freiwilligenarbeit coordinator's. Her
-    // queue naming it would hand her work she cannot act on.
+    // A language course going nowhere is the Jobcoach's signal, not the Freiwilligenarbeit coordinator's. That
+    // queue naming it would hand the coordinator work they cannot act on.
     const jobRecord = client({
       applications: [
         {
@@ -231,8 +231,8 @@ describe('a row points at the thing it is about', () => {
 describe('the seat the dashboard fetches', () => {
   /**
    * The root cause, pinned. The caseload query read the literal `'JOB'`, so
-   * the Freiwilligenarbeit coordinator's seats — `VOLUNTEERING` — were never queried and every term of her
-   * `totalIssues` was structurally zero. She was congratulated every morning.
+   * the Freiwilligenarbeit coordinator's seats — `VOLUNTEERING` — were never queried and every term of the
+   * `totalIssues` was structurally zero. The coordinator was congratulated every morning.
    */
   it('maps each coach to their own seat, derived and not written out', () => {
     expect(STAFF_ROLE_CARE_DOMAIN.JOBCOACH).toBe('JOB')

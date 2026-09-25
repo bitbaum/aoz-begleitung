@@ -245,7 +245,6 @@ export const ResidentInputSchema = z.object({
   socialStyle: SocialStyleSchema,
   conflictStyle: ConflictStyleSchema.default('COOPERATIVE' as ConflictStyle),
   languages: z.array(z.string()).default([]),
-  culturalRegion: z.string().optional().nullable(),
   smokingStatus: SmokingStatusSchema,
   dietaryNeeds: z.array(z.string()).default([]),
   mobilityNeeds: MobilityNeedSchema,
@@ -666,7 +665,6 @@ export const portalPreferencesSchema = z.object({
   languages: z.array(z.string()).default([]),
   dietaryNeeds: z.array(z.string()).default([]),
   preferredAgeRange: z.string().max(50).optional(),
-  culturalPreference: z.string().max(50).optional(),
   additionalPreferences: z.string().max(1000).optional(),
 })
 

@@ -19,9 +19,9 @@ export const dynamic = 'force-dynamic'
  *
  * `clientFacts:read` says only that this person has a queue. WHICH facts they
  * see, and for which clients, is decided per kind against the care seats they
- * hold: the Jobcoach opens this page and finds permits for the clients he coaches,
- * never their insurance, never a client he does not hold. The narrowing
- * happens in the QUERY — a kind he may not read is a query never issued, not
+ * hold: the Jobcoach opens this page and finds permits for the clients they coach,
+ * never their insurance, never a client they do not hold. The narrowing
+ * happens in the QUERY — a kind they may not read is a query never issued, not
  * rows fetched and filtered in the markup.
  */
 export default async function ApprovalsPage() {

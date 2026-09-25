@@ -167,7 +167,7 @@ describe('role policy smoke checks', () => {
  *
  * They were one enum, and the real AOZ team could not be described by it:
  * A Betreuerin who ALSO sees every client (BETREUUNG + ALL_DOMAINS): saying so meant
- * making her ADMIN — which erased her domain and handed her the settings page.
+ * making the account ADMIN — which erased its domain and handed it the settings page.
  */
 describe('role, scope and administration are independent', () => {
   const allDomainsBetreuerin = caps('BETREUUNG', 'ALL_DOMAINS')
@@ -185,7 +185,7 @@ describe('role, scope and administration are independent', () => {
   })
 
   test('seeing every domain grants every domain’s verbs', () => {
-    // The all-domains Betreuerin covers the whole house, so she records learning and reads a CV
+    // The all-domains Betreuerin covers the whole house, so the account records learning and reads a CV
     // the way the coach would — without being an administrator.
     expect(hasPermission(allDomainsBetreuerin, 'learning:write')).toBe(true)
     expect(hasPermission(allDomainsBetreuerin, 'documents:read')).toBe(true)

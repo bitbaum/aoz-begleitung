@@ -250,7 +250,7 @@ export const permitRequirement = pgEnum('PermitRequirement', [
  *
  * CONFIRMED means "a member of staff has SEEN this", never "this is true".
  * The all-domains Betreuerin cannot ring the insurer to verify a policy number, and a product
- * that implied she had would be asserting something about a person's insurance
+ * that implied they had would be asserting something about a person's insurance
  * or permit that it cannot know — the same failure as an opportunity claiming
  * `permitRequirement: NONE` by default.
  */
@@ -1090,7 +1090,6 @@ export const resident = pgTable(
     guestTolerance: integer().default(3).notNull(),
     socialStyle: socialStyle().notNull(),
     languages: text().array(),
-    culturalRegion: text(),
     conflictStyle: conflictStyle().default('COOPERATIVE').notNull(),
     smokingStatus: smokingStatus().notNull(),
     dietaryNeeds: text().array(),
@@ -2546,7 +2545,7 @@ export const staffUnit = pgTable(
 // A client's insurance, the health professionals they see, and their permit —
 // entered by the CLIENT, checked by Betreuung. Before this, extending an
 // insurance every six months or booking a dentist meant writing to your
-// Betreuerin and waiting; the facts lived in her inbox rather than in the
+// Betreuerin and waiting; the facts lived in their inbox rather than in the
 // product.
 //
 // THE RULE, enforced by

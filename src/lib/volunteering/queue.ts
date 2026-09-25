@@ -13,17 +13,17 @@ import { ACTIVE_ENGAGEMENT_STAGES } from '@/lib/analytics/role-kpis'
  *
  * ## The bug this exists to fix
  *
- * The Freiwilligenarbeit coordinator's dashboard could not show her an open task. Not "rarely did" —
+ * The Freiwilligenarbeit coordinator's dashboard could not show an open task. Not "rarely did" —
  * could not. `totalIssues` is built from critical incidents, overdue
  * check-ins, unplaced residents, pending transfers, proposals awaiting staff
- * and the job queue. She holds none of the permissions gating the first five,
- * and the sixth was fetched with `careAssignment.role = 'JOB'` while her seats
+ * and the job queue. The role holds none of the permissions gating the first five,
+ * and the sixth was fetched with `careAssignment.role = 'JOB'` while the seats
  * are `VOLUNTEERING`. Every term was structurally zero, so the dashboard
- * resolved to `quiet` and congratulated her — every morning, with work sitting
+ * resolved to `quiet` and congratulated them — every morning, with work sitting
  * in the database.
  *
  * This is the identical defect fixed for the Jobcoach on 2026-09-02, whose fix comment
- * sits three lines above the hardcoded `'JOB'` that excluded her. **The fix was
+ * sits three lines above the hardcoded `'JOB'` that excluded them. **The fix was
  * applied to the instance and not the class.** That is why the builder now
  * lives in `lib/care/queue.ts` and this file holds only what is specific to
  * volunteering.
@@ -32,7 +32,7 @@ import { ACTIVE_ENGAGEMENT_STAGES } from '@/lib/analytics/role-kpis'
  *
  * The job signals ask about the labour market: has this person had contact,
  * are they on a course with no work alongside it. Neither question is the Freiwilligenarbeit coordinator's.
- * Hers is whether the people she holds are actually doing something with other
+ * Theirs is whether the people they hold are actually doing something with other
  * people, and whether anyone answered the ones who asked.
  */
 
@@ -70,7 +70,7 @@ const VOLUNTEERING_KINDS = ['VOLUNTEERING', 'COMMUNITY_SERVICE']
  * `ACTIVE_ENGAGEMENT_STAGES` is imported rather than restated: if the queue and
  * `ENGAGEMENT_RATE` disagreed about what "engaged" means, the Freiwilligenarbeit coordinator would be
  * chasing a queue that never empties a number, or watching a number move with
- * nothing leaving her list.
+ * nothing leaving that list.
  */
 function hasLiveEngagement(client: CareClientInput): boolean {
   return client.applications.some(

@@ -36,7 +36,7 @@ describe('who may be named on a client team', () => {
   })
 
   it('keeps the role with no care domain out of EVERY seat', () => {
-    // The case that prompted this. The Liegenschaften lead runs the buildings; he holds no
+    // The case that prompted this. The Liegenschaften lead runs the buildings and holds no
     // client's file in any domain and never will.
     for (const domain of CARE_ROLES) {
       expect(canStaffWorkDomain(staff('LIEGENSCHAFTEN'), domain)).toBe(false)
@@ -45,7 +45,7 @@ describe('who may be named on a client team', () => {
 
   it('lets somebody who covers every domain hold any seat', () => {
     // The all-domains Betreuerin is BETREUUNG + ALL_DOMAINS and holds HOUSING seats; the same
-    // breadth is what lets her cover a seat nobody is staffed for.
+    // breadth is what lets that account cover a seat nobody is staffed for.
     for (const domain of CARE_ROLES) {
       expect(canStaffWorkDomain(staff('BETREUUNG', 'ALL_DOMAINS'), domain)).toBe(true)
     }

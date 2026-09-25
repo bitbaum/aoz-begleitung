@@ -23,8 +23,8 @@ Three orthogonal facts per person (`role` · `scope` · `isSystemAdmin`):
 
 The all-domains Betreuerin's row is the one that was previously unsayable. Before the split,
 "a Betreuerin who also sees every client" could only be written as `ADMIN`,
-which erased that housing is her domain **and** handed her the settings page
-as a side effect. Her role is now true and her breadth is stated separately.
+which erased that housing is that person's domain **and** handed them the settings page
+as a side effect. The role is now true and the breadth is stated separately.
 
 **Nobody on the care team administers the product.** Running the house is not
 configuring the software. That stays with the operator account, and granting
@@ -62,13 +62,13 @@ inputs greyed out — a job coach never reads Housing's "Schlüssel: fehlt" or
 Sozialarbeit's next step.
 
 **Scope limits which care seats you can work, not which clients you can list.**
-The Jobcoach sees all 19 clients and can open any of them; what he cannot do is read
+The Jobcoach sees all 19 clients and can open any of them; what the Jobcoach cannot do is read
 or write another discipline's notes on them. This is the intended reading of
 `OWN_DOMAIN`, and CLAUDE.md's shorthand "whose files may I open?" is looser
 than the behaviour.
 
 **A specialist is not deadlocked.** The Jobcoach's "Meine Klient*innen" filter shows
-0, but he can assign his own seat from any client's Betreuungsteam panel. The
+0, but can assign their own seat from any client's Betreuungsteam panel. The
 onboarding gap was discoverability, not permission — see below.
 
 **The resident portal is in good shape.** Signed in as Fatima: personalised
@@ -184,7 +184,7 @@ carried across, rather than guessing.
 **Fixed in PR #140.**
 
 Signed in as the Freiwilligenarbeit coordinator (`FREIWILLIGENARBEIT` / `OWN_DOMAIN`) and opened
-`/analytics` — reachable to her because it requires only `dashboard:read`,
+`/analytics` — reachable to that account because it requires only `dashboard:read`,
 which every role holds, correctly, since most of the page is aggregate pilot
 health (occupancy rate, satisfaction trend, conflict hotspots, algorithm
 accuracy). One section is not aggregate: `RecentPlacementsTable` names

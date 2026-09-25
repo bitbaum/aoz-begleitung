@@ -9,12 +9,12 @@ import type { LearningKindId, LearningStatusId } from '@/lib/config/learning'
  * `lib/jobcoach/queue.ts` documents a bug fixed for the Jobcoach on 2026-09-02: the
  * dashboard decided "busy" or "quiet" from a count made entirely of housing
  * queues, so a specialist's count was structurally zero and the product
- * congratulated him on a day with real work in it.
+ * congratulated them on a day with real work in it.
  *
  * That fix was written for ONE coach. The Freiwilligenarbeit coordinator sat next to it with the identical
- * defect — her caseload was never even fetched, because the query hardcoded
- * `careAssignment.role = 'JOB'` and her seats are `VOLUNTEERING` — and every
- * other term in the count needs permissions she does not hold. She has been
+ * defect — that caseload was never even fetched, because the query hardcoded
+ * `careAssignment.role = 'JOB'` and those seats are `VOLUNTEERING` — and every
+ * other term in the count needs permissions the role does not hold. It has been
  * getting "Alles unter Kontrolle" every morning since.
  *
  * So the lesson is not the fix, it is the shape of the mistake: **a fix applied

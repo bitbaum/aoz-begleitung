@@ -86,7 +86,6 @@ export const DIMENSION_WEIGHTS = {
     sharedSpaces: 25, // Functional requirement
     chores: 15, // Moderate evidence (Kansas State)
     pets: 10, // Lower conflict evidence
-    dietary: 5, // Minimal conflict evidence
   },
 } as const
 

@@ -63,9 +63,9 @@ describe('the form can describe the real team', () => {
   it('offers reach, because otherwise "Leitung" is the only way to say it', () => {
     /**
      * The all-domains Betreuerin is BETREUUNG + ALL_DOMAINS. Before this field existed, the only
-     * way to create her through the UI was to pick the retired role — which is
+     * way to create that account through the UI was to pick the retired role — which is
      * WHY it survived in the dropdown. Removing the option without adding this
-     * would have taken away the only way to express her, so the two changes
+     * would have taken away the only way to express that shape, so the two changes
      * belong together and this test says so.
      */
     const source = read(FORM)

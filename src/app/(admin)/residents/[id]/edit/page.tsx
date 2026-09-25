@@ -65,7 +65,6 @@ export default async function EditResidentPage({ params }: Props) {
             chaosTolerance: resident.chaosTolerance,
             socialStyle: resident.socialStyle,
             languages: resident.languages,
-            culturalRegion: resident.culturalRegion,
             smokingStatus: resident.smokingStatus,
             dietaryNeeds: resident.dietaryNeeds,
             mobilityNeeds: resident.mobilityNeeds,

@@ -56,7 +56,7 @@ describe('who may read a resident conversation', () => {
 
   it('leaves the two real coaches out, which is the whole point', () => {
     // The Jobcoach and the Freiwilligenarbeit coordinator are OWN_DOMAIN on the live instance; the all-domains Betreuerin is
-    // BETREUUNG + ALL_DOMAINS and keeps her inbox either way.
+    // BETREUUNG + ALL_DOMAINS and keeps that inbox either way.
     expect(
       hasPermission(
         { role: 'JOBCOACH', scope: 'OWN_DOMAIN', isSystemAdmin: false },

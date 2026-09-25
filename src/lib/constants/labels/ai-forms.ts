@@ -7,7 +7,7 @@ export const AI_FORM_LABELS = {
   fillHint:
     'Beschreibe das Aufnahmegespräch in eigenen Worten. Das Formular wird ausgefüllt — überprüfe jede Angabe, bevor du speicherst.',
   fillPlaceholder:
-    'z.B. Frau, 34, alleinstehend, spricht Arabisch und etwas Deutsch. Steht früh auf, hätte gerne ein Einzelzimmer. Raucht draussen, isst halal. Reagiert empfindlich auf Lärm.',
+    'z.B. Frau, 34, alleinstehend, spricht Arabisch und etwas Deutsch. Steht früh auf, hätte gerne ein Einzelzimmer. Raucht draussen, kocht lieber mit eigenem Geschirr. Reagiert empfindlich auf Lärm.',
   fillSubmit: 'Ausfüllen',
 
   refineTitle: 'Änderung beschreiben',

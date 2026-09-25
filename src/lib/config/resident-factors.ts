@@ -358,21 +358,6 @@ export const RESIDENT_FACTORS: Record<string, CompatibilityFactorDef> = {
     rule: 'OVERLAP_IS_BETTER',
   },
 
-  culturalRegion: {
-    id: 'culturalRegion',
-    type: 'text',
-    label: 'Kulturelle Region',
-    description:
-      'Optional, nur grobe Region, nie ein Herkunftsland. Wird nicht bewertet — nur Kontext für die Betreuung. Lieber leer lassen als raten.',
-    placeholder: 'z.B. Naher Osten, Ostafrika, Balkan',
-    intake: 'detail',
-    formSection: 'social',
-    formOrder: 4,
-    dimension: 'social',
-    weight: 0.1,
-    rule: 'NONE', // Used for context, not scoring
-  },
-
   conflictStyle: {
     id: 'conflictStyle',
     type: 'enum',
@@ -416,24 +401,29 @@ export const RESIDENT_FACTORS: Record<string, CompatibilityFactorDef> = {
     housingField: 'smokingAllowed',
   },
 
+  // Kitchen practice, not belief. This offered HALAL and KOSHER and was SCORED,
+  // which made religion an input to who lives with whom — in a product whose
+  // public promise is that it records no religion. A shared kitchen does need
+  // to know that someone keeps their own pans; it never needs to know why.
+  // Unscored: a note for organising the kitchen, never part of a match.
   dietaryNeeds: {
     id: 'dietaryNeeds',
     type: 'multi',
-    label: 'Ernährung',
-    description: 'Besondere Ernährungsbedürfnisse',
+    label: 'Küche & Lebensmittel',
+    description:
+      'Nur was die gemeinsame Küche organisieren hilft. Wird nicht bewertet und nie nach dem Grund gefragt.',
     formSection: 'practical',
     formOrder: 2,
-    options: ['HALAL', 'KOSHER', 'VEGETARIAN', 'VEGAN', 'NONE'] as const,
+    options: ['SEPARATE_COOKWARE', 'VEGETARIAN', 'VEGAN', 'NONE'] as const,
     optionLabels: {
-      HALAL: 'Halal',
-      KOSHER: 'Koscher',
+      SEPARATE_COOKWARE: 'Eigenes Kochgeschirr / getrennte Lebensmittel',
       VEGETARIAN: 'Vegetarisch',
       VEGAN: 'Vegan',
       NONE: 'Keine besonderen',
     },
     dimension: 'practical',
-    weight: 0.05,
-    rule: 'OVERLAP_IS_BETTER',
+    weight: 0,
+    rule: 'NONE',
   },
 
   mobilityNeeds: {

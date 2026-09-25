@@ -61,7 +61,7 @@ describe('DASHBOARD_SECTIONS', () => {
   it('administration, not the role, is what adds the team section', () => {
     // The difference used to be Leitung-vs-Betreuung. It is now the axis that
     // actually decides it: the SAME role with and without administration.
-    // The all-domains Betreuerin sees everything; whether she also manages
+    // The all-domains Betreuerin sees everything; whether that account also manages
     // accounts is a separate question, and this is where that shows.
     const plain = ALL_SECTIONS.filter((s) =>
       sectionVisible({ role: 'BETREUUNG', scope: 'ALL_DOMAINS', isSystemAdmin: false }, s),
@@ -93,7 +93,7 @@ describe('DASHBOARD_SECTIONS', () => {
     expect(visibleSections('JOBCOACH')).toEqual(['learning', 'applications', 'approvals'])
   })
 
-  it('FREIWILLIGENARBEIT sees learning, events and her requests, nothing housing', () => {
+  it('FREIWILLIGENARBEIT sees learning, events and its requests, nothing housing', () => {
     expect(visibleSections('FREIWILLIGENARBEIT')).toEqual(['learning', 'events', 'applications'])
   })
 
@@ -151,16 +151,16 @@ describe('fallbackCta', () => {
 
   it('offers learning to the Jobcoach, whose domain it names', () => {
     // "Lernen & Beruf" is learning AND work, so the generic ladder lands the Jobcoach
-    // on something that is his.
+    // on something that is the Jobcoach's.
     expect(fallbackCta({ role: 'JOBCOACH', scope: 'OWN_DOMAIN', isSystemAdmin: false }).href).toBe(
       '/learning',
     )
   })
 
   it('does NOT offer learning to Freiwilligenarbeit', () => {
-    // This assertion used to say '/learning' for her too, and that was the
+    // This assertion used to say '/learning' for FREIWILLIGENARBEIT too, and that was the
     // bug: the Freiwilligenarbeit coordinator holds learning:write, so a ladder matched on permission
-    // alone gave her one quiet-day button and it opened the Jobcoach's
+    // alone gave the coordinator one quiet-day button and it opened the Jobcoach's
     // surface. Nothing about Lernen & Beruf is Freiwilligenarbeit.
     // @see config/__tests__/quiet-day-cta.test.ts
     expect(

@@ -52,7 +52,6 @@ export interface ResidentProfile {
   // Social
   socialStyle: SocialStyle
   languages: string[]
-  culturalRegion?: string
   conflictStyle: ConflictStyle
 
   // Practical

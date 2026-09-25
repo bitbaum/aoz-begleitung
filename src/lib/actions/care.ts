@@ -135,7 +135,7 @@ export async function getCareTeam(residentId: string): Promise<CareSeat[]> {
  *
  * `role` was already selected here and read by nothing, so the picker offered
  * EVERY active account for EVERY seat: the Liegenschaften lead appeared under Jobcoach although
- * `LIEGENSCHAFTEN` maps to no care domain and he can never work one, and the Jobcoach
+ * `LIEGENSCHAFTEN` maps to no care domain and can never work one, and the Jobcoach
  * appeared under Freiwilligenarbeit. `scope` joins it so a caller can ask the
  * real question — see `canStaffWorkDomain` in config/care.ts.
  */

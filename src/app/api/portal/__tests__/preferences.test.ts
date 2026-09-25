@@ -143,7 +143,7 @@ describe('POST /api/portal/preferences', () => {
     })
   })
 
-  test('builds roommatePreferences text from optional fields', async () => {
+  test('builds roommatePreferences text from optional fields — never a region or culture', async () => {
     const resident = { id: 'res-2', code: 'RES-002' }
     mockCookieGet.mockReturnValue({ value: 'RES-002' })
     mockFindFirst.mockResolvedValue(resident)
@@ -152,7 +152,9 @@ describe('POST /api/portal/preferences', () => {
     const prefsWithRoommate = {
       ...VALID_PREFS,
       preferredAgeRange: '25-35',
-      culturalPreference: 'Arabisch',
+      // The portal no longer asks this. A crafted request that still sends it
+      // must not get a region preference stored against a person.
+      culturalPreference: 'SAME_REGION',
       additionalPreferences: 'Ruhige Person',
     }
 
@@ -165,7 +167,7 @@ describe('POST /api/portal/preferences', () => {
 
     const updateCall = mockUpdate.mock.calls[0][0]
     expect(updateCall.set.roommatePreferences).toContain('Altersgruppe: 25-35')
-    expect(updateCall.set.roommatePreferences).toContain('Kultur: Arabisch')
+    expect(updateCall.set.roommatePreferences).not.toMatch(/Kultur|REGION/)
     expect(updateCall.set.roommatePreferences).toContain('Ruhige Person')
   })
 

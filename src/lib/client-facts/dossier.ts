@@ -4,7 +4,7 @@
  * ⚠️ THIS CLOSES A HOLE IN THE FEATURE IT BELONGS TO. `/approvals` queries
  * `status = 'PENDING'`, and nothing else on the staff side read these tables —
  * so the moment a Betreuerin pressed "Gesehen", the insurance disappeared from
- * every staff surface. She could never afterwards look up which insurance a
+ * every staff surface. They could never afterwards look up which insurance a
  * client has, or who their dentist is, which is the entire reason the client
  * recorded it.
  *

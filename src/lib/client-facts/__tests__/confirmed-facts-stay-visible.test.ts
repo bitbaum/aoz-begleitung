@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest'
  * THE BUG THIS PINS SHIPPED. `/approvals` queries `status = 'PENDING'`, and
  * for a day nothing else on the staff side read the client-fact tables at all.
  * So the moment a Betreuerin pressed "Gesehen", the insurance disappeared from
- * every staff surface: she could never afterwards look up which insurance a
+ * every staff surface: they could never afterwards look up which insurance a
  * client holds, or who their dentist is — the entire reason the client entered
  * it. Written, then read by nobody, inside the feature built to end exactly
  * that.
@@ -70,7 +70,7 @@ describe('the dossier applies the same visibility rule as the queue', () => {
 
   it('distinguishes "may not see" from "nothing here"', () => {
     // null means forbidden, [] means empty. Collapsing them tells a Jobcoach
-    // that a client has no doctors, when the truth is that it is not his to
+    // that a client has no doctors, when the truth is that it is not theirs to
     // know.
     const source = codeOf(DOSSIER)
     expect(source).toMatch(/Promise\.resolve\(null\)/)

@@ -65,7 +65,7 @@ export interface RoleKpiDef {
    * What a dash MEANS for this particular number.
    *
    * Shipped without this and it was wrong on screen within the hour: the Jobcoach's
-   * median-days tile read "noch niemand zugewiesen" while he plainly had a
+   * median-days tile read "noch niemand zugewiesen" while the Jobcoach plainly had a
    * client. Its denominator is the people who have HAD contact, so nought there
    * means "nobody has started yet" — a different fact from an empty caseload,
    * and the one a coach would act on. One shared empty string cannot say both.

@@ -62,8 +62,8 @@ export default async function LearningQueuePage({ searchParams }: Props) {
   const board = resolveIntegrationBoard(boardParam, role)
   // Keys on SCOPE, not role. It read `role === 'ADMIN'` — a role retired when
   // the three axes landed — so the all-domains Betreuerin (BETREUUNG + ALL_DOMAINS, the shape
-  // that replaced ADMIN for oversight) silently defaulted to her own caseload,
-  // while the dashboard tile counting the same records keys on scope. Her tile
+  // that replaced ADMIN for oversight) silently defaulted to their own caseload,
+  // while the dashboard tile counting the same records keys on scope. That tile
   // and the page it links to reported different numbers.
   const mineDefault = staff.scope === 'ALL_DOMAINS' ? '0' : '1'
   const mine = mineParam === '0' || mineParam === '1' ? mineParam : mineDefault

@@ -17,9 +17,9 @@ export type CareRoleId = (typeof CARE_ROLES)[number]
  * Which staff role owns which seat.
  *
  * Working EVERY seat is no longer a role — it is `scope: 'ALL_DOMAINS'`, which
- * any role can carry. That is what makes the all-domains Betreuerin sayable: her domain of
- * record is housing and she also covers the rest, a shape the old "Leitung
- * works every seat" reading could not express without erasing her domain.
+ * any role can carry. That is what makes the all-domains Betreuerin sayable: the domain of
+ * record is housing and the account also covers the rest, a shape the old "Leitung
+ * works every seat" reading could not express without erasing that domain.
  */
 export const CARE_DOMAIN_STAFF_ROLE: Record<CareRoleId, Exclude<StaffRole, 'ADMIN'>> = {
   HOUSING: 'BETREUUNG',
@@ -59,9 +59,9 @@ export const STAFF_ROLE_CARE_DOMAIN: Partial<Record<StaffRole, CareRoleId>> = Ob
  *
  * Asked instead of counting someone's assignments and inferring from zero.
  * Those are different facts: the Freiwilligenarbeit coordinator with no clients is WAITING to be assigned
- * and the dashboard should say so; the Liegenschaften lead with no clients is doing his job,
- * and telling him "Ihnen ist noch niemand zugewiesen" would be the product
- * misunderstanding what he is for.
+ * and the dashboard should say so; the Liegenschaften lead with no clients is doing the job,
+ * and telling that role "Ihnen ist noch niemand zugewiesen" would be the product
+ * misunderstanding what the role is for.
  */
 export function roleHasCaseload(role: StaffRole): boolean {
   return STAFF_ROLE_CARE_DOMAIN[role] !== undefined
@@ -230,7 +230,7 @@ export function isCatalogKey(domain: CareRoleId, key: string): boolean {
  *
  * Asks the SCOPE, not the role name. It used to special-case `role === 'ADMIN'`,
  * which is why "a Betreuerin who also covers every seat" could only be
- * expressed by making her an administrator. Now the axis that means breadth is
+ * expressed by making the account an administrator. Now the axis that means breadth is
  * the axis that answers.
  */
 export function canWriteCareDomain(viewer: StaffCapabilities, domain: CareRoleId): boolean {
@@ -248,7 +248,7 @@ export function canWriteCareDomain(viewer: StaffCapabilities, domain: CareRoleId
  *
  * Without it the picker offered every active account for every seat. The Liegenschaften lead
  * appeared under Jobcoach though `LIEGENSCHAFTEN` maps to no care domain and
- * he can never work one; the Jobcoach appeared under Freiwilligenarbeit. Nothing
+ * it can never work one; the Jobcoach appeared under Freiwilligenarbeit. Nothing
  * stopped the assignment either — `saveCareSeat` checks who is EDITING, not
  * who is being named — so the mistake was one click away and would have looked
  * like a staffed seat forever after.

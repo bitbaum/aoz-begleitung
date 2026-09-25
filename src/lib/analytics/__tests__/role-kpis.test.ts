@@ -184,7 +184,7 @@ describe('volunteering', () => {
 
   it('an unanswered interest is not a running engagement either', () => {
     // The same inversion on the Freiwilligenarbeit coordinator's side: a resident's own click would have
-    // reported an engagement she had not arranged and did not know about.
+    // reported an engagement the coordinator had not arranged and did not know about.
     const rows = computeVolunteeringKpis([
       { residentId: 'a', applications: [unanswered()], rsvpStatuses: [] },
     ])
@@ -232,7 +232,7 @@ describe('every KPI traces to evidence', () => {
   it('says what a dash MEANS, per KPI', () => {
     /**
      * Shipped without this and it was wrong on screen within the hour: the Jobcoach's
-     * median-days tile read "noch niemand zugewiesen" while he plainly had a
+     * median-days tile read "noch niemand zugewiesen" while the Jobcoach plainly had a
      * client. That tile's denominator is the people who have HAD contact, so
      * nought means "nobody has started yet" — the state a coach acts on — and
      * one shared string cannot say both.

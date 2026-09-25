@@ -57,7 +57,7 @@ const SESSION_IS_ENOUGH = new Set([
   // Maintenance is NOT here any more. It was, on the guess that a repair board
   // is shared house operations — and walking it in production as a
   // Sozialarbeiter*in disproved that: the nav gates Wartung on
-  // `maintenance:read`, which she does not hold, and the page served her the
+  // `maintenance:read`, which that role does not hold, and the page served it the
   // board anyway with working "Neue Anfrage" / "Zuweisen" / "Abschliessen"
   // buttons. The permission existed and only the menu honoured it. Both pages
   // and all three server actions now enforce it.

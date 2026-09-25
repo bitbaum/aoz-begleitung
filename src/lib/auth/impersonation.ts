@@ -14,7 +14,7 @@
  * The tempting cheap version is a "preview role" cookie that only overrides the
  * capability triple used for permission checks. It is wrong here, and in a way
  * that would quietly defeat the purpose: the Jobcoach's dashboard is driven by HIS
- * caseload — `careAssignment.staffId = <the Jobcoach's id>` — not by his role. A preview
+ * caseload — `careAssignment.staffId = <the Jobcoach's id>` — not by the role. A preview
  * that kept the admin's identity would render a Jobcoach-shaped nav above an
  * administrator's data and call it the Jobcoach's view. The one bug this feature
  * exists to catch (a coach told there is nothing to do while holding a client)
