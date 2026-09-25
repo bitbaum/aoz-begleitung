@@ -116,10 +116,10 @@ code=$(curl -s -o /dev/null -w '%{http_code}' "$URL/api/health")
 # Assert on CONTENT, never on liveness: a restart that silently failed on a
 # busy port still answers 200 — from the OLD process.
 html=$(curl -s "$URL/login")
-echo "$html" | grep -q 'AOZ Begleitung' || {
+grep -q 'AOZ Begleitung' <<<"$html" || {
   echo "live page does not carry the AOZ brand — stale build?"; exit 1;
 }
-echo "$html" | grep -q 'loki.orangecat.ch/widget.js' || {
+grep -q 'loki.orangecat.ch/widget.js' <<<"$html" || {
   echo "live page does not carry the Loki widget — stale build?"; exit 1;
 }
 doors=$(curl -s "$URL/api/auth/demo" | grep -o '"id"' | wc -l)
