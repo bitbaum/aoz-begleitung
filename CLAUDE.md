@@ -1372,13 +1372,42 @@ Resend (`lib/email/service.ts`), fleet key, sender on the verified
 password-reset flow REFUSES loudly (see above). Absolute links come from
 `NEXT_PUBLIC_APP_URL` (`lib/config/app-url.ts`).
 
-### Demo Access — no invented people, and every profile claimable
+### Demo Access — invented people live on their own instance, never beside real ones
 
-⚠️ **The fabricated demo world was DELETED from production on 2026-09-08**, and
-this section used to describe it in detail. Read what follows as the current
-design; the old one is gone, not merely deprecated.
+**The rule (2026-09-25): no-account testing, on a separate app and database.**
+Anyone must be able to try the product without registering, and nothing they
+do there may touch a real person. Both hold only because the demo is its own
+deployment:
 
-**What was removed and why.** `lib/demo/seed-data.ts` invented 15 residents in
+| | Production `aoz-wohnen` | Demo `aoz-demo` |
+|---|---|---|
+| Domain | aoz.orangecat.ch | demo.aoz.orangecat.ch |
+| Database | `aoz_wohnen` — real staff, real residents | `aoz_demo` — invented people only |
+| `DEMO_INSTANCE` | unset | `true` |
+| Demo doors | **never** (hard gate in `isDemoEnabled()`, #256) | all role doors + Klient*in |
+| Nightly reset | refused by the route | `POST /api/cron/reset-demo`, 04:05 |
+
+- **`isDemoInstance()` is the only key.** A production build opens doors, and
+  the reset route truncates, ONLY with `DEMO_INSTANCE=true`. Copying
+  `DEMO_ACCESS_ENABLED=true` into production's env opens nothing — pinned by
+  `api/auth/__tests__/demo.test.ts` and `api/cron/__tests__/reset-demo.test.ts`.
+- **Until 2026-09-25 the doors opened into production**, as a full system
+  admin over real staff and residents. A session testing "the demo" published
+  an invented listing onto the live board. Do not reintroduce a door there.
+- **The invented world names no real place, organisation or phone number.**
+  Flats sit on `Beispielstrasse`, organisations say `(erfunden)`, phones are
+  `000 …`. A demo naming a real address points at a real building where real
+  people live.
+- Deployed by the `deploy-demo` job in `deploy.yml`, gated on the repo variable
+  `AOZ_DEMO_DEPLOY`; the app row and the reset timer live in loki
+  (`apps.conf`, `install-app-crons.sh`).
+- The wipe keeps `_deploy_schema_history`; emptying it made the next deploy
+  try to re-apply every migration.
+
+**On production: claimable placeholder profiles.** What follows describes the
+real instance, where invented rows were deleted on 2026-09-08.
+
+**What was removed from production and why.** `lib/demo/seed-data.ts` invented 15 residents in
 5 `DEMO-` units with incidents, expenses and a governance narrative, truncated
 and re-seeded nightly at 04:05. Measured on the live database that morning:
 **fabricated rows outnumbered real ones three to one** (15 residents vs 5, 5
@@ -1406,9 +1435,9 @@ Exactly the staff shape: the code is minted first, the human arrives later.
   the compatibility algorithm and back out as a recommendation staff act on.
 - **A bed is left free on purpose.** A flat seeded to exactly full cannot
   demonstrate placing anyone, which is the product's whole subject.
-- **`isPlaceholder` is PROVENANCE, not "has no account."** Ihor, Misha, Alex and
-  Julia are real clients who have never registered; deriving personhood from an
-  `Account` would erase four of the five people actually being served. The flag
+- **`isPlaceholder` is PROVENANCE, not "has no account."** Four of the five
+  real clients have never registered; deriving personhood from an
+  `Account` would erase them from the people actually being served. The flag
   is set when the row is created and cleared when the code is claimed.
 - **Every KPI excludes them** (`lib/analytics/real-data.ts`). This matters in a
   direction that is easy to miss: a seeded profile nobody is serving reads as a
@@ -1420,19 +1449,11 @@ Exactly the staff shape: the code is minted first, the human arrives later.
   who does not exist yet.
 - **Server-driven buttons**: the login page asks `GET /api/auth/demo` which
   doors exist; there is **no build-time flag**, so a button appears only when
-  pressing it can succeed. When the fabricated residents were deleted the
-  resident door removed itself, with no code change — the design working.
-- **Opt-in per deployment**: `DEMO_ACCESS_ENABLED=true` (server env only).
-- **The staff demo is a full ADMIN session** (`DEMO_STAFF_CODE=WG-DEMO01`).
-  George explicitly wants testers to see the Verwaltung side — accepted
-  trade-off: demo admins can see and edit the real flat's data. Sessions of
-  deactivated users die immediately (`getCurrentUser()` re-checks `User.active`).
-- **⚠️ The resident door is OFF, and turning it on is a consent decision, not a
-  config one.** It is an anonymous, no-account login: pointing it at any real
-  client publishes that person's flat, roommates, expenses and reports to
-  whoever clicks. Four of the five live clients are not George. Setting
-  `DEMO_RESIDENT_CODE` to a placeholder's code is safe; setting it to a real
-  client's code needs that client's agreement first.
+  pressing it can succeed. On production it answers no doors at all.
+- **Testers see the Verwaltung side on the DEMO instance**, never here.
+  George wants the staff side testable without an account; that is what
+  demo.aoz.orangecat.ch is for. Sessions of deactivated users die immediately
+  (`getCurrentUser()` re-checks `User.active`).
 
 ### Resident Portal
 

@@ -4,6 +4,7 @@ import Script from 'next/script'
 import { APP_LABELS } from '@/lib/constants/labels'
 import { ToastContainer } from '@/components/ui/Toast'
 import './globals.css'
+import { DemoInstanceBanner } from '@/components/layout/DemoInstanceBanner'
 import { BRAND } from '@/lib/config/brand'
 
 const inter = Inter({
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script id="theme-init" dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen bg-ui-canvas text-ui-text font-sans">
+        <DemoInstanceBanner />
         {children}
         <ToastContainer />
         {/* Token is a literal so next build cannot tree-shake the Script away. */}

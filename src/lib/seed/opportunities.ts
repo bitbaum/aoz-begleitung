@@ -59,8 +59,8 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     title: 'Mittagstisch im Quartiertreff',
     description:
       'Zweimal pro Woche kochen und servieren wir ein günstiges Mittagessen für das Quartier. Du hilfst beim Vorbereiten, Schöpfen und Aufräumen. Deutsch ist keine Voraussetzung — es wird viel gezeigt statt erklärt.',
-    organisation: 'Quartierverein Witikon',
-    location: 'Witikonerstrasse 405, 8053 Zürich',
+    organisation: 'Quartierverein Beispielquartier (erfunden)',
+    location: 'Beispielstrasse 405, 8000 Zürich',
     schedule: 'Di + Do, 10–14 Uhr',
     hoursPerWeek: 8,
     seats: 3,
@@ -68,7 +68,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     permitRequirement: 'NONE',
     requirementNote: null,
     contactName: 'Regula Kunz',
-    contactPhone: '044 422 11 08',
+    contactPhone: '000 000 00 01',
     stages: ['STARTED', 'ACCEPTED', 'INTERESTED'],
   },
   {
@@ -76,7 +76,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     title: 'Velowerkstatt im Quartier',
     description:
       'Offene Werkstatt: Velos flicken, Bremsen einstellen, Ersatzteile sortieren. Wer schon geschraubt hat, ist schnell drin. Werkzeug ist vorhanden.',
-    organisation: 'Verein Rad und Tat',
+    organisation: 'Velowerkstatt Beispiel (erfunden)',
     location: 'Zürich Oerlikon',
     schedule: 'Sa, 10–16 Uhr',
     hoursPerWeek: 6,
@@ -85,7 +85,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     permitRequirement: 'NONE',
     requirementNote: 'Sicherheitseinweisung am ersten Tag, dauert eine halbe Stunde.',
     contactName: 'Marc Baumgartner',
-    contactPhone: '044 311 92 40',
+    contactPhone: '000 000 00 02',
     stages: ['STARTED', 'DECLINED'],
   },
   {
@@ -93,8 +93,8 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     title: 'Grünpflege in der Stadtgärtnerei',
     description:
       'Gemeinnütziger Einsatz im Team: Beete pflegen, Wege freihalten, im Winter Werkzeugunterhalt. Feste Zeiten, feste Ansprechperson, Arbeitskleidung wird gestellt.',
-    organisation: 'Grün Stadt Zürich',
-    location: 'Sackzelg 27, 8047 Zürich',
+    organisation: 'Stadtgärtnerei Beispiel (erfunden)',
+    location: 'Beispielstrasse 27, 8000 Zürich',
     schedule: 'Mo–Mi, 8–12 Uhr',
     hoursPerWeek: 12,
     seats: 4,
@@ -103,7 +103,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     requirementNote:
       'Die Stadtgärtnerei meldet den Einsatz selbst an. Wir brauchen nur deinen Namen.',
     contactName: 'Sandra Vogt',
-    contactPhone: '044 412 26 00',
+    contactPhone: '000 000 00 03',
     stages: ['INTERVIEW', 'APPLIED', 'ENDED'],
   },
   {
@@ -111,7 +111,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     title: 'Deutsch-Café: Gastgeber*in',
     description:
       'Beim wöchentlichen Deutsch-Café Tische decken, Gäste begrüssen und mit Neuen ins Gespräch kommen. Ideal, wenn du selbst Deutsch übst — du redest zwei Stunden am Stück.',
-    organisation: 'Kirchgemeinde Balgrist',
+    organisation: 'Nachbarschaftshilfe Beispiel (erfunden)',
     location: 'Zürich Riesbach',
     schedule: 'Mi, 14–17 Uhr',
     hoursPerWeek: 3,
@@ -120,7 +120,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     permitRequirement: 'NONE',
     requirementNote: null,
     contactName: 'Peter Lehmann',
-    contactPhone: '044 383 55 21',
+    contactPhone: '000 000 00 04',
     stages: ['ACCEPTED', 'INTERESTED'],
   },
   {
@@ -128,7 +128,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     title: 'Lagerhilfe Brockenhaus (in Abklärung)',
     description:
       'Waren annehmen, sortieren und einräumen. Noch nicht ausgeschrieben: die Bewilligungsfrage ist offen, deshalb Entwurf.',
-    organisation: 'Brockenhaus Zürich',
+    organisation: 'Brockenstube Beispiel (erfunden)',
     location: 'Zürich Altstetten',
     schedule: 'nach Absprache',
     hoursPerWeek: 20,
@@ -138,7 +138,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     requirementNote:
       'Bezahlter Einsatz — vor einer Zuordnung mit der Sozialarbeit klären, ob eine Bewilligung möglich ist.',
     contactName: 'Doris Frei',
-    contactPhone: '044 271 30 90',
+    contactPhone: '000 000 00 05',
     stages: [],
   },
 ]

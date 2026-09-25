@@ -14,13 +14,16 @@ import type { db } from '../db'
 
 /**
  * Tables that survive a wipe:
- * - _prisma_migrations — schema state, never data
+ * - _prisma_migrations, _deploy_schema_history — schema state, never data.
+ *   The second is the ledger the deploy's apply-schema step reads; emptying
+ *   it makes the next deploy try to re-apply every migration.
  * - User               — real staff accounts
  * - AlgorithmWeight    — tuned scoring config, not seed data
  * - SystemConfig       — operator configuration, not seed data
  */
 export const KEEP_TABLES = new Set([
   '_prisma_migrations',
+  '_deploy_schema_history',
   'User',
   'AlgorithmWeight',
   'SystemConfig',

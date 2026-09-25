@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger'
 import { db, user, resident } from '@/lib/db'
 import { and, eq, inArray } from 'drizzle-orm'
 import { setResidentCookie } from '@/lib/portal-auth'
-import { isDemoEnabled, resolveDemoResidentCode } from '@/lib/demo/config'
+import { isDemoEnabled, isDemoInstance, resolveDemoResidentCode } from '@/lib/demo/config'
 import { demoStaffDoors } from '@/lib/demo/roles'
 import { isStaffRole } from '@/lib/auth/role-policy'
 import { ROLE_LABELS } from '@/lib/constants/labels'
@@ -71,7 +71,13 @@ async function availableDoors(): Promise<DemoDoor[]> {
     // Config discipline cannot prevent that, because the event that causes it
     // is a resident registering — something nobody is watching the env var
     // for. So the guard is in code and reads the same fact the marker does.
-    if (residentRow?.isPlaceholder) doors.push({ id: 'resident', label: residentDoorLabel() })
+    //
+    // The dedicated demo instance is the exception, and a safe one: every
+    // resident in its database is invented and re-seeded nightly, so there is
+    // no real person a claimed profile could belong to.
+    if (residentRow && (residentRow.isPlaceholder || isDemoInstance())) {
+      doors.push({ id: 'resident', label: residentDoorLabel() })
+    }
   }
 
   return doors

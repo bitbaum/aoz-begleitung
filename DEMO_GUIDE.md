@@ -1,28 +1,26 @@
 # Demo guide
 
 created_date: 2026-01-24
-last_modified_date: 2026-09-07
-last_modified_summary: Rewritten. The old script sold "an intelligent matching system", quoted a resident code that no longer exists, and sent people to an /analytics/roi page that was never built.
+last_modified_date: 2026-09-25
+last_modified_summary: The demo moved to its own instance and database. This guide used to say the demo shared a database with the real flat "safely" — for weeks the doors actually opened into production as a system admin.
 
-The demo is **not a separate product**. It is the real tool behind a door that
-needs no account, filled with a seeded narrative. What a visitor clicks is what
-AOZ staff use.
+The demo is **the real product on its own database of invented people**. What a
+visitor clicks is what staff use; nothing they do reaches a real person.
 
 ## The doors
 
-Live on <https://aoz.orangecat.ch/login> — the page asks the server which doors
-exist, so a button only appears when pressing it can succeed.
+On <https://demo.aoz.orangecat.ch/login>. The page asks the server which doors
+exist, so a button only appears when pressing it can succeed. There is one door
+per staff role (Leitung, Betreuung, Sozialarbeit, Jobcoach, Freiwilligenarbeit,
+Liegenschaften) plus the Klient\*in portal.
 
-| Door | Code | Lands on |
-|---|---|---|
-| Staff | `WG-DEMO01` | the Verwaltung side, full admin session |
-| Klient\*in | `RES-DEMO1` | the portal, as Fatima — placed, with a lived-in flat |
-
-Codes are configured on the box (`DEMO_STAFF_CODE`, `DEMO_RESIDENT_CODE`).
-Verified live 2026-09-07. The demo world is re-seeded nightly at 04:05 UTC, so
-anything a visitor changes is gone by morning — and the reset deletes strictly
-by code prefix, never by table, so it cannot touch the real flat that lives in
-the same database.
+- **No account needed**, and none should be — that is the point.
+- **Every person, flat, organisation and phone number is invented.** Flats sit
+  on `Beispielstrasse`; organisations are marked `(erfunden)`.
+- **Reset every night at 04:05**, so a visitor may change anything.
+- A banner on every page says so, in German and English.
+- **aoz.orangecat.ch (production) has no demo doors**, and must never get them
+  back: it holds real staff and residents.
 
 ## What the demo is actually showing
 
@@ -66,7 +64,7 @@ Two details in the seed are deliberate and worth knowing before you present:
   about four fifths, and it is the framing this guide used to open with.
 - Do not quote resident codes from memory. The demo prefix follows the brand
   (`KL-DEMO…` on the AOZ brand, `RES-DEMO…` historically); Ahmed, the unplaced
-  client in the placement story, is `KL-DEMO14` on the live instance, not the
+  client in the placement story, is `KL-DEMO14` on the demo instance, not the
   `RES-AH014` this guide claimed for months.
 - There is no ROI dashboard route. Pilot evidence lives on `/analytics`.
 

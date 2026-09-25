@@ -7,15 +7,13 @@
  * public BY DESIGN; safety comes from the reset (api/cron/reset-demo), the
  * login rate limit, and the operator opt-in via env.
  *
- * ⚠️ THERE IS NO LONGER A DEMO WORLD TO RESET. The fabricated one — 15
- * invented residents in 5 `DEMO-` units, truncated and re-seeded nightly — was
- * deleted from production on 2026-09-08 along with its seed, its two reset
- * scopes and its cron endpoint. What remains here is the DOOR: which no-account
- * logins this deployment offers into the real product.
- *
- * The data behind that door is now real flats holding CLAIMABLE PLACEHOLDER
- * profiles (`scripts/db/seed-placeholders.ts`), which persist precisely because
- * a profile you can take over must survive the night.
+ * WHERE THE DEMO LIVES. Invented people never share a database with real
+ * ones. The fabricated world was deleted from PRODUCTION on 2026-09-08 because
+ * it outnumbered the real residents three to one in the numbers AOZ is judged
+ * on. It lives again only on the dedicated demo instance (`isDemoInstance`),
+ * its own app and database, re-seeded nightly by api/cron/reset-demo — so
+ * anyone can try the product without an account, and nothing they do there
+ * can touch a real person.
  *
  * Relative-import-safe (no '@/' aliases): seeding scripts load this through
  * ts-node, which does not resolve tsconfig path aliases.
@@ -25,22 +23,33 @@
 import { ALL_RESIDENT_CODE_PREFIXES, RESIDENT_CODE_PREFIX } from '../auth/code-prefixes'
 
 /**
+ * Is THIS deployment the dedicated demo instance?
+ *
+ * The demo instance is a separate app on its own database holding only
+ * invented people (demo.aoz.orangecat.ch). It is the ONE production build on
+ * which no-account doors may open and on which a full wipe-and-reseed may run.
+ * Set in that box's env only; never in the production app's.
+ */
+export function isDemoInstance(): boolean {
+  return process.env.DEMO_INSTANCE === 'true'
+}
+
+/**
  * Master switch — server-side. The login page asks GET /api/auth/demo.
  *
- * SECURITY: Demo access is ALWAYS disabled in production, regardless of env var.
- * Demo logins create real sessions against the live database, so they must never
- * be enabled where real data exists.
+ * SECURITY: a production build opens demo doors ONLY on the dedicated demo
+ * instance. Until 2026-09-25 the doors opened into the live database — real
+ * AOZ staff, real residents — with system-admin reach (#256 closed that).
+ * A production build without `DEMO_INSTANCE=true` answers no, whatever
+ * DEMO_ACCESS_ENABLED says, so a copied env line cannot reopen it.
  *
- * In non-production environments (development, test), the DEMO_ACCESS_ENABLED
- * env var controls availability.
+ * In non-production environments (development, test), DEMO_ACCESS_ENABLED
+ * alone controls availability.
  */
 export function isDemoEnabled(): boolean {
-  // Hard gate: demo access is NEVER available in production
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' && !isDemoInstance()) {
     return false
   }
-
-  // In non-production, the env var controls it
   return process.env.DEMO_ACCESS_ENABLED === 'true'
 }
 

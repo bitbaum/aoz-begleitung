@@ -819,6 +819,13 @@ export const PROBLEM_DETECTION_LABELS = {
   relocate: 'Umplatzieren',
 } as const
 
+/** Top-of-page notice on the dedicated demo instance only. */
+export const DEMO_INSTANCE_LABELS = {
+  title: 'Demo mit erfundenen Daten.',
+  body: 'Alle Personen hier sind erfunden. Bitte keine echten Personendaten eingeben. Die Daten werden jede Nacht zurückgesetzt.',
+  bodyEn: 'Demo with invented people — please do not enter real personal data. Reset every night.',
+} as const
+
 /** The count beside Eingang in the navigation. */
 export const NAV_BADGE_LABELS = {
   waiting: (count: number) =>
