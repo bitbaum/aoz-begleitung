@@ -116,6 +116,33 @@ describe('POST /api/auth/demo', () => {
   })
 
   describe('validation and configuration', () => {
+    it('is ALWAYS disabled in production, even when DEMO_ACCESS_ENABLED=true', async () => {
+      // SECURITY: This is the hard gate preventing demo access in production.
+      // Demo logins create real sessions with admin access, so they must never
+      // be enabled where real data exists.
+      const env = process.env as Record<string, string | undefined>
+      const previous = env.NODE_ENV
+      env.NODE_ENV = 'production'
+      process.env.DEMO_ACCESS_ENABLED = 'true' // Explicitly try to enable it
+
+      try {
+        // GET endpoint should report no doors
+        const getResponse = await GET()
+        const getBody = await getResponse.json()
+        expect(getBody.data.doors).toEqual([])
+        expect(getBody.data.staff).toBe(false)
+        expect(getBody.data.resident).toBe(false)
+
+        // POST endpoint should refuse
+        const postResponse = await POST(createDemoRequest({ role: 'ADMIN' }))
+        expect(postResponse.status).toBe(404)
+        expect(mockLoginByCode).not.toHaveBeenCalled()
+        expect(mockSetSessionCookie).not.toHaveBeenCalled()
+      } finally {
+        env.NODE_ENV = previous
+      }
+    })
+
     it('rejects an unknown role', async () => {
       // 404, not 400: "no such role" and "that door is not on offer here" are
       // the same fact to the caller, and answering them differently would tell
@@ -193,7 +220,7 @@ describe('POST /api/auth/demo', () => {
   })
 
   describe('staff demo', () => {
-    it('issues a staff session', async () => {
+    it('issues a staff session in non-production environments', async () => {
       const response = await POST(createDemoRequest({ role: 'staff' }))
       const body = await response.json()
       expect(body).toEqual({ success: true, type: 'staff' })
@@ -201,17 +228,18 @@ describe('POST /api/auth/demo', () => {
       expect(mockSetSessionCookie).toHaveBeenCalledWith(STAFF_USER)
     })
 
-    it('issues a staff session in production (regression: prod hard-block)', async () => {
-      // NODE_ENV is readonly in the type but a plain property at runtime.
+    it('BLOCKS staff demo in production (security: prevents unauthorized admin access)', async () => {
+      // This is the regression test for the security vulnerability where demo
+      // logins granted system admin access in production against real data.
       const env = process.env as Record<string, string | undefined>
       const previous = env.NODE_ENV
       env.NODE_ENV = 'production'
       try {
         const response = await POST(createDemoRequest({ role: 'staff' }))
         const body = await response.json()
-        expect(response.status).toBe(200)
-        expect(body).toEqual({ success: true, type: 'staff' })
-        expect(mockSetSessionCookie).toHaveBeenCalledWith(STAFF_USER)
+        expect(response.status).toBe(404)
+        expect(mockSetSessionCookie).not.toHaveBeenCalled()
+        expect(mockLoginByCode).not.toHaveBeenCalled()
       } finally {
         env.NODE_ENV = previous
       }
@@ -219,7 +247,7 @@ describe('POST /api/auth/demo', () => {
   })
 
   describe('resident demo', () => {
-    it('issues a resident session', async () => {
+    it('issues a resident session in non-production environments', async () => {
       mockLoginByCode.mockResolvedValue({
         success: true,
         type: 'resident',
@@ -230,6 +258,25 @@ describe('POST /api/auth/demo', () => {
       expect(body).toEqual({ success: true, type: 'resident' })
       expect(mockLoginByCode).toHaveBeenCalledWith(RESIDENT_CODE, expect.any(String))
       expect(mockSetResidentCookie).toHaveBeenCalledWith(RESIDENT_CODE)
+    })
+
+    it('BLOCKS resident demo in production', async () => {
+      mockLoginByCode.mockResolvedValue({
+        success: true,
+        type: 'resident',
+        code: RESIDENT_CODE,
+      })
+      const env = process.env as Record<string, string | undefined>
+      const previous = env.NODE_ENV
+      env.NODE_ENV = 'production'
+      try {
+        const response = await POST(createDemoRequest({ role: 'resident' }))
+        expect(response.status).toBe(404)
+        expect(mockSetResidentCookie).not.toHaveBeenCalled()
+        expect(mockLoginByCode).not.toHaveBeenCalled()
+      } finally {
+        env.NODE_ENV = previous
+      }
     })
   })
 

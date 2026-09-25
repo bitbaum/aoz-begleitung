@@ -24,8 +24,23 @@
 // Relative on purpose — see the note above about ts-node and path aliases.
 import { ALL_RESIDENT_CODE_PREFIXES, RESIDENT_CODE_PREFIX } from '../auth/code-prefixes'
 
-/** Master switch — server-side. The login page asks GET /api/auth/demo. */
+/**
+ * Master switch — server-side. The login page asks GET /api/auth/demo.
+ *
+ * SECURITY: Demo access is ALWAYS disabled in production, regardless of env var.
+ * Demo logins create real sessions against the live database, so they must never
+ * be enabled where real data exists.
+ *
+ * In non-production environments (development, test), the DEMO_ACCESS_ENABLED
+ * env var controls availability.
+ */
 export function isDemoEnabled(): boolean {
+  // Hard gate: demo access is NEVER available in production
+  if (process.env.NODE_ENV === 'production') {
+    return false
+  }
+
+  // In non-production, the env var controls it
   return process.env.DEMO_ACCESS_ENABLED === 'true'
 }
 
