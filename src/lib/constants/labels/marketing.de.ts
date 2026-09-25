@@ -92,7 +92,7 @@ const PLACEMENT_COPY: MarketingCopy = {
     {
       icon: 'vote',
       title: 'Das Haus regelt seinen Alltag',
-      body: 'Hausregeln mit Versionen und Bestätigung, Vorschläge und Abstimmungen, Aufgaben mit Fairness-Bilanz, geteilte Ausgaben auf den Rappen genau.',
+      body: 'Hausregeln mit Versionen und Bestätigung, Aufgaben mit Fairness-Bilanz und ein Weg für Anliegen, der bis zur Antwort führt.',
     },
     {
       icon: 'shop',
@@ -118,7 +118,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   scienceEyebrow: 'Wissenschaftliche Grundlage',
   scienceTitle: `Keine Meinung, sondern Methode: ${FACTOR_COUNT} Matching-Faktoren — und Alltagsmechanik nach dokumentierten Befunden.`,
-  scienceBody: `Jeder Kompatibilitätsfaktor stützt sich auf mindestens eine publizierte Studie — Schweizer Forschung zuerst (unter anderem BFH/HSLU 2024 mit 1'000 Gastfamilien), internationale Studien zur Validierung, insgesamt ${SOURCE_COUNT} Quellen. Und die Mechanik jenseits des Matchings folgt denselben Massstäben: vom Eigenanteil-Bias beim Putzplan bis zur Regel, dass Sicherheit nie zur Abstimmung steht. Die vollständige Methodik samt Quellenverzeichnis ist im Produkt für alle Fachpersonen einsehbar — und in der Demo für Sie.`,
+  scienceBody: `Die Kompatibilitätsfaktoren sind aus publizierter Forschung abgeleitet — Schweizer Studien zuerst, internationale zur Einordnung, insgesamt ${SOURCE_COUNT} Quellen —, und die Evidenzstärke ist je Faktor offen ausgewiesen: Manche Befunde stammen aus anderen Wohnformen und sind für Kollektivunterkünfte eine begründete Annahme, die der Pilot prüft. Und die Mechanik jenseits des Matchings folgt denselben Massstäben: vom Eigenanteil-Bias beim Putzplan bis zur Regel, dass Sicherheit nie zur Abstimmung steht. Die vollständige Methodik samt Quellenverzeichnis ist im Produkt für alle Fachpersonen einsehbar — und in der Demo für Sie.`,
   science: [
     {
       title: 'Sauberkeit ist eine Richtung, kein Durchschnitt',

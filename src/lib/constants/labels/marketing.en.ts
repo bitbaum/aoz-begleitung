@@ -80,7 +80,7 @@ const PLACEMENT_COPY: MarketingCopy = {
     {
       icon: 'vote',
       title: 'The house runs its own daily life',
-      body: 'House rules with versions and acknowledgement, proposals and votes, chores with a fairness balance, shared expenses accurate to the rappen.',
+      body: 'House rules with versions and acknowledgement, chores with a fairness balance, and a path for concerns that ends in an answer.',
     },
     {
       icon: 'shop',
@@ -106,7 +106,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   scienceEyebrow: 'Scientific basis',
   scienceTitle: `Method rather than opinion: ${FACTOR_COUNT} matching factors — and everyday mechanics built on documented findings.`,
-  scienceBody: `Every compatibility factor rests on at least one published study — Swiss research first (including BFH/HSLU 2024 with 1,000 host families), international studies for validation, ${SOURCE_COUNT} sources in total. And the mechanics beyond matching follow the same standard: from self-share bias in the cleaning rota to the rule that safety is never put to a vote. The full methodology including the source list is readable in the product by every professional — and in the demo, by you.`,
+  scienceBody: `The compatibility factors are derived from published research — Swiss studies first, international ones for context, ${SOURCE_COUNT} sources in total — and the strength of evidence is shown for each factor: some findings come from other forms of housing and are, for collective accommodation, a reasoned assumption that the pilot tests. And the mechanics beyond matching follow the same standard: from self-share bias in the cleaning rota to the rule that safety is never put to a vote. The full methodology including the source list is readable in the product by every professional — and in the demo, by you.`,
   science: [
     {
       title: 'Cleanliness is a direction, not an average',
