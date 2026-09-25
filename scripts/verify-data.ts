@@ -84,13 +84,6 @@ async function main() {
   console.log(`   Placed: ${residents.filter((r) => r.status === 'PLACED').length}`)
   console.log(`   With medical docs: ${residents.filter((r) => r.hasMedicalDocumentation).length}`)
 
-  console.log(`\n⚠️  Troublemaker Analysis:`)
-  residents
-    .filter((r) => r.incidentsAsSubject.length >= 2)
-    .forEach((r) => {
-      console.log(`   ${r.code}: ${r.incidentsAsSubject.length} incidents as subject`)
-    })
-
   console.log(`\n✅ All data verified successfully!`)
   console.log(`\n🌐 Web UI URLs to test:`)
   console.log(`   Housing: http://localhost:3000/housing/${unit.id}`)

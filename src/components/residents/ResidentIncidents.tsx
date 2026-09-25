@@ -30,23 +30,11 @@ export function ResidentIncidents({
 
   return (
     <>
-      {/* Incident Stats - Troublemaker Detection */}
+      {/* Incident involvement — facts, never a recommendation about the person */}
       <div className="card">
         <h2 className="text-lg font-semibold text-ui-text mb-4">
           {RESIDENT_INCIDENTS_LABELS.sectionTitle}
         </h2>
-        {/* Warning banner for frequent subjects */}
-        {incidentsAsSubject.length >= INCIDENT_THRESHOLDS.severe && (
-          <div className="mb-4 p-4 bg-status-warning/10 border border-status-warning/25 rounded-lg">
-            <div className="flex items-center gap-2">
-              <span className="text-status-warning text-lg">!</span>
-              <p className="text-sm text-status-warning-text">
-                {RESIDENT_INCIDENTS_LABELS.warningMessage(incidentsAsSubject.length)}{' '}
-                {RESIDENT_INCIDENTS_LABELS.reviewRecommendation}
-              </p>
-            </div>
-          </div>
-        )}
         <div className="grid grid-cols-2 gap-4">
           <div className="p-4 bg-ui-subtle rounded-lg">
             <p className="text-sm text-ui-muted">{RESIDENT_INCIDENTS_LABELS.reportedLabel}</p>

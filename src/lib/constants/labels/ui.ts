@@ -172,7 +172,6 @@ export const PLACEMENT_HISTORY_LABELS = {
 export const UNIT_INCIDENT_LABELS = {
   title: 'Vorfälle & Meldungen',
   newIncident: 'Neuer Vorfall',
-  frequentResidents: 'Häufig betroffene Klient*innen',
   tabs: {
     all: 'Alle',
     conflicts: 'Konflikte',
@@ -774,8 +773,6 @@ export const AI_SUGGESTED_QUESTIONS = [
 
 export const RESIDENT_INCIDENTS_LABELS = {
   sectionTitle: 'Vorfallstatistik',
-  warningMessage: (count: number) => `Diese Person war in ${count} Vorfällen betroffen.`,
-  reviewRecommendation: 'Eine Überprüfung der Platzierung wird empfohlen.',
   reportedLabel: 'Gemeldet',
   reportedDesc: 'Vorfälle von dieser Person gemeldet',
   subjectLabel: 'Betroffen',
@@ -793,30 +790,29 @@ export const TRANSFER_RECOMMENDATIONS_LABELS = {
   showMoreUnits: (count: number) => `+${count} weitere Unterkünfte anzeigen`,
 } as const
 
-export const PROBLEM_DETECTION_LABELS = {
-  noProblems: 'Keine Probleme erkannt',
-  noProblemsDesc: 'Alle Klient*innen passen gut zusammen. Harmonie in der Wohnung.',
-  problemsDetected: 'Probleme erkannt',
-  adaptationIssues: 'mit Anpassungsproblemen',
-  lowerCleanliness: 'niedrigere',
-  higherCleanliness: 'höhere',
-  higherNoiseTolerance: 'höhere',
-  lowerNoiseTolerance: 'niedrigere',
-  higherPrivacy: 'höheres',
-  lowerPrivacy: 'niedrigeres',
-  scaleCleanliness: (direction: string) => `Deutlich ${direction} Sauberkeit als Durchschnitt`,
-  scaleNoise: (direction: string) => `Deutlich ${direction} Lärmtoleranz als Durchschnitt`,
-  scalePrivacy: (direction: string) => `Deutlich ${direction} Bedürfnis nach Privatsphäre`,
-  onlyNightOwl: 'Einzige Nachteule unter Frühaufstehern/Normalen',
-  onlyEarlyBird: 'Einziger Frühaufsteher unter Nachteulen/Normalen',
-  onlyExtrovert: 'Einziger Extrovertierter unter Introvertierten/Moderaten',
-  onlyIntrovert: 'Einziger Introvertierter unter Extrovertierten/Moderaten',
-  smokerInNonSmoking: 'Raucher in einer Nichtraucher-Wohnung',
-  avgCompatibilityOnly: 'Durchschnittliche Kompatibilität nur',
-  tip: 'Tipp:',
-  tipMessage:
-    'Klient*innen mit Anpassungsproblemen könnten in einer anderen Wohnung besser passen. Nutzen Sie "Umplatzieren", um passende Alternativen zu finden.',
-  relocate: 'Umplatzieren',
+/**
+ * Fit notes for a household. Each describes a difference or a pattern and the
+ * conversation that tends to help — never a person, never a move.
+ * @see lib/housing/fit-notes.ts
+ */
+export const HOUSEHOLD_FIT_LABELS = {
+  title: 'Passungshinweise für den Haushalt',
+  intro:
+    'Unterschiede im Alltag, die zu Reibung führen können — und was meist hilft. Die Hinweise nennen keine Personen; eine Umplatzierung entscheidet das Team im Gespräch mit den Betroffenen.',
+  none: 'Keine Hinweise. Die Angaben der Bewohnenden passen gut zusammen.',
+  notes: {
+    SLEEP_RHYTHMS:
+      'Frühaufstehende und Nachteulen leben zusammen. Ruhezeiten gemeinsam absprechen und in den Hausregeln festhalten.',
+    SMOKING: 'Rauchende und Nichtrauchende teilen die Wohnung. Den Rauchort klar vereinbaren.',
+    CLEANLINESS_EXPECTATIONS:
+      'Die Erwartungen an Ordnung gehen deutlich auseinander. Putzplan und Erwartungen gemeinsam klären, bevor Ärger entsteht.',
+    NOISE:
+      'Das Lärmempfinden ist sehr unterschiedlich. Lautstärke und Ruhezeiten im Haushalt besprechen.',
+    PRIVACY:
+      'Das Bedürfnis nach Rückzug ist sehr unterschiedlich. Gemeinsame und private Zeiten und Räume absprechen.',
+  },
+  repeatedIncidents: (typeLabel: string, count: number) =>
+    `${count} Vorfälle zu «${typeLabel}» in den letzten 30 Tagen. Ein Hausgespräch kann helfen, bevor jemand umziehen muss.`,
 } as const
 
 /** Top-of-page notice on the dedicated demo instance only. */

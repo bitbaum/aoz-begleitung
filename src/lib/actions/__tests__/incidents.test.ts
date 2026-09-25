@@ -163,10 +163,9 @@ describe('getHousingUnitIncidentHistory', () => {
       interpersonal: 0,
       maintenance: 0,
     })
-    expect(result.frequentSubjects).toEqual([])
   })
 
-  it('calculates correct stats and identifies frequent subjects', async () => {
+  it('calculates correct stats and ranks nobody', async () => {
     const incidents = [
       {
         id: 'inc-1',
@@ -202,37 +201,9 @@ describe('getHousingUnitIncidentHistory', () => {
     expect(result.stats.interpersonal).toBe(2)
     expect(result.stats.maintenance).toBe(1)
 
-    // res-a appears as subject 2 times (>= 2 threshold)
-    expect(result.frequentSubjects).toHaveLength(1)
-    expect(result.frequentSubjects[0]).toEqual(
-      expect.objectContaining({ id: 'res-a', code: 'RES-A', count: 2 }),
-    )
-  })
-
-  it('does not flag subjects with only one incident', async () => {
-    const incidents = [
-      {
-        id: 'inc-1',
-        category: 'INTERPERSONAL',
-        resolvedAt: null,
-        subject: { id: 'res-a', code: 'RES-A' },
-        reportedBy: null,
-        involvedResidents: [],
-      },
-      {
-        id: 'inc-2',
-        category: 'INTERPERSONAL',
-        resolvedAt: null,
-        subject: { id: 'res-b', code: 'RES-B' },
-        reportedBy: null,
-        involvedResidents: [],
-      },
-    ]
-    mockIncidentFindMany.mockResolvedValue(incidents)
-
-    const result = await getHousingUnitIncidentHistory('hu-1')
-
-    expect(result.frequentSubjects).toHaveLength(0)
+    // res-a is the subject twice. The history no longer turns that into a
+    // per-person list: a count is not a verdict. @see lib/housing/fit-notes.ts
+    expect(Object.keys(result).sort()).toEqual(['incidents', 'stats'])
   })
 })
 

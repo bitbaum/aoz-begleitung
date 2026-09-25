@@ -193,23 +193,6 @@ export async function getHousingUnitIncidentHistory(housingUnitId: string) {
     limit: QUERY_LIMITS.entityHistory,
   })
 
-  // Calculate which residents appear most frequently as subjects
-  const subjectCounts: Record<string, { code: string; count: number }> = {}
-  for (const incident of incidents) {
-    if (incident.subject) {
-      const id = incident.subject.id
-      if (!subjectCounts[id]) {
-        subjectCounts[id] = { code: incident.subject.code, count: 0 }
-      }
-      subjectCounts[id].count++
-    }
-  }
-
-  const frequentSubjects = Object.entries(subjectCounts)
-    .map(([id, data]) => ({ id, ...data }))
-    .filter((s) => s.count >= 2)
-    .sort((a, b) => b.count - a.count)
-
   return {
     incidents,
     stats: {
@@ -218,7 +201,6 @@ export async function getHousingUnitIncidentHistory(housingUnitId: string) {
       interpersonal: incidents.filter((i) => i.category === 'INTERPERSONAL').length,
       maintenance: incidents.filter((i) => i.category === 'MAINTENANCE').length,
     },
-    frequentSubjects,
   }
 }
 

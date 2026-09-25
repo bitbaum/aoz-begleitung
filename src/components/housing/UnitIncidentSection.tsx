@@ -22,19 +22,11 @@ interface Incident {
   subject: NamedResident | null
 }
 
-interface FrequentSubject {
-  id: string
-  code: string
-  displayName: string | null
-  count: number
-}
-
 interface Props {
   unitId: string
   incidents: Incident[]
   interpersonalCount: number
   maintenanceCount: number
-  frequentSubjects: FrequentSubject[]
 }
 
 export function UnitIncidentSection({
@@ -42,7 +34,6 @@ export function UnitIncidentSection({
   incidents,
   interpersonalCount,
   maintenanceCount,
-  frequentSubjects,
 }: Props) {
   return (
     <div className="card">
@@ -52,34 +43,6 @@ export function UnitIncidentSection({
           {UNIT_INCIDENT_LABELS.newIncident}
         </Link>
       </div>
-
-      {/* Frequent Subjects Warning */}
-      {frequentSubjects.length > 0 && (
-        <div className="mb-4 p-4 bg-status-warning/10 border border-status-warning/25 rounded-lg">
-          <div className="flex items-start gap-2">
-            <span className="text-status-warning text-lg" aria-hidden="true">
-              !
-            </span>
-            <div>
-              <p className="text-sm font-medium text-status-warning-text">
-                {UNIT_INCIDENT_LABELS.frequentResidents}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {frequentSubjects.map((s) => (
-                  <Link
-                    key={s.id}
-                    href={`/residents/${s.id}`}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-status-warning/15 text-status-warning-text rounded text-sm hover:bg-status-warning/20 transition-colors"
-                  >
-                    <span className="font-medium">{residentName(s)}</span>
-                    <span className="text-status-warning-text">({s.count}x)</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="mb-4">
         <div className="flex gap-2 border-b border-ui-border">
