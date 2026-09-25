@@ -62,7 +62,7 @@ describe('ADMIN is retired, and every path that creates staff knows it', () => {
 describe('the form can describe the real team', () => {
   it('offers reach, because otherwise "Leitung" is the only way to say it', () => {
     /**
-     * Franziska is BETREUUNG + ALL_DOMAINS. Before this field existed, the only
+     * The all-domains Betreuerin is BETREUUNG + ALL_DOMAINS. Before this field existed, the only
      * way to create her through the UI was to pick the retired role — which is
      * WHY it survived in the dropdown. Removing the option without adding this
      * would have taken away the only way to express her, so the two changes

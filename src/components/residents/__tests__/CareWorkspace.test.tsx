@@ -98,7 +98,7 @@ describe('CareWorkspace domain boundary', () => {
   })
 
   it('gives a viewer with oversight all four seats — whatever their role', () => {
-    // This is Franziska: a Betreuerin who also covers every seat. It used to
+    // This is the all-domains Betreuerin: she covers every seat. It used to
     // require the ADMIN role, which erased the fact that housing is her
     // domain. Breadth is now its own axis, so the role stays true.
     render(

@@ -43,8 +43,8 @@ export function isWorkKind(kind: string): kind is WorkOpportunityKindId {
  * the enum lands on exactly one board without anyone remembering to put it
  * there, and it can never land on both or neither. The split the coaches see is
  * then the same split the permit gate already enforces, which is the point —
- * "does this raise a question about authorisation" is what separates Simon's
- * work from Sandra's.
+ * "does this raise a question about authorisation" is what separates the Jobcoach's
+ * work from the Freiwilligenarbeit coordinator's.
  */
 export function boardOpportunityKinds(board: IntegrationBoardId): readonly OpportunityKindId[] {
   if (board === 'job') return WORK_OPPORTUNITY_KINDS

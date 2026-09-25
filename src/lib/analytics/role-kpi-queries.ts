@@ -9,7 +9,7 @@
  *
  * A specialist is measured on the people THEY hold — that is the point of a
  * per-role KPI, and a product-wide number would recreate the aggregate that
- * told Simon "23 laufend" while his own board showed nothing.
+ * told the Jobcoach "23 laufend" while his own board showed nothing.
  *
  * A viewer with reach over every domain has no single seat, so they see the
  * whole real population instead: for them these are pilot numbers, not a

@@ -285,7 +285,7 @@ describe('ActionDashboard', () => {
   })
 
   /**
-   * The bug this pins: Sandra's dashboard could not show her an open task.
+   * The bug this pins: the Freiwilligenarbeit coordinator's dashboard could not show her an open task.
    * Every term of `totalIssues` needed a permission she does not hold, and the
    * sixth — the coach queue — was fetched with a hardcoded `'JOB'` while her
    * seats are `VOLUNTEERING`. The count was structurally zero, so the page
@@ -345,8 +345,8 @@ describe('ActionDashboard', () => {
         {...BASE_PROPS}
         viewer={{ role: 'BETREUUNG', scope: 'ALL_DOMAINS', isSystemAdmin: false }}
         waitingThreads={[
-          { residentId: 'r1', name: 'Ihor', waitingSince: fourDaysAgo },
-          { residentId: 'r2', name: 'Misha', waitingSince: new Date() },
+          { residentId: 'r1', name: 'Hana', waitingSince: fourDaysAgo },
+          { residentId: 'r2', name: 'Noor', waitingSince: new Date() },
         ]}
       />,
     )
@@ -375,7 +375,7 @@ describe('ActionDashboard', () => {
         {...BASE_PROPS}
         viewer={{ role: 'BETREUUNG', scope: 'ALL_DOMAINS', isSystemAdmin: false }}
         overdueFollowUps={[
-          { id: 'inc-1', subject: 'Ihor', unitCode: 'WIT-458', daysOverdue: 6 },
+          { id: 'inc-1', subject: 'Hana', unitCode: 'WIT-458', daysOverdue: 6 },
           { id: 'inc-2', subject: null, unitCode: 'WIT-458', daysOverdue: 1 },
         ]}
       />,
@@ -573,7 +573,7 @@ describe('ActionDashboard', () => {
   // purpose — a Jobcoach must not be told the workspace is empty while 19
   // people sit in it — but that makes a specialist nobody has been assigned to
   // indistinguishable from a specialist who has finished. On 2026-08-31, the
-  // day the real AOZ team was created, Simon Binder and Sandra each opened
+  // day the real AOZ team was created, the Jobcoach and the Freiwilligenarbeit coordinator each opened
   // their first ever session and were shown "🎉 Alles unter Kontrolle! Keine
   // dringenden Aufgaben" over an account connected to no one.
 

@@ -137,7 +137,7 @@ export async function GET(request: Request) {
     // 2b. Insurances and permits crossing a renewal milestone.
     //
     // The original complaint this whole feature answers is "my insurance has to
-    // be extended every six months, and for that I need to write Franziska."
+    // be extended every six months, and for that I need to write my Betreuerin."
     // Recording the date let a client SEE it and put it on two staff pages —
     // but a date only prevents a lapse if it reaches someone who is not
     // already looking. `isMilestoneDay` was written for exactly this daily

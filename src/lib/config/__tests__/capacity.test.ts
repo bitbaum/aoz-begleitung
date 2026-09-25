@@ -4,8 +4,8 @@ import { CAPACITY_STATUSES, countsTowardCapacity, placeableBeds } from '../capac
 
 describe('a bed nobody can be placed into is not capacity', () => {
   /**
-   * The production case. On 2026-09-04 the 118 flats of Witikonerstrasse
-   * 426–468 were entered from the federal register — a terrace under demolition
+   * The production case. On 2026-09-04 the 118 flats of a real
+   * street terrace were entered from the federal register — a terrace under demolition
    * order, most of which AOZ may not hold. They sit at CLOSED with 0 beds, and
    * that zero was doing the work a status should do: the moment a real bed
    * count is typed into a flat that is not in service, free beds inflates,

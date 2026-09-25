@@ -27,7 +27,7 @@ function client(overrides: Partial<CareClientInput> = {}): CareClientInput {
   }
 }
 
-describe("Sandra's queue", () => {
+describe("The Freiwilligenarbeit coordinator's queue", () => {
   it('names a resident whose own interest nobody answered', () => {
     const signals = signalsFor(
       client({
@@ -66,7 +66,7 @@ describe("Sandra's queue", () => {
 
   it('does not count an unanswered click as an engagement', () => {
     // Were this wrong, a resident putting their hand up would REMOVE themselves
-    // from Sandra's queue — the exact failure fixed on the job side.
+    // from the Freiwilligenarbeit coordinator's queue — the exact failure fixed on the job side.
     const waiting = client({
       createdAt: daysAgo(NO_ENGAGEMENT_GRACE_DAYS + 5),
       applications: [
@@ -128,7 +128,7 @@ describe("Sandra's queue", () => {
   })
 
   it('ignores a stalled record that belongs to the job coach', () => {
-    // A language course going nowhere is Simon's signal, not Sandra's. Her
+    // A language course going nowhere is the Jobcoach's signal, not the Freiwilligenarbeit coordinator's. Her
     // queue naming it would hand her work she cannot act on.
     const jobRecord = client({
       applications: [
@@ -231,7 +231,7 @@ describe('a row points at the thing it is about', () => {
 describe('the seat the dashboard fetches', () => {
   /**
    * The root cause, pinned. The caseload query read the literal `'JOB'`, so
-   * Sandra's seats — `VOLUNTEERING` — were never queried and every term of her
+   * the Freiwilligenarbeit coordinator's seats — `VOLUNTEERING` — were never queried and every term of her
    * `totalIssues` was structurally zero. She was congratulated every morning.
    */
   it('maps each coach to their own seat, derived and not written out', () => {
@@ -242,7 +242,7 @@ describe('the seat the dashboard fetches', () => {
 
   it('gives the volunteering domain as many signals as the job domain has', () => {
     // Not a symmetry fetish: a domain with zero signals is a domain whose
-    // specialist can never be told anything, which is where Sandra started.
+    // specialist can never be told anything, which is where the Freiwilligenarbeit coordinator started.
     expect(VOLUNTEERING_SIGNAL_IDS.length).toBeGreaterThan(0)
     expect(VOLUNTEERING_SIGNAL_IDS[0]).toBe('INTEREST_UNANSWERED')
   })

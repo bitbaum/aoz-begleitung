@@ -12,7 +12,7 @@ import { RENEWAL_MILESTONE_DAYS, isMilestoneDay } from '../renewals'
  * WHAT SHIPPED: `expiringFacts` reached two staff PAGES, and `isMilestoneDay`
  * — the cooldown rule written for a daily check — was exported, tested, and
  * called by nothing. So the feature answered "my insurance expires every six
- * months and I have to write Franziska" with a tile that only helps the person
+ * months and I have to write my Betreuerin" with a tile that only helps the person
  * who was already looking. The comment at the top of `renewals.ts` justified
  * that: `STAFF_EMAIL_RECIPIENTS` was unset, so mail reached nobody. True when
  * written; false within the week, once the variable was set and delivery

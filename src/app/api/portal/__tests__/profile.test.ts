@@ -240,7 +240,7 @@ describe('POST /api/portal/profile/photo', () => {
 })
 
 describe('GET /api/portal/residents/[id]/photo', () => {
-  const PHOTO = { residentId: 'ihor', data: Buffer.from([1, 2, 3]), mimeType: 'image/jpeg' }
+  const PHOTO = { residentId: 'hana', data: Buffer.from([1, 2, 3]), mimeType: 'image/jpeg' }
 
   function get(id: string) {
     return getPhoto(new NextRequest(`http://localhost/api/portal/residents/${id}/photo`), {
@@ -261,10 +261,10 @@ describe('GET /api/portal/residents/[id]/photo', () => {
     // deliberate change from the route's original behaviour, which hid photos
     // from staff too.
     mockGetCurrentUser.mockResolvedValue({ id: 'staff-1', role: 'ADMIN' })
-    mockResidentFindFirst.mockResolvedValue({ id: 'ihor', profileVisibility: 'PRIVATE' })
+    mockResidentFindFirst.mockResolvedValue({ id: 'hana', profileVisibility: 'PRIVATE' })
     mockPhotoFindFirst.mockResolvedValue(PHOTO)
 
-    const response = await get('ihor')
+    const response = await get('hana')
 
     expect(response.status).toBe(200)
     // Staff never need a shared-unit lookup — they are not a flatmate.
@@ -272,19 +272,19 @@ describe('GET /api/portal/residents/[id]/photo', () => {
   })
 
   it('404s for a roommate when the resident chose PRIVATE', async () => {
-    mockResidentFindFirst.mockResolvedValue({ id: 'ihor', profileVisibility: 'PRIVATE' })
+    mockResidentFindFirst.mockResolvedValue({ id: 'hana', profileVisibility: 'PRIVATE' })
     mockPlacementFindFirst.mockResolvedValue({ id: 'placement-1' })
     mockPhotoFindFirst.mockResolvedValue(PHOTO)
 
-    expect((await get('ihor')).status).toBe(404)
+    expect((await get('hana')).status).toBe(404)
   })
 
   it('serves a resident of another unit when the setting is RESIDENTS', async () => {
-    mockResidentFindFirst.mockResolvedValue({ id: 'ihor', profileVisibility: 'RESIDENTS' })
+    mockResidentFindFirst.mockResolvedValue({ id: 'hana', profileVisibility: 'RESIDENTS' })
     mockPlacementFindFirst.mockResolvedValue(null)
     mockPhotoFindFirst.mockResolvedValue(PHOTO)
 
-    expect((await get('ihor')).status).toBe(200)
+    expect((await get('hana')).status).toBe(200)
   })
 
   it('404s for an unknown resident without touching the photo table', async () => {
@@ -299,13 +299,13 @@ describe('GET /api/portal/residents/[id]/photo', () => {
   it("serves a roommate's photo when a shared unit exists", async () => {
     mockPlacementFindFirst.mockResolvedValue({ id: 'placement-1' })
     mockPhotoFindFirst.mockResolvedValue(PHOTO)
-    const response = await get('ihor')
+    const response = await get('hana')
     expect(response.status).toBe(200)
   })
 
   it('404s for residents of other units (no photo-existence leak)', async () => {
     mockPlacementFindFirst.mockResolvedValue(null)
-    const response = await get('ihor')
+    const response = await get('hana')
     expect(response.status).toBe(404)
     expect(mockPhotoFindFirst).not.toHaveBeenCalled()
   })
@@ -313,7 +313,7 @@ describe('GET /api/portal/residents/[id]/photo', () => {
   it('404s when the roommate has no photo', async () => {
     mockPlacementFindFirst.mockResolvedValue({ id: 'placement-1' })
     mockPhotoFindFirst.mockResolvedValue(null)
-    const response = await get('ihor')
+    const response = await get('hana')
     expect(response.status).toBe(404)
   })
 })

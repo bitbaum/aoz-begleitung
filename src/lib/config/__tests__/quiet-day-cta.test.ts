@@ -10,8 +10,8 @@ import type { StaffCapabilities, StaffRole } from '@/lib/auth/role-policy'
  * `DASHBOARD_FALLBACK_CTAS` is ordered by permission alone, and its second
  * entry is `learning:write` — documented in that file as "the coaching roles'
  * home". True of a Jobcoach. False of the Freiwilligenarbeit coordinator, who
- * also holds `learning:write`: Sandra's "Alles unter Kontrolle" screen offered
- * her one button, and it opened Simon's surface.
+ * also holds `learning:write`: the Freiwilligenarbeit coordinator's "Alles unter Kontrolle" screen offered
+ * her one button, and it opened the Jobcoach's surface.
  *
  * Found by opening her dashboard during a walk of the live product. Nothing
  * failed, because a CTA that resolves is indistinguishable from a CTA that
@@ -34,7 +34,7 @@ describe('a specialist lands on their own board', () => {
   it('leaves the Jobcoach on Lernen & Beruf, which is his by name', () => {
     // Deliberate, and pinned by two older tests: the surface is called
     // "Lernen & Beruf" — learning AND work — so the generic ladder already
-    // lands Simon somewhere that belongs to him. Redirecting him too was an
+    // lands the Jobcoach somewhere that belongs to him. Redirecting him too was an
     // over-reach in the first version of this change.
     expect(fallbackCta(viewer('JOBCOACH')).labelKey).toBe('actionOpenLearning')
   })

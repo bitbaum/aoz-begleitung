@@ -1,8 +1,8 @@
 /**
  * The approval queue: client-entered facts nobody has looked at yet.
  *
- * Scoped by the seats the viewer holds, not by their job title. Franziska
- * (ALL_DOMAINS) sees every client's; Simon sees the permits of the clients he
+ * Scoped by the seats the viewer holds, not by their job title. The all-domains Betreuerin
+ * (ALL_DOMAINS) sees every client's; the Jobcoach sees the permits of the clients he
  * coaches and nothing else — no insurance, no doctors, and nothing at all for
  * a client he does not hold.
  *

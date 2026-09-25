@@ -286,7 +286,7 @@ export function ActionDashboard({
     // An insurance about to lapse is work whether or not anyone has filed it
     // as such. Counted, so a day with one is not a quiet day.
     expiringFacts.length +
-    // Sandra's rows count exactly as Simon's do. While they did not, her
+    // The Freiwilligenarbeit coordinator's rows count exactly as the Jobcoach's do. While they did not, her
     // dashboard could only ever resolve to `quiet` — every term above needs a
     // permission she does not hold, and her caseload was never fetched.
     careTiles.reduce((sum, tile) => sum + tile.rows.length, 0)

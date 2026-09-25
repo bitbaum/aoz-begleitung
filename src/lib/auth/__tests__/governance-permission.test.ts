@@ -22,12 +22,12 @@ import { DASHBOARD_SECTIONS } from '@/lib/config/dashboard'
  *
  * And the dashboard queue for it was gated on `housing:read`, which was a fair
  * approximation while `housing:read` implied a care role. Adding
- * LIEGENSCHAFTEN broke that silently: Manuel holds `housing:read` to run the
+ * LIEGENSCHAFTEN broke that silently: the Liegenschaften lead holds `housing:read` to run the
  * building stock, and it handed him the queue where SAFETY and
  * NON-DISCRIMINATION proposals land — the topics this product refuses to put
  * to a vote precisely because a majority must not decide them.
  *
- * Found by opening the dashboard as Manuel.
+ * Found by opening the dashboard as the Liegenschaften lead.
  */
 
 const ROOT = join(__dirname, '..', '..', '..', '..')
@@ -52,11 +52,11 @@ describe('who may answer a household', () => {
   })
 
   it('is NOT the role that runs the buildings', () => {
-    // Manuel keeps housing:read and can still READ the rule book of a house he
+    // The Liegenschaften lead keeps housing:read and can still READ the rule book of a house he
     // runs. Answering the household is a different job.
-    const manuel = ROLE_PERMISSIONS.LIEGENSCHAFTEN as readonly string[]
-    expect(manuel).not.toContain('governance:confirm')
-    expect(manuel).toContain('housing:read')
+    const liegenschaften = ROLE_PERMISSIONS.LIEGENSCHAFTEN as readonly string[]
+    expect(liegenschaften).not.toContain('governance:confirm')
+    expect(liegenschaften).toContain('housing:read')
   })
 
   it('is NOT the integration roles', () => {

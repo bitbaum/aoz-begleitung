@@ -83,10 +83,10 @@ const AUTH = {
 }
 
 const MEMBERS = [
-  { id: 'alex', code: 'RES-ALE001', displayName: 'Alex', photoVersion: null },
+  { id: 'amara', code: 'RES-AMA001', displayName: 'Amara', photoVersion: null },
   { id: 'georgy', code: 'RES-GEO001', displayName: 'Georgy', photoVersion: null },
-  { id: 'ihor', code: 'RES-IHO001', displayName: 'Ihor', photoVersion: null },
-  { id: 'misha', code: 'RES-MIS001', displayName: 'Misha', photoVersion: null },
+  { id: 'hana', code: 'RES-HAN001', displayName: 'Hana', photoVersion: null },
+  { id: 'noor', code: 'RES-NOO001', displayName: 'Noor', photoVersion: null },
 ]
 
 function jsonRequest(url: string, method: string, body: unknown): NextRequest {
@@ -140,13 +140,13 @@ describe('POST /api/portal/expenses', () => {
     const response = await createExpense(
       jsonRequest('/api/portal/expenses', 'POST', {
         ...VALID_EXPENSE,
-        paidById: 'ihor',
-        participantIds: ['ihor', 'misha'],
+        paidById: 'hana',
+        participantIds: ['hana', 'noor'],
       }),
     )
     expect(response.status).toBe(200)
     const created = mockExpenseCreate.mock.calls[0][0]
-    expect(created.paidById).toBe('ihor')
+    expect(created.paidById).toBe('hana')
     expect(created.createdById).toBe('georgy')
     expect(mockShareCreate.mock.calls[0][0]).toHaveLength(2)
   })
@@ -189,7 +189,7 @@ describe('DELETE /api/portal/expenses/[id]', () => {
   const EXPENSE = {
     id: 'expense-1',
     housingUnitId: 'unit-1',
-    paidById: 'ihor',
+    paidById: 'hana',
     createdById: 'georgy',
     amountRappen: 4000,
   }
@@ -211,13 +211,13 @@ describe('DELETE /api/portal/expenses/[id]', () => {
   })
 
   it('lets the payer delete', async () => {
-    mockExpenseFindFirst.mockResolvedValue({ ...EXPENSE, paidById: 'georgy', createdById: 'ihor' })
+    mockExpenseFindFirst.mockResolvedValue({ ...EXPENSE, paidById: 'georgy', createdById: 'hana' })
     const response = await del()
     expect(response.status).toBe(200)
   })
 
   it('refuses an uninvolved roommate with 403', async () => {
-    mockExpenseFindFirst.mockResolvedValue({ ...EXPENSE, paidById: 'misha', createdById: 'alex' })
+    mockExpenseFindFirst.mockResolvedValue({ ...EXPENSE, paidById: 'noor', createdById: 'amara' })
     const response = await del()
     expect(response.status).toBe(403)
     expect(mockExpenseDelete).not.toHaveBeenCalled()
@@ -234,11 +234,11 @@ describe('DELETE /api/portal/expenses/[id]', () => {
 describe('POST /api/portal/settlements', () => {
   it('records a payment to a roommate', async () => {
     const response = await createSettlement(
-      jsonRequest('/api/portal/settlements', 'POST', { toResidentId: 'ihor', amountRappen: 1500 }),
+      jsonRequest('/api/portal/settlements', 'POST', { toResidentId: 'hana', amountRappen: 1500 }),
     )
     expect(response.status).toBe(200)
     const created = mockSettlementCreate.mock.calls[0][0]
-    expect(created).toMatchObject({ fromId: 'georgy', toId: 'ihor', amountRappen: 1500 })
+    expect(created).toMatchObject({ fromId: 'georgy', toId: 'hana', amountRappen: 1500 })
   })
 
   it('refuses paying yourself', async () => {

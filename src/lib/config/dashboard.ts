@@ -143,8 +143,8 @@ export const DASHBOARD_FALLBACK_CTAS: readonly {
  * Checked BEFORE the generic list, because that list is ordered by permission
  * alone and its second entry is `learning:write` — "the coaching roles' home",
  * which is true of a Jobcoach and false of everyone else holding the
- * permission. Sandra runs Freiwilligenarbeit, holds `learning:write`, and her
- * quiet-day screen therefore invited her into Simon's surface. Found by
+ * permission. The Freiwilligenarbeit coordinator runs Freiwilligenarbeit, holds `learning:write`, and her
+ * quiet-day screen therefore invited her into the Jobcoach's surface. Found by
  * opening her dashboard, not by reading this file.
  *
  * Derived from the SAME function that decides which board each role opens on,
@@ -152,11 +152,11 @@ export const DASHBOARD_FALLBACK_CTAS: readonly {
  * button.
  */
 const DOMAIN_HOME: Partial<Record<StaffRole, { href: string; labelKey: DashboardCtaLabelKey }>> = {
-  // JOBCOACH is deliberately ABSENT. "Lernen & Beruf" covers Simon's domain by
+  // JOBCOACH is deliberately ABSENT. "Lernen & Beruf" covers the Jobcoach's domain by
   // name — learning and work — so the generic ladder already lands him on
   // something that is his, and two existing tests pin that on purpose.
-  // Sandra is the one it mis-routes: nothing about Lernen & Beruf is
-  // Freiwilligenarbeit. Redirecting Simon as well was an over-reach; the
+  // The Freiwilligenarbeit coordinator is the one it mis-routes: nothing about Lernen & Beruf is
+  // Freiwilligenarbeit. Redirecting the Jobcoach as well was an over-reach; the
   // suite caught it.
   FREIWILLIGENARBEIT: {
     href: `/opportunities?board=${defaultIntegrationBoardForRole('FREIWILLIGENARBEIT')}`,
@@ -197,7 +197,7 @@ export function fallbackCta(viewer: StaffCapabilities): {
  * are told, with a party emoji, that everything is under control.
  *
  * Observed in production on 2026-08-31, the day the real AOZ team was
- * created: Simon Binder (Jobcoach) and Sandra (Freiwilligenarbeit) both saw
+ * created: the Jobcoach and the Freiwilligenarbeit coordinator both saw
  * "🎉 Alles unter Kontrolle! Keine dringenden Aufgaben" on their first ever
  * login, with nobody assigned to either of them. That is the first thing the
  * two specialists AOZ actually employs were told by this product.

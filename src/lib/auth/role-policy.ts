@@ -7,10 +7,10 @@
  *                 import. Not implied by seeing everything.
  *
  * These were a single enum, and the real AOZ team could not be described by it.
- * Franziska is a Betreuerin who ALSO sees every client; the only way to say
+ * A Betreuerin who ALSO sees every client could not be expressed; the only way to say
  * that was to make her ADMIN, which erased her actual domain and handed her the
- * settings page as a side effect. Simon (Jobcoach) and Sandra
- * (Freiwilligenarbeit) work one domain each.
+ * settings page as a side effect. The Jobcoach and the Freiwilligenarbeit
+ * coordinator work one domain each.
  *
  * This used to end "There is no Leitung." — false, corrected 2026-08-31. AOZ
  * was recruiting a Programmleiter*in and a Teamleiter*in Betreuung for the
@@ -19,9 +19,9 @@
  * already expresses it — do NOT add a LEITUNG role for it.
  *
  * Ask each axis exactly one question and the team describes itself:
- *   Franziska  BETREUUNG          + ALL_DOMAINS
- *   Simon      JOBCOACH           + OWN_DOMAIN
- *   Sandra     FREIWILLIGENARBEIT + OWN_DOMAIN
+ *   Betreuerin (all domains)     BETREUUNG          + ALL_DOMAINS
+ *   Jobcoach                     JOBCOACH           + OWN_DOMAIN
+ *   Freiwilligenarbeit coord.    FREIWILLIGENARBEIT + OWN_DOMAIN
  */
 
 export type StaffRole =
@@ -178,7 +178,7 @@ const CAREER_DOCUMENTS_WRITE = 'documents:write'
  * every conversation. `residents:read` does not fix that: all four care roles
  * hold it, so gating on it would have been a check that nobody fails.
  *
- * ⚠️ A DECISION, not a derivation: if AOZ wants Simon or Sandra answering
+ * ⚠️ A DECISION, not a derivation: if AOZ wants the Jobcoach or the Freiwilligenarbeit coordinator answering
  * residents directly, this is one line in each list. Better to have to grant
  * it than to have never noticed it was ungranted.
  */
@@ -216,13 +216,13 @@ const CLIENT_FACTS_READ = 'clientFacts:read'
  * The dashboard tile for it was gated on `housing:read`, with a comment saying
  * it rode there "not by a governance-specific permission that does not exist".
  * That was fair when `housing:read` implied a care role. It stopped being fair
- * the day LIEGENSCHAFTEN was added: Manuel holds `housing:read` because he
+ * the day LIEGENSCHAFTEN was added: the Liegenschaften lead holds `housing:read` because he
  * runs the building stock, and it silently handed him the queue for confirming
  * decisions — the queue where SAFETY and NON-DISCRIMINATION topics land,
  * precisely because those must never be settled by a vote.
  *
  * So the permission now exists. READING the rule book stays on `housing:read`
- * — Manuel should know the rules of a house he runs. Answering the people who
+ * — the Liegenschaften lead should know the rules of a house he runs. Answering the people who
  * live there is a different job.
  */
 const GOVERNANCE_CONFIRM = 'governance:confirm'
@@ -296,8 +296,8 @@ export const ROLE_PERMISSIONS = {
    *
    * The first role staffed for no CARE DOMAIN at all. `role` answers "which
    * care domain am I staffed for?", and the honest answer here is none —
-   * Manuel is responsible for the housing stock: which flats exist, who is
-   * placed where, what is broken. Franziska is a Betreuerin who supports
+   * the Liegenschaften lead is responsible for the housing stock: which flats exist, who is
+   * placed where, what is broken. The all-domains Betreuerin supports
    * PEOPLE about their housing, and she holds their HOUSING care seats. Those
    * are two jobs, and giving both the same role said they were one.
    *

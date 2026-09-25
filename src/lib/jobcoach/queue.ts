@@ -21,7 +21,7 @@ import {
  * Jobcoach holds none of those permissions, so the count was structurally
  * always zero.
  *
- * Observed in production on 2026-09-02: Simon B. had a client assigned that
+ * Observed in production on 2026-09-02: the Jobcoach had a client assigned that
  * same day — job-seeking, two years without work, an unrecognised trade
  * qualification, German at A2 — and his dashboard said
  * "🎉 Alles unter Kontrolle! Keine dringenden Aufgaben", without naming him.
@@ -102,7 +102,7 @@ const LIVE_STAGES: readonly ApplicationStageId[] = [
 
 /**
  * The input shapes, the "a click is a request" rule and the queue builder are
- * NOT job-coaching facts — they are equally true of Sandra's volunteering
+ * NOT job-coaching facts — they are equally true of the Freiwilligenarbeit coordinator's volunteering
  * caseload, so they live in `lib/care/queue.ts`.
  *
  * Re-exported here rather than moved outright: eleven modules import these
@@ -172,7 +172,7 @@ export function signalsFor(client: JobClientInput, now: Date): JobSignalId[] {
 }
 
 /**
- * Simon's queue. The shape and the sort live in `lib/care/queue.ts`; what is
+ * The Jobcoach's queue. The shape and the sort live in `lib/care/queue.ts`; what is
  * job-coaching-specific is only which signals fire, above.
  */
 export function buildJobQueue(clients: JobClientInput[], now: Date): JobQueueItem[] {

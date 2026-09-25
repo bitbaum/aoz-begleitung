@@ -3,8 +3,8 @@
  *
  * `AdminSidebar.test.tsx` has forbidden one-item accordions since the sidebar
  * shipped, and it asserted it for ADMIN: the one viewer whose groups are always
- * full, so the rule could never fire. Walked live on 2026-09-03, Simon
- * (JOBCOACH) had THREE one-item accordions and Sandra had the same, with the
+ * full, so the rule could never fire. Walked live on 2026-09-03, the Jobcoach
+ * (JOBCOACH) had THREE one-item accordions and the Freiwilligenarbeit coordinator had the same, with the
  * suite green throughout.
  *
  * That is the same shape as the portal defect CLAUDE.md documents — a group

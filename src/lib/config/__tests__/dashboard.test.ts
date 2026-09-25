@@ -61,7 +61,7 @@ describe('DASHBOARD_SECTIONS', () => {
   it('administration, not the role, is what adds the team section', () => {
     // The difference used to be Leitung-vs-Betreuung. It is now the axis that
     // actually decides it: the SAME role with and without administration.
-    // Franziska is a Betreuerin who sees everything; whether she also manages
+    // The all-domains Betreuerin sees everything; whether she also manages
     // accounts is a separate question, and this is where that shows.
     const plain = ALL_SECTIONS.filter((s) =>
       sectionVisible({ role: 'BETREUUNG', scope: 'ALL_DOMAINS', isSystemAdmin: false }, s),
@@ -150,7 +150,7 @@ describe('fallbackCta', () => {
   })
 
   it('offers learning to the Jobcoach, whose domain it names', () => {
-    // "Lernen & Beruf" is learning AND work, so the generic ladder lands Simon
+    // "Lernen & Beruf" is learning AND work, so the generic ladder lands the Jobcoach
     // on something that is his.
     expect(fallbackCta({ role: 'JOBCOACH', scope: 'OWN_DOMAIN', isSystemAdmin: false }).href).toBe(
       '/learning',
@@ -159,7 +159,7 @@ describe('fallbackCta', () => {
 
   it('does NOT offer learning to Freiwilligenarbeit', () => {
     // This assertion used to say '/learning' for her too, and that was the
-    // bug: Sandra holds learning:write, so a ladder matched on permission
+    // bug: the Freiwilligenarbeit coordinator holds learning:write, so a ladder matched on permission
     // alone gave her one quiet-day button and it opened the Jobcoach's
     // surface. Nothing about Lernen & Beruf is Freiwilligenarbeit.
     // @see config/__tests__/quiet-day-cta.test.ts
@@ -237,7 +237,7 @@ describe('fallbackCta', () => {
 
   it('never tells a role with no setup rights to wait for a named job title', () => {
     // This message used to say "Sobald die Leitung ... erfasst hat" — naming
-    // a role AOZ's real team does not have. Franziska/Simon/Sandra hold
+    // a role AOZ's real team does not have. The Betreuung, Jobcoach and Freiwilligenarbeit staff hold
     // Betreuung/Jobcoach/Freiwilligenarbeit; ADMIN survives only as the
     // retired system-administrator seat, not a care role anyone is staffed
     // for. A Jobcoach or Freiwilligenarbeit account opening a genuinely empty

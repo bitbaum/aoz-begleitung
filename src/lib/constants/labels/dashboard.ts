@@ -143,7 +143,7 @@ export const DASHBOARD_LABELS = {
    *
    * Names the CAPABILITY (housing:write / residents:write), never a job
    * title. This used to say "die Leitung" — a role AOZ's real team does not
-   * have (Franziska/Simon/Sandra are Betreuung/Jobcoach/Freiwilligenarbeit,
+   * have (the real team is Betreuung/Jobcoach/Freiwilligenarbeit,
    * and ADMIN survives only as the retired system-administrator seat). A
    * Jobcoach or Freiwilligenarbeit person opening a genuinely empty
    * workspace would be told to wait for someone who does not exist at this

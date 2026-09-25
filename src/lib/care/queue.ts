@@ -6,12 +6,12 @@ import type { LearningKindId, LearningStatusId } from '@/lib/config/learning'
  *
  * ## Why this file exists, and it is not "tidiness"
  *
- * `lib/jobcoach/queue.ts` documents a bug fixed for Simon on 2026-09-02: the
+ * `lib/jobcoach/queue.ts` documents a bug fixed for the Jobcoach on 2026-09-02: the
  * dashboard decided "busy" or "quiet" from a count made entirely of housing
  * queues, so a specialist's count was structurally zero and the product
  * congratulated him on a day with real work in it.
  *
- * That fix was written for ONE coach. Sandra sat next to it with the identical
+ * That fix was written for ONE coach. The Freiwilligenarbeit coordinator sat next to it with the identical
  * defect — her caseload was never even fetched, because the query hardcoded
  * `careAssignment.role = 'JOB'` and her seats are `VOLUNTEERING` — and every
  * other term in the count needs permissions she does not hold. She has been
@@ -91,7 +91,7 @@ export interface CareQueueItem<Signal extends string> {
  * went undone.
  *
  * Contact means a person engaged. A click is a request for one. This is domain
- * -neutral on purpose: it is equally wrong to count Sandra's unanswered
+ * -neutral on purpose: it is equally wrong to count the Freiwilligenarbeit coordinator's unanswered
  * volunteering interest as an engagement.
  */
 export function isAwaitingAnswer(application: CareApplicationInput): boolean {

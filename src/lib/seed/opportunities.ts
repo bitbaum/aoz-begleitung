@@ -102,7 +102,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     permitRequirement: 'EMPLOYER_NOTIFIES',
     requirementNote:
       'Die Stadtgärtnerei meldet den Einsatz selbst an. Wir brauchen nur deinen Namen.',
-    contactName: 'Sandra Vogt',
+    contactName: 'Lea Keller',
     contactPhone: '000 000 00 03',
     stages: ['INTERVIEW', 'APPLIED', 'ENDED'],
   },

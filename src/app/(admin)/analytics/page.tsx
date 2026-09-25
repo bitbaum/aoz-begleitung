@@ -62,7 +62,7 @@ export default async function AnalyticsPage({ searchParams }: Props) {
    * The page itself sits on `dashboard:read`, which every staff role holds — so
    * a Jobcoach who cannot open /housing was nevertheless reading occupancy,
    * satisfaction, and conflict hotspots labelled with street addresses.
-   * Verified live as Simon on 2026-09-03. Hiding the /housing link while
+   * Verified live as the Jobcoach on 2026-09-03. Hiding the /housing link while
    * serving the same facts one page over is not a boundary.
    *
    * The page stays reachable for every role because their OWN KPIs live here

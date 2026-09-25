@@ -1,7 +1,7 @@
 import { computeBalances, simplifyDebts } from '../balances'
 import { splitEqually } from '../split'
 
-const MEMBERS = ['georgy', 'ihor', 'misha', 'alex']
+const MEMBERS = ['georgy', 'hana', 'noor', 'amara']
 
 function expense(paidById: string, amountRappen: number, participants = MEMBERS) {
   return { paidById, amountRappen, shares: splitEqually(amountRappen, participants) }
@@ -16,28 +16,28 @@ describe('computeBalances', () => {
   it('credits the payer and debits the sharers', () => {
     const balances = computeBalances([expense('georgy', 4000)], [], MEMBERS)
     expect(balances.get('georgy')).toBe(3000) // paid 4000, own share 1000
-    expect(balances.get('ihor')).toBe(-1000)
-    expect(balances.get('misha')).toBe(-1000)
-    expect(balances.get('alex')).toBe(-1000)
+    expect(balances.get('hana')).toBe(-1000)
+    expect(balances.get('noor')).toBe(-1000)
+    expect(balances.get('amara')).toBe(-1000)
   })
 
   it('handles a payer who is not a participant', () => {
     const balances = computeBalances(
-      [expense('georgy', 3000, ['ihor', 'misha', 'alex'])],
+      [expense('georgy', 3000, ['hana', 'noor', 'amara'])],
       [],
       MEMBERS,
     )
     expect(balances.get('georgy')).toBe(3000)
-    expect(balances.get('ihor')).toBe(-1000)
+    expect(balances.get('hana')).toBe(-1000)
   })
 
   it('applies settlements: paying a debt moves both balances toward zero', () => {
     const balances = computeBalances(
       [expense('georgy', 4000)],
-      [{ fromId: 'ihor', toId: 'georgy', amountRappen: 1000 }],
+      [{ fromId: 'hana', toId: 'georgy', amountRappen: 1000 }],
       MEMBERS,
     )
-    expect(balances.get('ihor')).toBe(0)
+    expect(balances.get('hana')).toBe(0)
     expect(balances.get('georgy')).toBe(2000)
   })
 
@@ -50,12 +50,12 @@ describe('computeBalances', () => {
   it('always sums to zero (money must balance)', () => {
     const expenses = [
       expense('georgy', 4999),
-      expense('ihor', 333, ['ihor', 'misha']),
-      expense('alex', 10001, ['georgy', 'alex', 'misha']),
+      expense('hana', 333, ['hana', 'noor']),
+      expense('amara', 10001, ['georgy', 'amara', 'noor']),
     ]
     const settlements = [
-      { fromId: 'misha', toId: 'georgy', amountRappen: 700 },
-      { fromId: 'ihor', toId: 'alex', amountRappen: 123 },
+      { fromId: 'noor', toId: 'georgy', amountRappen: 700 },
+      { fromId: 'hana', toId: 'amara', amountRappen: 123 },
     ]
     const balances = computeBalances(expenses, settlements, MEMBERS)
     expect(Array.from(balances.values()).reduce((a, b) => a + b, 0)).toBe(0)
@@ -65,7 +65,7 @@ describe('computeBalances', () => {
 describe('simplifyDebts', () => {
   it('settles all balances with at most n−1 transfers', () => {
     const balances = computeBalances(
-      [expense('georgy', 4000), expense('ihor', 2000), expense('misha', 1000)],
+      [expense('georgy', 4000), expense('hana', 2000), expense('noor', 1000)],
       [],
       MEMBERS,
     )

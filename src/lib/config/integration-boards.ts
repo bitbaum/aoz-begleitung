@@ -1,8 +1,8 @@
 /**
  * The integration domain splits in two, and BOTH pages that serve it split the
  * same way: `/learning` is what somebody has already done, `/opportunities` is
- * where they could go next. Simon works the job half, Sandra the volunteering
- * half, Franziska sees everything.
+ * where they could go next. The Jobcoach works the job half, the Freiwilligenarbeit coordinator the volunteering
+ * half, the all-domains Betreuerin sees everything.
  *
  * The board identity and the role default live here so those two pages cannot
  * come to disagree about which half a coach works in. What a board CONTAINS

@@ -17,7 +17,7 @@ export type CareRoleId = (typeof CARE_ROLES)[number]
  * Which staff role owns which seat.
  *
  * Working EVERY seat is no longer a role — it is `scope: 'ALL_DOMAINS'`, which
- * any role can carry. That is what makes Franziska sayable: her domain of
+ * any role can carry. That is what makes the all-domains Betreuerin sayable: her domain of
  * record is housing and she also covers the rest, a shape the old "Leitung
  * works every seat" reading could not express without erasing her domain.
  */
@@ -44,7 +44,7 @@ export const CARE_DOMAIN_STAFF_ROLE: Record<CareRoleId, Exclude<StaffRole, 'ADMI
  *
  * LIEGENSCHAFTEN is absent for the opposite reason, and it is the more
  * interesting one: ADMIN has no seat because it works ALL of them, and
- * Liegenschaften has none because it works NONE. Manuel is responsible for the
+ * Liegenschaften has none because it works NONE. The Liegenschaften lead is responsible for the
  * buildings — which flats exist, who is placed where, what is broken — and
  * never for a person's care. `undefined` here is therefore a fact about the
  * job, not a gap to fill in later, and `roleHasCaseload()` below is how the
@@ -58,8 +58,8 @@ export const STAFF_ROLE_CARE_DOMAIN: Partial<Record<StaffRole, CareRoleId>> = Ob
  * Does this role carry a caseload at all?
  *
  * Asked instead of counting someone's assignments and inferring from zero.
- * Those are different facts: Sandra with no clients is WAITING to be assigned
- * and the dashboard should say so; Manuel with no clients is doing his job,
+ * Those are different facts: the Freiwilligenarbeit coordinator with no clients is WAITING to be assigned
+ * and the dashboard should say so; the Liegenschaften lead with no clients is doing his job,
  * and telling him "Ihnen ist noch niemand zugewiesen" would be the product
  * misunderstanding what he is for.
  */
@@ -246,9 +246,9 @@ export function canWriteCareDomain(viewer: StaffCapabilities, domain: CareRoleId
  * same rule from the other side: their role works that domain, or they cover
  * every domain.
  *
- * Without it the picker offered every active account for every seat. Manuel
+ * Without it the picker offered every active account for every seat. The Liegenschaften lead
  * appeared under Jobcoach though `LIEGENSCHAFTEN` maps to no care domain and
- * he can never work one; Simon appeared under Freiwilligenarbeit. Nothing
+ * he can never work one; the Jobcoach appeared under Freiwilligenarbeit. Nothing
  * stopped the assignment either — `saveCareSeat` checks who is EDITING, not
  * who is being named — so the mistake was one click away and would have looked
  * like a staffed seat forever after.

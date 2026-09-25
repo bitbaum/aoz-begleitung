@@ -13,10 +13,10 @@
  *
  * The tempting cheap version is a "preview role" cookie that only overrides the
  * capability triple used for permission checks. It is wrong here, and in a way
- * that would quietly defeat the purpose: Simon's dashboard is driven by HIS
- * caseload — `careAssignment.staffId = <Simon>` — not by his role. A preview
+ * that would quietly defeat the purpose: the Jobcoach's dashboard is driven by HIS
+ * caseload — `careAssignment.staffId = <the Jobcoach's id>` — not by his role. A preview
  * that kept the admin's identity would render a Jobcoach-shaped nav above an
- * administrator's data and call it Simon's view. The one bug this feature
+ * administrator's data and call it the Jobcoach's view. The one bug this feature
  * exists to catch (a coach told there is nothing to do while holding a client)
  * is precisely the kind that preview would hide.
  *
@@ -24,8 +24,8 @@
  *
  * ## Why it is READ-ONLY, enforced at the request and not in the UI
  *
- * If an impersonated session could write, the audit trail would say Simon
- * archived a resident when Simon was at lunch. In a product whose whole claim
+ * If an impersonated session could write, the audit trail would say the Jobcoach
+ * archived a resident when the Jobcoach was at lunch. In a product whose whole claim
  * is that placement decisions are explainable and attributable, an audit row
  * naming the wrong caseworker is worse than no audit row.
  *

@@ -5,7 +5,7 @@
  * `STAFF_ROUTES` answers "must you be signed in?" and it listed /settings
  * correctly. Nothing answered the next question — "signed in as WHOM?" — and
  * /settings answered it only by hiding its nav link. On 2026-08-31, signed in
- * to production as Simon Binder (JOBCOACH / OWN_DOMAIN / isSystemAdmin false),
+ * to production as the Jobcoach (JOBCOACH / OWN_DOMAIN / isSystemAdmin false),
  * typing the URL served the whole page, including a roster of every
  * colleague's login CODE. A staff code is the credential — `loginByCode` takes
  * it with no password — so the narrowest role in the product could read

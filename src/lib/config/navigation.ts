@@ -367,9 +367,9 @@ export function visibleMegaMenuGroups(viewer: StaffCapabilities): MegaMenuGroup[
     //
     // `AdminSidebar.test.tsx` has forbidden one-item accordions since the
     // sidebar shipped — but only for ADMIN, the one viewer for whom no group is
-    // ever near-empty. Walked live on 2026-09-03, Simon (JOBCOACH) had THREE:
+    // ever near-empty. Walked live on 2026-09-03, the Jobcoach had THREE:
     // "Klient*innen" holding only "Alle Klient*innen", "Konflikte" holding only
-    // "Vorfälle", and "Wohnen" holding only "Statistiken". Sandra had the same.
+    // "Vorfälle", and "Wohnen" holding only "Statistiken". The Freiwilligenarbeit coordinator had the same.
     // A rule enforced against the one role it cannot fire for is not enforced.
     //
     // The item's own label wins, because it names the destination — "Vorfälle"

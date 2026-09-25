@@ -191,12 +191,12 @@ describe('registerAccount', () => {
   it('claims a resident code and returns the resident identity', async () => {
     codeExists({ resident: true })
     mockAccountById.mockResolvedValue(
-      account({ id: 'acc-new', email: 'ihor@example.ch', resident: RESIDENT }),
+      account({ id: 'acc-new', email: 'hana@example.ch', resident: RESIDENT }),
     )
 
     const result = await registerAccount({
       code: 'RES-ABC123',
-      email: 'ihor@example.ch',
+      email: 'hana@example.ch',
       password: 'secret-password',
     })
 

@@ -43,8 +43,8 @@ describe('who may read a resident conversation', () => {
     // a reason that does not apply here: their reader may be their subject.
     // Reading a resident's message is simply part of covering Betreuung.
     //
-    // Pinned because it is the difference between "Simon cannot read these" and
-    // "nobody but Franziska can", and only the first is true.
+    // Pinned because it is the difference between "The Jobcoach cannot read these" and
+    // "nobody but the all-domains Betreuerin can", and only the first is true.
     const anyRoleWithOversight = {
       role: 'JOBCOACH' as const,
       scope: 'ALL_DOMAINS' as const,
@@ -55,7 +55,7 @@ describe('who may read a resident conversation', () => {
   })
 
   it('leaves the two real coaches out, which is the whole point', () => {
-    // Simon and Sandra are OWN_DOMAIN on the live instance; Franziska is
+    // The Jobcoach and the Freiwilligenarbeit coordinator are OWN_DOMAIN on the live instance; the all-domains Betreuerin is
     // BETREUUNG + ALL_DOMAINS and keeps her inbox either way.
     expect(
       hasPermission(
@@ -108,7 +108,7 @@ describe('the dashboard tile follows the same boundary as the inbox', () => {
    * The tile names a Klient*in and links into a conversation, so it must never
    * render for somebody who may not open that conversation. Gating it on the
    * SAME permission as the page means the two cannot drift — the failure mode
-   * would be a coach seeing "Ihor wartet seit 4 Tagen" on a thread they are
+   * would be a coach seeing "Hana wartet seit 4 Tagen" on a thread they are
    * not allowed to read.
    */
   it('is gated on messages:read, exactly like /messages', () => {

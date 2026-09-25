@@ -11,7 +11,7 @@ import { DASHBOARD_LABELS } from '@/lib/constants/labels'
  * `.length === 0` check, and both were reported as "🎉 Alles unter
  * Kontrolle! Keine dringenden Aufgaben".
  *
- * That is what Simon Binder and Sandra were shown on their first ever login
+ * That is what the Jobcoach and the Freiwilligenarbeit coordinator were shown on their first ever login
  * on 2026-08-31 — a party emoji and a finished day, on an account nobody had
  * connected to a single client. The product's answer to "why is this empty?"
  * was "because you are done".

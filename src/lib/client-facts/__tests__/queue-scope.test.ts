@@ -37,7 +37,7 @@ describe('who holds the permission', () => {
   })
 
   it('is NOT held by the role that runs the buildings', () => {
-    // Manuel places people into flats. That is not a reason to hold anyone's
+    // The Liegenschaften lead places people into flats. That is not a reason to hold anyone's
     // health insurance or their list of doctors.
     expect(ROLE_PERMISSIONS.LIEGENSCHAFTEN as readonly string[]).not.toContain('clientFacts:read')
   })

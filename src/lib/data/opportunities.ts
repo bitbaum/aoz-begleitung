@@ -130,8 +130,8 @@ export async function getOpportunityDetail(id: string) {
  */
 export async function opportunityStats(kinds?: readonly OpportunityKindId[]) {
   // The tiles must describe the list underneath them. Once the board opens on
-  // the coach's own half, unscoped totals would report Sandra's waiting people
-  // above Simon's listings — a number that is true of nothing on the screen.
+  // the coach's own half, unscoped totals would report the Freiwilligenarbeit coordinator's waiting people
+  // above the Jobcoach's listings — a number that is true of nothing on the screen.
   const scoped = kinds && kinds.length > 0 ? inArray(opportunity.kind, [...kinds]) : undefined
 
   const listingsIn = (extra?: SQL) => (scoped ? and(scoped, extra) : extra)

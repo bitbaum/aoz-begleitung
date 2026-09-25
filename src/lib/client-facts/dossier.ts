@@ -9,7 +9,7 @@
  * recorded it.
  *
  * Written and then read by nobody: the exact class this feature was built to
- * end, reproduced inside it. Found by walking the product as Simon rather than
+ * end, reproduced inside it. Found by walking the product as the Jobcoach rather than
  * by reading the code.
  *
  * Visibility is the SAME per-kind rule as the queue (`mayReadFact`), applied

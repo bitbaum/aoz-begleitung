@@ -10,7 +10,7 @@ import { RENEWAL_MILESTONE_DAYS, isMilestoneDay } from '@/lib/client-facts/renew
  * The reminder half of the client-facts feature.
  *
  * "My insurance has to be extended every 6 months, and for that I need to
- * write Franziska." Recording the date let a client SEE it; this is what makes
+ * write my Betreuerin." Recording the date let a client SEE it; this is what makes
  * the date reach somebody who can act.
  *
  * The delivery choice is the part worth pinning: it is IN-APP because

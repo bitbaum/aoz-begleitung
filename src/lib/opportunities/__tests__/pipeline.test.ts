@@ -93,7 +93,7 @@ describe('evidenceForStartedApplication', () => {
   const opportunity = {
     kind: 'VOLUNTEERING' as const,
     title: 'Mittagstisch im Quartiertreff',
-    organisation: 'Quartierverein Witikon',
+    organisation: 'Quartierverein Beispiel',
   }
   const startedAt = new Date('2026-08-25T09:00:00Z')
 
@@ -106,7 +106,7 @@ describe('evidenceForStartedApplication', () => {
 
   it('records the organisation as the provider, not the product', () => {
     expect(evidenceForStartedApplication(opportunity, startedAt).provider).toBe(
-      'Quartierverein Witikon',
+      'Quartierverein Beispiel',
     )
   })
 

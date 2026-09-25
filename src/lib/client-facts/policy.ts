@@ -20,7 +20,7 @@
  *    claim about exactly this. A Jobcoach has no business seeing which doctors
  *    someone visits. One blanket "care team" grant would have handed over both.
  *
- * 3. CONFIRMED MEANS SEEN, NOT TRUE. Franziska cannot ring the insurer to check
+ * 3. CONFIRMED MEANS SEEN, NOT TRUE. The all-domains Betreuerin cannot ring the insurer to check
  *    a policy number. A product that implied she had would be asserting
  *    something about a person's insurance or permit that it cannot know — the
  *    same failure as an opportunity defaulting to "Keine Bewilligung nötig".
@@ -62,7 +62,7 @@ export interface FactViewer {
 /**
  * May this staff member see this kind of fact about this client?
  *
- * `ALL_DOMAINS` is oversight over every care domain, which is what Franziska
+ * `ALL_DOMAINS` is oversight over every care domain, which is what the all-domains Betreuerin
  * holds — it answers "whose files may I open", so it carries here. It is NOT a
  * system-admin grant: `isSystemAdmin` deliberately gives nothing, because
  * configuring the product is not a reason to read someone's insurance.

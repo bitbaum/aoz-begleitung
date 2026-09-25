@@ -105,7 +105,7 @@ describe('the claim survives a round trip through the token', () => {
     const token = await createToken({
       sub: 'target-user',
       email: 'admin@example.ch',
-      name: 'Simon B.',
+      name: 'Jonas M.',
       role: 'JOBCOACH',
       [IMPERSONATION_CLAIM]: 'admin-user',
     })
@@ -122,7 +122,7 @@ describe('the claim survives a round trip through the token', () => {
     const token = await createToken({
       sub: 'someone',
       email: 'a@b.ch',
-      name: 'Franziska Heimhuber',
+      name: 'Anna Muster',
       role: 'BETREUUNG',
     })
 
@@ -137,7 +137,7 @@ describe('the claim survives a round trip through the token', () => {
     const token = await createToken({
       sub: 'someone',
       email: 'a@b.ch',
-      name: 'Sandra',
+      name: 'Lea',
       role: 'FREIWILLIGENARBEIT',
       // Deliberately the wrong shape. TypeScript permits it — JWTPayload
       // carries an index signature, so the compiler is no help here at all,

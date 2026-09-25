@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest'
  * it. Written, then read by nobody, inside the feature built to end exactly
  * that.
  *
- * It was found by walking the product as Simon, not by reading the code. No
+ * It was found by walking the product as the Jobcoach, not by reading the code. No
  * test failed, because "the queue is empty" is indistinguishable from "there
  * is nothing to do".
  */
