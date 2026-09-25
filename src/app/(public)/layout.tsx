@@ -1,3 +1,4 @@
+import Script from 'next/script'
 import Link from 'next/link'
 import { Logo } from '@/components/ui/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -81,6 +82,14 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           </div>
         </div>
       </footer>
+      {/* The feedback widget lives HERE and nowhere else: public pages carry
+          no personal data, so a third-party script sees nothing it should not.
+          Token is a literal so next build cannot tree-shake the Script away. */}
+      <Script
+        src="https://loki.orangecat.ch/widget.js"
+        strategy="afterInteractive"
+        data-fc-project="fcw_757c716fede237047d988f8d715a144d"
+      />
     </div>
   )
 }

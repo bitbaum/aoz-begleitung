@@ -82,7 +82,7 @@ const PLACEMENT_COPY: MarketingCopy = {
     {
       icon: 'vote',
       title: 'La maison organise son quotidien',
-      body: 'Règles de la maison versionnées et confirmées, propositions et votes, tâches avec bilan d’équité, dépenses partagées au centime près.',
+      body: 'Règles de la maison versionnées et confirmées, tâches avec bilan d’équité et un chemin pour les demandes qui aboutit à une réponse.',
     },
     {
       icon: 'shop',
@@ -108,7 +108,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   scienceEyebrow: 'Base scientifique',
   scienceTitle: `Une méthode, pas une opinion : ${FACTOR_COUNT} facteurs d’appariement — et une mécanique du quotidien fondée sur des résultats documentés.`,
-  scienceBody: `Chaque facteur de compatibilité s’appuie sur au moins une étude publiée — la recherche suisse d’abord (notamment BFH/HSLU 2024 auprès de 1000 familles d’accueil), des études internationales pour la validation, ${SOURCE_COUNT} sources au total. Et la mécanique au-delà de l’appariement suit les mêmes exigences : du biais d’auto-évaluation dans le plan de nettoyage à la règle selon laquelle la sécurité ne se met jamais au vote. La méthodologie complète et la liste des sources sont consultables dans le produit par toutes les équipes — et dans la démo, par vous.`,
+  scienceBody: `Les facteurs de compatibilité sont tirés de la recherche publiée — études suisses d’abord, internationales pour la mise en contexte, ${SOURCE_COUNT} sources au total — et la solidité des preuves est indiquée pour chaque facteur : certains résultats proviennent d’autres formes de logement et constituent, pour l’hébergement collectif, une hypothèse argumentée que le pilote vérifie. Et la mécanique au-delà de l’appariement suit les mêmes exigences : du biais d’auto-évaluation dans le plan de nettoyage à la règle selon laquelle la sécurité ne se met jamais au vote. La méthodologie complète et la liste des sources sont consultables dans le produit par toutes les équipes — et dans la démo, par vous.`,
   science: [
     {
       title: 'La propreté est une direction, pas une moyenne',
