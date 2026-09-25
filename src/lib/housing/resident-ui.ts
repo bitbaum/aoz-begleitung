@@ -18,7 +18,7 @@ export type ResidentUiSummary = ResidentSummary & Pick<Resident, 'choresContribu
  * returns every scalar when no `select` is given) because server-side
  * compatibility math (`toResidentProfile`, `getUnitFitConcerns`) needs the full
  * functional field set. Those same rows were then passed straight into client
- * components — `ApartmentProfileCard`, `ProblemDetectionCard`,
+ * components — `ApartmentProfileCard`, `HouseholdFitCard`,
  * `CompatibilityMatrixInteractive`, `RoomVisualizationWithPlacement` — whose
  * props are typed as the NARROW `ResidentSummary`/`…HouseholdProfile`/`…Basic`.
  *

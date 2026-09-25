@@ -36,7 +36,8 @@ import { DISPLAY_LIMITS, QUERY_LIMITS } from '@/lib/config/thresholds'
 import { RoomVisualizationWithPlacement } from '@/components/housing/RoomVisualizationWithPlacement'
 import { CompatibilityMatrixInteractive } from '@/components/housing/CompatibilityMatrixInteractive'
 import { ApartmentProfileCard } from '@/components/housing/ApartmentProfileCard'
-import { ProblemDetectionCard } from '@/components/housing/ProblemDetectionCard'
+import { HouseholdFitCard } from '@/components/housing/HouseholdFitCard'
+import { householdFitNotes } from '@/lib/housing/fit-notes'
 import { UnitOverviewCards } from '@/components/housing/UnitOverviewCards'
 import { UnitSidebar } from '@/components/housing/UnitSidebar'
 import { UnitRulesSection } from '@/components/governance/UnitRulesSection'
@@ -158,26 +159,13 @@ export default async function HousingDetailPage({ params }: Props) {
   )
   const maintenanceIncidents = unit.incidents.filter((i) => i.category === 'MAINTENANCE')
 
-  // Analyze frequent subjects (troublemaker detection)
-  const subjectCounts: Record<string, { code: string; displayName: string | null; count: number }> =
-    {}
-  for (const incident of unit.incidents) {
-    if (incident.subject) {
-      const id = incident.subjectId!
-      if (!subjectCounts[id]) {
-        subjectCounts[id] = {
-          code: incident.subject.code,
-          displayName: incident.subject.displayName,
-          count: 0,
-        }
-      }
-      subjectCounts[id].count++
-    }
-  }
-  const frequentSubjects = Object.entries(subjectCounts)
-    .map(([id, data]) => ({ id, ...data }))
-    .filter((s) => s.count >= 2)
-    .sort((a, b) => b.count - a.count)
+  // What in this household could cause friction — about the household, never
+  // a person. This used to rank residents by how often each was an incident's
+  // subject, listing everyone at two or more. @see lib/housing/fit-notes.ts
+  const fitNotes = householdFitNotes(
+    unit.placements.map((p) => p.resident),
+    unit.incidents,
+  )
 
   const occupancy = unit.placements.length
 
@@ -364,14 +352,7 @@ export default async function HousingDetailPage({ params }: Props) {
             />
           )}
 
-          {/* Problem Detection Card */}
-          {unit.placements.length > 1 && (
-            <ProblemDetectionCard
-              residents={unit.placements.map((p) => toResidentUiSummary(p.resident))}
-              compatibilityScores={compatibilityScores}
-              housingUnitId={unit.id}
-            />
-          )}
+          {unit.placements.length > 1 && <HouseholdFitCard notes={fitNotes} />}
 
           {/* Who Fits Here - Only show if there's available space */}
           {hasAvailableSpace && (
@@ -405,7 +386,6 @@ export default async function HousingDetailPage({ params }: Props) {
             incidents={unit.incidents}
             interpersonalCount={interpersonalIncidents.length}
             maintenanceCount={maintenanceIncidents.length}
-            frequentSubjects={frequentSubjects}
           />
 
           <details className="card">
