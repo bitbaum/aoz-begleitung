@@ -210,14 +210,6 @@ function calculatePracticalCompatibility(
     weight: DIMENSION_WEIGHTS.practical.pets,
   })
 
-  // Dietary compatibility (kitchen sharing)
-  const dietScore = calculateDietaryCompatibility(r1.dietaryNeeds, r2.dietaryNeeds)
-  factors.push({
-    name: 'dietary',
-    score: dietScore,
-    weight: DIMENSION_WEIGHTS.practical.dietary,
-  })
-
   // Chores contribution compatibility (similar levels = less conflict)
   const choresDiff = Math.abs(r1.choresContribution - r2.choresContribution)
   const choresScore = 100 - choresDiff * PRACTICAL_SCALES.choresContribution
@@ -407,27 +399,6 @@ function calculateSharedSpaceCompatibility(r1: ResidentProfile, r2: ResidentProf
   if (!r2.sharedKitchen && r1.sharedKitchen) score -= 15
 
   return Math.max(0, score)
-}
-
-function calculateDietaryCompatibility(d1: string[], d2: string[]): number {
-  // Check for incompatible dietary requirements sharing a kitchen
-  const hasHalal1 = d1.includes('halal')
-  const hasHalal2 = d2.includes('halal')
-  const hasKosher1 = d1.includes('kosher')
-  const hasKosher2 = d2.includes('kosher')
-  const hasVegan1 = d1.includes('vegan')
-  const hasVegan2 = d2.includes('vegan')
-
-  // Similar dietary needs are easier
-  if ((hasHalal1 && hasHalal2) || (hasKosher1 && hasKosher2) || (hasVegan1 && hasVegan2)) {
-    return 100
-  }
-
-  // No special needs = easy
-  if (d1.length === 0 && d2.length === 0) return 100
-
-  // One has special needs, other doesn't = workable
-  return 75
 }
 
 function calculateAgeGapRisk(a1: string, a2: string): number {

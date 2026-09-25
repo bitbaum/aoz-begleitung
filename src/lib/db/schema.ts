@@ -1090,7 +1090,6 @@ export const resident = pgTable(
     guestTolerance: integer().default(3).notNull(),
     socialStyle: socialStyle().notNull(),
     languages: text().array(),
-    culturalRegion: text(),
     conflictStyle: conflictStyle().default('COOPERATIVE').notNull(),
     smokingStatus: smokingStatus().notNull(),
     dietaryNeeds: text().array(),

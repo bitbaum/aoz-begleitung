@@ -166,9 +166,6 @@ export function buildPreferencesLabels(t: Translator) {
       preferredAgeRange: t('preferences.field.preferredAgeRange'),
       noPref: t('preferences.field.noPref'),
       similarAge: t('preferences.field.similarAge'),
-      culturalPref: t('preferences.field.culturalPref'),
-      sameRegion: t('preferences.field.sameRegion'),
-      differentRegion: t('preferences.field.differentRegion'),
       additionalPrefs: t('preferences.field.additionalPrefs'),
     },
     hints: {
@@ -179,7 +176,6 @@ export function buildPreferencesLabels(t: Translator) {
       privacyNeed: t('preferences.hint.privacyNeed'),
       languages: t('preferences.hint.languages'),
       roommatePrefs: t('preferences.hint.roommatePrefs'),
-      culturalPref: t('preferences.hint.culturalPref'),
       additionalPrefsPlaceholder: t('preferences.hint.additionalPrefsPlaceholder'),
     },
   }

@@ -14,7 +14,6 @@ const DEFAULT_RESIDENT: ResidentProfile = {
   guestTolerance: 3,
   socialStyle: 'MODERATE',
   languages: ['German'],
-  culturalRegion: undefined,
   conflictStyle: 'COOPERATIVE',
   smokingStatus: 'NON_SMOKER',
   dietaryNeeds: [],

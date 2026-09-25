@@ -174,7 +174,6 @@ describe('ResidentInputSchema', () => {
   it('accepts optional nullable fields', () => {
     const result = ResidentInputSchema.safeParse({
       ...validInput,
-      culturalRegion: null,
       notes: null,
       medicalDocType: null,
     })

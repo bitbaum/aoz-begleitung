@@ -41,7 +41,7 @@ async function main() {
       privacyNeed: 5, // High need
       languages: ['AR', 'EN'],
       smokingStatus: 'NON_SMOKER' as SmokingStatus,
-      dietaryNeeds: ['HALAL'],
+      dietaryNeeds: ['SEPARATE_COOKWARE'],
       name: 'Ahmed Hassan - quiet early bird, very clean',
     },
     {
@@ -92,7 +92,7 @@ async function main() {
       privacyNeed: 5, // High
       languages: ['SO'],
       smokingStatus: 'NON_SMOKER' as SmokingStatus,
-      dietaryNeeds: ['HALAL'],
+      dietaryNeeds: ['SEPARATE_COOKWARE'],
       hasMedicalDocumentation: true,
       name: 'Amina Osman - quiet, religious, needs privacy',
     },
@@ -127,7 +127,7 @@ async function main() {
       privacyNeed: 3, // Medium
       languages: ['AR'],
       smokingStatus: 'NON_SMOKER' as SmokingStatus,
-      dietaryNeeds: ['HALAL'],
+      dietaryNeeds: ['SEPARATE_COOKWARE'],
       name: 'Fatima Al-Rashid - nurse, shift work',
     },
     {
@@ -210,7 +210,7 @@ async function main() {
   console.log('  • Clean: Very clean (3) vs Clean (3) vs Average/Messy (2)')
   console.log('  • Noise tolerance: 1-5 spread')
   console.log('  • Languages: AR, ES, RU, SO, PT, EN, JA, FR')
-  console.log('  • Diet: Halal (3), Vegetarian (1), Regular (4)')
+  console.log('  • Kitchen: own cookware (3), vegetarian (1), none (4)')
   console.log('\n💡 Next: Visit http://localhost:3000/matching to see compatibility scores!')
 }
 

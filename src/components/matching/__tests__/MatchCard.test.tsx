@@ -125,7 +125,6 @@ const mockResident = {
   guestTolerance: 3,
   socialStyle: 'MODERATE',
   languages: ['DE', 'EN'],
-  culturalRegion: null,
   conflictStyle: 'COOPERATIVE',
   smokingStatus: 'NON_SMOKER',
   dietaryNeeds: [],

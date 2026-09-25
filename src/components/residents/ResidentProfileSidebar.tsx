@@ -32,7 +32,6 @@ export interface ResidentProfileSidebarProps {
     | 'privacyNeed'
     | 'smokingStatus'
     | 'languages'
-    | 'culturalRegion'
     | 'choresContribution'
     | 'recyclingKnowledge'
     | 'mobilityNeeds'
@@ -199,12 +198,6 @@ export function ResidentProfileSidebar({ resident }: ResidentProfileSidebarProps
               ))}
             </dd>
           </div>
-          {resident.culturalRegion && (
-            <DetailRow
-              label={RESIDENT_PROFILE_SIDEBAR_LABELS.fieldRegion}
-              value={resident.culturalRegion}
-            />
-          )}
         </dl>
       </CollapsibleSection>
 

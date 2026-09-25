@@ -23,7 +23,6 @@ export function toResidentProfile(resident: Resident): ResidentProfile {
     guestTolerance: resident.guestTolerance,
     socialStyle: resident.socialStyle,
     languages: resident.languages ?? [],
-    culturalRegion: resident.culturalRegion ?? undefined,
     conflictStyle: resident.conflictStyle,
     smokingStatus: resident.smokingStatus,
     dietaryNeeds: resident.dietaryNeeds ?? [],
