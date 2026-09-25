@@ -19,7 +19,6 @@ function makePrismaResident(overrides: Partial<Resident> = {}): Resident {
     guestTolerance: 3,
     socialStyle: 'MODERATE',
     languages: ['German'],
-    culturalRegion: null,
     conflictStyle: 'COOPERATIVE',
     smokingStatus: 'NON_SMOKER',
     dietaryNeeds: [],
@@ -88,26 +87,14 @@ describe('toResidentProfile', () => {
     expect(profile.supportLevel).toBe('STANDARD')
   })
 
-  it('converts null culturalRegion to undefined', () => {
-    const resident = makePrismaResident({ culturalRegion: null })
-    const profile = toResidentProfile(resident)
-    expect(profile.culturalRegion).toBeUndefined()
-  })
-
-  it('preserves culturalRegion when set', () => {
-    const resident = makePrismaResident({ culturalRegion: 'Middle East' })
-    const profile = toResidentProfile(resident)
-    expect(profile.culturalRegion).toBe('Middle East')
-  })
-
   it('preserves array fields (languages, dietaryNeeds)', () => {
     const resident = makePrismaResident({
       languages: ['German', 'Arabic', 'English'],
-      dietaryNeeds: ['halal', 'vegan'],
+      dietaryNeeds: ['SEPARATE_COOKWARE', 'vegan'],
     })
     const profile = toResidentProfile(resident)
     expect(profile.languages).toEqual(['German', 'Arabic', 'English'])
-    expect(profile.dietaryNeeds).toEqual(['halal', 'vegan'])
+    expect(profile.dietaryNeeds).toEqual(['SEPARATE_COOKWARE', 'vegan'])
   })
 
   it('does not include Prisma-only fields (status, createdAt, etc.)', () => {

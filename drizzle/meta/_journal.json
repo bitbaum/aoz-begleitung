@@ -50,6 +50,13 @@
       "when": 1788886846856,
       "tag": "0006_claimable_placeholder_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790352961239,
+      "tag": "0007_no_religion_or_origin_proxies",
+      "breakpoints": true
     }
   ]
 }

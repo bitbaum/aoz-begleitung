@@ -37,7 +37,6 @@ function makeResident(overrides: Partial<Resident> = {}): Resident {
     guestTolerance: 3,
     socialStyle: 'MODERATE',
     languages: ['German'],
-    culturalRegion: null,
     conflictStyle: 'COOPERATIVE',
     smokingStatus: 'NON_SMOKER',
     dietaryNeeds: [],

@@ -158,8 +158,6 @@ export const LANGUAGE_LABELS: Record<string, string> = {
 // Diet labels (includes uppercase from config and lowercase aliases)
 export const DIET_LABELS: Record<string, string> = {
   ...getLabelsFromFactor('dietaryNeeds'),
-  halal: 'Halal',
-  kosher: 'Koscher',
   vegetarian: 'Vegetarisch',
   vegan: 'Vegan',
   none: 'Keine besonderen',

@@ -449,18 +449,6 @@ export function PreferencesForm({ resident, languageOptions, dietOptions }: Prop
             </div>
 
             <div>
-              <label className="label" htmlFor="culturalPreference">
-                {P.fields.culturalPref}
-              </label>
-              <select id="culturalPreference" name="culturalPreference" className="input">
-                <option value="">{P.fields.noPref}</option>
-                <option value="SAME_REGION">{P.fields.sameRegion}</option>
-                <option value="DIFFERENT_REGION">{P.fields.differentRegion}</option>
-              </select>
-              <p className="text-xs text-ui-muted mt-1">{P.hints.culturalPref}</p>
-            </div>
-
-            <div>
               <label className="label">{P.fields.additionalPrefs}</label>
               <textarea
                 name="additionalPreferences"

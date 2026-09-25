@@ -50,7 +50,6 @@ export async function POST(request: NextRequest) {
   const roommatePrefsText =
     [
       data.preferredAgeRange ? `Altersgruppe: ${data.preferredAgeRange}` : null,
-      data.culturalPreference ? `Kultur: ${data.culturalPreference}` : null,
       data.additionalPreferences || null,
     ]
       .filter(Boolean)
