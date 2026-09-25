@@ -143,6 +143,35 @@ describe('POST /api/auth/demo', () => {
       }
     })
 
+    it('opens in a production build ONLY on the dedicated demo instance', async () => {
+      // The demo instance is its own app on its own database of invented
+      // people. It is the one production build where a no-account door is
+      // safe — and the thing that makes "try it without registering" possible.
+      const env = process.env as Record<string, string | undefined>
+      const previous = env.NODE_ENV
+      env.NODE_ENV = 'production'
+      process.env.DEMO_ACCESS_ENABLED = 'true'
+      process.env.DEMO_INSTANCE = 'true'
+
+      try {
+        const body = await (await GET()).json()
+        expect(body.data.staff).toBe(true)
+        expect(body.data.resident).toBe(true)
+      } finally {
+        env.NODE_ENV = previous
+      }
+    })
+
+    it('offers the resident door on the demo instance even for a non-placeholder profile', async () => {
+      // Every resident there is invented and re-seeded nightly, so there is no
+      // real person behind a "claimed" profile. Everywhere else the
+      // placeholder condition keeps closing the door (tested below).
+      process.env.DEMO_INSTANCE = 'true'
+      mockResidentFindFirst.mockResolvedValue({ id: 'demo-resident-id', isPlaceholder: false })
+      const body = await (await GET()).json()
+      expect(body.data.resident).toBe(true)
+    })
+
     it('rejects an unknown role', async () => {
       // 404, not 400: "no such role" and "that door is not on offer here" are
       // the same fact to the caller, and answering them differently would tell
