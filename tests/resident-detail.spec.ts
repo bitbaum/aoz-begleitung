@@ -138,7 +138,8 @@ test.describe('Resident detail — placed resident (RES-001)', () => {
     // which is correct — RES-001 only has its current one. RES-004 is placed
     // *and* has an earlier, ended placement in the seed.
     const href = await getResidentHrefByCode(page, 'RES-004')
-    await page.goto(href)
+    // The placement's past lives in the dossier's Wohnen section.
+    await page.goto(`${href}?tab=housing`)
 
     await expect(page.getByRole('heading', { name: /Platzierungshistorie/i })).toBeVisible({
       timeout: 15_000,
@@ -184,9 +185,9 @@ test.describe('Resident detail — unplaced resident (RES-021)', () => {
 
   test('shows compatible units or empty state for matching', async ({ page }) => {
     const href = await getResidentHrefByCode(page, 'RES-021')
-    await page.goto(href)
+    await page.goto(`${href}?tab=housing`)
 
-    // CompatibleMatchesCard heading
+    // CompatibleMatchesCard heading, in the dossier's Wohnen section
     await expect(page.getByRole('heading', { name: /Passende Optionen/i })).toBeVisible({
       timeout: 15_000,
     })

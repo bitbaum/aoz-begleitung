@@ -424,6 +424,42 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
 
           {dossierTab === 'overview' && (
             <>
+              {/* Where the person lives is a fact every role needs on
+                  arrival; the placement's detail and actions stay in Wohnen. */}
+              <div className="card flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="eyebrow">{RESIDENT_DETAIL_LABELS.livesIn}</p>
+                  {currentPlacement ? (
+                    <p className="text-sm text-ui-text">
+                      {canReadHousing ? (
+                        <Link
+                          href={`/housing/${currentPlacement.housingUnitId}`}
+                          className="inline-flex min-h-[44px] items-center font-medium hover:text-brand-primary"
+                        >
+                          {currentPlacement.housingUnit.code}
+                        </Link>
+                      ) : (
+                        <span className="font-medium">{currentPlacement.housingUnit.code}</span>
+                      )}{' '}
+                      <span className="text-ui-muted">
+                        · {currentPlacement.housingUnit.address} · {RESIDENT_DETAIL_LABELS.since}
+                        {formatDate(currentPlacement.startDate)}
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="text-sm text-ui-muted">{RESIDENT_DETAIL_LABELS.notPlaced}</p>
+                  )}
+                </div>
+                {visibleDossierTabs.includes('housing') && (
+                  <Link
+                    href={`/residents/${resident.id}?tab=housing`}
+                    className="btn-ghost shrink-0"
+                  >
+                    {RESIDENT_DETAIL_LABELS.toHousingSection}
+                  </Link>
+                )}
+              </div>
+
               <CareTeamCard
                 residentId={resident.id}
                 seats={careSeats}
