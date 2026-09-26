@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { BoardSwitcher } from '@/components/ui/BoardSwitcher'
+import { DOSSIER_TABS, DOSSIER_TAB_LABELS, resolveDossierTab } from '@/lib/config/dossier'
 import type { HousingUnit, Resident } from '@/lib/db'
 import {
   db,
@@ -85,7 +87,7 @@ export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ action?: string }>
+  searchParams: Promise<{ action?: string; tab?: string }>
 }
 
 export default async function ResidentDetailPage({ params, searchParams }: Props) {
@@ -335,6 +337,17 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
       .slice(0, 3)
   }
 
+  // Sections with nothing this viewer may see are not offered at all.
+  const visibleDossierTabs = DOSSIER_TABS.filter(
+    (id) => id !== 'documents' || canReadDocuments || Boolean(clientFacts),
+  )
+  const dossierTab = resolveDossierTab({
+    tab: query.tab,
+    action: query.action,
+    role: staff?.role ?? 'BETREUUNG',
+    visible: visibleDossierTabs,
+  })
+
   return (
     <div>
       {/* Header */}
@@ -373,7 +386,7 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
               crash on click. */}
           {canWritePlacements && currentPlacement && (
             <Link
-              href={`/residents/${resident.id}?action=transfer#placement-actions`}
+              href={`/residents/${resident.id}?tab=housing&action=transfer#placement-actions`}
               className="btn-primary"
             >
               {RESIDENT_DETAIL_LABELS.transferBtn}
@@ -395,156 +408,231 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column: Profile details */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Current Placement */}
-          <div className="card">
-            <h2 className="text-lg font-semibold text-ui-text mb-4">
-              {RESIDENT_DETAIL_LABELS.currentPlacementTitle}
-            </h2>
-            {currentPlacement ? (
-              <div className="space-y-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 bg-status-success/10 rounded-lg">
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-10 h-10 shrink-0 bg-status-success text-ui-on-accent rounded-lg flex items-center justify-center">
-                      {'\u{1F3E0}'}
-                    </div>
-                    <div className="min-w-0">
-                      {canReadHousing ? (
-                        <Link
-                          href={`/housing/${currentPlacement.housingUnitId}`}
-                          className="inline-flex items-center py-2 -my-2 font-medium text-ui-text hover:text-brand-primary"
-                        >
-                          {currentPlacement.housingUnit.code}
-                        </Link>
-                      ) : (
-                        <span className="inline-flex items-center py-2 -my-2 font-medium text-ui-text">
-                          {currentPlacement.housingUnit.code}
-                        </span>
-                      )}
-                      <p className="text-sm text-ui-muted">
-                        {currentPlacement.housingUnit.address}
-                      </p>
-                      {currentPlacement.spot && (
-                        <p className="text-sm text-ui-muted">
-                          {
-                            SPOT_TYPE_ICONS[
-                              currentPlacement.spot.type as keyof typeof SPOT_TYPE_ICONS
-                            ]
-                          }{' '}
-                          {currentPlacement.spot.label || currentPlacement.spot.code}
-                        </p>
-                      )}
-                      <p className="text-sm text-ui-muted">
-                        {RESIDENT_DETAIL_LABELS.since}
-                        {formatDate(currentPlacement.startDate)}
-                      </p>
-                    </div>
-                  </div>
-                  {currentPlacement.compatibilityScore && (
-                    <div className="text-left sm:text-right shrink-0">
-                      <p className="text-sm text-ui-muted">
-                        {RESIDENT_DETAIL_LABELS.compatibility}
-                      </p>
-                      <p
-                        className={`text-lg font-semibold ${getScoreColorClass(
-                          currentPlacement.compatibilityScore,
-                        )}`}
-                      >
-                        {Math.round(currentPlacement.compatibilityScore)}% -{' '}
-                        {getScoreLabel(currentPlacement.compatibilityScore)}
-                      </p>
-                    </div>
-                  )}
-                </div>
+          {/* The dossier in sections — the person first, then the places they
+              could go, their roof, living together, their papers. It was one
+              column of ten cards in the order they were added.
+              @see lib/config/dossier.ts */}
+          <BoardSwitcher
+            label={RESIDENT_DETAIL_LABELS.sectionsLabel}
+            current={dossierTab}
+            items={visibleDossierTabs.map((id) => ({
+              id,
+              label: DOSSIER_TAB_LABELS[id],
+              href: `/residents/${resident.id}?tab=${id}`,
+            }))}
+          />
 
-                {/* The score without the reasoning is the black box this
+          {dossierTab === 'overview' && (
+            <>
+              <CareTeamCard
+                residentId={resident.id}
+                seats={careSeats}
+                staffOptions={assignableStaff}
+                canWrite={false}
+                writableDomains={staff ? writableCareDomains(staff) : []}
+                title="Betreuungsteam"
+                empty="Noch niemand zugewiesen."
+              />
+
+              <CareWorkspace
+                residentId={resident.id}
+                interpreterNeed={resident.interpreterNeed}
+                attributes={careAttributes}
+                appointments={careAppointments}
+                writableDomains={staff ? writableCareDomains(staff) : []}
+              />
+
+              {/*
+            Who changed this record, and when.
+            `getEntityAuditLog` was written for exactly this and had no caller
+            anywhere in the product — 120 write sites, and the only way to read
+            any of it was the system-wide /audit page, which answers a
+            different question. This one is the day-to-day one: "who edited
+            this client, and why".
+            Scoped to RESIDENT entries, so nothing here can reveal that a
+            client-fact entry exists to somebody who may not read that kind.
+          */}
+              <details className="card">
+                <summary className="min-h-[44px] cursor-pointer list-none [&::-webkit-details-marker]:hidden flex items-center text-sm font-medium text-brand-secondary">
+                  {RESIDENT_DETAIL_LABELS.changeHistory}
+                </summary>
+                <p className="mt-1 text-xs text-ui-muted">
+                  {RESIDENT_DETAIL_LABELS.changeHistoryHint}
+                </p>
+                <div className="mt-3">
+                  <AuditTrail entries={residentHistory} showEntity={false} />
+                </div>
+              </details>
+            </>
+          )}
+
+          {dossierTab === 'integration' && (
+            <>
+              {/* Directly above the evidence, because that is where the evidence
+              comes from: a thread reaching STARTED mints the LearningRecord
+              below it. @see lib/opportunities/pipeline.ts */}
+              {canReadOpportunities && <ResidentThreadsCard threads={opportunityThreads} />}
+
+              <LearningRecordsCard
+                residentId={resident.id}
+                records={resident.learningRecords}
+                canWrite={canWriteLearning}
+              />
+            </>
+          )}
+
+          {dossierTab === 'housing' && (
+            <>
+              {/* Current Placement */}
+              <div className="card">
+                <h2 className="text-lg font-semibold text-ui-text mb-4">
+                  {RESIDENT_DETAIL_LABELS.currentPlacementTitle}
+                </h2>
+                {currentPlacement ? (
+                  <div className="space-y-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 bg-status-success/10 rounded-lg">
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="w-10 h-10 shrink-0 bg-status-success text-ui-on-accent rounded-lg flex items-center justify-center">
+                          {'\u{1F3E0}'}
+                        </div>
+                        <div className="min-w-0">
+                          {canReadHousing ? (
+                            <Link
+                              href={`/housing/${currentPlacement.housingUnitId}`}
+                              className="inline-flex items-center py-2 -my-2 font-medium text-ui-text hover:text-brand-primary"
+                            >
+                              {currentPlacement.housingUnit.code}
+                            </Link>
+                          ) : (
+                            <span className="inline-flex items-center py-2 -my-2 font-medium text-ui-text">
+                              {currentPlacement.housingUnit.code}
+                            </span>
+                          )}
+                          <p className="text-sm text-ui-muted">
+                            {currentPlacement.housingUnit.address}
+                          </p>
+                          {currentPlacement.spot && (
+                            <p className="text-sm text-ui-muted">
+                              {
+                                SPOT_TYPE_ICONS[
+                                  currentPlacement.spot.type as keyof typeof SPOT_TYPE_ICONS
+                                ]
+                              }{' '}
+                              {currentPlacement.spot.label || currentPlacement.spot.code}
+                            </p>
+                          )}
+                          <p className="text-sm text-ui-muted">
+                            {RESIDENT_DETAIL_LABELS.since}
+                            {formatDate(currentPlacement.startDate)}
+                          </p>
+                        </div>
+                      </div>
+                      {currentPlacement.compatibilityScore && (
+                        <div className="text-left sm:text-right shrink-0">
+                          <p className="text-sm text-ui-muted">
+                            {RESIDENT_DETAIL_LABELS.compatibility}
+                          </p>
+                          <p
+                            className={`text-lg font-semibold ${getScoreColorClass(
+                              currentPlacement.compatibilityScore,
+                            )}`}
+                          >
+                            {Math.round(currentPlacement.compatibilityScore)}% -{' '}
+                            {getScoreLabel(currentPlacement.compatibilityScore)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* The score without the reasoning is the black box this
                     product's first principles forbid: "decisions must be
                     explainable". The argument was composed by
                     `buildPlacementRationale` and written to `placementNotes`
                     on every placement since that code existed, and no
                     component ever read the column. Collapsed, because it is
                     the answer to "why?" rather than something to read daily. */}
-                {currentPlacement.placementNotes && (
-                  <details className="mt-4 border-t border-ui-border pt-4">
-                    <summary className="min-h-[44px] cursor-pointer text-sm font-medium text-brand-primary list-none [&::-webkit-details-marker]:hidden flex items-center">
-                      {RESIDENT_DETAIL_LABELS.placementRationale}
-                    </summary>
-                    <p className="mt-2 text-xs text-ui-muted">
-                      {RESIDENT_DETAIL_LABELS.placementRationaleHint}
-                    </p>
-                    <p className="mt-2 whitespace-pre-line text-sm text-ui-text">
-                      {currentPlacement.placementNotes}
-                    </p>
-                  </details>
-                )}
+                    {currentPlacement.placementNotes && (
+                      <details className="mt-4 border-t border-ui-border pt-4">
+                        <summary className="min-h-[44px] cursor-pointer text-sm font-medium text-brand-primary list-none [&::-webkit-details-marker]:hidden flex items-center">
+                          {RESIDENT_DETAIL_LABELS.placementRationale}
+                        </summary>
+                        <p className="mt-2 text-xs text-ui-muted">
+                          {RESIDENT_DETAIL_LABELS.placementRationaleHint}
+                        </p>
+                        <p className="mt-2 whitespace-pre-line text-sm text-ui-text">
+                          {currentPlacement.placementNotes}
+                        </p>
+                      </details>
+                    )}
 
-                {/* A satisfaction scale used to sit here permanently, so a
+                    {/* A satisfaction scale used to sit here permanently, so a
                     caseworker could record how someone felt without having
                     spoken to them. Recording it now belongs to closing an
                     appointment (see CareWorkspace); reading the history stays
                     here, in SatisfactionHistory below. */}
 
-                {/* Actions Section - Client Component */}
-                <PlacementActions
-                  placementId={currentPlacement.id}
-                  residentId={resident.id}
-                  currentUnitId={currentPlacement.housingUnitId}
-                  hasMedicalDocumentation={resident.hasMedicalDocumentation}
-                  availableUnits={availableUnits.map((u) => ({
-                    id: u.id,
-                    code: u.code,
-                    address: u.address,
-                    spots: u.spots.map((s) => ({
-                      id: s.id,
-                      code: s.code,
-                      type: s.type,
-                      label: s.label,
-                    })),
-                  }))}
-                  eligibleSpotTypes={getEligibleSpotTypes(
-                    resident.hasMedicalDocumentation,
-                    resident.medicalDocType,
-                  )}
-                  unitCompatibility={unitCompatibility}
-                  recentIncidents={resident.incidentsAsSubject.map((i) => ({
-                    id: i.id,
-                    date: i.date,
-                    type: i.type,
-                    description: i.description,
-                  }))}
-                  initialCompatibilityScore={currentPlacement.compatibilityScore}
-                  initialAction={
-                    query.action === 'transfer'
-                      ? 'transfer'
-                      : query.action === 'end'
-                        ? 'end'
-                        : undefined
-                  }
-                  canWriteCheckIn={canWriteResidents}
-                  canWritePlacement={canWritePlacements}
-                />
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-ui-muted mb-4">{RESIDENT_DETAIL_LABELS.notPlaced}</p>
-                {canWritePlacements && (
-                  <Link href={`/matching?resident=${resident.id}`} className="btn-primary">
-                    {RESIDENT_DETAIL_LABELS.findUnit}
-                  </Link>
+                    {/* Actions Section - Client Component */}
+                    <PlacementActions
+                      placementId={currentPlacement.id}
+                      residentId={resident.id}
+                      currentUnitId={currentPlacement.housingUnitId}
+                      hasMedicalDocumentation={resident.hasMedicalDocumentation}
+                      availableUnits={availableUnits.map((u) => ({
+                        id: u.id,
+                        code: u.code,
+                        address: u.address,
+                        spots: u.spots.map((s) => ({
+                          id: s.id,
+                          code: s.code,
+                          type: s.type,
+                          label: s.label,
+                        })),
+                      }))}
+                      eligibleSpotTypes={getEligibleSpotTypes(
+                        resident.hasMedicalDocumentation,
+                        resident.medicalDocType,
+                      )}
+                      unitCompatibility={unitCompatibility}
+                      recentIncidents={resident.incidentsAsSubject.map((i) => ({
+                        id: i.id,
+                        date: i.date,
+                        type: i.type,
+                        description: i.description,
+                      }))}
+                      initialCompatibilityScore={currentPlacement.compatibilityScore}
+                      initialAction={
+                        query.action === 'transfer'
+                          ? 'transfer'
+                          : query.action === 'end'
+                            ? 'end'
+                            : undefined
+                      }
+                      canWriteCheckIn={canWriteResidents}
+                      canWritePlacement={canWritePlacements}
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-ui-muted mb-4">{RESIDENT_DETAIL_LABELS.notPlaced}</p>
+                    {canWritePlacements && (
+                      <Link href={`/matching?resident=${resident.id}`} className="btn-primary">
+                        {RESIDENT_DETAIL_LABELS.findUnit}
+                      </Link>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
 
-          {/* Compatible Matches for Unplaced Residents */}
-          {!currentPlacement && canWritePlacements && (
-            <CompatibleMatchesCard
-              residentId={resident.id}
-              compatibleUnits={compatibleUnits}
-              compatibleResidents={compatibleResidents}
-            />
-          )}
+              {/* Compatible Matches for Unplaced Residents */}
+              {!currentPlacement && canWritePlacements && (
+                <CompatibleMatchesCard
+                  residentId={resident.id}
+                  compatibleUnits={compatibleUnits}
+                  compatibleResidents={compatibleResidents}
+                />
+              )}
 
-          {/* Satisfaction Check-ins History — `placements:read`, the same
+              {/* Satisfaction Check-ins History — `placements:read`, the same
               boundary /placements and /analytics use for this data.
 
               This was ungated, so EVERY staff role saw a client's full
@@ -564,87 +652,48 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
               (api/portal/satisfaction), and incidents have their own
               permission. The signal that needs to travel still travels; what
               stops is browsing someone's mood history with no reason to. */}
-          {currentPlacement && canReadPlacements && (
-            <SatisfactionHistory placementId={currentPlacement.id} />
+              {currentPlacement && canReadPlacements && (
+                <SatisfactionHistory placementId={currentPlacement.id} />
+              )}
+
+              {/* Compatibility with current roommates */}
+              <TopCompatibilitiesCard assessments={resident.assessments} />
+
+              {/* Placement History */}
+              <PlacementHistoryCard placements={pastPlacements} />
+            </>
           )}
 
-          {/* Compatibility with current roommates */}
-          <TopCompatibilitiesCard assessments={resident.assessments} />
-
-          {/* Incidents */}
-          <ResidentIncidents
-            incidentsAsSubject={resident.incidentsAsSubject}
-            incidentsReportedCount={resident.incidentsReported.length}
-            currentPlacement={
-              currentPlacement
-                ? { id: currentPlacement.id, housingUnitId: currentPlacement.housingUnitId }
-                : null
-            }
-            residentId={resident.id}
-            canWriteIncidents={canWriteIncidents}
-          />
-
-          {/* Directly above the evidence, because that is where the evidence
-              comes from: a thread reaching STARTED mints the LearningRecord
-              below it. @see lib/opportunities/pipeline.ts */}
-          {canReadOpportunities && <ResidentThreadsCard threads={opportunityThreads} />}
-
-          <LearningRecordsCard
-            residentId={resident.id}
-            records={resident.learningRecords}
-            canWrite={canWriteLearning}
-          />
-
-          <CareTeamCard
-            residentId={resident.id}
-            seats={careSeats}
-            staffOptions={assignableStaff}
-            canWrite={false}
-            writableDomains={staff ? writableCareDomains(staff) : []}
-            title="Betreuungsteam"
-            empty="Noch niemand zugewiesen."
-          />
-
-          {canReadDocuments && (
-            <ResidentDocumentsCard
-              residentId={resident.id}
-              documents={documents}
-              canWrite={canWriteDocuments}
-            />
+          {dossierTab === 'living' && (
+            <>
+              {/* Incidents */}
+              <ResidentIncidents
+                incidentsAsSubject={resident.incidentsAsSubject}
+                incidentsReportedCount={resident.incidentsReported.length}
+                currentPlacement={
+                  currentPlacement
+                    ? { id: currentPlacement.id, housingUnitId: currentPlacement.housingUnitId }
+                    : null
+                }
+                residentId={resident.id}
+                canWriteIncidents={canWriteIncidents}
+              />
+            </>
           )}
 
-          <CareWorkspace
-            residentId={resident.id}
-            interpreterNeed={resident.interpreterNeed}
-            attributes={careAttributes}
-            appointments={careAppointments}
-            writableDomains={staff ? writableCareDomains(staff) : []}
-          />
+          {dossierTab === 'documents' && (
+            <>
+              {canReadDocuments && (
+                <ResidentDocumentsCard
+                  residentId={resident.id}
+                  documents={documents}
+                  canWrite={canWriteDocuments}
+                />
+              )}
 
-          {/* Placement History */}
-          <PlacementHistoryCard placements={pastPlacements} />
-
-          {clientFacts && <ClientFactsCard facts={clientFacts} />}
-
-          {/*
-            Who changed this record, and when.
-            `getEntityAuditLog` was written for exactly this and had no caller
-            anywhere in the product — 120 write sites, and the only way to read
-            any of it was the system-wide /audit page, which answers a
-            different question. This one is the day-to-day one: "who edited
-            this client, and why".
-            Scoped to RESIDENT entries, so nothing here can reveal that a
-            client-fact entry exists to somebody who may not read that kind.
-          */}
-          <details className="card">
-            <summary className="min-h-[44px] cursor-pointer list-none [&::-webkit-details-marker]:hidden flex items-center text-sm font-medium text-brand-secondary">
-              {RESIDENT_DETAIL_LABELS.changeHistory}
-            </summary>
-            <p className="mt-1 text-xs text-ui-muted">{RESIDENT_DETAIL_LABELS.changeHistoryHint}</p>
-            <div className="mt-3">
-              <AuditTrail entries={residentHistory} showEntity={false} />
-            </div>
-          </details>
+              {clientFacts && <ClientFactsCard facts={clientFacts} />}
+            </>
+          )}
         </div>
 
         {/* Right column: Profile attributes */}

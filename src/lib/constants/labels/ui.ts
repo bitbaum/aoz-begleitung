@@ -616,6 +616,8 @@ export const RESIDENT_FORM_LABELS = {
 } as const
 
 export const RESIDENT_DETAIL_LABELS = {
+  /** Accessible name of the dossier's section tabs. @see config/dossier.ts */
+  sectionsLabel: 'Bereich im Dossier',
   breadcrumb: 'Klient*innen',
   transferBtn: 'Verlegen',
   editBtn: 'Bearbeiten',
