@@ -20,16 +20,3 @@ jobs:
       app: aoz-wohnen
       git-ref: ${{ github.event.workflow_run.head_sha }}
     secrets: inherit
-
-  # The no-account demo: the same commit, deployed to its own app and its own
-  # database of invented people (aoz-demo.orangecat.ch, DEMO_INSTANCE=true in
-  # that box's env). Gated on a repo variable so master stays green until the
-  # app is registered in loki's apps.conf and provisioned on the box. Enable:
-  #   gh variable set AOZ_DEMO_DEPLOY --body true -R bitbaum/aoz-begleitung
-  deploy-demo:
-    if: vars.AOZ_DEMO_DEPLOY == 'true' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request'))
-    uses: bitbaum/loki/.github/workflows/selfhost-deploy.yml@main
-    with:
-      app: aoz-demo
-      git-ref: ${{ github.event.workflow_run.head_sha }}
-    secrets: inherit

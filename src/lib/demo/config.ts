@@ -7,13 +7,13 @@
  * public BY DESIGN; safety comes from the reset (api/cron/reset-demo), the
  * login rate limit, and the operator opt-in via env.
  *
- * WHERE THE DEMO LIVES. Invented people never share a database with real
- * ones. The fabricated world was deleted from PRODUCTION on 2026-09-08 because
- * it outnumbered the real residents three to one in the numbers AOZ is judged
- * on. It lives again only on the dedicated demo instance (`isDemoInstance`),
- * its own app and database, re-seeded nightly by api/cron/reset-demo — so
- * anyone can try the product without an account, and nothing they do there
- * can touch a real person.
+ * WHERE THE DEMO LIVES (decided 2026-09-26): on the main site, beside the
+ * real flat. Invented residents and flats carry demo code prefixes, invented
+ * listings are authored by a demo account, and the nightly reset
+ * (api/cron/reset-demo → scoped-reset.ts) removes exactly those rows and
+ * nothing else. The KPIs exclude them by the same prefixes
+ * (lib/analytics/real-data.ts). A separate demo app and database ran for one
+ * day (aoz-demo) and was retired as more machinery than the job needs.
  *
  * Relative-import-safe (no '@/' aliases): seeding scripts load this through
  * ts-node, which does not resolve tsconfig path aliases.
@@ -22,46 +22,17 @@
 // Relative on purpose — see the note above about ts-node and path aliases.
 import { ALL_RESIDENT_CODE_PREFIXES, RESIDENT_CODE_PREFIX } from '../auth/code-prefixes'
 
-/**
- * Is THIS deployment the dedicated demo instance?
- *
- * The demo instance is a separate app on its own database holding only
- * invented people (aoz-demo.orangecat.ch). It is the ONE production build on
- * which no-account doors may open and on which a full wipe-and-reseed may run.
- * Set in that box's env only; never in the production app's.
- */
-export function isDemoInstance(): boolean {
-  return process.env.DEMO_INSTANCE === 'true'
-}
-
-/** Where the no-account demo lives. Production has no demo doors of its own. */
-export const DEMO_INSTANCE_URL = 'https://aoz-demo.orangecat.ch'
-
-/**
- * Where "Produkt ansehen" goes. On the demo instance, its own doors; anywhere
- * else, the demo instance — production's login has no doors to offer, and a
- * button that lands on a password form is not "try it without an account".
- */
+/** Where "Produkt ansehen" goes: this site's own demo doors. */
 export function demoEntryHref(): string {
-  return isDemoInstance() ? '/login#demo' : `${DEMO_INSTANCE_URL}/login#demo`
+  return '/login#demo'
 }
 
 /**
- * Master switch — server-side. The login page asks GET /api/auth/demo.
- *
- * SECURITY: a production build opens demo doors ONLY on the dedicated demo
- * instance. Until 2026-09-25 the doors opened into the live database — real
- * AOZ staff, real residents — with system-admin reach (PR 256 closed that).
- * A production build without `DEMO_INSTANCE=true` answers no, whatever
- * DEMO_ACCESS_ENABLED says, so a copied env line cannot reopen it.
- *
- * In non-production environments (development, test), DEMO_ACCESS_ENABLED
- * alone controls availability.
+ * Master switch — server-side, per deployment (`DEMO_ACCESS_ENABLED=true`).
+ * The login page asks GET /api/auth/demo which doors exist, so a button
+ * appears only where pressing it can succeed.
  */
 export function isDemoEnabled(): boolean {
-  if (process.env.NODE_ENV === 'production' && !isDemoInstance()) {
-    return false
-  }
   return process.env.DEMO_ACCESS_ENABLED === 'true'
 }
 

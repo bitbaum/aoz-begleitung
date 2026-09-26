@@ -115,37 +115,31 @@ describe('POST /api/auth/demo', () => {
     process.env = { ...originalEnv }
   })
 
-  describe('where to try it without an account', () => {
-    it('production has no doors, and says where the demo is', async () => {
+  describe('the demo lives on the main site', () => {
+    it('opens its doors in a production build when switched on', async () => {
+      // Decided 2026-09-26: invented residents live beside the real flat on
+      // aoz.orangecat.ch, cleaned nightly by the scoped reset.
       const env = process.env as Record<string, string | undefined>
       const previous = env.NODE_ENV
       env.NODE_ENV = 'production'
-      delete process.env.DEMO_INSTANCE
+      process.env.DEMO_ACCESS_ENABLED = 'true'
       try {
         const body = await (await GET()).json()
-        expect(body.data.doors).toEqual([])
-        expect(body.data.demoUrl).toBe('https://aoz-demo.orangecat.ch/login#demo')
+        expect(body.data.staff).toBe(true)
+        expect(body.data.resident).toBe(true)
+        expect(body.data).not.toHaveProperty('demoUrl')
       } finally {
         env.NODE_ENV = previous
       }
     })
-
-    it('the demo instance offers its own doors and points nowhere else', async () => {
-      process.env.DEMO_INSTANCE = 'true'
-      const body = await (await GET()).json()
-      expect(body.data.demoUrl).toBeNull()
-    })
   })
 
   describe('validation and configuration', () => {
-    it('is ALWAYS disabled in production, even when DEMO_ACCESS_ENABLED=true', async () => {
-      // SECURITY: This is the hard gate preventing demo access in production.
-      // Demo logins create real sessions with admin access, so they must never
-      // be enabled where real data exists.
+    it('stays shut in production unless DEMO_ACCESS_ENABLED=true', async () => {
       const env = process.env as Record<string, string | undefined>
       const previous = env.NODE_ENV
       env.NODE_ENV = 'production'
-      process.env.DEMO_ACCESS_ENABLED = 'true' // Explicitly try to enable it
+      process.env.DEMO_ACCESS_ENABLED = 'false'
 
       try {
         // GET endpoint should report no doors
@@ -165,30 +159,11 @@ describe('POST /api/auth/demo', () => {
       }
     })
 
-    it('opens in a production build ONLY on the dedicated demo instance', async () => {
-      // The demo instance is its own app on its own database of invented
-      // people. It is the one production build where a no-account door is
-      // safe — and the thing that makes "try it without registering" possible.
-      const env = process.env as Record<string, string | undefined>
-      const previous = env.NODE_ENV
-      env.NODE_ENV = 'production'
-      process.env.DEMO_ACCESS_ENABLED = 'true'
-      process.env.DEMO_INSTANCE = 'true'
-
-      try {
-        const body = await (await GET()).json()
-        expect(body.data.staff).toBe(true)
-        expect(body.data.resident).toBe(true)
-      } finally {
-        env.NODE_ENV = previous
-      }
-    })
-
-    it('offers the resident door on the demo instance even for a non-placeholder profile', async () => {
-      // Every resident there is invented and re-seeded nightly, so there is no
-      // real person behind a "claimed" profile. Everywhere else the
-      // placeholder condition keeps closing the door (tested below).
-      process.env.DEMO_INSTANCE = 'true'
+    it('offers the resident door onto an invented resident', async () => {
+      // A demo-prefixed code is never issued to a real person, and the nightly
+      // reset re-creates the row, so the door is safe though it is no
+      // placeholder. A real client's code never matches (tested below).
+      process.env.DEMO_RESIDENT_CODE = 'KL-DEMO1'
       mockResidentFindFirst.mockResolvedValue({ id: 'demo-resident-id', isPlaceholder: false })
       const body = await (await GET()).json()
       expect(body.data.resident).toBe(true)
@@ -279,12 +254,11 @@ describe('POST /api/auth/demo', () => {
       expect(mockSetSessionCookie).toHaveBeenCalledWith(STAFF_USER)
     })
 
-    it('BLOCKS staff demo in production (security: prevents unauthorized admin access)', async () => {
-      // This is the regression test for the security vulnerability where demo
-      // logins granted system admin access in production against real data.
+    it('refuses the staff door in production while demo access is off', async () => {
       const env = process.env as Record<string, string | undefined>
       const previous = env.NODE_ENV
       env.NODE_ENV = 'production'
+      process.env.DEMO_ACCESS_ENABLED = 'false'
       try {
         const response = await POST(createDemoRequest({ role: 'staff' }))
         const body = await response.json()
@@ -311,7 +285,7 @@ describe('POST /api/auth/demo', () => {
       expect(mockSetResidentCookie).toHaveBeenCalledWith(RESIDENT_CODE)
     })
 
-    it('BLOCKS resident demo in production', async () => {
+    it('refuses the resident door in production while demo access is off', async () => {
       mockLoginByCode.mockResolvedValue({
         success: true,
         type: 'resident',
@@ -320,6 +294,7 @@ describe('POST /api/auth/demo', () => {
       const env = process.env as Record<string, string | undefined>
       const previous = env.NODE_ENV
       env.NODE_ENV = 'production'
+      process.env.DEMO_ACCESS_ENABLED = 'false'
       try {
         const response = await POST(createDemoRequest({ role: 'resident' }))
         expect(response.status).toBe(404)
@@ -395,11 +370,8 @@ describe('POST /api/auth/demo', () => {
     it('reports nothing when demo access is disabled', async () => {
       process.env.DEMO_ACCESS_ENABLED = 'false'
       const body = await (await GET()).json()
-      // No doors here — and a pointer to the demo instance, which is where
-      // trying the product without an account now lives.
       expect(body.data).toEqual({
         doors: [],
-        demoUrl: 'https://aoz-demo.orangecat.ch/login#demo',
         staff: false,
         resident: false,
       })

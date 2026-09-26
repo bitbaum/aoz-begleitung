@@ -35,7 +35,6 @@ function LoginForm() {
   const [demoDoors, setDemoDoors] = useState<{ id: string; label: string }[]>([])
   // Set only where this instance has no doors of its own (production): the
   // way to try the product without an account is the demo instance.
-  const [demoUrl, setDemoUrl] = useState<string | null>(null)
   const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -45,7 +44,6 @@ function LoginForm() {
       .then((body) => {
         if (!cancelled && body?.success) {
           setDemoDoors(body.data?.doors ?? [])
-          setDemoUrl(typeof body.data?.demoUrl === 'string' ? body.data.demoUrl : null)
         }
       })
       .catch(() => {
@@ -173,14 +171,6 @@ function LoginForm() {
             </Button>
           ))}
         </div>
-      </div>
-    ) : demoUrl && state.status !== 'success' ? (
-      <div className="mb-6 rounded-lg border border-ui-border bg-ui-subtle p-4">
-        <p className="text-sm font-medium text-ui-text">{LOGIN_LABELS.demo.title}</p>
-        <p className="mt-0.5 mb-3 text-xs text-ui-muted">{LOGIN_LABELS.demo.elsewhere}</p>
-        <a href={demoUrl} className="btn-outline">
-          {LOGIN_LABELS.demo.openDemo}
-        </a>
       </div>
     ) : null
 

@@ -69,7 +69,6 @@ describe('POST /api/cron/reset-demo', () => {
     vi.clearAllMocks()
     process.env.CRON_SECRET = CRON_SECRET
     process.env.DEMO_ACCESS_ENABLED = 'true'
-    process.env.DEMO_INSTANCE = 'true'
     mockExecute.mockResolvedValue({ rows: [{ ok: true }] })
     mockResetDemoData.mockResolvedValue(RESET_SUMMARY)
   })
@@ -99,33 +98,22 @@ describe('POST /api/cron/reset-demo', () => {
     })
   })
 
-  describe('only the demo instance may be wiped', () => {
-    it('refuses on the production database, even with demo access switched on', async () => {
-      // The configuration that matters most: someone copies
-      // DEMO_ACCESS_ENABLED=true into the production env. A valid cron call
-      // must still be a no-op, because a truncate there erases real people.
-      delete process.env.DEMO_INSTANCE
-      const response = await POST(createCronRequest(`Bearer ${CRON_SECRET}`))
-      expect(await response.json()).toEqual({
-        skipped: true,
-        reason: 'not-the-demo-instance',
-      })
-      expect(mockResetDemoData).not.toHaveBeenCalled()
-      expect(mockExecute).not.toHaveBeenCalled()
-    })
-
-    it('refuses on the demo instance while demo access is switched off', async () => {
+  describe('runs only where the demo is switched on, and only scoped', () => {
+    it('refuses while demo access is switched off', async () => {
       delete process.env.DEMO_ACCESS_ENABLED
       const response = await POST(createCronRequest(`Bearer ${CRON_SECRET}`))
       expect((await response.json()).skipped).toBe(true)
       expect(mockResetDemoData).not.toHaveBeenCalled()
     })
 
-    it('resets the demo instance', async () => {
+    it('resets the invented world, never the whole database', async () => {
+      // The main site holds real residents in the same tables. The route must
+      // ask for the scoped reset explicitly; a truncate would erase them.
       const response = await POST(createCronRequest(`Bearer ${CRON_SECRET}`))
       expect(response.status).toBe(200)
       expect(await response.json()).toEqual({ success: true, ...RESET_SUMMARY })
       expect(mockResetDemoData).toHaveBeenCalledTimes(1)
+      expect(mockResetDemoData).toHaveBeenCalledWith(expect.anything(), { scope: 'scoped' })
     })
   })
 
