@@ -55,6 +55,8 @@ function createDbMock(tables: string[]) {
     return [{ id: 'demo-user' }]
   })
   const accountDelete = vi.fn().mockResolvedValue({ rowCount: 0 })
+  // Caseload rows the reset hands the specialist doors.
+  const caseloadInsert = vi.fn((rows: unknown[]) => rows.map((_, i) => ({ id: `ca-${i}` })))
   const residentFindMany = vi.fn().mockResolvedValue([{ id: 'demo-resident-1' }])
 
   const dbMock = {
@@ -69,6 +71,9 @@ function createDbMock(tables: string[]) {
       values: (values: unknown) => ({
         onConflictDoUpdate: ({ target, set }: { target: unknown; set: unknown }) => ({
           returning: () => Promise.resolve(userUpsert({ values, target, set })),
+        }),
+        onConflictDoNothing: () => ({
+          returning: () => Promise.resolve(caseloadInsert(values as unknown[])),
         }),
       }),
     }),
@@ -87,6 +92,7 @@ function createDbMock(tables: string[]) {
     userUpsert,
     accountDelete,
     residentFindMany,
+    caseloadInsert,
   }
 }
 
@@ -185,7 +191,21 @@ describe('resetDemoData', () => {
       orgRulesSynced: true,
       opportunities: 5,
       opportunityApplications: 10,
+      // One demo resident in this fake × the four doors that work a care
+      // domain (Liegenschaften and the system admin hold none).
+      caseloadAssignments: 4,
     })
+  })
+
+  it('gives every specialist door its own clients, and nobody without a care domain', async () => {
+    // A visitor opening the Jobcoach door used to land on "Ihnen ist noch
+    // niemand zugewiesen" — honest for a new account, useless for a demo.
+    const { db, caseloadInsert } = createDbMock(['Resident'])
+    await resetDemoData(db)
+    const rows = caseloadInsert.mock.calls[0][0] as { role: string }[]
+    expect(new Set(rows.map((row) => row.role))).toEqual(
+      new Set(['HOUSING', 'SOCIAL', 'JOB', 'VOLUNTEERING']),
+    )
   })
 
   it('still opens every role door when no staff code is configured', async () => {
