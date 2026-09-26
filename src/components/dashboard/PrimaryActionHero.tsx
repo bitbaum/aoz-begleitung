@@ -7,6 +7,7 @@ import { URGENCY_BADGE_CLASS, URGENCY_BORDER_CLASS, type Urgency } from '@/lib/c
 import { VERY_OVERDUE_THRESHOLD_DAYS } from '@/lib/config/checkin-intervals'
 import { fallbackCta } from '@/lib/config/dashboard'
 import type { JobQueueItem } from '@/lib/jobcoach/queue'
+import type { WaitingApplication } from '@/lib/inbox/waiting'
 import { JOB_SIGNAL_COPY } from '@/lib/config/job-integration-docs'
 import type { StaffCapabilities } from '@/lib/auth/role-policy'
 import { INCIDENT_TYPE_LABELS_SHORT, DASHBOARD_LABELS, UI_LABELS } from '@/lib/constants/labels'
@@ -44,6 +45,7 @@ export function determinePrimaryAction({
   problemUnits,
   proposalsAwaitingStaff,
   jobQueue,
+  waitingApplications = [],
   viewer,
 }: {
   criticalIncidents: CriticalIncident[]
@@ -53,6 +55,8 @@ export function determinePrimaryAction({
   problemUnits: ProblemUnit[]
   proposalsAwaitingStaff: ProposalAwaitingStaff[]
   jobQueue: JobQueueItem[]
+  /** Requests from the portal nobody has picked up — the Eingang badge's set. */
+  waitingApplications?: WaitingApplication[]
   viewer: StaffCapabilities
 }): PrimaryActionType {
   // Priority 1: Critical incidents
@@ -164,6 +168,21 @@ export function determinePrimaryAction({
       href: `/residents/${jobQueue[0].residentId}`,
       buttonText: DASHBOARD_LABELS.heroReview,
       count: jobQueue.length,
+    }
+  }
+
+  // A client pressed "Ich habe Interesse" and nobody has answered. Without
+  // this the hero said "Alles erledigt!" directly above the list of people
+  // waiting — the badge said 2, the hero said nothing to do.
+  if (waitingApplications.length > 0) {
+    const oldest = waitingApplications[0]
+    return {
+      type: 'problem',
+      title: DASHBOARD_LABELS.heroRequestsTitle(waitingApplications.length),
+      description: `${oldest.name} — ${DASHBOARD_LABELS.heroRequestInterestIn} «${oldest.opportunityTitle}»`,
+      href: `/opportunities/${oldest.opportunityId}`,
+      buttonText: DASHBOARD_LABELS.heroReview,
+      count: waitingApplications.length,
     }
   }
 

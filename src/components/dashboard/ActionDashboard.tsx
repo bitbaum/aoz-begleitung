@@ -203,6 +203,7 @@ export function ActionDashboard({
     freeBeds,
     problemUnits,
     proposalsAwaitingStaff,
+    waitingApplications,
     viewer,
   })
 
@@ -461,7 +462,9 @@ export function ActionDashboard({
       )}
 
       {/* Action Tiles - Only show what needs action */}
-      {(totalIssues > 0 || problemUnits.length > 0) && (
+      {/* Waiting requests have their own section above; counting them here
+          left an "Offene Aufgaben" heading with nothing under it. */}
+      {(totalIssues - waitingApplications.length > 0 || problemUnits.length > 0) && (
         <div>
           <h2 className="text-sm font-semibold text-ui-muted uppercase tracking-wide mb-3">
             {DASHBOARD_LABELS.sectionOpenTasks}

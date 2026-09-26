@@ -42,6 +42,9 @@ export const DASHBOARD_LABELS = {
 
   statFreeBeds: 'Freie Plätze',
   statCheckIns: 'Check-ins',
+  heroRequestsTitle: (count: number) =>
+    count === 1 ? 'Eine Anfrage wartet auf Antwort' : `${count} Anfragen warten auf Antwort`,
+  heroRequestInterestIn: 'Interesse an',
   statOverdueSuffix: 'überfällig',
   statCurrentSuffix: 'aktuell',
   statAllCurrent: 'alle aktuell',
