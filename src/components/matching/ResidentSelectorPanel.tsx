@@ -85,17 +85,21 @@ export function ResidentSelectorPanel({
                 href={`/residents/${resident.id}`}
                 className="flex min-w-0 items-center gap-3 flex-1 hover:opacity-80"
               >
-                <div className="avatar-sm">{residentInitials(resident)}</div>
+                <div className="avatar-sm shrink-0">{residentInitials(resident)}</div>
                 <div className="min-w-0">
                   <p className="inline-flex items-center py-2 -my-2 font-medium text-ui-text hover:text-brand-primary">
                     {residentName(resident)}
                   </p>
                   <p className="text-sm text-ui-muted">
-                    {getLabel(AGE_RANGE_LABELS, resident.ageRange)} ·{' '}
-                    {(resident.languages ?? [])
-                      .slice(0, DISPLAY_LIMITS.languagePreview)
-                      .map((l) => getLabel(LANGUAGE_LABELS, l))
-                      .join(', ')}
+                    {[
+                      getLabel(AGE_RANGE_LABELS, resident.ageRange),
+                      (resident.languages ?? [])
+                        .slice(0, DISPLAY_LIMITS.languagePreview)
+                        .map((l) => getLabel(LANGUAGE_LABELS, l))
+                        .join(', '),
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
                   </p>
                 </div>
               </Link>
@@ -134,7 +138,7 @@ export function ResidentSelectorPanel({
                   href={`/residents/${resident.id}`}
                   className="flex items-center gap-2 flex-1 hover:opacity-80"
                 >
-                  <div className="avatar-sm">{residentInitials(resident)}</div>
+                  <div className="avatar-sm shrink-0">{residentInitials(resident)}</div>
                   <div>
                     <p className="text-sm font-medium text-ui-text">{residentName(resident)}</p>
                     <p className="text-xs text-ui-muted">
