@@ -1381,7 +1381,7 @@ deployment:
 
 | | Production `aoz-wohnen` | Demo `aoz-demo` |
 |---|---|---|
-| Domain | aoz.orangecat.ch | demo.aoz.orangecat.ch |
+| Domain | aoz.orangecat.ch | aoz-demo.orangecat.ch |
 | Database | `aoz_wohnen` — real staff, real residents | `aoz_demo` — invented people only |
 | `DEMO_INSTANCE` | unset | `true` |
 | Demo doors | **never** (hard gate in `isDemoEnabled()`, #256) | all role doors + Klient*in |
@@ -1403,6 +1403,10 @@ deployment:
   (`apps.conf`, `install-app-crons.sh`).
 - The wipe keeps `_deploy_schema_history`; emptying it made the next deploy
   try to re-apply every migration.
+- **One label under `orangecat.ch`, never two.** The `*.orangecat.ch` wildcard
+  does not reach `demo.aoz.orangecat.ch`, because `aoz.orangecat.ch` is its own
+  DNS node and blocks the wildcard beneath it — the first demo deploy failed
+  on exactly that. `aoz-demo.orangecat.ch` resolves with no DNS change.
 
 **On production: claimable placeholder profiles.** What follows describes the
 real instance, where invented rows were deleted on 2026-09-08.
@@ -1452,7 +1456,7 @@ Exactly the staff shape: the code is minted first, the human arrives later.
   pressing it can succeed. On production it answers no doors at all.
 - **Testers see the Verwaltung side on the DEMO instance**, never here.
   George wants the staff side testable without an account; that is what
-  demo.aoz.orangecat.ch is for. Sessions of deactivated users die immediately
+  aoz-demo.orangecat.ch is for. Sessions of deactivated users die immediately
   (`getCurrentUser()` re-checks `User.active`).
 
 ### Resident Portal

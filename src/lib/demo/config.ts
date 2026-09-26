@@ -26,12 +26,24 @@ import { ALL_RESIDENT_CODE_PREFIXES, RESIDENT_CODE_PREFIX } from '../auth/code-p
  * Is THIS deployment the dedicated demo instance?
  *
  * The demo instance is a separate app on its own database holding only
- * invented people (demo.aoz.orangecat.ch). It is the ONE production build on
+ * invented people (aoz-demo.orangecat.ch). It is the ONE production build on
  * which no-account doors may open and on which a full wipe-and-reseed may run.
  * Set in that box's env only; never in the production app's.
  */
 export function isDemoInstance(): boolean {
   return process.env.DEMO_INSTANCE === 'true'
+}
+
+/** Where the no-account demo lives. Production has no demo doors of its own. */
+export const DEMO_INSTANCE_URL = 'https://aoz-demo.orangecat.ch'
+
+/**
+ * Where "Produkt ansehen" goes. On the demo instance, its own doors; anywhere
+ * else, the demo instance — production's login has no doors to offer, and a
+ * button that lands on a password form is not "try it without an account".
+ */
+export function demoEntryHref(): string {
+  return isDemoInstance() ? '/login#demo' : `${DEMO_INSTANCE_URL}/login#demo`
 }
 
 /**
