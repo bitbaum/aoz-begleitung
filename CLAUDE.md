@@ -1379,41 +1379,33 @@ Resend (`lib/email/service.ts`), fleet key, sender on the verified
 password-reset flow REFUSES loudly (see above). Absolute links come from
 `NEXT_PUBLIC_APP_URL` (`lib/config/app-url.ts`).
 
-### Demo Access — invented people live on their own instance, never beside real ones
+### Demo Access — invented people on the main site, cleaned nightly
 
-**The rule (2026-09-25): no-account testing, on a separate app and database.**
-Anyone must be able to try the product without registering, and nothing they
-do there may touch a real person. Both hold only because the demo is its own
-deployment:
+**Decided by George 2026-09-26: the demo lives on aoz.orangecat.ch, beside the
+real flat.** Anyone can open a door on `/login` without an account and use the
+real product as any role. A separate demo app and database (`aoz-demo`) ran
+for one day and was retired as more machinery than the job needs — do not
+rebuild it.
 
-| | Production `aoz-wohnen` | Demo `aoz-demo` |
-|---|---|---|
-| Domain | aoz.orangecat.ch | aoz-demo.orangecat.ch |
-| Database | `aoz_wohnen` — real staff, real residents | `aoz_demo` — invented people only |
-| `DEMO_INSTANCE` | unset | `true` |
-| Demo doors | **never** (hard gate in `isDemoEnabled()`, #256) | all role doors + Klient*in |
-| Nightly reset | refused by the route | `POST /api/cron/reset-demo`, 04:05 |
-
-- **`isDemoInstance()` is the only key.** A production build opens doors, and
-  the reset route truncates, ONLY with `DEMO_INSTANCE=true`. Copying
-  `DEMO_ACCESS_ENABLED=true` into production's env opens nothing — pinned by
-  `api/auth/__tests__/demo.test.ts` and `api/cron/__tests__/reset-demo.test.ts`.
-- **Until 2026-09-25 the doors opened into production**, as a full system
-  admin over real staff and residents. A session testing "the demo" published
-  an invented listing onto the live board. Do not reintroduce a door there.
-- **The invented world names no real place, organisation or phone number.**
-  Flats sit on `Beispielstrasse`, organisations say `(erfunden)`, phones are
-  `000 …`. A demo naming a real address points at a real building where real
-  people live.
-- Deployed by the `deploy-demo` job in `deploy.yml`, gated on the repo variable
-  `AOZ_DEMO_DEPLOY`; the app row and the reset timer live in loki
-  (`apps.conf`, `install-app-crons.sh`).
-- The wipe keeps `_deploy_schema_history`; emptying it made the next deploy
-  try to re-apply every migration.
-- **One label under `orangecat.ch`, never two.** The `*.orangecat.ch` wildcard
-  does not reach `demo.aoz.orangecat.ch`, because `aoz.orangecat.ch` is its own
-  DNS node and blocks the wildcard beneath it — the first demo deploy failed
-  on exactly that. `aoz-demo.orangecat.ch` resolves with no DNS change.
+- **What is invented is marked, and only that is ever deleted.** Residents
+  carry a demo code prefix (`KL-DEMO…`), flats a `DEMO-` code, and invented
+  listings are authored by a demo staff account. `lib/demo/scoped-reset.ts`
+  deletes exactly those rows plus everything that references them, walking the
+  database's OWN foreign keys, so a new table can never make the nightly reset
+  fail. It never truncates. Rehearsed on a full-schema database 2026-09-26:
+  260 non-demo rows untouched across two resets, and a listing posted through a
+  demo door was gone the next night.
+- **`POST /api/cron/reset-demo`** (04:05, `appcron-aoz-wohnen-reset-demo`) runs
+  the scoped reset whenever `DEMO_ACCESS_ENABLED=true`. The full wipe
+  (`scope: 'full'`) exists for a local dev database only.
+- **The resident door opens only onto an invented or placeholder resident.** A
+  real client's code never matches either, so the public door cannot land in a
+  real person's flat — pinned by `api/auth/__tests__/demo.test.ts`.
+- **The KPIs exclude every invented row** by the same prefixes
+  (`lib/analytics/real-data.ts`), so the pilot numbers stay real.
+- **The staff doors can see the real flat** — George's accepted trade-off:
+  testers see the whole Verwaltung side. Invented people name no real place,
+  organisation or phone number (`Beispielstrasse`, `(erfunden)`, `000 …`).
 
 **On production: claimable placeholder profiles.** What follows describes the
 real instance, where invented rows were deleted on 2026-09-08.
@@ -1460,11 +1452,9 @@ Exactly the staff shape: the code is minted first, the human arrives later.
   who does not exist yet.
 - **Server-driven buttons**: the login page asks `GET /api/auth/demo` which
   doors exist; there is **no build-time flag**, so a button appears only when
-  pressing it can succeed. On production it answers no doors at all.
-- **Testers see the Verwaltung side on the DEMO instance**, never here.
-  George wants the staff side testable without an account; that is what
-  aoz-demo.orangecat.ch is for. Sessions of deactivated users die immediately
-  (`getCurrentUser()` re-checks `User.active`).
+  pressing it can succeed.
+- Sessions of deactivated users die immediately (`getCurrentUser()` re-checks
+  `User.active`).
 
 ### Resident Portal
 

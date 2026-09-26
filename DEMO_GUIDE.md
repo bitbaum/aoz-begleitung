@@ -1,26 +1,29 @@
 # Demo guide
 
 created_date: 2026-01-24
-last_modified_date: 2026-09-25
-last_modified_summary: The demo moved to its own instance and database. This guide used to say the demo shared a database with the real flat "safely" — for weeks the doors actually opened into production as a system admin.
+last_modified_date: 2026-09-26
+last_modified_summary: The demo is back on the main site (George's decision): invented people beside the real flat, removed nightly by a scoped reset that never touches a real row. The separate demo instance is retired.
 
-The demo is **the real product on its own database of invented people**. What a
-visitor clicks is what staff use; nothing they do reaches a real person.
+The demo is **the real product, with invented people living beside the real
+flat**. What a visitor clicks is what staff use.
 
 ## The doors
 
-On <https://aoz-demo.orangecat.ch/login>. The page asks the server which doors
+On <https://aoz.orangecat.ch/login#demo>. The page asks the server which doors
 exist, so a button only appears when pressing it can succeed. There is one door
 per staff role (Leitung, Betreuung, Sozialarbeit, Jobcoach, Freiwilligenarbeit,
 Liegenschaften) plus the Klient\*in portal.
 
 - **No account needed**, and none should be — that is the point.
-- **Every person, flat, organisation and phone number is invented.** Flats sit
-  on `Beispielstrasse`; organisations are marked `(erfunden)`.
-- **Reset every night at 04:05**, so a visitor may change anything.
-- A banner on every page says so, in German and English.
-- **aoz.orangecat.ch (production) has no demo doors**, and must never get them
-  back: it holds real staff and residents.
+- **Every invented person, flat, organisation and phone number says so:** flats
+  sit on `Beispielstrasse` with `DEMO-` codes, organisations are marked
+  `(erfunden)`, phones are `000 …`.
+- **Reset every night at 04:05.** Only invented rows are removed and re-created
+  — whatever a visitor changed on them, and any listing posted through a demo
+  door. Real residents and the real flat are never touched.
+- **The Klient\*in door opens an invented resident**, never a real one.
+- **The staff doors see the whole product**, the real flat included. That is
+  deliberate: testers should see what staff see.
 
 ## What the demo is actually showing
 

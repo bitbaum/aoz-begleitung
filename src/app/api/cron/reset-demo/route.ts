@@ -3,16 +3,16 @@
  * Authenticated via Bearer token (CRON_SECRET), same contract as
  * cron/notifications. Triggered by a systemd timer on the box.
  *
- * Truncates everything and reseeds the invented world. It runs ONLY on the
- * dedicated demo instance (`isDemoInstance()`): the old UNIT scope, which
- * cleaned demo rows out of a database that also held real ones, is gone with
- * the idea of mixing the two.
+ * SCOPED, always: it deletes the invented rows (demo codes, DEMO- units,
+ * listings a demo account authored) with everything that hangs off them, and
+ * reseeds them. Real residents, flats and listings live in the same database
+ * and are never touched — nothing here truncates. @see lib/demo/scoped-reset.ts
  */
 import { NextResponse } from 'next/server'
 import { sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { logger } from '@/lib/logger'
-import { isDemoEnabled, isDemoInstance } from '@/lib/demo/config'
+import { isDemoEnabled } from '@/lib/demo/config'
 import { resetDemoData } from '@/lib/demo/reset'
 
 // Truncate + full reseed comfortably exceeds the 10s default at cold start.
@@ -32,13 +32,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // A reset on a non-demo deployment would destroy real data — refuse unless
-  // the operator has explicitly opted this instance into demo mode.
-  // Two separate facts, both required. A truncate on the production database
-  // would erase every real resident, so being "demo-enabled" is not enough —
-  // this must also be the instance that holds nothing else.
-  if (!isDemoInstance() || !isDemoEnabled()) {
-    return NextResponse.json({ skipped: true, reason: 'not-the-demo-instance' })
+  // Only where the operator opted in to demo doors.
+  if (!isDemoEnabled()) {
+    return NextResponse.json({ skipped: true, reason: 'demo-disabled' })
   }
 
   // Advisory lock: a reset overlapping itself (or a slow previous run) would
@@ -53,7 +49,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const summary = await resetDemoData(db)
+    const summary = await resetDemoData(db, { scope: 'scoped' })
     logger.info('Demo data reset', { ...summary })
     return NextResponse.json({ success: true, ...summary })
   } catch (error) {

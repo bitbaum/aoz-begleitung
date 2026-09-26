@@ -96,8 +96,8 @@ Das ist der operative Kitt:
 
 ## Was man heute sehen kann — ohne Konto
 
-Die Demo unter **https://aoz-demo.orangecat.ch** ist das laufende Produkt auf
-einer eigenen Instanz mit erfundenen Personen, jede Nacht zurückgesetzt. Man
+Die Demo unter **https://aoz.orangecat.ch/login#demo** ist das laufende
+Produkt, mit erfundenen Personen, die jede Nacht zurückgesetzt werden. Man
 wählt eine Rolle und arbeitet damit.
 
 ### Für Leitung und Betreuung

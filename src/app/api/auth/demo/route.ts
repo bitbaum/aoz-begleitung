@@ -6,9 +6,8 @@ import { db, user, resident } from '@/lib/db'
 import { and, eq, inArray } from 'drizzle-orm'
 import { setResidentCookie } from '@/lib/portal-auth'
 import {
-  DEMO_INSTANCE_URL,
+  ALL_DEMO_RESIDENT_CODE_PREFIXES,
   isDemoEnabled,
-  isDemoInstance,
   resolveDemoResidentCode,
 } from '@/lib/demo/config'
 import { demoStaffDoors } from '@/lib/demo/roles'
@@ -77,10 +76,13 @@ async function availableDoors(): Promise<DemoDoor[]> {
     // is a resident registering — something nobody is watching the env var
     // for. So the guard is in code and reads the same fact the marker does.
     //
-    // The dedicated demo instance is the exception, and a safe one: every
-    // resident in its database is invented and re-seeded nightly, so there is
-    // no real person a claimed profile could belong to.
-    if (residentRow && (residentRow.isPlaceholder || isDemoInstance())) {
+    // An invented resident (a demo code prefix) is the other safe target: no
+    // real person is ever issued a demo code, and the nightly reset re-creates
+    // the row. Real clients never match either condition.
+    const invented = ALL_DEMO_RESIDENT_CODE_PREFIXES.some((prefix) =>
+      residentCode.startsWith(prefix),
+    )
+    if (residentRow && (residentRow.isPlaceholder || invented)) {
       doors.push({ id: 'resident', label: residentDoorLabel() })
     }
   }
@@ -107,9 +109,6 @@ export async function GET() {
       success: true,
       data: {
         doors,
-        // Where to try the product when this instance offers no door of its
-        // own — production points at the demo instance. Null on the demo.
-        demoUrl: isDemoInstance() ? null : `${DEMO_INSTANCE_URL}/login#demo`,
         // Kept so an older cached login bundle still renders its two buttons
         // instead of none while the new one rolls out.
         staff: doors.some((door) => door.id !== 'resident'),

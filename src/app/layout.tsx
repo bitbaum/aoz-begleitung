@@ -3,8 +3,6 @@ import { Inter, JetBrains_Mono } from 'next/font/google'
 import { APP_LABELS } from '@/lib/constants/labels'
 import { ToastContainer } from '@/components/ui/Toast'
 import './globals.css'
-import { DemoInstanceBanner } from '@/components/layout/DemoInstanceBanner'
-import { isDemoInstance } from '@/lib/demo/config'
 import { BRAND } from '@/lib/config/brand'
 
 const inter = Inter({
@@ -76,17 +74,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   `
 
   return (
-    <html
-      lang="de"
-      className={`${inter.variable} ${mono.variable}`}
-      data-brand={BRAND.id}
-      data-demo-instance={isDemoInstance() ? '' : undefined}
-    >
+    <html lang="de" className={`${inter.variable} ${mono.variable}`} data-brand={BRAND.id}>
       <head>
         <script id="theme-init" dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen bg-ui-canvas text-ui-text font-sans">
-        <DemoInstanceBanner />
         {children}
         <ToastContainer />
         {/* The feedback widget is NOT here. It loads only on the public

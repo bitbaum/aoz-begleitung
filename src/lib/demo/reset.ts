@@ -19,10 +19,12 @@
  * through ts-node, which does not resolve tsconfig path aliases.
  */
 
-import { asc } from 'drizzle-orm'
-import { careAssignment, resident, type db } from '../db'
+import { asc, eq, like, or } from 'drizzle-orm'
+import { careAssignment, escapeLike, resident, type db } from '../db'
+import { ALL_DEMO_RESIDENT_CODE_PREFIXES, resolveDemoResidentCode } from './config'
+import { deleteDemoWorld } from './scoped-reset'
 import { STAFF_ROLE_CARE_DOMAIN } from '../config/care'
-import { demoStaffDoors } from './roles'
+import { demoStaffCodeFor, demoStaffDoors } from './roles'
 import { seedDemoData, type DemoSeedSummary } from './seed-data'
 import { syncOrgRules } from '../governance/sync-org-rules'
 import { upsertDemoStaff, upsertDemoStaffRoles } from './staff'
@@ -38,8 +40,25 @@ export interface DemoResetSummary extends DemoSeedSummary {
   caseloadAssignments: number
 }
 
-export async function resetDemoData(dbClient: typeof db): Promise<DemoResetSummary> {
-  const tablesWiped = await wipeAllExceptKeepList(dbClient)
+/**
+ * `scoped` (the main site, and the default): delete only invented rows, then
+ * reseed them — real residents, real flats and real listings are never
+ * touched. `full` (a local dev database): truncate everything first.
+ */
+export type DemoResetScope = 'scoped' | 'full'
+
+export async function resetDemoData(
+  dbClient: typeof db,
+  { scope = 'scoped' }: { scope?: DemoResetScope } = {},
+): Promise<DemoResetSummary> {
+  let tablesWiped = 0
+  if (scope === 'full') {
+    tablesWiped = await wipeAllExceptKeepList(dbClient)
+  } else {
+    await deleteDemoWorld(dbClient)
+  }
+  // Before the seed: the demo house rule points at an org rule by key.
+  await syncOrgRules(dbClient)
 
   // BEFORE the seed, not after: the seed hands this account the care seats on
   // every demo resident, and an assignment cannot point at a row that does not
@@ -50,23 +69,33 @@ export async function resetDemoData(dbClient: typeof db): Promise<DemoResetSumma
 
   const seeded = await seedDemoData(dbClient, {
     careStaffId: demoStaff?.id ?? null,
-    // Full scope owns the whole database, so it can also own — and next time
-    // truncate — content that no demo prefix reaches.
-    siteWideContent: true,
+    // Only a full reset owns content no demo marker reaches.
+    siteWideContent: scope === 'full',
   })
 
-  // The opportunity directory is org-wide, so it is seeded HERE and never in
-  // the scoped reset: this path truncated the database first, which makes an
-  // unscoped resident query correct and makes invented listings impossible to
-  // confuse with a real coach's. See lib/seed/opportunities.ts.
+  // Invented residents only: on the main site the same table holds real
+  // people. Invented listings are created BY the demo account, which is how
+  // the next scoped reset finds and removes them (scoped-reset.ts).
   const demoResidents = await dbClient.query.resident.findMany({
+    where: or(
+      ...ALL_DEMO_RESIDENT_CODE_PREFIXES.map((prefix) =>
+        like(resident.code, `${escapeLike(prefix)}%`),
+      ),
+      eq(resident.code, resolveDemoResidentCode()),
+    ),
     columns: { id: true },
     orderBy: [asc(resident.code)],
   })
-  const opportunities = await seedOpportunities(dbClient, {
-    residentIds: demoResidents.map((resident) => resident.id),
-    staffId: demoStaff?.id ?? null,
-  })
+  // The author is what marks a listing as invented. Without a demo account to
+  // own them the next scoped reset could never find them, so none are seeded.
+  const listingAuthorId =
+    demoStaff?.id ?? roleAccounts.find((a) => a.code === demoStaffCodeFor('ADMIN'))?.id ?? null
+  const opportunities = listingAuthorId
+    ? await seedOpportunities(dbClient, {
+        residentIds: demoResidents.map((resident) => resident.id),
+        staffId: listingAuthorId,
+      })
+    : { opportunities: 0, applications: 0, evidenceRecords: 0 }
 
   // Every specialist door opens onto real work. The Jobcoach and
   // Freiwilligenarbeit doors used to land on "Ihnen ist noch niemand
@@ -78,8 +107,6 @@ export async function resetDemoData(dbClient: typeof db): Promise<DemoResetSumma
     roleAccounts,
     demoResidents.map((row) => row.id),
   )
-
-  await syncOrgRules(dbClient)
 
   return {
     ...seeded,

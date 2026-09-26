@@ -22,6 +22,11 @@ vi.mock('../../seed/opportunities', async () => ({
   seedOpportunities: (...args: unknown[]) => mockSeedOpportunities(...args),
 }))
 
+const mockDeleteDemoWorld = vi.fn()
+vi.mock('../scoped-reset', async () => ({
+  deleteDemoWorld: (...args: unknown[]) => mockDeleteDemoWorld(...args),
+}))
+
 import { resetDemoData } from '../reset'
 import { STAFF_ROLES } from '@/lib/auth/role-policy'
 import { account, user, type db } from '@/lib/db'
@@ -111,11 +116,29 @@ describe('resetDemoData', () => {
     })
   })
 
+  it('defaults to the scoped reset: deletes invented rows, never truncates', async () => {
+    // The main site holds real residents in the same tables. Anything that
+    // calls the reset without saying otherwise must get the safe path.
+    mockDeleteDemoWorld.mockResolvedValue({
+      residentsDeleted: 15,
+      unitsDeleted: 5,
+      opportunitiesDeleted: 7,
+    })
+    const { db, executeTruncate, residentFindMany } = createDbMock(['Resident'])
+    const summary = await resetDemoData(db)
+
+    expect(mockDeleteDemoWorld).toHaveBeenCalledTimes(1)
+    expect(executeTruncate).not.toHaveBeenCalled()
+    expect(summary.tablesWiped).toBe(0)
+    // Only invented residents feed the listings and caseloads.
+    expect(sqlText(residentFindMany.mock.calls[0][0].where)).toMatch(/like/)
+  })
+
   it('seeds the opportunity directory from the residents it just created', async () => {
     // Mocking a seed away and then never asserting it ran is how a step
     // silently stops happening while the suite stays green.
     const { db } = createDbMock(['Resident'])
-    const summary = await resetDemoData(db)
+    const summary = await resetDemoData(db, { scope: 'full' })
 
     expect(mockSeedOpportunities).toHaveBeenCalledWith(
       db,
@@ -141,7 +164,7 @@ describe('resetDemoData', () => {
       'BrandNewFutureModel', // schema growth: wiped without editing the reset
     ])
 
-    await resetDemoData(db)
+    await resetDemoData(db, { scope: 'full' })
 
     expect(executeTruncate).toHaveBeenCalledTimes(1)
     const sql = executeTruncate.mock.calls[0][0] as string
@@ -159,7 +182,7 @@ describe('resetDemoData', () => {
   it('reseeds, self-heals the demo staff account, and re-syncs the rule catalog', async () => {
     const { db, userUpsert, accountDelete } = createDbMock(['Resident'])
 
-    const summary = await resetDemoData(db)
+    const summary = await resetDemoData(db, { scope: 'full' })
 
     // The staff account is upserted BEFORE the seed and handed to it: the
     // care seats it assigns cannot point at a row that does not exist yet.
@@ -201,7 +224,7 @@ describe('resetDemoData', () => {
     // A visitor opening the Jobcoach door used to land on "Ihnen ist noch
     // niemand zugewiesen" — honest for a new account, useless for a demo.
     const { db, caseloadInsert } = createDbMock(['Resident'])
-    await resetDemoData(db)
+    await resetDemoData(db, { scope: 'full' })
     const rows = caseloadInsert.mock.calls[0][0] as { role: string }[]
     expect(new Set(rows.map((row) => row.role))).toEqual(
       new Set(['HOUSING', 'SOCIAL', 'JOB', 'VOLUNTEERING']),
@@ -217,7 +240,7 @@ describe('resetDemoData', () => {
     delete process.env.DEMO_STAFF_CODE
     const { db, userUpsert } = createDbMock(['Resident'])
 
-    const summary = await resetDemoData(db)
+    const summary = await resetDemoData(db, { scope: 'full' })
 
     expect(userUpsert).toHaveBeenCalledTimes(STAFF_ROLES.length)
     // The legacy single-door summary field stays null: nothing was configured.

@@ -16,8 +16,8 @@ It is meant to sit **beside** an organisation's case-management system
 integration layer those systems do not cover, plus a portal residents use in
 their own language.
 
-**Try it without an account:** <https://aoz-demo.orangecat.ch> — the real
-product on its own database of invented people, reset every night.
+**Try it without an account:** <https://aoz.orangecat.ch/login#demo> — pick a
+role and use the real product. The invented people there are reset every night.
 **Where AI is used and what it sends:** <https://aoz.orangecat.ch/ki-datenschutz>.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -73,11 +73,10 @@ household scores by its worst pairing, never the average. Details and sources:
 
 ## Where it runs
 
-| | Production | Demo |
-|---|---|---|
-| URL | aoz.orangecat.ch | aoz-demo.orangecat.ch |
-| App / DB | `aoz-wohnen` / `aoz_wohnen` | `aoz-demo` / `aoz_demo` |
-| Data | real | invented, reset nightly |
+One app: **aoz.orangecat.ch** (`aoz-wohnen`, database `aoz_wohnen`). The demo
+lives there too — invented residents and flats beside the real ones, marked by
+their codes and reset every night without touching anything real
+(`src/lib/demo/scoped-reset.ts`).
 
 Self-hosted on Hetzner (box `bitbaum`). Deploy is push to `master` → CI →
 `.github/workflows/deploy.yml`. Env SSOT is `/opt/<app>/shared/.env` on the
@@ -99,7 +98,7 @@ pnpm run verify         # format, lint, typecheck, tests — what CI runs
 | `SESSION_SECRET` | Session signing key (a production build refuses to start without it) |
 | `NEXT_PUBLIC_APP_URL` | Absolute links in emails |
 | `NEXT_PUBLIC_BRAND` | Brand preset, inlined at build time (`src/lib/config/brand.ts`) |
-| `DEMO_INSTANCE`, `DEMO_ACCESS_ENABLED` | Only on the demo instance |
+| `DEMO_ACCESS_ENABLED` | `true` opens the no-account demo doors on `/login` |
 | `GROQ_API_KEY`, `OPENROUTER_API_KEY` | AI features (test access; see `/ki-datenschutz`) |
 
 The full list with comments is `.env.example`. Test counts are what CI
