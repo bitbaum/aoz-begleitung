@@ -26,10 +26,10 @@
  * `--color-brand-*` tokens, because a colour belongs in the stylesheet that
  * also has to express it in light mode, dark mode and at 15% opacity. A brand
  * that wants a different palette adds a `:root[data-brand='<id>']` block; a
- * brand that wants the default palette (AOZH) adds nothing at all.
+ * brand that wants the default palette adds nothing at all.
  */
 
-export type BrandId = 'aoz' | 'aozh' | 'wg'
+export type BrandId = 'aoz' | 'wg'
 
 /**
  * Surfaces that differ between an AOZ Standort and a private WG.
@@ -225,25 +225,6 @@ export const BRANDS: Record<BrandId, Brand> = {
     features: AOZ_FEATURES,
   },
 
-  // The neutral badge. Same palette as AOZ by design — the brief was to keep
-  // AOZ's colours and change only the name and the design language.
-  aozh: {
-    id: 'aozh',
-    shortName: 'AOZH',
-    codePrefix: 'AOZH-',
-    residentCodePrefix: 'KL-',
-    clientTerm: 'Klient*in',
-    clientTermPlural: 'Klient*innen',
-    productName: 'AOZH Begleitung',
-    portalName: 'Mein Bereich',
-    portalTitleKey: 'portal.title',
-    tagline: 'Integrationsplattform',
-    metaDescription:
-      'Wohnstabilität sichern, Integrationsfortschritte sichtbar machen und Fachpersonen in einem gemeinsamen Verlauf koordinieren',
-    orgName: 'AOZH',
-    features: AOZ_FEATURES,
-  },
-
   // Real shared-flat deployments (first: the pilot flat). Same product,
   // different register: nobody in a WG is "placed" by a "system".
   wg: {
@@ -268,10 +249,10 @@ export const BRANDS: Record<BrandId, Brand> = {
 
 /**
  * AOZ is the default: the product IS the AOZ tool, and anything that has not
- * been told otherwise should say so. The neutral `aozh` badge was the default
- * while the product was being pitched under a placeholder name, and the effect
- * was that every un-configured surface — a local build, a preview, a new
- * deployment — introduced a THIRD name into a product that already had two.
+ * been told otherwise should say so. Another organisation that adopts it gets
+ * its own preset here — a name of its own, never a placeholder. The neutral
+ * `aozh` badge was retired on 2026-09-26 for exactly that reason: a third name
+ * nobody recognised, on a product built for AOZ.
  */
 export const DEFAULT_BRAND_ID: BrandId = 'aoz'
 
@@ -284,9 +265,18 @@ export const DEFAULT_BRAND_ID: BrandId = 'aoz'
  * stops working the day the name changes. That is exactly how the log
  * redactor's hardcoded /AOZ-…/ pattern would have started leaking staff codes.
  */
-export const ALL_CODE_PREFIXES: readonly string[] = Object.values(BRANDS).map(
-  (brand) => brand.codePrefix,
-)
+/**
+ * Staff prefixes issued by a brand that no longer exists. `AOZH-` was minted
+ * while that badge existed, and one live staff code still carries it (measured
+ * 2026-09-26); login matches the exact string, so it keeps working — this list
+ * keeps it redacted in logs and recognised by parsers.
+ */
+export const LEGACY_CODE_PREFIXES: readonly string[] = ['AOZH-']
+
+export const ALL_CODE_PREFIXES: readonly string[] = [
+  ...Object.values(BRANDS).map((brand) => brand.codePrefix),
+  ...LEGACY_CODE_PREFIXES,
+]
 
 /**
  * Client/resident code prefixes issued before `residentCodePrefix` existed.
@@ -319,7 +309,7 @@ function resolveBrandId(): BrandId {
 /** The brand this deployment runs under. Set `NEXT_PUBLIC_BRAND=aoz` to re-badge. */
 export const BRAND: Brand = BRANDS[resolveBrandId()]
 
-/** AOZ and the neutral pitch badge share the staff/resident surface. */
+/** The AOZ staff/resident surface, as opposed to a private WG. */
 export function isAozSurface(brand: Brand = BRAND): boolean {
-  return brand.id === 'aoz' || brand.id === 'aozh'
+  return brand.id === 'aoz'
 }

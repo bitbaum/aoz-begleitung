@@ -3,7 +3,7 @@ import { MermaidBlock } from 'bip-kit/react/mermaid'
 import type { ContentBlock } from 'bip-kit'
 
 /**
- * The blog body renderer — bip-kit's reference renderer with AOZH's wiring.
+ * The blog body renderer — bip-kit's reference renderer with this product's wiring.
  *
  * The loader registration below is the supported seam for shiki under
  * `output: "standalone"`: bip-kit's zero-config shiki load goes through a

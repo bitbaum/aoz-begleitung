@@ -9,11 +9,13 @@ import { ALL_CODE_PREFIXES, BRANDS, DEFAULT_BRAND_ID, type BrandId } from '../br
 describe('brand presets', () => {
   const ids = Object.keys(BRANDS) as BrandId[]
 
-  it('offers both the original and the neutral brand', () => {
-    expect(ids).toEqual(expect.arrayContaining(['aoz', 'aozh']))
+  it('offers AOZ and the WG register, and no placeholder badge', () => {
+    // `aozh` was a neutral name nobody recognised; retired 2026-09-26. Another
+    // organisation gets a preset with its own name.
+    expect(ids.sort()).toEqual(['aoz', 'wg'])
   })
 
-  it.each(['aoz', 'aozh', 'wg'] as const)('%s fills in every field', (id) => {
+  it.each(['aoz', 'wg'] as const)('%s fills in every field', (id) => {
     const brand = BRANDS[id]
     for (const [key, value] of Object.entries(brand)) {
       expect(`${key}=${value}`).not.toMatch(/=(undefined|null|)$/)
@@ -70,8 +72,6 @@ describe('brand presets', () => {
     // programme. @see BrandFeatures.pilotMeasurement
     expect(BRANDS.wg.features.pilotMeasurement).toBe(false)
     expect(BRANDS.aoz.features.pilotMeasurement).toBe(true)
-    // AOZH is the pitch badge for the same AOZ deployment, so it keeps it.
-    expect(BRANDS.aozh.features.pilotMeasurement).toBe(true)
   })
 
   it('gives every brand an explicit answer for every feature flag', () => {
@@ -125,14 +125,14 @@ describe('ALL_CODE_PREFIXES', () => {
    */
   it('covers every brand, not just the active one', () => {
     const ids = Object.keys(BRANDS) as BrandId[]
-    expect(ALL_CODE_PREFIXES).toHaveLength(ids.length)
     for (const id of ids) {
       expect(ALL_CODE_PREFIXES).toContain(BRANDS[id].codePrefix)
     }
   })
 
-  it('still covers AOZ once the product ships as AOZH', () => {
-    expect(ALL_CODE_PREFIXES).toEqual(expect.arrayContaining(['AOZ-', 'AOZH-']))
+  it('still recognises codes minted by the retired AOZH badge', () => {
+    // One live staff code starts with AOZH- (measured 2026-09-26).
+    expect(ALL_CODE_PREFIXES).toEqual(expect.arrayContaining(['AOZ-', 'WG-', 'AOZH-']))
   })
 })
 

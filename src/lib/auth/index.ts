@@ -271,7 +271,7 @@ export async function isAuthenticated(): Promise<boolean> {
  *
  * Staff routing deliberately accepts every prefix the product has ever issued,
  * not just the active brand's. Codes outlive the brand that issued them: after
- * the AOZ→AOZH rebrand an existing `AOZ-…` code matches neither the active
+ * a rebrand an existing `AOZ-…` code matches neither the active
  * staff prefix nor the resident one, falls through to "Ungültiger Code", and
  * locks out every staff member who has not been re-issued a code — including
  * the seeded admin. The lookup itself is still by exact string, so no code

@@ -12,7 +12,7 @@ last_modified_summary: Drei orthogonale Achsen statt einer Rollenliste; LIEGENSC
    - Scope: resident self-service only (`/portal/*`, `/api/portal/*`)
 
 2. **Staff user**
-   - Entry: `/login` (code-first on AOZ/AOZH; email still available)
+   - Entry: `/login` (code-first on AOZ; email still available)
    - Auth: `staff_session` JWT cookie
    - Scope: admin/staff operations (`/`, `/residents`, `/housing`, ...)
    - Roles: `BETREUUNG`, `SOZIALARBEIT`, `JOBCOACH`, `FREIWILLIGENARBEIT`,

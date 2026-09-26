@@ -106,7 +106,7 @@ export interface MarketingCopy {
  * Both registers of one language.
  *
  * The product ships in two registers and they are not interchangeable.
- * `aoz`/`aozh` are shown to an organisation deciding whether to place people
+ * `aoz` is shown to an organisation deciding whether to place people
  * with software; `wg` runs in a real shared flat where nobody is "placed" by a
  * "system" and the reader is a person who lives there. The same landing page
  * for both would be wrong for at least one of them — so a language is not

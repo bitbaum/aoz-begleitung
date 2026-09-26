@@ -237,13 +237,15 @@ src/
 
 ## Branding (re-badging is config, not code)
 
-The product ships under a neutral brand and can be handed to AOZ badged as AOZ.
-Neither is a fork; both are presets.
+**Decided 2026-09-26: the product is AOZ's, built for AOZ, and branded AOZ.**
+It stays usable by another organisation (ORS or anyone else) if AOZ does not
+take it — that organisation gets a preset with ITS OWN name in `brand.ts`,
+never a neutral placeholder. The `aozh` badge was exactly that placeholder, a
+third name nobody recognised, and it is retired. No fork; presets only.
 
 ```bash
 NEXT_PUBLIC_BRAND=aoz    # DEFAULT (`DEFAULT_BRAND_ID`), and what the live
                          # instance runs — verified on the box 2026-08-31.
-NEXT_PUBLIC_BRAND=aozh   # neutral pitch badge
 NEXT_PUBLIC_BRAND=wg     # real shared-flat deployments — "WG Wohnen /
                          # Gemeinsam wohnen", no placement-system register.
 ```
@@ -263,9 +265,8 @@ keeps working precisely because login resolves by exact string.
 run a code-minting script without carrying the deployment's brand across —
 `ensure-aoz-team.ts` now refuses rather than guessing.
 
-AOZH ships the **same palette** as AOZ deliberately — the brief was to keep
-AOZ's colours and change only the name and the design language — so it defines
-no colour override at all. Only the acronym differs.
+`AOZH-` staff codes were minted while that badge existed, and one live code
+still carries it: `LEGACY_CODE_PREFIXES` keeps it recognised and redacted.
 
 **Switching the live deployment** — `NEXT_PUBLIC_*` is inlined at build time, so
 this needs a redeploy, not a restart. The box holds the authoritative runtime
