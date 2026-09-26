@@ -616,11 +616,16 @@ export const RESIDENT_FORM_LABELS = {
 } as const
 
 export const RESIDENT_DETAIL_LABELS = {
+  /** Accessible name of the dossier's section tabs. @see config/dossier.ts */
+  sectionsLabel: 'Bereich im Dossier',
   breadcrumb: 'Klient*innen',
   transferBtn: 'Verlegen',
   editBtn: 'Bearbeiten',
   placeBtn: 'Platzieren',
   currentPlacementTitle: 'Aktuelle Platzierung',
+  /** The overview's one line about the person's roof — every role needs it. */
+  livesIn: 'Wohnt in',
+  toHousingSection: 'Zum Bereich Wohnen',
   since: 'Seit ',
   compatibility: 'Kompatibilität',
   /**
