@@ -15,7 +15,7 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
   // as a nav group keeping its name after its contents changed.
   pageDescription:
     'Arbeitsstellen, Praktika, Freiwilligenarbeit und gemeinnützige Einsätze — wo es Plätze gibt und wer gerade wohin unterwegs ist.',
-  newAction: 'Einsatzplatz',
+  newAction: '+ Einsatzplatz',
   createTitle: 'Einsatzplatz erfassen',
   createDescription:
     'Neue Plätze bleiben Entwurf, bis sie veröffentlicht werden. Was der Platz voraussetzt, gehört zum Platz — nicht zur Person.',
@@ -66,7 +66,7 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
 
   emptyTitle: 'Noch keine Einsatzplätze erfasst.',
   emptyBody:
-    'Trag den ersten Platz ein — eine Organisation, ein Ort, ein paar Stunden pro Woche. Danach kannst du Klient*innen zuordnen und siehst, wo alle stehen.',
+    'Tragen Sie den ersten Platz ein — eine Organisation, ein Ort, ein paar Stunden pro Woche. Danach können Sie Klient*innen zuordnen und sehen, wo alle stehen.',
   emptyAction: 'Ersten Einsatzplatz erfassen',
   noResults: 'Keine passenden Einsatzplätze.',
 
@@ -76,8 +76,8 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
   sectionContact: 'Kontakt',
   sectionApplicants: 'Wer ist unterwegs',
   requirementsHint:
-    'Diese Angaben beschreiben den Platz. Wir speichern keinen Aufenthaltsstatus — die Zuordnung machst du, weil du den Fall kennst.',
-  germanLevel: 'Deutsch (GER)',
+    'Diese Angaben beschreiben, was der Platz verlangt. Ob er zu einer Person passt, entscheiden Sie — der Platz prüft keinen Aufenthaltsstatus.',
+  germanLevel: 'Deutschniveau',
   germanLevelAny: 'Kein Niveau vorausgesetzt',
   permitRequirement: 'Bewilligung',
   permitRequirementWorkHint:
@@ -131,11 +131,11 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
   // example edit. Every field on this form describes a PLACE.
   aiFillTitle: 'Aus einem Inserat ausfüllen',
   aiFillHint:
-    'Inserat, E-Mail oder Telefonnotiz einfügen — das Formular wird ausgefüllt. Überprüfe jede Angabe, bevor du speicherst. Den Bewilligungsweg setzt du selbst.',
+    'Inserat, E-Mail oder Telefonnotiz einfügen — das Formular wird ausgefüllt. Prüfen Sie jede Angabe, bevor Sie speichern. Den Bewilligungsweg setzen Sie selbst.',
   aiFillPlaceholder: 'Inserat, E-Mail oder Notiz aus dem Telefonat hier einfügen …',
   aiRefineTitle: 'Angaben anpassen',
   aiRefineHint:
-    'Sag, was anders sein soll, füge weitere Angaben ein — oder lass dir Verbesserungen vorschlagen. Leere Felder werden ergänzt, der Rest bleibt stehen.',
+    'Sagen Sie, was anders sein soll, fügen Sie weitere Angaben ein — oder lassen Sie sich Verbesserungen vorschlagen. Leere Felder werden ergänzt, der Rest bleibt stehen.',
   aiRefinePlaceholder:
     'z.B. «Beschreibung schreiben» oder «Start ist der 1. Oktober, 8 Stunden pro Woche»',
 

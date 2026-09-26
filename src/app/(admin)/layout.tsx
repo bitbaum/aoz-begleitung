@@ -95,7 +95,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             than the viewport instead of being contained and clipped/scrolled
             the way each of those children already intended. */}
         <main id="admin-main" className="flex-1 flex flex-col min-w-0">
-          <div className="flex-1 p-4 pt-16 md:p-6 md:pt-6 min-w-0">{children}</div>
+          <div className="flex-1 p-4 pt-20 md:p-6 md:pt-6 min-w-0">{children}</div>
         </main>
       </div>
 

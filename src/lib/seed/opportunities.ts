@@ -135,8 +135,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     seats: 2,
     germanLevel: 'B1',
     permitRequirement: 'PERMIT_REQUIRED',
-    requirementNote:
-      'Bezahlter Einsatz — vor einer Zuordnung mit der Sozialarbeit klären, ob eine Bewilligung möglich ist.',
+    requirementNote: 'Kleine Entschädigung pro Einsatztag. Arbeitskleidung wird gestellt.',
     contactName: 'Doris Frei',
     contactPhone: '000 000 00 05',
     stages: [],
@@ -174,7 +173,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     seats: 1,
     germanLevel: 'A2',
     permitRequirement: 'PERMIT_REQUIRED',
-    requirementNote: 'Vorher mit der Sozialarbeit klären, ob eine Bewilligung möglich ist.',
+    requirementNote: 'Staplerausweis ist kein Muss — wer ihn nicht hat, wird im Betrieb geschult.',
     contactName: 'Luca Meier',
     contactPhone: '000 000 00 07',
     stages: ['INTERESTED'],

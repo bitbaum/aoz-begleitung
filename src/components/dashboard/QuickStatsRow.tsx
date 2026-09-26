@@ -39,9 +39,19 @@ export function QuickStat({
     <Link href={href} className="card-hover">
       <div className="flex items-center justify-between mb-1">
         <span className="text-ui-muted inline-flex items-center">{icon}</span>
-        <span className={`metric text-2xl ${URGENCY_VALUE_CLASS[urgency]}`}>
-          {value}
-          {suffix}
+        {/* The number is data and gets the mono figure style; the word after
+            it is prose. Setting "Überfällig" in 24px mono read like code and
+            broke the tile at desktop widths. */}
+        <span className={`whitespace-nowrap ${URGENCY_VALUE_CLASS[urgency]}`}>
+          <span className="metric text-2xl">{value}</span>
+          {/* A literal space, not a margin: two inline spans with only CSS
+              between them read as one word to screen readers and copy-paste. */}
+          {suffix && (
+            <>
+              {' '}
+              <span className="text-sm font-medium">{suffix.trim()}</span>
+            </>
+          )}
         </span>
       </div>
       <div className="text-sm font-medium text-ui-text">{label}</div>

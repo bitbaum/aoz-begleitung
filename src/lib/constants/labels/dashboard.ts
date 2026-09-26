@@ -23,7 +23,7 @@ export const DASHBOARD_LABELS = {
   sectionWaiting: 'Wartet auf eine Antwort',
   applicationsTitle: 'Anfragen zu Einsatzplätzen',
   applicationsHint:
-    'Klient*innen haben im Portal «Ich habe Interesse» gedrückt. Übernimm eine Anfrage, dann weiss dein Team, dass sich jemand kümmert.',
+    'Klient*innen haben im Portal «Ich habe Interesse» gedrückt. Übernehmen Sie eine Anfrage, dann weiss das Team, dass sich jemand kümmert.',
   applicationInterest: (title: string) => `Interesse an «${title}»`,
   applicationSince: (days: number) =>
     days === 0 ? 'seit heute' : days === 1 ? 'seit gestern' : `seit ${days} Tagen`,
@@ -44,7 +44,6 @@ export const DASHBOARD_LABELS = {
   statCheckIns: 'Check-ins',
   statOverdueSuffix: 'überfällig',
   statCurrentSuffix: 'aktuell',
-  statNoneCurrent: 'keine aktuell',
   statAllCurrent: 'alle aktuell',
   statHarmony: 'Harmonie',
   statDaysSuffix: 'Tage',

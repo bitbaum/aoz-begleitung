@@ -18,7 +18,7 @@ test.describe('Matching page structure', () => {
   test('shows unplaced residents list or empty state', async ({ page }) => {
     await page.goto('/matching')
 
-    const hasResidents = (await page.getByRole('link', { name: 'Passend' }).count()) > 0
+    const hasResidents = (await page.getByRole('link', { name: 'Unterkunft finden' }).count()) > 0
     const hasEmptyState = await page
       .getByText(/Keine Klient\*innen|Alle Klient\*innen sind platziert/i)
       .isVisible()
@@ -44,10 +44,12 @@ test.describe('Matching page structure', () => {
 })
 
 test.describe('Resident selection', () => {
-  test('clicking "Passend" loads compatibility scores for that resident', async ({ page }) => {
+  test('clicking "Unterkunft finden" loads compatibility scores for that resident', async ({
+    page,
+  }) => {
     await page.goto('/matching')
 
-    const matchingBtn = page.getByRole('link', { name: 'Passend' }).first()
+    const matchingBtn = page.getByRole('link', { name: 'Unterkunft finden' }).first()
     if ((await matchingBtn.count()) === 0) {
       await expect(page.getByText(/Alle Klient\*innen|Keine Klient\*innen/i)).toBeVisible()
       return
@@ -65,7 +67,7 @@ test.describe('Resident selection', () => {
   test('selected resident button changes to "Ausgewählt"', async ({ page }) => {
     await page.goto('/matching')
 
-    const matchingBtns = page.getByRole('link', { name: 'Passend' })
+    const matchingBtns = page.getByRole('link', { name: 'Unterkunft finden' })
     if ((await matchingBtns.count()) === 0) return
 
     await matchingBtns.first().click()
@@ -78,7 +80,7 @@ test.describe('Resident selection', () => {
   test('match results include score percentages', async ({ page }) => {
     await page.goto('/matching')
 
-    const matchingBtn = page.getByRole('link', { name: 'Passend' }).first()
+    const matchingBtn = page.getByRole('link', { name: 'Unterkunft finden' }).first()
     if ((await matchingBtn.count()) === 0) return
 
     await matchingBtn.click()
@@ -94,7 +96,7 @@ test.describe('Resident selection', () => {
   test('Standard / Fast Mode toggle is visible after selecting a resident', async ({ page }) => {
     await page.goto('/matching')
 
-    const matchingBtn = page.getByRole('link', { name: 'Passend' }).first()
+    const matchingBtn = page.getByRole('link', { name: 'Unterkunft finden' }).first()
     if ((await matchingBtn.count()) === 0) return
 
     await matchingBtn.click()
@@ -107,7 +109,7 @@ test.describe('Resident selection', () => {
   test('Fast Mode toggle updates URL and preserves resident param', async ({ page }) => {
     await page.goto('/matching')
 
-    const matchingBtn = page.getByRole('link', { name: 'Passend' }).first()
+    const matchingBtn = page.getByRole('link', { name: 'Unterkunft finden' }).first()
     if ((await matchingBtn.count()) === 0) return
 
     await matchingBtn.click()
@@ -124,7 +126,7 @@ test.describe('Resident search / filter', () => {
   test('searching with a non-matching string shows empty state', async ({ page }) => {
     await page.goto('/matching')
 
-    const hasResidents = (await page.getByRole('link', { name: 'Passend' }).count()) > 0
+    const hasResidents = (await page.getByRole('link', { name: 'Unterkunft finden' }).count()) > 0
     if (!hasResidents) return
 
     await page.locator('input[name="q"]').fill('XYZNONEXISTENT999')
@@ -138,7 +140,7 @@ test.describe('Resident search / filter', () => {
   test('clearing search restores resident list', async ({ page }) => {
     await page.goto('/matching')
 
-    const initialCount = await page.getByRole('link', { name: 'Passend' }).count()
+    const initialCount = await page.getByRole('link', { name: 'Unterkunft finden' }).count()
     if (initialCount === 0) return
 
     await page.locator('input[name="q"]').fill('XYZNONEXISTENT999')
@@ -151,10 +153,10 @@ test.describe('Resident search / filter', () => {
     await page.getByRole('button', { name: 'Suchen' }).click()
 
     // Should restore original count
-    await expect(page.getByRole('link', { name: 'Passend' }).first()).toBeVisible({
+    await expect(page.getByRole('link', { name: 'Unterkunft finden' }).first()).toBeVisible({
       timeout: 10_000,
     })
-    const restoredCount = await page.getByRole('link', { name: 'Passend' }).count()
+    const restoredCount = await page.getByRole('link', { name: 'Unterkunft finden' }).count()
     expect(restoredCount).toBe(initialCount)
   })
 })

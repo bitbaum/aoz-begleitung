@@ -635,6 +635,7 @@ export const en: Dictionary = {
   'opportunities.filterAll': 'All places',
   'opportunities.filterLabel': 'Kind of place',
   'opportunities.germanLevel': 'German',
+  'opportunities.when': 'When',
   'opportunities.perWeek': 'hrs/week',
   'opportunities.okInterest': 'Noted — your team will get in touch with you.',
   'opportunities.okWithdrawn': 'Your interest has been withdrawn.',

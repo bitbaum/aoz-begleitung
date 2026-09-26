@@ -288,6 +288,7 @@ export const de = {
   'opportunities.filterAll': 'Alle Plätze',
   'opportunities.filterLabel': 'Art des Platzes',
   'opportunities.germanLevel': 'Deutsch',
+  'opportunities.when': 'Wann',
   'opportunities.perWeek': 'Std./Woche',
   'opportunities.okInterest': 'Notiert — dein Team meldet sich bei dir.',
   'opportunities.okWithdrawn': 'Dein Interesse wurde zurückgezogen.',

@@ -4,10 +4,10 @@
 
 export const ACTIVITIES_ADMIN_LABELS = {
   pageTitle: 'Aktivitäten',
-  pageDescription: 'Admin-gepflegte Angebote für das Portal der Klient*innen.',
-  newAction: 'Aktivität',
+  pageDescription: 'Kurse, Treffen und Angebote, die Klient*innen im Portal sehen.',
+  newAction: '+ Aktivität',
   statTotal: 'Gesamt',
-  statLive: 'Live',
+  statLive: 'Veröffentlicht',
   statDrafts: 'Entwürfe',
   statHighlighted: 'Hervorgehoben',
   all: 'Alle',

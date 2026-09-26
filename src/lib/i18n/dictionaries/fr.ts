@@ -651,6 +651,7 @@ export const fr: Dictionary = {
   'opportunities.filterAll': 'Toutes les places',
   'opportunities.filterLabel': 'Type de place',
   'opportunities.germanLevel': 'Allemand',
+  'opportunities.when': 'Quand',
   'opportunities.perWeek': 'h/semaine',
   'opportunities.okInterest': 'C’est noté — votre équipe vous contactera.',
   'opportunities.okWithdrawn': 'Votre intérêt a été retiré.',

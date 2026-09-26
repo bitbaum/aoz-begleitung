@@ -14,6 +14,8 @@ export const MATCHING_LABELS = {
   apartmentProfile: 'Wohnungs-Profil',
   residents: 'Klient*innen',
   matching: 'Passend',
+  /** The action on an unplaced person: an adjective looked like a status. */
+  findUnitAction: 'Unterkunft finden',
   scoreDerivation: 'Score-Berechnung anzeigen',
   basePenalty: 'Basis: 100 Punkte',
   conflictDeductions: 'Abzüge (Konflikte):',

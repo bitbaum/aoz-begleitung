@@ -30,7 +30,8 @@ const GREETING_BY_DAY_PART: Record<DayPart, 'greetingMorning' | 'greetingDay' | 
     day: 'greetingDay',
     evening: 'greetingEvening',
   }
-import { buildJobQueue } from '@/lib/jobcoach/queue'
+import { buildJobQueue, isAwaitingAnswer } from '@/lib/jobcoach/queue'
+import { boardOpportunityKinds } from '@/lib/config/opportunities'
 import { buildVolunteeringQueue } from '@/lib/volunteering/queue'
 import { staffInbox } from '@/lib/messaging/queries'
 import { getIncidentsNeedingFollowUp } from '@/lib/actions/incidents'
@@ -299,6 +300,9 @@ export default async function AdminDashboard() {
                     createdBy: true,
                     supportedByUserId: true,
                   },
+                  // Which desk answers the request: a Jobcoach answers work
+                  // listings, Freiwilligenarbeit the rest.
+                  with: { opportunity: { columns: { kind: true } } },
                 },
               },
             },
@@ -373,12 +377,23 @@ export default async function AdminDashboard() {
         }))
     : []
 
+  // A request waits on the desk that answers its kind of listing. Without this
+  // the Jobcoach's hero named a volunteering request that the request list on
+  // the same page (rightly) did not show, and the task list repeated it — one
+  // person three times, with counts that disagreed. Other threads stay in, so
+  // what counts as contact is unchanged.
+  const seatKinds: readonly string[] = boardOpportunityKinds(
+    viewerSeat === 'JOB' ? 'job' : 'volunteering',
+  )
   const caseloadClients = jobCaseload.map(({ resident }) => ({
     residentId: resident.id,
     name: residentName(resident),
     createdAt: resident.createdAt,
     learningRecords: resident.learningRecords,
-    applications: resident.opportunityApplications,
+    applications: resident.opportunityApplications.filter(
+      (application) =>
+        !isAwaitingAnswer(application) || seatKinds.includes(application.opportunity.kind),
+    ),
   }))
 
   // One caseload, the signals of whichever domain the viewer works. The Freiwilligenarbeit coordinator's
