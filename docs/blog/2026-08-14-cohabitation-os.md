@@ -71,8 +71,8 @@ arrives, it should bring a seed file, not a fork.
 
 Where this goes — multi-org tenancy, portable resident-owned compatibility
 profiles, a cross-operator vacancy network — is in the
-[roadmap](../ROADMAP.md). But the order matters: first, prove at one or two
-AOZ locations that placements informed by compatibility measurably cut
-incidents, relocations and mediation hours. A multibillion-dollar company
-in this space is built on one boring, verifiable sentence: *the conflicts
+[roadmap](../ROADMAP.md). But the order matters: first, measure at one or two
+locations whether placements informed by compatibility cut incidents,
+relocations and mediation hours — and report the result either way.
+Everything else rests on one boring, verifiable sentence: *the conflicts
 stopped happening.*

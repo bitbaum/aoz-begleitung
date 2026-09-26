@@ -818,8 +818,8 @@ export const HOUSEHOLD_FIT_LABELS = {
 /** Top-of-page notice on the dedicated demo instance only. */
 export const DEMO_INSTANCE_LABELS = {
   title: 'Demo mit erfundenen Daten.',
-  body: 'Alle Personen hier sind erfunden. Bitte keine echten Personendaten eingeben. Die Daten werden jede Nacht zurückgesetzt.',
-  bodyEn: 'Demo with invented people — please do not enter real personal data. Reset every night.',
+  body: 'Bitte keine echten Personendaten eingeben — jede Nacht zurückgesetzt.',
+  bodyEn: 'Invented people only; please enter no real personal data.',
 } as const
 
 /** The count beside Eingang in the navigation. */

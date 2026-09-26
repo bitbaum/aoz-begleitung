@@ -20,7 +20,9 @@
  */
 
 import { asc } from 'drizzle-orm'
-import { resident, type db } from '../db'
+import { careAssignment, resident, type db } from '../db'
+import { STAFF_ROLE_CARE_DOMAIN } from '../config/care'
+import { demoStaffDoors } from './roles'
 import { seedDemoData, type DemoSeedSummary } from './seed-data'
 import { syncOrgRules } from '../governance/sync-org-rules'
 import { upsertDemoStaff, upsertDemoStaffRoles } from './staff'
@@ -33,6 +35,7 @@ export interface DemoResetSummary extends DemoSeedSummary {
   orgRulesSynced: boolean
   opportunities: number
   opportunityApplications: number
+  caseloadAssignments: number
 }
 
 export async function resetDemoData(dbClient: typeof db): Promise<DemoResetSummary> {
@@ -43,7 +46,7 @@ export async function resetDemoData(dbClient: typeof db): Promise<DemoResetSumma
   // exist yet. (The wipe keeps User, so this is an update on a repeat run.)
   const demoStaff = await upsertDemoStaff(dbClient)
   // Every role door, so the visitor can walk the product as each of them.
-  await upsertDemoStaffRoles(dbClient)
+  const roleAccounts = await upsertDemoStaffRoles(dbClient)
 
   const seeded = await seedDemoData(dbClient, {
     careStaffId: demoStaff?.id ?? null,
@@ -65,6 +68,17 @@ export async function resetDemoData(dbClient: typeof db): Promise<DemoResetSumma
     staffId: demoStaff?.id ?? null,
   })
 
+  // Every specialist door opens onto real work. The Jobcoach and
+  // Freiwilligenarbeit doors used to land on "Ihnen ist noch niemand
+  // zugewiesen": the seed gave care seats only to the single legacy demo
+  // account, so a visitor trying the product AS a specialist saw an empty
+  // workspace — honest for a new account, useless for a demo.
+  const caseloadAssignments = await assignDemoCaseloads(
+    dbClient,
+    roleAccounts,
+    demoResidents.map((row) => row.id),
+  )
+
   await syncOrgRules(dbClient)
 
   return {
@@ -74,5 +88,40 @@ export async function resetDemoData(dbClient: typeof db): Promise<DemoResetSumma
     orgRulesSynced: true,
     opportunities: opportunities.opportunities,
     opportunityApplications: opportunities.applications,
+    caseloadAssignments,
   }
+}
+
+/** How many invented residents each specialist door is given to work with. */
+export const DEMO_CASELOAD_SIZE = 6
+
+/**
+ * Give every demo door that works a care domain its own clients, so the
+ * specialist workspaces have something in them. The same residents may sit in
+ * several domains — as in reality, one person has a Betreuerin AND a Jobcoach.
+ * Doors without a care domain (Liegenschaften, the system admin) get none.
+ */
+export async function assignDemoCaseloads(
+  dbClient: typeof db,
+  accounts: readonly { id: string; code: string }[],
+  residentIds: readonly string[],
+): Promise<number> {
+  const idByCode = new Map(accounts.map((account) => [account.code, account.id]))
+  const rows = demoStaffDoors().flatMap((door) => {
+    const domain = STAFF_ROLE_CARE_DOMAIN[door.role]
+    const staffId = idByCode.get(door.code)
+    if (!domain || !staffId) return []
+    return residentIds
+      .slice(0, DEMO_CASELOAD_SIZE)
+      .map((residentId) => ({ residentId, staffId, role: domain }))
+  })
+  if (rows.length === 0) return 0
+  // One holder per (resident, domain) is the table's rule; a seat the seed
+  // already filled keeps its holder.
+  const inserted = await dbClient
+    .insert(careAssignment)
+    .values(rows)
+    .onConflictDoNothing()
+    .returning({ id: careAssignment.id })
+  return inserted.length
 }

@@ -1,8 +1,8 @@
 # AOZ Begleitung - Integrationsplattform für Fachpersonen
 
 created_date: 2026-08-19
-last_modified_date: 2026-08-19
-last_modified_summary: Reframed the pitch from a housing-only placement tool to a four-pillar integration operations platform for the AOZ demo.
+last_modified_date: 2026-09-26
+last_modified_summary: Operator-neutral problem statement (the pilot measures it, the pitch does not assert it), the person-centred product as it now is, the no-account demo, positioning beside case management, and AI in plain words.
 
 ## Kurzfassung
 
@@ -23,9 +23,9 @@ sehen:
 
 ## Das Problem heute
 
-AOZ hat nicht nur ein Platzierungsproblem. AOZ hat ein **Fragmentierungsproblem**.
-
-Wichtige Informationen liegen oft getrennt:
+In der Begleitung liegen wichtige Informationen oft getrennt — das berichten
+Fachpersonen in vielen Organisationen, und ob und wie stark es bei AOZ zutrifft,
+**misst der Pilot**, statt dass diese Seite es behauptet:
 
 - Housing und Vorfälle in einer operativen Sicht
 - Sprach- und Lernfortschritt an anderer Stelle
@@ -94,13 +94,16 @@ Das ist der operative Kitt:
 - welches Follow-up offen ist
 - ob ein Nutzerpfad sauber abgeschlossen wurde
 
-## Was AOZ am Montag sehen kann
+## Was man heute sehen kann — ohne Konto
 
-Die Demo zeigt kein Konzeptdeck, sondern das laufende Produkt.
+Die Demo unter **https://aoz-demo.orangecat.ch** ist das laufende Produkt auf
+einer eigenen Instanz mit erfundenen Personen, jede Nacht zurückgesetzt. Man
+wählt eine Rolle und arbeitet damit.
 
 ### Für Leitung und Betreuung
 
-- Fachpersonen-Dashboard mit klientenbezogener Sicht
+- **Eingang**: wer wartet auf eine Antwort — Anfragen zu Einsatzplätzen,
+  Freigaben, Nachrichten, Verlegungsanfragen — mit einer Zahl in der Navigation
 - Housing, Vorfälle, Transfers und Check-ins
 - Matching mit erklärbarer Logik
 - Care Team und Follow-ups
@@ -119,6 +122,22 @@ Die Demo zeigt kein Konzeptdeck, sondern das laufende Produkt.
 - eigene Integrations-Evidenz erfassen
 - sichtbare Orientierung über offene und abgeschlossene Schritte
 
+## Wo es hingehört
+
+Neben der bestehenden Fallführung (Tutoris, KLIBnet/KiSS, Citysoftnet), nicht
+an ihrer Stelle: Dossier, Buchhaltung und Schnittstellen zum Bund bleiben dort.
+Diese Plattform deckt den Alltag in der Unterkunft und die Sicht der
+Klient*innen ab. Austausch zunächst per CSV.
+
+## KI, klar gesagt
+
+Drei optionale Hilfen für Fachpersonen (Formular-Assistent, Fragen an die
+Daten, Übersetzung von Einsatzplätzen) laufen heute über kostenlose
+Testzugänge in den USA und sind als «KI · Testbetrieb» markiert. Die Zuteilung
+von Zimmern ist eine offengelegte Formel, keine KI; Klient*innen sprechen nie
+mit einer KI. Vor dem Regelbetrieb mit echten Daten wird die KI abgeschaltet
+oder durch ein freigegebenes Modell ersetzt. Details: /ki-datenschutz.
+
 ## Warum das glaubwürdig ist
 
 Die Produktthese ist bewusst diszipliniert:
@@ -126,7 +145,8 @@ Die Produktthese ist bewusst diszipliniert:
 - **kein Black-Box-Score** über Menschen
 - **keine** medizinischen Diagnosen
 - **keine** Dossierdetails ohne operative Notwendigkeit
-- **keine** religiösen oder politischen Angaben
+- **keine** religiösen oder politischen Angaben und keine Herkunft
+- **keine** Bewertung einzelner Personen aus Zählungen — Hinweise betreffen den Haushalt
 - **keine** normative "Integrationsnote"
 
 Das System misst keine Person als Ganzes. Es zeigt Zustände, Fortschritt,

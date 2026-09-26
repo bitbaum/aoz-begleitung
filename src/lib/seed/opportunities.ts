@@ -26,7 +26,7 @@ import { evidenceForStartedApplication } from '../opportunities/pipeline'
 
 type Db = typeof db
 
-type Kind = 'VOLUNTEERING' | 'COMMUNITY_SERVICE'
+type Kind = 'VOLUNTEERING' | 'COMMUNITY_SERVICE' | 'EMPLOYMENT' | 'INTERNSHIP'
 type Permit = 'NONE' | 'EMPLOYER_NOTIFIES' | 'PERMIT_REQUIRED'
 type Stage = 'INTERESTED' | 'APPLIED' | 'INTERVIEW' | 'ACCEPTED' | 'STARTED' | 'ENDED' | 'DECLINED'
 
@@ -140,6 +140,44 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     contactName: 'Doris Frei',
     contactPhone: '000 000 00 05',
     stages: [],
+  },
+  // Work, so the Jobcoach's board and Eingang are not structurally empty: the
+  // demo used to seed only volunteering and community service, and a visitor
+  // opening the Jobcoach door saw nothing to do. A work listing must state
+  // its permit route (permitRequirementIsStated), so both do.
+  {
+    kind: 'EMPLOYMENT',
+    title: 'Mitarbeit Küche, Kantine Beispiel',
+    description:
+      'Vorbereiten, Abwaschen und Ausgabe über Mittag in einer Betriebskantine. Arbeitskleidung wird gestellt. Einarbeitung vor Ort, einfache Deutschkenntnisse reichen für den Anfang.',
+    organisation: 'Kantine Beispiel AG (erfunden)',
+    location: 'Beispielstrasse 12, 8000 Zürich',
+    schedule: 'Mo–Fr, 10–14 Uhr',
+    hoursPerWeek: 20,
+    seats: 2,
+    germanLevel: 'A2',
+    permitRequirement: 'EMPLOYER_NOTIFIES',
+    requirementNote: 'Die Arbeitgeberin meldet die Stelle bei der Behörde an.',
+    contactName: 'Nora Brunner',
+    contactPhone: '000 000 00 06',
+    stages: ['INTERVIEW', 'INTERESTED'],
+  },
+  {
+    kind: 'INTERNSHIP',
+    title: 'Schnupperpraktikum Logistik',
+    description:
+      'Zwei Wochen in einem Lager mitarbeiten: Ware annehmen, einräumen, Bestellungen bereitstellen. Am Ende gibt es ein Zeugnis.',
+    organisation: 'Logistik Beispiel GmbH (erfunden)',
+    location: 'Beispielstrasse 30, 8000 Zürich',
+    schedule: 'Mo–Fr, 8–16 Uhr, zwei Wochen',
+    hoursPerWeek: 38,
+    seats: 1,
+    germanLevel: 'A2',
+    permitRequirement: 'PERMIT_REQUIRED',
+    requirementNote: 'Vorher mit der Sozialarbeit klären, ob eine Bewilligung möglich ist.',
+    contactName: 'Luca Meier',
+    contactPhone: '000 000 00 07',
+    stages: ['INTERESTED'],
   },
 ]
 
