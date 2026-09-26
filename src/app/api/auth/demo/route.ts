@@ -5,7 +5,12 @@ import { logger } from '@/lib/logger'
 import { db, user, resident } from '@/lib/db'
 import { and, eq, inArray } from 'drizzle-orm'
 import { setResidentCookie } from '@/lib/portal-auth'
-import { isDemoEnabled, isDemoInstance, resolveDemoResidentCode } from '@/lib/demo/config'
+import {
+  DEMO_INSTANCE_URL,
+  isDemoEnabled,
+  isDemoInstance,
+  resolveDemoResidentCode,
+} from '@/lib/demo/config'
 import { demoStaffDoors } from '@/lib/demo/roles'
 import { isStaffRole } from '@/lib/auth/role-policy'
 import { ROLE_LABELS } from '@/lib/constants/labels'
@@ -102,6 +107,9 @@ export async function GET() {
       success: true,
       data: {
         doors,
+        // Where to try the product when this instance offers no door of its
+        // own — production points at the demo instance. Null on the demo.
+        demoUrl: isDemoInstance() ? null : `${DEMO_INSTANCE_URL}/login#demo`,
         // Kept so an older cached login bundle still renders its two buttons
         // instead of none while the new one rolls out.
         staff: doors.some((door) => door.id !== 'resident'),

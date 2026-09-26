@@ -127,6 +127,11 @@ export const LOGIN_LABELS = {
     description: `Ohne Konto, ein Klick: Sie sehen das echte Produkt aus der Sicht der Rolle, die Sie wählen — auch als ${BRAND.clientTerm}.`,
     staff: `${BRAND.shortName}-Verwaltung`,
     resident: `Als ${BRAND.clientTerm} ausprobieren`,
+    // Production holds real people and offers no demo doors; the demo lives
+    // on its own instance with invented data.
+    elsewhere:
+      'Ohne Konto, mit erfundenen Daten: Die Demo läuft auf einer eigenen Instanz, getrennt von echten Personendaten.',
+    openDemo: 'Demo öffnen',
   },
 } as const
 

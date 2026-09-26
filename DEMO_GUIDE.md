@@ -9,7 +9,7 @@ visitor clicks is what staff use; nothing they do reaches a real person.
 
 ## The doors
 
-On <https://demo.aoz.orangecat.ch/login>. The page asks the server which doors
+On <https://aoz-demo.orangecat.ch/login>. The page asks the server which doors
 exist, so a button only appears when pressing it can succeed. There is one door
 per staff role (Leitung, Betreuung, Sozialarbeit, Jobcoach, Freiwilligenarbeit,
 Liegenschaften) plus the Klient\*in portal.

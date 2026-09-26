@@ -81,8 +81,11 @@ describe('the demo ships through the same pipeline as production', () => {
     const jobs = yml.split(/\n  (?=[a-z-]+:\n)/)
     const prod = jobs.find((job) => job.startsWith('deploy:'))
     const demo = jobs.find((job) => job.startsWith('deploy-demo:'))
+    // Compared on the `app:` key only — the demo job's explanatory comment sits
+    // above its header and so falls in the production chunk, and it names the
+    // demo host. What must never happen is the production job DEPLOYING it.
     expect(prod).toMatch(/app:\s*aoz-wohnen/)
-    expect(prod).not.toMatch(/aoz-demo/)
+    expect(prod).not.toMatch(/app:\s*aoz-demo/)
     expect(demo).toMatch(/app:\s*aoz-demo/)
     expect(demo).not.toMatch(/app:\s*aoz-wohnen/)
   })

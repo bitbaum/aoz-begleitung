@@ -115,6 +115,28 @@ describe('POST /api/auth/demo', () => {
     process.env = { ...originalEnv }
   })
 
+  describe('where to try it without an account', () => {
+    it('production has no doors, and says where the demo is', async () => {
+      const env = process.env as Record<string, string | undefined>
+      const previous = env.NODE_ENV
+      env.NODE_ENV = 'production'
+      delete process.env.DEMO_INSTANCE
+      try {
+        const body = await (await GET()).json()
+        expect(body.data.doors).toEqual([])
+        expect(body.data.demoUrl).toBe('https://aoz-demo.orangecat.ch/login#demo')
+      } finally {
+        env.NODE_ENV = previous
+      }
+    })
+
+    it('the demo instance offers its own doors and points nowhere else', async () => {
+      process.env.DEMO_INSTANCE = 'true'
+      const body = await (await GET()).json()
+      expect(body.data.demoUrl).toBeNull()
+    })
+  })
+
   describe('validation and configuration', () => {
     it('is ALWAYS disabled in production, even when DEMO_ACCESS_ENABLED=true', async () => {
       // SECURITY: This is the hard gate preventing demo access in production.
@@ -373,7 +395,14 @@ describe('POST /api/auth/demo', () => {
     it('reports nothing when demo access is disabled', async () => {
       process.env.DEMO_ACCESS_ENABLED = 'false'
       const body = await (await GET()).json()
-      expect(body.data).toEqual({ doors: [], staff: false, resident: false })
+      // No doors here — and a pointer to the demo instance, which is where
+      // trying the product without an account now lives.
+      expect(body.data).toEqual({
+        doors: [],
+        demoUrl: 'https://aoz-demo.orangecat.ch/login#demo',
+        staff: false,
+        resident: false,
+      })
     })
   })
 })
