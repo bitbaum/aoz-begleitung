@@ -4,6 +4,7 @@ import { APP_LABELS } from '@/lib/constants/labels'
 import { ToastContainer } from '@/components/ui/Toast'
 import './globals.css'
 import { DemoInstanceBanner } from '@/components/layout/DemoInstanceBanner'
+import { isDemoInstance } from '@/lib/demo/config'
 import { BRAND } from '@/lib/config/brand'
 
 const inter = Inter({
@@ -75,7 +76,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   `
 
   return (
-    <html lang="de" className={`${inter.variable} ${mono.variable}`} data-brand={BRAND.id}>
+    <html
+      lang="de"
+      className={`${inter.variable} ${mono.variable}`}
+      data-brand={BRAND.id}
+      data-demo-instance={isDemoInstance() ? '' : undefined}
+    >
       <head>
         <script id="theme-init" dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
