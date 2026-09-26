@@ -27,7 +27,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         Zum Inhalt springen
       </a>
 
-      <header className="chrome-bar sticky top-0">
+      <header className="chrome-bar below-demo-banner sticky">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between gap-4 h-14">
             <div className="flex items-center gap-3">

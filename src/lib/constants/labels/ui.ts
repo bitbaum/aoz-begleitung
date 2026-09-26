@@ -823,6 +823,8 @@ export const HOUSEHOLD_FIT_LABELS = {
 /** Top-of-page notice on the dedicated demo instance only. */
 export const DEMO_INSTANCE_LABELS = {
   title: 'Demo mit erfundenen Daten.',
+  /** The phone line: one row, so it can stay on screen. */
+  short: 'Demo mit erfundenen Daten – nichts Echtes eingeben.',
   body: 'Bitte keine echten Personendaten eingeben — jede Nacht zurückgesetzt.',
   bodyEn: 'Invented people only; please enter no real personal data.',
 } as const

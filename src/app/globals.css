@@ -46,6 +46,17 @@
    structural and brand-invariant, so they stay on Tailwind's defaults.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Height of the demo instance's banner on phones; 0 on every real instance
+   and from `md` up. Read by .demo-banner and .below-demo-banner. */
+:root {
+  --demo-banner-h: 0px;
+}
+@media (max-width: 767px) {
+  :root[data-demo-instance] {
+    --demo-banner-h: 2rem;
+  }
+}
+
 :root {
   color-scheme: light;
 
@@ -429,6 +440,21 @@
    emit last would win, which is not a thing to rely on). */
   .chrome-bar {
     @apply bg-ui-canvas/85 backdrop-blur-md border-b border-ui-border z-40;
+  }
+
+  /* The demo instance's "invented data" line, and the room every top bar
+     leaves for it. On phones the admin bar is `fixed` at the top, and it was
+     painting straight over the banner: the one sentence that tells a visitor
+     not to type in a real person was invisible on the device most of them
+     use. Below `md` the banner is one fixed-height sticky line and every top
+     bar starts under it; the height is 0 everywhere else, so production and
+     desktop are unchanged. */
+  .demo-banner {
+    height: var(--demo-banner-h);
+    @apply sticky top-0 z-50 overflow-hidden md:static md:h-auto;
+  }
+  .below-demo-banner {
+    top: var(--demo-banner-h);
   }
 
   /* A row whose content length is config-driven (nav groups, filter chips) must

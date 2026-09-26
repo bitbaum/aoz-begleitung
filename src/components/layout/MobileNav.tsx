@@ -61,7 +61,7 @@ export function MobileNav({
   return (
     <>
       {/* Mobile header bar */}
-      <header className="chrome-bar fixed inset-x-0 top-0 md:hidden">
+      <header className="chrome-bar below-demo-banner fixed inset-x-0 md:hidden">
         <div className="flex items-center justify-between px-4 py-3">
           <Logo size="md" />
           <button

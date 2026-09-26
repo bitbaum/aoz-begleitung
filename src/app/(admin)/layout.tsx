@@ -59,7 +59,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           cues and viewport-anchored panels to pretend otherwise. What is left
           here is the brand, the theme switch and who you are signed in as —
           three things, which is what a 56px row can actually hold. */}
-      <header className="chrome-bar sticky top-0 z-30 hidden md:block">
+      <header className="chrome-bar below-demo-banner sticky z-30 hidden md:block">
         <div className="px-6">
           <div className="flex items-center justify-between gap-6 h-14">
             <div className="flex items-center gap-6 min-w-0">

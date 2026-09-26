@@ -74,7 +74,7 @@ export default async function PortalLayout({ children }: { children: React.React
           Zum Inhalt springen
         </a>
 
-        <header className="chrome-bar sticky top-0 z-30 h-14">
+        <header className="chrome-bar below-demo-banner sticky z-30 h-14">
           <div className="h-full px-4 lg:px-6 flex items-center">
             <PortalNav hasStaffAccess={hasStaffAccess} />
           </div>
