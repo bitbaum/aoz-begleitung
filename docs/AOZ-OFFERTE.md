@@ -15,10 +15,12 @@
 
 ## 1. Zusammenfassung
 
-AOZ braucht nicht nur ein besseres Platzierungswerkzeug, sondern eine
-**gemeinsame Arbeitsfläche für Fachpersonen**. Housing-Stabilität,
-Sprach- und Lernfortschritt, Arbeitsmarktnähe, Teilhabe und koordinierte
-Begleitung dürfen nicht in getrennten Sichten stecken bleiben.
+In der Begleitung liegen Informationen oft verteilt: Wohnen, Vorfälle,
+Sprach- und Arbeitsschritte, Anliegen von Klient*innen und offene Rückfragen.
+Diese Offerte schlägt eine **gemeinsame Arbeitsfläche für Fachpersonen** vor —
+als Ergänzung zur bestehenden Fallführung, nicht als Ersatz. Ob und wie stark
+die Verteilung bei AOZ zutrifft und was die Plattform daran ändert, misst der
+Pilot.
 
 Das System ist **bereits gebaut und läuft**. Es verbindet:
 
@@ -78,8 +80,10 @@ Betrieb:
 
 ### Stability - Platzierung und Kompatibilität
 
-- Kompatibilitätsberechnung über **4 Dimensionen** (Lebensstil 30 %, Sozial 25 %,
-  Praktisch 25 %, Risiko 20 %) und 38 Faktoren
+- Kompatibilitätsberechnung über **4 Dimensionen** (Lebensstil 35 %, Soziales 25 %,
+  Praktisches 20 %, Anforderungen 20 %). Die Zahl der bewerteten Faktoren wird aus
+  dem Code abgeleitet und im Produkt unter «Algorithmus» offengelegt; Religion,
+  Herkunft und Ernährungsgründe fliessen nicht ein.
 - Bewertung nicht nur paarweise, sondern gegen die **gesamte bestehende Gruppe** einer
   Wohneinheit
 - **Blockierende Konflikte** werden erkannt und verhindern die Platzierung (z. B.
@@ -168,7 +172,7 @@ Einzelentscheidung. Drei Varianten stehen zur Wahl:
 
 | Variante | Datenhaltung | Auswirkung auf den Preis |
 | --- | --- | --- |
-| **A — Schweizer Rechenzentrum** *(empfohlen)* | Betrieb durch mich bei einem Schweizer Anbieter (z. B. Infomaniak, Exoscale), Daten verlassen die Schweiz nicht | im Preis enthalten |
+| **A — Schweizer Rechenzentrum** *(empfohlen)* | Betrieb durch mich bei einem Schweizer Anbieter (z. B. Infomaniak, Exoscale), Daten verlassen die Schweiz nicht. **Heute** laufen Produkt und Demo auf einem Server in Deutschland (Hetzner); Variante A wird für den Pilot eingerichtet. | im Preis enthalten |
 | **B — On-Premise bei AOZ** | Betrieb auf AOZ-eigener Infrastruktur, vollständige Datenhoheit bei AOZ | Einrichtung + CHF 3'500, Betrieb − CHF 150/Monat |
 | **C — Bestehende EU-Infrastruktur** | Betrieb auf meiner bestehenden Infrastruktur in Deutschland | Betrieb − CHF 100/Monat, **benötigt Freigabe der Datenschutzstelle** |
 
@@ -197,12 +201,34 @@ Diese Grenze ist im System selbst verankert, nicht nur in einer Richtlinie:
 
 - **keine** medizinischen Diagnosen (nur funktionale Bedürfnisse, z. B. „benötigt Erdgeschoss")
 - **keine** Angaben zum Asylstatus oder zum Verfahren
-- **keine** religiösen oder politischen Angaben
+- **keine** religiösen oder politischen Angaben und keine Herkunft
 - **keine** persönliche Vorgeschichte über die Wohnrelevanz hinaus
-- **nichts**, was zur Diskriminierung verwendet werden könnte
+- **keine** Bewertung einzelner Personen aus Zählungen — Hinweise betreffen den Haushalt
 
-Erfasst werden ausschliesslich: Schlafrhythmus, Lärmtoleranz, Sauberkeitsanspruch,
-Rauchstatus, gesprochene Sprachen, Mobilitätsbedarf sowie anonymisierte Konfliktausgänge.
+Für die Zuteilung zählen Alltagsfaktoren wie Schlafrhythmus, Lärm, Ordnung,
+Rauchen, gemeinsame Sprache und Barrierefreiheit. Die vollständige Liste ist im
+Produkt unter «Algorithmus» einsehbar; Ernährung ist ein Küchenhinweis und wird
+nicht bewertet.
+
+### 5a. KI-Funktionen
+
+Das Produkt enthält drei optionale KI-Hilfen: einen Formular-Assistenten, einen
+Assistenten für Fragen an die Daten und die Übersetzung von Einsatzplätzen für das
+Portal. Heute laufen sie über kostenlose Testzugänge (Groq, USA; ersatzweise
+OpenRouter) und sind als «KI · Testbetrieb» gekennzeichnet; was übermittelt wird,
+steht öffentlich unter /ki-datenschutz. **Im Pilot sind die KI-Funktionen
+standardmässig ausgeschaltet.** Für den Einsatz mit echten Daten wird ein von AOZ
+freigegebenes Modell angebunden (Hosting in der Schweiz oder Anbieter mit AVV, ohne
+Speicherung und Training); Mehrkosten nach Aufwand und Verbrauch. Die Zuteilung von
+Zimmern ist eine offengelegte Formel, keine KI.
+
+### 5b. Unterauftragsbearbeiter
+
+| Zweck | Heute | Im Pilot |
+| --- | --- | --- |
+| Hosting | Hetzner (Deutschland) | Schweizer Rechenzentrum (Variante A) |
+| E-Mail-Versand | Resend (USA) | nach Absprache, EU/CH bevorzugt |
+| KI-Hilfen | Groq / OpenRouter (USA), Testzugang | aus, oder freigegebenes Modell |
 
 ### Im Preis enthaltene Datenschutzleistungen
 
@@ -329,8 +355,7 @@ Was diese Software von einem Prototyp unterscheidet:
 
 | | |
 | --- | --- |
-| Automatisierte Tests (Unit) | 2'341 in 135 Suiten |
-| Automatisierte Tests (End-to-End) | 173 in 18 Szenarien |
+| Automatisierte Tests | Mehrere tausend Unit-Tests und rund 200 End-to-End-Tests; die aktuelle Zahl liefert jede Prüfstrecke (Stand bei Versand eintragen) |
 | Prüfung vor jeder Änderung | Jede Änderung läuft über eine automatische Prüfstrecke (Codeprüfung, Typprüfung, alle Tests). Ohne grüne Prüfstrecke gelangt nichts in den Betrieb. |
 | Getestete Bereiche | Kompatibilitätsalgorithmus, Zugangskontrolle, Rollentrennung Portal/Verwaltung, Import/Export, Benachrichtigungen, mobile Darstellung, Barrierefreiheit |
 | Audit-Trail | Jede Platzierung protokolliert mit Person, Zeitpunkt, Kompatibilitätswert und Begründung |

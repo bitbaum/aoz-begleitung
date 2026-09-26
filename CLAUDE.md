@@ -59,7 +59,10 @@ AOZ staff place asylum seekers into shared housing based on **gut feeling and av
 3. **Recommends placements** - Shows best matches first, flags potential conflicts
 4. **Tracks outcomes** - Records incidents to improve future recommendations
 
-### Measuring Success - What AOZ Should Track
+### Measuring Success — hypotheses a pilot tests, not results
+
+The targets below are what a pilot would test, against a baseline. None has
+been measured; a pilot that finds no improvement is a valid result.
 
 **Before pilot (baseline - 1 month):**
 | Metric | How to Measure | Example |
@@ -109,16 +112,13 @@ Verschlechterung" off them. `lib/analytics/real-data.ts` excludes demo rows by
 the same CODE PREFIX the scoped reset deletes by, so a row the reset can clean
 is exactly a row the KPIs ignore. Any new metric must pass through it.
 
-**Cost of NOT solving this:**
-- 1 relocation = ~2 staff hours (packing, transport, paperwork) = CHF 100+
-- 1 conflict mediation = ~1 staff hour = CHF 50+
-- 4 relocations + 15 incidents/month = **CHF 1,150/month minimum**
-- Plus: resident stress, staff burnout, reputation risk
-
-**ROI calculation:**
-If system reduces incidents by 30% and relocations by 50%:
-- Savings: ~CHF 400-500/month per housing location
-- Staff can focus on support instead of firefighting
+**Cost and savings are ASSUMPTIONS until a pilot measures them.** This block
+used to state "CHF 1,150/month minimum" and "Savings ~CHF 400–500/month" as
+if they were findings, in a public file, while the offer carefully called the
+same arithmetic an assumption. Never quote a saving as a fact — in code, copy,
+docs or a pitch. The one worked example (clearly an assumption) lives in the
+offer (`docs/AOZ-OFFERTE.md` §8); the measures the pilot uses are in
+`docs/ROADMAP.md` ("How we will know whether it helps").
 
 ### Pilot Proposal for AOZ
 
@@ -159,7 +159,13 @@ This system serves **vulnerable populations** (asylum seekers). Every decision m
 
 ## Core Mission
 
-**Reduce housing conflicts and improve wellbeing** through compatibility-based placement.
+**Accompany people** — decided 2026-09-24, person-centred. The product began
+as compatibility-based placement to reduce housing conflicts, and grew into the
+everyday layer of accompanying a person: who is waiting for an answer, how each
+person is doing, where they could go next (work, volunteering, learning), who
+lives with whom, and how a house settles its conflicts. Housing is one part of
+a person's situation, not a gate on the others. The navigation follows this
+(`src/lib/config/navigation.ts`).
 
 **NOT**: Maximize occupancy, minimize costs, or optimize throughput.
 
