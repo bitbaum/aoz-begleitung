@@ -1,8 +1,8 @@
 /**
- * AOZH tokens → bip-kit's --bp-* theming contract, for the blog only (this
+ * Design tokens → bip-kit's --bp-* theming contract, for the blog only (this
  * file is imported by the blog post route, not by globals.css).
  *
- * Every value references the design-token SSOT (src/app/globals.css). AOZH
+ * Every value references the design-token SSOT (src/app/globals.css). The
  * tokens are RGB channel triples, so each mapping wraps them in rgb(). Both
  * themes are covered by ONE mapping — the underlying tokens already flip on
  * `data-theme` + the OS preference, which is exactly bip-kit's own dark-mode

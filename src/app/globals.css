@@ -24,7 +24,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   AOZH DESIGN SYSTEM — the single source of truth for every design token.
+   AOZ DESIGN SYSTEM — the single source of truth for every design token.
 
    Design language: technical, flat, high-contrast. Structure is drawn with
    1px hairlines and near-square corners rather than shadows and soft radii,
@@ -78,9 +78,7 @@
   /* ── Brand palette ────────────────────────────────────────────────────────
      THE ORIGINAL AOZ PALETTE, BYTE-FOR-BYTE. Do not edit these values.
      Switching the product back to AOZ branding must restore exactly what AOZ
-     was shown, not an approximation of it. AOZH deliberately ships the same
-     palette — the brief was to keep AOZ's colours and change the design
-     language — so it adds no override block at all. A future brand that wants
+     was shown, not an approximation of it. A future brand that wants
      different colours adds `:root[data-brand='<id>']` below. */
   --color-brand-primary: 230 57 70;
   --color-brand-primary-light: 236 80 92;

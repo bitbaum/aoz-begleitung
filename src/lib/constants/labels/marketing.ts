@@ -20,7 +20,7 @@ export type { MarketingCopy, MarketingSection, MarketingFeature } from './market
  *
  * BRAND is a build-time fact. One deployment is one brand, `NEXT_PUBLIC_BRAND`
  * is inlined at build, and a reader cannot switch it. It selects the REGISTER:
- * `aoz`/`aozh` address an organisation deciding whether to place people with
+ * `aoz` addresses an organisation deciding whether to place people with
  * software; `wg` runs in a real shared flat where nobody is "placed" by a
  * "system". The same page for both would be wrong for at least one of them.
  *
@@ -46,7 +46,6 @@ export type { MarketingCopy, MarketingSection, MarketingFeature } from './market
 /** Which register this brand speaks. Build-time, one per deployment. */
 const REGISTER_BY_BRAND: Record<BrandId, keyof MarketingRegisters> = {
   aoz: 'placement',
-  aozh: 'placement',
   wg: 'household',
 }
 
@@ -158,7 +157,6 @@ export const MARKETING_COPY: MarketingCopy = marketingCopy(PUBLIC_DEFAULT_LOCALE
 /** Exported for the test that checks every brand has its own complete pitch. */
 export const MARKETING_COPY_BY_BRAND: Record<BrandId, MarketingCopy> = {
   aoz: marketingDe[REGISTER_BY_BRAND.aoz],
-  aozh: marketingDe[REGISTER_BY_BRAND.aozh],
   wg: marketingDe[REGISTER_BY_BRAND.wg],
 }
 
