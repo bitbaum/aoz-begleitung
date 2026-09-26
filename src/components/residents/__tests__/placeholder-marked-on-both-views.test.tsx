@@ -65,13 +65,13 @@ describe('the default board marks a placeholder', () => {
   })
 
   it('leaves a real client unmarked', () => {
-    board([client({ id: 'r1', displayName: 'Ihor', isPlaceholder: false })])
+    board([client({ id: 'r1', displayName: 'Hana', isPlaceholder: false })])
     expect(screen.queryByText('Platzhalter')).not.toBeInTheDocument()
   })
 
   it('marks only the seeded one when both are shown', () => {
     board([
-      client({ id: 'r1', displayName: 'Ihor', isPlaceholder: false }),
+      client({ id: 'r1', displayName: 'Hana', isPlaceholder: false }),
       client({ id: 'p1', displayName: 'Amir', isPlaceholder: true }),
     ])
     expect(screen.getAllByText('Platzhalter')).toHaveLength(1)

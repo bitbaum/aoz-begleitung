@@ -19,7 +19,7 @@ import { excludesDemo, isRealRow, type DemoScope } from '@/lib/analytics/real-da
  * looks in the numbers it is judged on. Same failure as demo conflicts
  * reporting "67% mehr Konflikte · Verschlechterung", from the other side.
  *
- * And the opposite mistake is just as real: Ihor, Misha, Alex and Julia are
+ * And the opposite mistake is just as real: four of the live residents are
  * REAL clients who have never registered an account. Deriving "is a person"
  * from "has an Account" would erase four of the five people actually being
  * served. Placeholder-ness is provenance, fixed when the row is created.
@@ -39,10 +39,10 @@ describe('the scope the KPIs exclude', () => {
   })
 
   it('keeps a real client who never registered', () => {
-    // Ihor. No Account, no email, entirely real.
+    // A real client with no Account and no email: entirely real.
     const scope: DemoScope = { residentIds: new Set(['placeholder-1']), unitIds: new Set() }
-    const rows = [{ residentId: 'ihor' }, { residentId: 'placeholder-1' }, { residentId: 'misha' }]
-    expect(excludesDemo(rows, scope)).toEqual([{ residentId: 'ihor' }, { residentId: 'misha' }])
+    const rows = [{ residentId: 'hana' }, { residentId: 'placeholder-1' }, { residentId: 'noor' }]
+    expect(excludesDemo(rows, scope)).toEqual([{ residentId: 'hana' }, { residentId: 'noor' }])
   })
 })
 

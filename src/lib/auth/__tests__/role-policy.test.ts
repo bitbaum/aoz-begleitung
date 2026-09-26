@@ -166,13 +166,13 @@ describe('role policy smoke checks', () => {
  * The three axes, and that each answers ONLY its own question.
  *
  * They were one enum, and the real AOZ team could not be described by it:
- * Franziska is a Betreuerin who ALSO sees every client, and saying so meant
- * making her ADMIN — which erased her domain and handed her the settings page.
+ * A Betreuerin who ALSO sees every client (BETREUUNG + ALL_DOMAINS): saying so meant
+ * making the account ADMIN — which erased its domain and handed it the settings page.
  */
 describe('role, scope and administration are independent', () => {
-  const franziska = caps('BETREUUNG', 'ALL_DOMAINS')
-  const simon = caps('JOBCOACH')
-  const sandra = caps('FREIWILLIGENARBEIT')
+  const allDomainsBetreuerin = caps('BETREUUNG', 'ALL_DOMAINS')
+  const jobcoach = caps('JOBCOACH')
+  const coordinator = caps('FREIWILLIGENARBEIT')
 
   test('a system permission is granted by isSystemAdmin ALONE, never by a role', () => {
     for (const permission of SYSTEM_ADMIN_PERMISSIONS) {
@@ -185,23 +185,23 @@ describe('role, scope and administration are independent', () => {
   })
 
   test('seeing every domain grants every domain’s verbs', () => {
-    // Franziska covers the whole house, so she records learning and reads a CV
+    // The all-domains Betreuerin covers the whole house, so the account records learning and reads a CV
     // the way the coach would — without being an administrator.
-    expect(hasPermission(franziska, 'learning:write')).toBe(true)
-    expect(hasPermission(franziska, 'documents:read')).toBe(true)
-    expect(hasPermission(franziska, 'opportunities:write')).toBe(true)
-    expect(hasPermission(franziska, 'users:manage')).toBe(false)
-    expect(hasPermission(franziska, 'system:configure')).toBe(false)
+    expect(hasPermission(allDomainsBetreuerin, 'learning:write')).toBe(true)
+    expect(hasPermission(allDomainsBetreuerin, 'documents:read')).toBe(true)
+    expect(hasPermission(allDomainsBetreuerin, 'opportunities:write')).toBe(true)
+    expect(hasPermission(allDomainsBetreuerin, 'users:manage')).toBe(false)
+    expect(hasPermission(allDomainsBetreuerin, 'system:configure')).toBe(false)
   })
 
   test('one domain grants only that domain’s verbs', () => {
-    expect(hasPermission(simon, 'learning:write')).toBe(true)
-    expect(hasPermission(simon, 'placements:write')).toBe(false)
-    expect(hasPermission(simon, 'housing:write')).toBe(false)
+    expect(hasPermission(jobcoach, 'learning:write')).toBe(true)
+    expect(hasPermission(jobcoach, 'placements:write')).toBe(false)
+    expect(hasPermission(jobcoach, 'housing:write')).toBe(false)
 
-    expect(hasPermission(sandra, 'marketplace:moderate')).toBe(true)
-    expect(hasPermission(sandra, 'documents:write')).toBe(false)
-    expect(hasPermission(sandra, 'placements:write')).toBe(false)
+    expect(hasPermission(coordinator, 'marketplace:moderate')).toBe(true)
+    expect(hasPermission(coordinator, 'documents:write')).toBe(false)
+    expect(hasPermission(coordinator, 'placements:write')).toBe(false)
   })
 
   test('the integration roles SEE a conflict but never work it', () => {
@@ -214,7 +214,7 @@ describe('role, scope and administration are independent', () => {
     // staff shared a corridor and overheard that a household was in trouble.
     // Distributed housing removes that, and a coach placing someone into work
     // or a group activity should not be the last to know.
-    for (const viewer of [simon, sandra]) {
+    for (const viewer of [jobcoach, coordinator]) {
       expect(hasPermission(viewer, 'incidents:read')).toBe(true)
       expect(hasPermission(viewer, 'incidents:write')).toBe(false)
     }

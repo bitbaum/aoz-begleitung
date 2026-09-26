@@ -6,7 +6,7 @@
  * was precise and backwards: the two roles who write the most prose in this
  * product, a Jobcoach (CVs, references) and a Freiwilligenarbeit coordinator
  * (listings), were the two the nav hid it from. Verified live on 2026-09-03 as
- * both Simon and Sandra: their entire user menu was Algorithmus and Hilfe.
+ * both the Jobcoach and the Freiwilligenarbeit coordinator: their entire user menu was Algorithmus and Hilfe.
  *
  * The second half was worse. `/api/ai/chat` and `/api/ai/form-assist` checked
  * only that a session existed, so the API served exactly the people the nav

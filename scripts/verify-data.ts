@@ -89,7 +89,7 @@ async function main() {
   console.log(`   Housing: http://localhost:3000/housing/${unit.id}`)
   console.log(`   Residents: http://localhost:3000/residents`)
   console.log(
-    `   Carlos: http://localhost:3000/residents/${residents.find((r) => r.code === 'WIT-005')?.id}`,
+    `   Person E: http://localhost:3000/residents/${residents.find((r) => r.code === 'WIT-005')?.id}`,
   )
   console.log(`   Incidents: http://localhost:3000/incidents`)
 }

@@ -1,7 +1,7 @@
 import { monthlyStatements, monthKeyOf } from '../statement'
 import { splitEqually } from '../split'
 
-const MEMBERS = ['alex', 'georgy', 'ihor', 'misha']
+const MEMBERS = ['amara', 'georgy', 'hana', 'noor']
 
 function expense(
   paidById: string,
@@ -33,9 +33,9 @@ describe('monthlyStatements', () => {
   it('groups by month, newest first, and totals correctly', () => {
     const statements = monthlyStatements(
       [
-        expense('alex', 2000, '2026-08-13T10:00:00Z'),
+        expense('amara', 2000, '2026-08-13T10:00:00Z'),
         expense('georgy', 600, '2026-08-13T11:00:00Z'),
-        expense('ihor', 1000, '2026-07-05T10:00:00Z'),
+        expense('hana', 1000, '2026-07-05T10:00:00Z'),
       ],
       MEMBERS,
     )
@@ -46,11 +46,11 @@ describe('monthlyStatements', () => {
   })
 
   it('computes paid, share and net per person; nets sum to zero', () => {
-    const statements = monthlyStatements([expense('alex', 2000, '2026-08-13T10:00:00Z')], MEMBERS)
+    const statements = monthlyStatements([expense('amara', 2000, '2026-08-13T10:00:00Z')], MEMBERS)
     const rows = statements[0].rows
-    const alex = rows.find((r) => r.residentId === 'alex')!
-    expect(alex).toEqual({
-      residentId: 'alex',
+    const amara = rows.find((r) => r.residentId === 'amara')!
+    expect(amara).toEqual({
+      residentId: 'amara',
       paidRappen: 2000,
       shareRappen: 500,
       netRappen: 1500,
@@ -62,11 +62,11 @@ describe('monthlyStatements', () => {
 
   it('handles partial splits: the uninvolved member shows a zero row', () => {
     const statements = monthlyStatements(
-      [expense('georgy', 600, '2026-08-13T10:00:00Z', ['georgy', 'ihor', 'misha'])],
+      [expense('georgy', 600, '2026-08-13T10:00:00Z', ['georgy', 'hana', 'noor'])],
       MEMBERS,
     )
-    const alex = statements[0].rows.find((r) => r.residentId === 'alex')!
-    expect(alex).toEqual({ residentId: 'alex', paidRappen: 0, shareRappen: 0, netRappen: 0 })
+    const amara = statements[0].rows.find((r) => r.residentId === 'amara')!
+    expect(amara).toEqual({ residentId: 'amara', paidRappen: 0, shareRappen: 0, netRappen: 0 })
   })
 
   it('includes past residents present in the data but not in memberIds', () => {
@@ -80,11 +80,11 @@ describe('monthlyStatements', () => {
   it('sorts rows by paid desc, then id', () => {
     const statements = monthlyStatements(
       [
-        expense('misha', 1000, '2026-08-02T10:00:00Z'),
-        expense('alex', 1000, '2026-08-03T10:00:00Z'),
+        expense('noor', 1000, '2026-08-02T10:00:00Z'),
+        expense('amara', 1000, '2026-08-03T10:00:00Z'),
       ],
       MEMBERS,
     )
-    expect(statements[0].rows.map((r) => r.residentId)).toEqual(['alex', 'misha', 'georgy', 'ihor'])
+    expect(statements[0].rows.map((r) => r.residentId)).toEqual(['amara', 'noor', 'georgy', 'hana'])
   })
 })

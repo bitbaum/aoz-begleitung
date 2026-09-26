@@ -66,7 +66,7 @@ export function demoStaffCodeFor(role: StaffRole): string {
  * administration were separated that has to be SAID: a bare `role: 'ADMIN'`
  * row now takes the column defaults — own domain, no administration — which
  * would leave that door with no care seats at all and no settings page. The
- * shape below is Franziska's: one domain of record, oversight over the rest.
+ * shape below is the all-domains Betreuerin's: one domain of record, oversight over the rest.
  */
 export function demoStaffReachFor(role: StaffRole): {
   scope: 'OWN_DOMAIN' | 'ALL_DOMAINS'

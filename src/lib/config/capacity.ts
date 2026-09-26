@@ -8,11 +8,11 @@
  * be placed into, and the dashboard advertised them as free.
  *
  * That was harmless while the database held only units AOZ actually runs. It
- * stopped being harmless on 2026-09-04, when the 118 flats of Witikonerstrasse
- * 426–468 were entered from the federal register: a terrace under demolition
+ * stopped being harmless on 2026-09-04, when the 118 flats of a real
+ * street terrace were entered from the federal register: a terrace under demolition
  * order, most of which AOZ may not hold. Their beds are 0 today precisely
  * BECAUSE of this bug — the moment anyone types a real bed count into a flat
- * that is not yet in service, Franziska's "Freie Plätze" tile inflates.
+ * that is not yet in service, the all-domains Betreuerin's "Freie Plätze" tile inflates.
  *
  * Capacity you cannot place anyone into is not capacity. It is worse than a
  * missing number, because it reads as headroom during exactly the conversation

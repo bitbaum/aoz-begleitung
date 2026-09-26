@@ -3,7 +3,7 @@
  *
  * The picker on a client's page offered every active account for every seat,
  * because `listAssignableStaff` selected `role` and read it nowhere — so
- * Manuel (`LIEGENSCHAFTEN`, a role mapping to no care domain) was offered as a
+ * the Liegenschaften lead (`LIEGENSCHAFTEN`, a role mapping to no care domain) was offered as a
  * Jobcoach. Filtering the dropdown fixes what a person sees; it does not fix
  * what the action accepts, and a dropdown is a suggestion rather than a rule.
  *
@@ -66,12 +66,12 @@ beforeEach(() => {
 describe('saveCareSeat checks the person being named', () => {
   it('refuses a role that works no care domain at all', async () => {
     mockUserFindFirst.mockResolvedValue({
-      id: 'manuel',
+      id: 'liegenschaften-lead',
       role: 'LIEGENSCHAFTEN',
       scope: 'OWN_DOMAIN',
     })
 
-    const result = await saveCareSeat(seatForm('JOB', 'manuel'))
+    const result = await saveCareSeat(seatForm('JOB', 'liegenschaften-lead'))
 
     expect(result.success).toBe(false)
     expect(mockInsertValues).not.toHaveBeenCalled()
@@ -79,12 +79,12 @@ describe('saveCareSeat checks the person being named', () => {
 
   it('refuses a specialist in somebody else’s domain', async () => {
     mockUserFindFirst.mockResolvedValue({
-      id: 'simon',
+      id: 'jobcoach',
       role: 'JOBCOACH',
       scope: 'OWN_DOMAIN',
     })
 
-    const result = await saveCareSeat(seatForm('VOLUNTEERING', 'simon'))
+    const result = await saveCareSeat(seatForm('VOLUNTEERING', 'jobcoach'))
 
     expect(result.success).toBe(false)
     expect(mockInsertValues).not.toHaveBeenCalled()
@@ -92,12 +92,12 @@ describe('saveCareSeat checks the person being named', () => {
 
   it('accepts a specialist in their own domain', async () => {
     mockUserFindFirst.mockResolvedValue({
-      id: 'sandra',
+      id: 'coordinator',
       role: 'FREIWILLIGENARBEIT',
       scope: 'OWN_DOMAIN',
     })
 
-    const result = await saveCareSeat(seatForm('VOLUNTEERING', 'sandra'))
+    const result = await saveCareSeat(seatForm('VOLUNTEERING', 'coordinator'))
 
     expect(result.success).toBe(true)
     expect(mockInsertValues).toHaveBeenCalled()
@@ -105,12 +105,12 @@ describe('saveCareSeat checks the person being named', () => {
 
   it('accepts somebody who covers every domain', async () => {
     mockUserFindFirst.mockResolvedValue({
-      id: 'franziska',
+      id: 'all-domains',
       role: 'BETREUUNG',
       scope: 'ALL_DOMAINS',
     })
 
-    const result = await saveCareSeat(seatForm('SOCIAL', 'franziska'))
+    const result = await saveCareSeat(seatForm('SOCIAL', 'all-domains'))
 
     expect(result.success).toBe(true)
     expect(mockInsertValues).toHaveBeenCalled()

@@ -75,7 +75,7 @@ beforeEach(() => {
 })
 
 describe('POST /api/auth/signup', () => {
-  const VALID = { code: 'RES-ABC123', email: 'ihor@example.ch', password: 'secret-password' }
+  const VALID = { code: 'RES-ABC123', email: 'hana@example.ch', password: 'secret-password' }
 
   it('registers, sets the resident cookie, and reports the type', async () => {
     mockRegisterAccount.mockResolvedValue({
@@ -140,13 +140,13 @@ describe('POST /api/auth/signup', () => {
     await signupPost(
       jsonRequest('/api/auth/signup', {
         code: 'res-abc123',
-        email: '  Ihor@Example.CH ',
+        email: '  Hana@Example.CH ',
         password: 'secret-password',
       }),
     )
     expect(mockRegisterAccount).toHaveBeenCalledWith({
       code: 'RES-ABC123',
-      email: 'ihor@example.ch',
+      email: 'hana@example.ch',
       password: 'secret-password',
     })
   })
@@ -274,7 +274,7 @@ describe('POST /api/auth/login with email credentials', () => {
     })
 
     const response = await loginPost(
-      jsonRequest('/api/auth/login', { email: 'ihor@example.ch', password: 'pw-123456' }),
+      jsonRequest('/api/auth/login', { email: 'hana@example.ch', password: 'pw-123456' }),
     )
     const body = await response.json()
 

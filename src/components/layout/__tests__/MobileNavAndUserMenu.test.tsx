@@ -440,8 +440,8 @@ describe('ChoreBalanceSummary', () => {
   })
 
   it('scales bars to the largest IMBALANCE, so an even month reads as even', () => {
-    // Ihor is 5 minutes ahead of a 100-minute share. Scaling to contribution
-    // would paint his bar full and imply a winner; scaling to imbalance keeps
+    // Hana is 5 minutes ahead of a 100-minute share. Scaling to contribution
+    // would paint that bar full and imply a winner; scaling to imbalance keeps
     // the whole panel visibly near-even.
     const { container } = render(
       <ChoreBalanceSummary balances={[row('RES-001', 105, 100), row('RES-002', 95, 100)]} />,

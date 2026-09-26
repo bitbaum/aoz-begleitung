@@ -19,7 +19,7 @@ const staffApp = (stage: ApplicationStageId): JobApplicationInput => ({
   opportunityId: 'opp-1',
   stage,
   createdBy: 'STAFF',
-  supportedByUserId: 'u-simon',
+  supportedByUserId: 'u-coach',
 })
 
 /** A resident pressed "Ich habe Interesse" and nobody has replied. */
@@ -44,7 +44,7 @@ const value = (rows: ReturnType<typeof computeJobKpis>, id: string) => rows.find
 describe('an empty caseload is not a score of zero', () => {
   /**
    * The distinction this whole file turns on. On the live instance three of
-   * five real residents have no care team at all, and Franziska's and Sandra's
+   * five real residents have no care team at all, and the all-domains Betreuerin's and the Freiwilligenarbeit coordinator's
    * caseloads are empty. Reporting 0% would read as "this coach is failing"
    * when the true statement is "nobody has been assigned to them".
    */
@@ -101,7 +101,7 @@ describe('labour-market contact', () => {
             opportunityId: 'opp-1',
             stage: 'INTERESTED',
             createdBy: 'RESIDENT',
-            supportedByUserId: 'u-simon',
+            supportedByUserId: 'u-coach',
           },
         ],
       }),
@@ -183,8 +183,8 @@ describe('volunteering', () => {
   })
 
   it('an unanswered interest is not a running engagement either', () => {
-    // The same inversion on Sandra's side: a resident's own click would have
-    // reported an engagement she had not arranged and did not know about.
+    // The same inversion on the Freiwilligenarbeit coordinator's side: a resident's own click would have
+    // reported an engagement the coordinator had not arranged and did not know about.
     const rows = computeVolunteeringKpis([
       { residentId: 'a', applications: [unanswered()], rsvpStatuses: [] },
     ])
@@ -231,8 +231,8 @@ describe('every KPI traces to evidence', () => {
 
   it('says what a dash MEANS, per KPI', () => {
     /**
-     * Shipped without this and it was wrong on screen within the hour: Simon's
-     * median-days tile read "noch niemand zugewiesen" while he plainly had a
+     * Shipped without this and it was wrong on screen within the hour: the Jobcoach's
+     * median-days tile read "noch niemand zugewiesen" while the Jobcoach plainly had a
      * client. That tile's denominator is the people who have HAD contact, so
      * nought means "nobody has started yet" — the state a coach acts on — and
      * one shared string cannot say both.

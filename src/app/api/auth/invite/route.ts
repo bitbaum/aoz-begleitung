@@ -118,10 +118,10 @@ export async function POST(request: NextRequest) {
   // Reach is stated, administration is not.
   //
   // `scope` belongs here because the team cannot otherwise be described: the
-  // only way to create Franziska — a Betreuerin who ALSO covers every domain —
+  // only way to create the all-domains Betreuerin — a Betreuerin who ALSO covers every domain —
   // was to pick "Leitung" from a dropdown that should not have offered it. That
   // is WHY the retired role survived in the UI, and removing the option without
-  // adding this would have taken away the only way to express her.
+  // adding this would have taken away the only way to express that shape.
   //
   // `isSystemAdmin` deliberately stays false and unexposed. Running the houses
   // is not reconfiguring the product; granting that is a rare, deliberate act

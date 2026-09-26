@@ -145,8 +145,8 @@ describe('staff provisioning', () => {
     expect(values.isSystemAdmin).toBe(false)
   })
 
-  it('can describe Franziska: a Betreuerin who also sees everything', async () => {
-    // The shape that was unexpressible before — her domain is housing AND she
+  it('can describe a Betreuerin who also sees everything', async () => {
+    // The shape that was unexpressible before — the domain is housing AND the seat
     // sees every client, without being handed the settings page.
     mockGetCurrentUser.mockResolvedValue({
       id: 'u1',
@@ -155,7 +155,7 @@ describe('staff provisioning', () => {
       isSystemAdmin: true,
     })
 
-    await POST(post({ name: 'Franziska Heimhuber', role: 'BETREUUNG', scope: 'ALL_DOMAINS' }))
+    await POST(post({ name: 'Anna Muster', role: 'BETREUUNG', scope: 'ALL_DOMAINS' }))
 
     const [values] = mockUserInsertReturning.mock.calls[0]
     expect(values.role).toBe('BETREUUNG')

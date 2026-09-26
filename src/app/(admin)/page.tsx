@@ -208,7 +208,7 @@ export default async function AdminDashboard() {
         })
       : [],
     // "My clients" across every seat this person holds — not just JOB, because
-    // a Freiwilligenarbeit coordinator's learning entries are hers too.
+    // a Freiwilligenarbeit coordinator's learning entries are theirs too.
     show('learning') && user
       ? db.query.careAssignment.findMany({
           where: eq(careAssignment.staffId, user.id),
@@ -256,9 +256,9 @@ export default async function AdminDashboard() {
     // account nobody has connected to a client yet — the global count above
     // cannot tell those apart, and reported the second as the first.
     //
-    // Also null for a role that carries no caseload AT ALL. Counting Manuel's
-    // care assignments returns 0 like Sandra's, and the two zeros mean opposite
-    // things: she is waiting to be assigned, he runs the buildings and never
+    // Also null for a role that carries no caseload AT ALL. Counting the Liegenschaften lead's
+    // care assignments returns 0 like the Freiwilligenarbeit coordinator's, and the two zeros mean opposite
+    // things: one is waiting to be assigned, the other runs the buildings and never
     // will be. Asked of the ROLE rather than inferred from the count, because
     // a count cannot tell them apart. @see config/care.ts
     viewer.scope === 'ALL_DOMAINS' || !roleHasCaseload(viewer.role) || !user
@@ -273,9 +273,9 @@ export default async function AdminDashboard() {
     // `learning:write` is the integration domains' verb.
     //
     // The seat is DERIVED from the viewer's role. It was the literal `'JOB'`,
-    // which meant Sandra's caseload was never fetched at all: her seats are
-    // `VOLUNTEERING`, so the query returned nothing and her dashboard resolved
-    // to "Alles unter Kontrolle" every morning. The fix written for Simon on
+    // which meant the Freiwilligenarbeit coordinator's caseload was never fetched at all: those seats are
+    // `VOLUNTEERING`, so the query returned nothing and that dashboard resolved
+    // to "Alles unter Kontrolle" every morning. The fix written for the Jobcoach on
     // 2026-09-02 had been applied to the instance, not the class.
     show('learning') && user && viewerSeat
       ? db.query.careAssignment.findMany({
@@ -381,8 +381,8 @@ export default async function AdminDashboard() {
     applications: resident.opportunityApplications,
   }))
 
-  // One caseload, the signals of whichever domain the viewer works. Sandra's
-  // questions are not Simon's — "has anyone answered them, and is anyone doing
+  // One caseload, the signals of whichever domain the viewer works. The Freiwilligenarbeit coordinator's
+  // questions are not the Jobcoach's — "has anyone answered them, and is anyone doing
   // anything with other people" rather than "have they reached the labour
   // market" — so the rows differ even though the fetch is identical.
   const jobQueue = viewerSeat === 'JOB' ? buildJobQueue(caseloadClients, now) : []
@@ -391,11 +391,11 @@ export default async function AdminDashboard() {
 
   // The learning tile, narrowed to what it claims to be about.
   //
-  // It used to be two global counts. On Simon's dashboard that read "23 laufend
+  // It used to be two global counts. On the Jobcoach's dashboard that read "23 laufend
   // · 7 Abschlüsse in 30 Tagen" while `/learning` — the page the tile links to,
-  // which defaults to "Meine Klient*innen" — showed him TOTAL 0. Neither number
+  // which defaults to "Meine Klient*innen" — showed them TOTAL 0. Neither number
   // was wrong; they answered different questions, and only one of them was the
-  // question a coach is asking on his own dashboard.
+  // question a coach is asking on their own dashboard.
   //
   // Two narrowings, in this order:
   //  - demo rows never count, the same rule the mission KPIs now follow;

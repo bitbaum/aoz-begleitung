@@ -5,7 +5,7 @@
  * `STAFF_ROUTES` answers "must you be signed in?" and it listed /settings
  * correctly. Nothing answered the next question — "signed in as WHOM?" — and
  * /settings answered it only by hiding its nav link. On 2026-08-31, signed in
- * to production as Simon Binder (JOBCOACH / OWN_DOMAIN / isSystemAdmin false),
+ * to production as the Jobcoach (JOBCOACH / OWN_DOMAIN / isSystemAdmin false),
  * typing the URL served the whole page, including a roster of every
  * colleague's login CODE. A staff code is the credential — `loginByCode` takes
  * it with no password — so the narrowest role in the product could read
@@ -57,7 +57,7 @@ const SESSION_IS_ENOUGH = new Set([
   // Maintenance is NOT here any more. It was, on the guess that a repair board
   // is shared house operations — and walking it in production as a
   // Sozialarbeiter*in disproved that: the nav gates Wartung on
-  // `maintenance:read`, which she does not hold, and the page served her the
+  // `maintenance:read`, which that role does not hold, and the page served it the
   // board anyway with working "Neue Anfrage" / "Zuweisen" / "Abschliessen"
   // buttons. The permission existed and only the menu honoured it. Both pages
   // and all three server actions now enforce it.

@@ -1,5 +1,5 @@
 /**
- * Create 8 diverse residents for Witikon-440
+ * Create 8 diverse residents for ZH-1-440
  * Following CLAUDE.md best practices:
  * - SSOT: Using the Drizzle schema
  * - Quality: Type-safe, validated data
@@ -24,7 +24,7 @@ import {
 } from '../src/lib/db'
 
 async function main() {
-  console.log('🏢 Creating residents for Witikon-440...\n')
+  console.log('🏢 Creating residents for ZH-1-440...\n')
 
   const residents = [
     {
@@ -42,7 +42,7 @@ async function main() {
       languages: ['AR', 'EN'],
       smokingStatus: 'NON_SMOKER' as SmokingStatus,
       dietaryNeeds: ['SEPARATE_COOKWARE'],
-      name: 'Ahmed Hassan - quiet early bird, very clean',
+      name: 'Person A - quiet early bird, very clean',
     },
     {
       code: 'WIT-002',
@@ -59,7 +59,7 @@ async function main() {
       languages: ['ES', 'EN'],
       smokingStatus: 'NON_SMOKER' as SmokingStatus,
       dietaryNeeds: ['VEGETARIAN'],
-      name: 'Maria Rodriguez - social night owl, musician',
+      name: 'Person B - social night owl, musician',
     },
     {
       code: 'WIT-003',
@@ -76,7 +76,7 @@ async function main() {
       languages: ['RU'],
       smokingStatus: 'NON_SMOKER' as SmokingStatus,
       dietaryNeeds: [],
-      name: 'Dmitri Volkov - flexible shift worker',
+      name: 'Person C - flexible shift worker',
     },
     {
       code: 'WIT-004',
@@ -94,7 +94,7 @@ async function main() {
       smokingStatus: 'NON_SMOKER' as SmokingStatus,
       dietaryNeeds: ['SEPARATE_COOKWARE'],
       hasMedicalDocumentation: true,
-      name: 'Amina Osman - quiet, religious, needs privacy',
+      name: 'Person D - quiet, religious, needs privacy',
     },
     {
       code: 'WIT-005',
@@ -111,7 +111,7 @@ async function main() {
       languages: ['PT'],
       smokingStatus: 'NON_SMOKER' as SmokingStatus,
       dietaryNeeds: [],
-      name: 'Carlos Silva - party person, messy',
+      name: 'Person E - party person, messy',
     },
     {
       code: 'WIT-006',
@@ -128,7 +128,7 @@ async function main() {
       languages: ['AR'],
       smokingStatus: 'NON_SMOKER' as SmokingStatus,
       dietaryNeeds: ['SEPARATE_COOKWARE'],
-      name: 'Fatima Al-Rashid - nurse, shift work',
+      name: 'Person F - nurse, shift work',
     },
     {
       code: 'WIT-007',
@@ -145,7 +145,7 @@ async function main() {
       languages: ['EN'],
       smokingStatus: 'NON_SMOKER' as SmokingStatus,
       dietaryNeeds: [],
-      name: "John O'Brien - teacher, structured",
+      name: 'Person G - teacher, structured',
     },
     {
       code: 'WIT-008',
@@ -162,7 +162,7 @@ async function main() {
       languages: ['JA'],
       smokingStatus: 'NON_SMOKER' as SmokingStatus,
       dietaryNeeds: [],
-      name: 'Yuki Tanaka - PhD student, needs quiet',
+      name: 'Person H - PhD student, needs quiet',
     },
   ]
 

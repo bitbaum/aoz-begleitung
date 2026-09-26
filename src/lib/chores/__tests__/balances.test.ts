@@ -25,7 +25,7 @@ describe('completionMinutes', () => {
 })
 
 describe('computeChoreBalances', () => {
-  const members = ['ihor', 'misha', 'alex']
+  const members = ['hana', 'noor', 'amara']
 
   it('returns every member at zero before any chore is done', () => {
     const balances = computeChoreBalances([], members)
@@ -35,50 +35,50 @@ describe('computeChoreBalances', () => {
   })
 
   it('weights by time, not by number of completions', () => {
-    // Ihor did four 5-minute bin runs; Misha scrubbed the shower once for 40.
-    // Row-counting would call Ihor the biggest contributor by 4:1.
+    // Hana did four 5-minute bin runs; Noor scrubbed the shower once for 40.
+    // Row-counting would call Hana the biggest contributor by 4:1.
     const balances = computeChoreBalances(
       [
-        { completedById: 'ihor', durationMinutes: 5 },
-        { completedById: 'ihor', durationMinutes: 5 },
-        { completedById: 'ihor', durationMinutes: 5 },
-        { completedById: 'ihor', durationMinutes: 5 },
-        { completedById: 'misha', durationMinutes: 40 },
+        { completedById: 'hana', durationMinutes: 5 },
+        { completedById: 'hana', durationMinutes: 5 },
+        { completedById: 'hana', durationMinutes: 5 },
+        { completedById: 'hana', durationMinutes: 5 },
+        { completedById: 'noor', durationMinutes: 40 },
       ],
       members,
     )
 
-    const ihor = balances.find((b) => b.residentId === 'ihor')!
-    const misha = balances.find((b) => b.residentId === 'misha')!
+    const hana = balances.find((b) => b.residentId === 'hana')!
+    const noor = balances.find((b) => b.residentId === 'noor')!
 
-    expect(ihor.doneMinutes).toBe(20)
-    expect(misha.doneMinutes).toBe(40)
-    expect(misha.balanceMinutes).toBeGreaterThan(ihor.balanceMinutes)
+    expect(hana.doneMinutes).toBe(20)
+    expect(noor.doneMinutes).toBe(40)
+    expect(noor.balanceMinutes).toBeGreaterThan(hana.balanceMinutes)
   })
 
   it('splits the total evenly and reports who is ahead and behind', () => {
     const balances = computeChoreBalances(
       [
-        { completedById: 'ihor', durationMinutes: 60 },
-        { completedById: 'misha', durationMinutes: 30 },
+        { completedById: 'hana', durationMinutes: 60 },
+        { completedById: 'noor', durationMinutes: 30 },
       ],
       members,
     )
 
     // 90 minutes over 3 people = 30 each.
     expect(balances.every((b) => b.shareMinutes === 30)).toBe(true)
-    expect(balances.find((b) => b.residentId === 'ihor')!.balanceMinutes).toBe(30)
-    expect(balances.find((b) => b.residentId === 'misha')!.balanceMinutes).toBe(0)
-    expect(balances.find((b) => b.residentId === 'alex')!.balanceMinutes).toBe(-30)
+    expect(balances.find((b) => b.residentId === 'hana')!.balanceMinutes).toBe(30)
+    expect(balances.find((b) => b.residentId === 'noor')!.balanceMinutes).toBe(0)
+    expect(balances.find((b) => b.residentId === 'amara')!.balanceMinutes).toBe(-30)
   })
 
   it('always sums to zero — the invariant the whole ledger rests on', () => {
     const balances = computeChoreBalances(
       [
-        { completedById: 'ihor', durationMinutes: 17 },
-        { completedById: 'misha', taskEstimatedMinutes: 23 },
-        { completedById: 'alex' },
-        { completedById: 'alex', durationMinutes: 5 },
+        { completedById: 'hana', durationMinutes: 17 },
+        { completedById: 'noor', taskEstimatedMinutes: 23 },
+        { completedById: 'amara' },
+        { completedById: 'amara', durationMinutes: 5 },
       ],
       members,
     )
@@ -92,7 +92,7 @@ describe('computeChoreBalances', () => {
     // make the balances stop summing to zero and silently inflate everyone else.
     const balances = computeChoreBalances(
       [
-        { completedById: 'ihor', durationMinutes: 30 },
+        { completedById: 'hana', durationMinutes: 30 },
         { completedById: 'departed', durationMinutes: 30 },
       ],
       members,
@@ -110,7 +110,10 @@ describe('computeChoreBalances', () => {
   })
 
   it('preserves member order so the summary does not reshuffle between renders', () => {
-    const balances = computeChoreBalances([{ completedById: 'alex', durationMinutes: 10 }], members)
+    const balances = computeChoreBalances(
+      [{ completedById: 'amara', durationMinutes: 10 }],
+      members,
+    )
 
     expect(balances.map((b) => b.residentId)).toEqual(members)
   })

@@ -141,7 +141,7 @@ than saying nothing.
 ## 2026-08-13 — Real deployment + full-product demo
 
 - The live instance switched to REAL mode: one actual shared flat
-  (Witikonerstrasse 458) under the `wg` brand, with the demo doors kept
+  (the pilot flat) under the `wg` brand, with the demo doors kept
   alongside via prefix-scoped daily reset (#37–#39, #43–#44).
 - Reports route to the desk that can act on them: maintenance reports land
   on the maintenance board, conflicts on the incident ladder — residents

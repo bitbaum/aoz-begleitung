@@ -46,7 +46,7 @@ const PLACEMENT = { startDate: new Date('2026-08-13'), compatibilityScore: null 
 
 function unit(nickname: string | null) {
   return {
-    address: 'Witikonerstrasse 458, 8053 Zürich',
+    address: 'Musterstrasse 1, 8000 Zürich',
     nickname,
     totalRooms: 3,
     quietHours: null,

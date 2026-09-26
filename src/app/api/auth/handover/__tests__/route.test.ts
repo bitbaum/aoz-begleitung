@@ -51,15 +51,15 @@ const ADMIN = {
 }
 const COACH = {
   id: 'coach-1',
-  name: 'Simon B.',
+  name: 'Jonas M.',
   role: 'JOBCOACH',
   scope: 'OWN_DOMAIN',
   isSystemAdmin: false,
 }
 
 const SIMON_ROW = {
-  id: 'simon-1',
-  name: 'Simon B.',
+  id: 'coach-1',
+  name: 'Jonas M.',
   code: 'AOZ-HWGA8G',
   active: true,
   account: null,
@@ -85,14 +85,14 @@ beforeEach(() => {
 describe('POST /api/auth/handover', () => {
   it('attaches the address and mails the person their EXISTING code', async () => {
     const { POST } = await import('../route')
-    const response = await POST(post({ userId: 'simon-1', email: 'Simon@AOZ.ch ' }))
+    const response = await POST(post({ userId: 'coach-1', email: 'Coach@AOZ.ch ' }))
 
     expect(response.status).toBe(200)
-    expect(mockInsertValues).toHaveBeenCalledWith({ email: 'simon@aoz.ch', userId: 'simon-1' })
+    expect(mockInsertValues).toHaveBeenCalledWith({ email: 'coach@aoz.ch', userId: 'coach-1' })
     // The code is the one already on the row — this route never mints a new
     // one, because the person may already have been handed it on paper.
     const [recipients, , html] = mockSendEmail.mock.calls[0] as [string[], string, string]
-    expect(recipients).toEqual(['simon@aoz.ch'])
+    expect(recipients).toEqual(['coach@aoz.ch'])
     expect(html).toContain('AOZ-HWGA8G')
   })
 
@@ -100,7 +100,7 @@ describe('POST /api/auth/handover', () => {
     mockGetCurrentUser.mockResolvedValue(COACH)
     const { POST } = await import('../route')
 
-    const response = await POST(post({ userId: 'simon-1', email: 'a@b.ch' }))
+    const response = await POST(post({ userId: 'coach-1', email: 'a@b.ch' }))
 
     expect(response.status).toBe(403)
     expect(mockInsertValues).not.toHaveBeenCalled()
@@ -112,7 +112,7 @@ describe('POST /api/auth/handover', () => {
     emailEnabled = false
     const { POST } = await import('../route')
 
-    const response = await POST(post({ userId: 'simon-1', email: 'a@b.ch' }))
+    const response = await POST(post({ userId: 'coach-1', email: 'a@b.ch' }))
 
     expect(response.status).toBe(503)
     expect(mockInsertValues).not.toHaveBeenCalled()
@@ -123,7 +123,7 @@ describe('POST /api/auth/handover', () => {
     mockFindFirst.mockResolvedValue({ ...SIMON_ROW, account: { email: 'old@aoz.ch' } })
     const { POST } = await import('../route')
 
-    const response = await POST(post({ userId: 'simon-1', email: 'new@aoz.ch' }))
+    const response = await POST(post({ userId: 'coach-1', email: 'new@aoz.ch' }))
 
     expect(response.status).toBe(409)
     expect(mockInsertValues).not.toHaveBeenCalled()
@@ -135,7 +135,7 @@ describe('POST /api/auth/handover', () => {
     mockInsertValues.mockRejectedValue({ unique: true })
     const { POST } = await import('../route')
 
-    const response = await POST(post({ userId: 'simon-1', email: 'taken@aoz.ch' }))
+    const response = await POST(post({ userId: 'coach-1', email: 'taken@aoz.ch' }))
 
     expect(response.status).toBe(409)
     expect(mockSendEmail).not.toHaveBeenCalled()
@@ -147,7 +147,7 @@ describe('POST /api/auth/handover', () => {
     mockSendEmail.mockResolvedValue(false)
     const { POST } = await import('../route')
 
-    const response = await POST(post({ userId: 'simon-1', email: 'simon@aoz.ch' }))
+    const response = await POST(post({ userId: 'coach-1', email: 'coach@aoz.ch' }))
 
     expect(response.status).toBe(502)
     expect(mockInsertValues).toHaveBeenCalled()
@@ -157,10 +157,10 @@ describe('POST /api/auth/handover', () => {
     mockFindFirst.mockResolvedValue({ ...SIMON_ROW, active: false })
     const { POST } = await import('../route')
 
-    expect((await POST(post({ userId: 'simon-1', email: 'a@b.ch' }))).status).toBe(409)
+    expect((await POST(post({ userId: 'coach-1', email: 'a@b.ch' }))).status).toBe(409)
   })
 
-  it.each([[{ userId: 'simon-1', email: 'nope' }], [{ userId: 'simon-1' }], [{ email: 'a@b.ch' }]])(
+  it.each([[{ userId: 'coach-1', email: 'nope' }], [{ userId: 'coach-1' }], [{ email: 'a@b.ch' }]])(
     'rejects malformed input %j',
     async (body) => {
       const { POST } = await import('../route')
@@ -170,10 +170,10 @@ describe('POST /api/auth/handover', () => {
 
   it('audits against the administrator who acted', async () => {
     const { POST } = await import('../route')
-    await POST(post({ userId: 'simon-1', email: 'simon@aoz.ch' }))
+    await POST(post({ userId: 'coach-1', email: 'coach@aoz.ch' }))
 
     expect(mockLogAudit).toHaveBeenCalledWith(
-      expect.objectContaining({ entity: 'STAFF_USER', entityId: 'simon-1', userId: 'admin-1' }),
+      expect.objectContaining({ entity: 'STAFF_USER', entityId: 'coach-1', userId: 'admin-1' }),
     )
   })
 })

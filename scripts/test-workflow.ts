@@ -34,7 +34,7 @@ async function main() {
     .insert(housingUnitTable)
     .values({
       code: 'ZH-1-440',
-      address: 'Witikonerstrasse 440, 8053 Zürich',
+      address: 'Musterstrasse 1, 8000 Zürich',
       totalBeds: 8,
       totalRooms: 4,
       sharedRooms: 3,
@@ -188,7 +188,7 @@ async function main() {
       dietaryNeeds: ['SEPARATE_COOKWARE'],
       mobilityNeeds: 'NONE' as MobilityNeed,
       privacyNeed: 5,
-      description: 'Ahmed - quiet early bird, very clean',
+      description: 'Person A - quiet early bird, very clean',
     },
     {
       code: 'WIT-002',
@@ -206,7 +206,7 @@ async function main() {
       dietaryNeeds: ['vegetarian'],
       mobilityNeeds: 'NONE' as MobilityNeed,
       privacyNeed: 1,
-      description: 'Maria - social night owl, musician',
+      description: 'Person B - social night owl, musician',
     },
     {
       code: 'WIT-003',
@@ -224,7 +224,7 @@ async function main() {
       dietaryNeeds: [],
       mobilityNeeds: 'NONE' as MobilityNeed,
       privacyNeed: 3,
-      description: 'Dmitri - flexible shift worker',
+      description: 'Person C - flexible shift worker',
     },
     {
       code: 'WIT-004',
@@ -245,7 +245,7 @@ async function main() {
       hasMedicalDocumentation: true,
       medicalDocType: 'PRIVATE_ROOM' as MedicalDocType,
       medicalDocDate: new Date(),
-      description: 'Amina - needs privacy (medical), quiet, religious',
+      description: 'Person D - needs privacy (medical), quiet, religious',
     },
     {
       code: 'WIT-005',
@@ -263,7 +263,7 @@ async function main() {
       dietaryNeeds: [],
       mobilityNeeds: 'NONE' as MobilityNeed,
       privacyNeed: 1,
-      description: 'Carlos - party person, messy',
+      description: 'Person E - party person, messy',
     },
     {
       code: 'WIT-006',
@@ -281,7 +281,7 @@ async function main() {
       dietaryNeeds: ['SEPARATE_COOKWARE'],
       mobilityNeeds: 'NONE' as MobilityNeed,
       privacyNeed: 3,
-      description: 'Fatima - nurse, shift work',
+      description: 'Person F - nurse, shift work',
     },
     {
       code: 'WIT-007',
@@ -299,7 +299,7 @@ async function main() {
       dietaryNeeds: [],
       mobilityNeeds: 'NONE' as MobilityNeed,
       privacyNeed: 3,
-      description: 'John - teacher, structured',
+      description: 'Person G - teacher, structured',
     },
     {
       code: 'WIT-008',
@@ -317,7 +317,7 @@ async function main() {
       dietaryNeeds: [],
       mobilityNeeds: 'NONE' as MobilityNeed,
       privacyNeed: 5,
-      description: 'Yuki - PhD student, needs quiet',
+      description: 'Person H - PhD student, needs quiet',
     },
   ]
 
@@ -448,11 +448,11 @@ async function main() {
     .values({
       housingUnitId: housingUnit.id,
       reportedById: createdResidents[0].id,
-      subjectId: createdResidents[4].id, // Carlos - the party person
+      subjectId: createdResidents[4].id, // Person E - the party person
       category: 'INTERPERSONAL',
       type: 'NOISE_COMPLAINT',
       severity: 'MEDIUM',
-      description: 'Carlos played loud music at 2 AM',
+      description: 'Person E played loud music at 2 AM',
       date: new Date(),
     })
     .returning()) as Incident[]

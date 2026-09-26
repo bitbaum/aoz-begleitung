@@ -21,7 +21,7 @@ describe('the board a role works in', () => {
 
   it('opens the roles that span both halves on everything', () => {
     // Narrowing these would hide, not help: Betreuung and Sozialarbeit work
-    // across both halves, and Franziska's oversight is the point of her seat.
+    // across both halves, and the all-domains Betreuerin's oversight is the point of that seat.
     expect(defaultIntegrationBoardForRole('BETREUUNG')).toBe('overview')
     expect(defaultIntegrationBoardForRole('SOZIALARBEIT')).toBe('overview')
     expect(defaultIntegrationBoardForRole('ADMIN')).toBe('overview')
@@ -67,8 +67,8 @@ describe('which listings land on each board', () => {
   })
 
   it('agrees with the learning board about which kinds are volunteering', () => {
-    // Two pages, one vocabulary. If these drift, Sandra's record board and her
-    // directory disagree about what her own work is.
+    // Two pages, one vocabulary. If these drift, the Freiwilligenarbeit coordinator's record board and the
+    // directory disagree about what that role's own work is.
     expect(boardOpportunityKinds('volunteering')).toEqual(
       boardKinds('volunteering').filter((kind) =>
         (OPPORTUNITY_KINDS as readonly string[]).includes(kind),

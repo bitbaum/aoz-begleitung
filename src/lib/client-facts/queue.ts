@@ -1,10 +1,10 @@
 /**
  * The approval queue: client-entered facts nobody has looked at yet.
  *
- * Scoped by the seats the viewer holds, not by their job title. Franziska
- * (ALL_DOMAINS) sees every client's; Simon sees the permits of the clients he
- * coaches and nothing else — no insurance, no doctors, and nothing at all for
- * a client he does not hold.
+ * Scoped by the seats the viewer holds, not by their job title. The all-domains Betreuerin
+ * (ALL_DOMAINS) sees every client's; the Jobcoach sees the permits of the clients they
+ * coach and nothing else — no insurance, no doctors, and nothing at all for
+ * a client they do not hold.
  *
  * The query is written per fact kind rather than as one union so that the
  * per-kind visibility rule in `policy.ts` is applied by construction: a kind a

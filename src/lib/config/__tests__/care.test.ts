@@ -27,7 +27,7 @@ describe('the seat map is one mapping, not two', () => {
 
   it('gives every care role exactly one seat, and the seatless roles none', () => {
     // Two roles have no seat, for OPPOSITE reasons, and both must stay
-    // seatless: ADMIN works every domain, LIEGENSCHAFTEN works none — Manuel
+    // seatless: ADMIN works every domain, LIEGENSCHAFTEN works none — the Liegenschaften lead
     // is responsible for the buildings, never for a person's care.
     const SEATLESS: readonly string[] = ['ADMIN', 'LIEGENSCHAFTEN']
 
@@ -119,8 +119,8 @@ describe('care domains', () => {
 
 describe('a role either carries a caseload or does not', () => {
   /**
-   * Counting somebody's care assignments cannot answer this. Sandra with zero
-   * clients is WAITING to be assigned; Manuel with zero is doing his job. Both
+   * Counting somebody's care assignments cannot answer this. The Freiwilligenarbeit coordinator with zero
+   * clients is WAITING to be assigned; the Liegenschaften lead with zero is doing the job. Both
    * count 0, and the dashboard must say different things to them.
    */
   it('says yes for the four care domains', () => {

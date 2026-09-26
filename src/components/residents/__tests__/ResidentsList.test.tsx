@@ -172,7 +172,7 @@ describe('ResidentsList', () => {
  * A seeded profile must never read as a person who needs support.
  *
  * Placeholder rows carry a plausible first name and sit in a real flat, so on
- * this list "Amir" looks exactly like Ihor. Without a marker a Betreuerin could
+ * this list "Amir" looks exactly like a real client. Without a marker a Betreuerin could
  * open a case, record a check-in or chase somebody who does not exist yet —
  * and the row would keep looking healthy, because a name is a name.
  *
@@ -192,7 +192,7 @@ describe('placeholder profiles are marked', () => {
   it('leaves a real client unmarked', () => {
     render(
       <ResidentsList
-        residents={[makeResident({ id: 'r1', displayName: 'Ihor', isPlaceholder: false })]}
+        residents={[makeResident({ id: 'r1', displayName: 'Hana', isPlaceholder: false })]}
       />,
     )
     expect(screen.queryByText('Platzhalter')).not.toBeInTheDocument()
@@ -203,13 +203,13 @@ describe('placeholder profiles are marked', () => {
     render(
       <ResidentsList
         residents={[
-          makeResident({ id: 'r1', displayName: 'Ihor', isPlaceholder: false }),
+          makeResident({ id: 'r1', displayName: 'Hana', isPlaceholder: false }),
           makeResident({ id: 'p1', displayName: 'Amir', isPlaceholder: true }),
         ]}
       />,
     )
     expect(screen.getAllByText('Platzhalter')).toHaveLength(1)
-    expect(screen.getByText('Ihor')).toBeInTheDocument()
+    expect(screen.getByText('Hana')).toBeInTheDocument()
     expect(screen.getByText('Amir')).toBeInTheDocument()
   })
 })

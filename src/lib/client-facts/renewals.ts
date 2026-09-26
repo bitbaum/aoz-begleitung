@@ -3,7 +3,7 @@
  *
  * The half of the client-facts feature that closes the original complaint:
  * "my insurance has to be extended every 6 months, and for that I need to
- * write Franziska." Recording the date lets a client SEE it; this is what
+ * write my Betreuerin." Recording the date lets a client SEE it; this is what
  * makes the date reach the person who can act before it lapses.
  *
  * IT IS BOTH IN-APP AND EMAIL, and the split is not arbitrary.

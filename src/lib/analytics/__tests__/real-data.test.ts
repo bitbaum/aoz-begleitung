@@ -94,7 +94,7 @@ describe('matching never crosses the demo boundary', () => {
 
   it('a demo person is not offered the real flat either', () => {
     // The other direction matters too: a demo visitor clicking through must not
-    // be shown Witikonerstrasse, nor its residents.
+    // be shown the real flat, nor its residents.
     expect(belongsToSameWorld(true, false)).toBe(false)
   })
 

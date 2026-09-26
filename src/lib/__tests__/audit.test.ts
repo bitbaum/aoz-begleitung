@@ -247,7 +247,7 @@ describe('getEntityAuditLog', () => {
   })
 
   test('returns the rows the query hands back', async () => {
-    const entries = [{ id: 'log-1', action: 'CREATE', actorName: 'Franziska Heimhuber' }]
+    const entries = [{ id: 'log-1', action: 'CREATE', actorName: 'Anna Muster' }]
     mockSelectRows.mockReturnValue(entries)
 
     await expect(getEntityAuditLog('RESIDENT', 'res-1')).resolves.toEqual(entries)
@@ -306,7 +306,7 @@ describe('getRecentAuditLogs', () => {
   })
 
   test('returns the rows the query hands back', async () => {
-    const rows = [{ id: 'log-1', action: 'UPDATE', actorName: 'Franziska Heimhuber' }]
+    const rows = [{ id: 'log-1', action: 'UPDATE', actorName: 'Anna Muster' }]
     mockSelectRows.mockReturnValue(rows)
 
     await expect(getRecentAuditLogs()).resolves.toEqual(rows)

@@ -38,8 +38,8 @@ describe('who may read a complaint about the organisation', () => {
           granted: hasPermission(caps(role), permission),
         }).toEqual({ role, scope: 'OWN_DOMAIN', granted: false })
 
-        // The one that matters. Franziska is BETREUUNG + ALL_DOMAINS, and a
-        // complaint may be about Franziska.
+        // The one that matters. The all-domains Betreuerin is BETREUUNG + ALL_DOMAINS, and a
+        // complaint may be about the all-domains Betreuerin.
         expect({
           role,
           scope: 'ALL_DOMAINS',

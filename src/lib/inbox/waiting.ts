@@ -17,8 +17,8 @@
  * specialist who held that resident's care seat. A resident nobody was assigned
  * to — most of them, on a new instance — raised a hand that no screen showed
  * anyone. Now every staff member who may act on a listing sees the requests
- * for the listings of their half of the integration domain (Simon the jobs,
- * Sandra the volunteering, Leitung and Betreuung both), whoever holds the file.
+ * for the listings of their half of the integration domain (the Jobcoach the jobs,
+ * the Freiwilligenarbeit coordinator the volunteering, Leitung and Betreuung both), whoever holds the file.
  */
 
 import { and, asc, countDistinct, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'

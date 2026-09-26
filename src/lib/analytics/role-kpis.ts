@@ -5,7 +5,7 @@
  *
  * `mission-kpis.ts` implements the four numbers from CLAUDE.md's pilot table:
  * conflicts, relocations, mediation hours, placement time. Every one is
- * HOUSING. Walked live on 2026-09-03, Simon (Jobcoach) and Sandra
+ * HOUSING. Walked live on 2026-09-03, the Jobcoach and the Freiwilligenarbeit coordinator
  * (Freiwilligenarbeit) can both open `/analytics` and not one metric on it is
  * about their work — while labour-market integration is half of what AOZ is
  * measured on by its funder.
@@ -64,8 +64,8 @@ export interface RoleKpiDef {
   /**
    * What a dash MEANS for this particular number.
    *
-   * Shipped without this and it was wrong on screen within the hour: Simon's
-   * median-days tile read "noch niemand zugewiesen" while he plainly had a
+   * Shipped without this and it was wrong on screen within the hour: the Jobcoach's
+   * median-days tile read "noch niemand zugewiesen" while the Jobcoach plainly had a
    * client. Its denominator is the people who have HAD contact, so nought there
    * means "nobody has started yet" — a different fact from an empty caseload,
    * and the one a coach would act on. One shared empty string cannot say both.
@@ -271,7 +271,7 @@ export function computeVolunteeringKpis(clients: readonly VolunteeringKpiClient[
 
   // The same rule the Jobcoach side follows, for the same reason: an interest
   // nobody has answered is a person waiting, not a running engagement. Without
-  // this, a resident's own click would raise Sandra's ENGAGEMENT_RATE while
+  // this, a resident's own click would raise the Freiwilligenarbeit coordinator's ENGAGEMENT_RATE while
   // nothing had been arranged for them.
   const engaged = clients.filter((c) =>
     c.applications.some((a) => ACTIVE_ENGAGEMENT_STAGES.includes(a.stage) && !isAwaitingAnswer(a)),

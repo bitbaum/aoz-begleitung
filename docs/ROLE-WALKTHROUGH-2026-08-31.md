@@ -1,7 +1,7 @@
 # Walking the product as the three people who actually use it
 
 **Date:** 2026-08-31 · **Against:** production (`aoz.orangecat.ch`), real data
-**Accounts created that day:** Franziska Heimhuber, Simon Binder, Sandra
+**Accounts created that day:** a Betreuerin with reach over every domain, a Jobcoach, a Freiwilligenarbeit coordinator
 
 This is what happened when the real AOZ team was provisioned for the first
 time and each account was signed into and used. It records what held, what
@@ -17,14 +17,14 @@ Three orthogonal facts per person (`role` · `scope` · `isSystemAdmin`):
 
 | Person | Role | Scope | System admin |
 |---|---|---|---|
-| Franziska Heimhuber | `BETREUUNG` | `ALL_DOMAINS` | no |
-| Simon Binder | `JOBCOACH` | `OWN_DOMAIN` | no |
-| Sandra | `FREIWILLIGENARBEIT` | `OWN_DOMAIN` | no |
+| Betreuerin (all domains) | `BETREUUNG` | `ALL_DOMAINS` | no |
+| Jobcoach | `JOBCOACH` | `OWN_DOMAIN` | no |
+| Freiwilligenarbeit coordinator | `FREIWILLIGENARBEIT` | `OWN_DOMAIN` | no |
 
-Franziska's row is the one that was previously unsayable. Before the split,
+The all-domains Betreuerin's row is the one that was previously unsayable. Before the split,
 "a Betreuerin who also sees every client" could only be written as `ADMIN`,
-which erased that housing is her domain **and** handed her the settings page
-as a side effect. Her role is now true and her breadth is stated separately.
+which erased that housing is that person's domain **and** handed them the settings page
+as a side effect. The role is now true and the breadth is stated separately.
 
 **Nobody on the care team administers the product.** Running the house is not
 configuring the software. That stays with the operator account, and granting
@@ -33,7 +33,7 @@ it is a deliberate one-line change rather than something a care role implies.
 **There is no Sozialarbeit staff member.** `ensure-aoz-team.ts` prints this
 rather than leaving the seat quietly empty — an unstaffed domain looks
 identical to a staffed one nobody has used yet. The SOCIAL seat is covered by
-Franziska's oversight.
+the all-domains Betreuerin's oversight.
 
 Provisioning lives in `scripts/db/real/aoz-team.ts` (config) +
 `scripts/maintenance/ensure-aoz-team.ts` (idempotent, matches by name, so it
@@ -49,26 +49,26 @@ Everything below was verified by signing in, not by reading code.
 
 **The domain boundary is real, at every layer that matters.**
 
-| | Franziska | Simon | Sandra |
+| | Betreuerin (all domains) | Jobcoach | Freiwilligenarbeit coordinator |
 |---|---|---|---|
 | Nav areas | 20 | 9 | 11 |
 | Care seats on a client | all 4 | Jobcoach only | Freiwilligenarbeit only |
 | Seat pickers rendered | 4 | **1** | 1 |
 | Einstellungen in nav | no | no | no |
 
-Simon opening a client sees one `staffId` select, not four disabled ones. The
+The Jobcoach opening a client sees one `staffId` select, not four disabled ones. The
 `CareWorkspace` boundary is an access boundary rather than a form with some
 inputs greyed out — a job coach never reads Housing's "Schlüssel: fehlt" or
 Sozialarbeit's next step.
 
 **Scope limits which care seats you can work, not which clients you can list.**
-Simon sees all 19 clients and can open any of them; what he cannot do is read
+The Jobcoach sees all 19 clients and can open any of them; what the Jobcoach cannot do is read
 or write another discipline's notes on them. This is the intended reading of
 `OWN_DOMAIN`, and CLAUDE.md's shorthand "whose files may I open?" is looser
 than the behaviour.
 
-**A specialist is not deadlocked.** Simon's "Meine Klient*innen" filter shows
-0, but he can assign his own seat from any client's Betreuungsteam panel. The
+**A specialist is not deadlocked.** The Jobcoach's "Meine Klient*innen" filter shows
+0, but can assign their own seat from any client's Betreuungsteam panel. The
 onboarding gap was discoverability, not permission — see below.
 
 **The resident portal is in good shape.** Signed in as Fatima: personalised
@@ -86,7 +86,7 @@ in six languages, under "Mein Bereich" (the AOZ register, correctly not
 
 **Severity: high. Fixed in PR #135.**
 
-Signed in as Simon — `JOBCOACH` / `OWN_DOMAIN` / not an admin, the narrowest
+Signed in as the Jobcoach — `JOBCOACH` / `OWN_DOMAIN` / not an admin, the narrowest
 real role in the product — and typed `/settings`.
 
 The nav correctly omitted the link. The route served the whole page anyway,
@@ -142,7 +142,7 @@ the defaults.
 
 **Fixed in PR #137.**
 
-Simon and Sandra each opened their first ever session and were shown
+The Jobcoach and the Freiwilligenarbeit coordinator each opened their first ever session and were shown
 **"🎉 Alles unter Kontrolle! Keine dringenden Aufgaben"** — over an account
 connected to no one.
 
@@ -183,14 +183,14 @@ carried across, rather than guessing.
 
 **Fixed in PR #140.**
 
-Signed in as Sandra (`FREIWILLIGENARBEIT` / `OWN_DOMAIN`) and opened
-`/analytics` — reachable to her because it requires only `dashboard:read`,
+Signed in as the Freiwilligenarbeit coordinator (`FREIWILLIGENARBEIT` / `OWN_DOMAIN`) and opened
+`/analytics` — reachable to that account because it requires only `dashboard:read`,
 which every role holds, correctly, since most of the page is aggregate pilot
 health (occupancy rate, satisfaction trend, conflict hotspots, algorithm
 accuracy). One section is not aggregate: `RecentPlacementsTable` names
 residents, links straight into their profile, and renders their satisfaction
 check-in emoji — the exact surface `/placements` fences off behind
-`placements:read`, which Sandra does not hold and never could reach directly.
+`placements:read`, which the Freiwilligenarbeit coordinator does not hold and never could reach directly.
 
 Gating only the page and rendering that table unconditionally bypassed the
 fence entirely. This is the identical concern that opened this whole
@@ -202,16 +202,16 @@ the same underlying data without checking it.
 Fixed on both halves, same discipline as `/settings`: the **query** is
 conditioned on `placements:read`, not just the render — an unconditional
 query still puts the data in the process even if the JSX hides it. Verified
-live as Sandra: the section is now absent, not empty.
+live as the Freiwilligenarbeit coordinator: the section is now absent, not empty.
 
 Class closed by extending `admin-page-guards.test.ts` to check both halves
 are conditioned, mutation-proven against the exact shape that shipped.
 
 ---
 
-## Deeper passes (Sandra, and the resident portal past the overview)
+## Deeper passes (the Freiwilligenarbeit coordinator, and the resident portal past the overview)
 
-Marketplace, events, and Einsatzplätze all render correctly for Sandra with
+Marketplace, events, and Einsatzplätze all render correctly for the Freiwilligenarbeit coordinator with
 the boundaries intended — no create-listing affordance on the marketplace
 (residents post, staff moderate), an inline event-creation form scoped to
 `events:write`, and the Einsatzplätze empty state correctly offering a create
@@ -252,7 +252,7 @@ Recorded rather than fixed, because each is a decision rather than a defect.
   `emptyNoSetupRights` was different — it told a Jobcoach or Freiwilligenarbeit
   account opening a genuinely empty workspace to wait for **"die Leitung"** to
   enter the first housing and clients. That names a person who does not exist
-  at AOZ (Franziska/Simon/Sandra hold Betreuung/Jobcoach/Freiwilligenarbeit;
+  at AOZ (the real team holds Betreuung/Jobcoach/Freiwilligenarbeit;
   ADMIN survives only as the retired system-administrator seat). Fixed to name
   the CAPABILITY instead of a job title — "jemand mit Zugriff auf Unterkünfte
   oder Klient*innen" — so it stays true regardless of who is actually staffed,

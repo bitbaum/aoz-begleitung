@@ -234,8 +234,8 @@ export function ActionDashboard({
   // with its own "Übernehmen" button. The caseload tiles carry the same signal
   // for the specialist's own clients, so a row the section already shows is
   // dropped from them — by (person, listing), not by signal: a coordinator's
-  // client who asked about a JOB is outside her section and must stay visible
-  // in her caseload tile, or it would be on no screen of hers at all.
+  // client who asked about a JOB is outside that section and must stay visible
+  // in the caseload tile, or it would be on no screen of theirs at all.
   const listedInSection = new Set(
     waitingApplications.map((row) => `${row.residentId}:${row.opportunityId}`),
   )
@@ -286,9 +286,9 @@ export function ActionDashboard({
     // An insurance about to lapse is work whether or not anyone has filed it
     // as such. Counted, so a day with one is not a quiet day.
     expiringFacts.length +
-    // Sandra's rows count exactly as Simon's do. While they did not, her
+    // The Freiwilligenarbeit coordinator's rows count exactly as the Jobcoach's do. While they did not, that dashboard
     // dashboard could only ever resolve to `quiet` — every term above needs a
-    // permission she does not hold, and her caseload was never fetched.
+    // permission the role does not hold, and its caseload was never fetched.
     careTiles.reduce((sum, tile) => sum + tile.rows.length, 0)
 
   // "Nothing to do" and "nothing entered yet" are different facts and get
@@ -486,8 +486,8 @@ export function ActionDashboard({
             {/* The integration domains' work, one tile per signal. Named
                 clients, not a bare count: the screen this replaces reported
                 "keine dringenden Aufgaben" to a coach whose client was created
-                that morning, and never mentioned him — and said the same thing
-                to his colleague for three days longer, because her caseload was
+                that morning, and never mentioned that client — and said the same thing
+                to a colleague for three days longer, whose caseload was
                 not even queried. */}
             {overdueFollowUps.length > 0 && (
               <ActionTile
@@ -509,7 +509,7 @@ export function ActionDashboard({
                 answers the complaint the whole feature came from: extending an
                 insurance every six months meant writing to your Betreuerin,
                 because nothing in the product knew the date. Now it does, and
-                it says so where she already looks. */}
+                it says so where they already look. */}
             {expiringFacts.length > 0 && (
               <ActionTile
                 title={DASHBOARD_LABELS.tileRenewalsDue}

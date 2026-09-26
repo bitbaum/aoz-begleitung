@@ -895,7 +895,7 @@ none.
 So the one action a resident can take on this board REMOVED them from
 `NO_LABOUR_MARKET_CONTACT` and RAISED `LABOUR_MARKET_CONTACT_RATE`, with no
 member of staff having done anything. The person most in need of a reply became
-the person the product had stopped mentioning. Sandra's `ENGAGEMENT_RATE` had
+the person the product had stopped mentioning. The Freiwilligenarbeit coordinator's `ENGAGEMENT_RATE` had
 the same inversion, and `MEDIAN_DAYS_TO_FIRST_CONTACT` was measuring how fast
 residents click — a client who clicked on day one and waited two months
 reported one day, so the tile improved fastest exactly where the service was
@@ -1030,7 +1030,7 @@ portal lets them OPTIONALLY set `displayName`, `bio` and a photo:
   `displayName: string | null`; never widen it back to `?:`.
   This is enforced by `src/lib/__tests__/resident-name-ssot.test.ts`: it failed
   on 50+ surfaces, because rendering a bare code type-checks, lints and looks
-  fine — it just tells Georgy that "RES-LCCM7A" did the dishes instead of Ihor,
+  fine — it just tells Georgy that "RES-LCCM7A" did the dishes instead of the flatmate by name,
   and shows AOZ staff codes for people whose names sat in the same row. The few
   places where the login code *is* the point (the portal's own "your code" card,
   the staff breadcrumb) opt out with a `resident-code-intentional` comment, so
@@ -1062,7 +1062,7 @@ once — never committed). `--wipe` converts a demo instance in place. A real
 instance must run with `DEMO_ACCESS_ENABLED=false` and the reset timer
 disabled — the daily demo reset would truncate real data. The production
 instance `aoz.orangecat.ch` runs in REAL mode since 2026-08-13
-(Witikonerstrasse 458); the demo remains fully env-switchable for a future
+(the pilot flat); the demo remains fully env-switchable for a future
 dedicated demo deployment.
 
 ---
@@ -1100,7 +1100,7 @@ Some incompatibilities are **blocking** (cannot place together):
 absolute line, and that was too blunt to survive contact with the product.**
 Extending a health insurance every six months, or getting a dentist
 appointment, meant writing to your Betreuerin and waiting — the facts lived in
-her inbox rather than in the profile of the person they belong to.
+their inbox rather than in the profile of the person they belong to.
 
 The distinction that holds is between **what is wrong with you** and **who you
 call and when a form is due.** A diagnosis is a judgment about a person and
@@ -1138,14 +1138,14 @@ build goes red.
 | Gesundheitsfachpersonen | ✓ | ✓ | — | — |
 | Aufenthaltsstatus | ✓ | ✓ | ✓ | — |
 
-The Jobcoach holds the permit and only the permit: which work is lawful is his
+The Jobcoach holds the permit and only the permit: which work is lawful is that role's
 job, and `permitRequirement` on an opportunity is already a claim about exactly
-this. He has no business knowing which doctors somebody visits. A single "the
-care team may see the client's facts" grant reads as reasonable and hands him
+this. It has no business knowing which doctors somebody visits. A single "the
+care team may see the client's facts" grant reads as reasonable and hands that role
 both — which is why `clientFacts:read` is its own permission and not
 `residents:read`, a check all four care roles pass.
 
-**"Bestätigt" means SEEN, never TRUE.** Franziska cannot ring the insurer to
+**"Bestätigt" means SEEN, never TRUE.** A Betreuerin cannot ring the insurer to
 verify a policy number. Every label says *geprüft* / *gesehen*, never *gültig*,
 and both surfaces spell the difference out. A product that implied more would
 be asserting something about a person's insurance or permit that it cannot
@@ -1275,20 +1275,20 @@ the mistake this section exists to prevent:
 (`STAFF_ROLE_CARE_DOMAIN`), never restated.
 
 **Why it is split.** The house this runs for has four people and the old
-single enum could not describe them. Franziska Heimhuber is a **Betreuerin who
+single enum could not describe them. One is a **Betreuerin who
 also sees every client**; the only way to say that was `ADMIN`, which erased
-that housing is her domain *and* handed her the settings page as a side effect.
-Simon Binder (Jobcoach) and Sandra (Freiwilligenarbeit) work one domain each.
-Manuel is the fourth, and he is the reason `role` cannot simply mean "care
-domain": he runs the housing STOCK — which flats exist, who is placed where,
+that housing is that person's domain *and* handed them the settings page as a side effect.
+The Jobcoach and the Freiwilligenarbeit coordinator work one domain each.
+The Liegenschaften lead is the fourth, and that role is the reason `role` cannot simply mean "care
+domain": it runs the housing STOCK — which flats exist, who is placed where,
 what is broken — and supports nobody. `LIEGENSCHAFTEN` maps to no `CareRole`
 at all, which is why `STAFF_ROLE_CARE_DOMAIN` is a `Partial<Record<…>>`.
 
 ```
-Franziska  BETREUUNG          + ALL_DOMAINS
-Simon      JOBCOACH           + OWN_DOMAIN
-Sandra     FREIWILLIGENARBEIT + OWN_DOMAIN
-Manuel     LIEGENSCHAFTEN     + OWN_DOMAIN   (no caseload)
+Betreuerin (all domains)   BETREUUNG          + ALL_DOMAINS
+Jobcoach                   JOBCOACH           + OWN_DOMAIN
+Freiwilligenarbeit coord.  FREIWILLIGENARBEIT + OWN_DOMAIN
+Liegenschaften lead        LIEGENSCHAFTEN     + OWN_DOMAIN   (no caseload)
 ```
 
 ⚠️ **This file used to say "There is no Leitung" here, as settled fact. That
@@ -1300,7 +1300,7 @@ was true is narrower: *these three people* have no lead among them.
 
 The split holds up anyway, which is the point worth keeping: a
 **Teamleiter\*in Betreuung is `BETREUUNG` + `ALL_DOMAINS` + NOT
-`isSystemAdmin`** — Franziska's exact shape. Leading a care team is reach over
+`isSystemAdmin`** — the all-domains Betreuerin's exact shape. Leading a care team is reach over
 that team's clients, not the right to reconfigure the product, and the three
 axes say so without a new role. Do not add a `LEITUNG` enum value for it; that
 is the mistake this section exists to prevent, and `ADMIN` is retired for
@@ -1445,7 +1445,7 @@ Exactly the staff shape: the code is minted first, the human arrives later.
   more placeholders exist to show the product off, the WORSE the service looks
   in the numbers it is judged on.
 - **Staff see "Platzhalter"** beside the name. Without it "Amir" reads exactly
-  like Ihor on the same list, and a Betreuerin could open a case for somebody
+  like a real client on the same list, and a Betreuerin could open a case for somebody
   who does not exist yet.
 - **Server-driven buttons**: the login page asks `GET /api/auth/demo` which
   doors exist; there is **no build-time flag**, so a button appears only when

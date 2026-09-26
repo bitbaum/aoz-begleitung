@@ -1,7 +1,7 @@
 import type { VolunteeringSignalId } from '@/lib/volunteering/queue'
 
 /**
- * What each of Sandra's signals is called, and what she should do about it.
+ * What each of the Freiwilligenarbeit coordinator's signals is called, and what to do about it.
  *
  * Copy lives here rather than in the queue module for the same reason
  * `JOB_SIGNAL_COPY` does: the queue is pure logic with no opinion about how it

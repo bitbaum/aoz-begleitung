@@ -105,7 +105,7 @@ export interface CreateHouseholdInput {
   password: string
   /** What this person wants to be called. Optional — the code still works. */
   displayName?: string
-  /** The flat's name, e.g. "Singapur" or "Witikonerstrasse 458". */
+  /** The flat's name, e.g. "Singapur" or a street address. */
   householdName: string
 }
 

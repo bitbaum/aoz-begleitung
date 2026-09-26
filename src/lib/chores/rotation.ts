@@ -24,8 +24,8 @@
  * rotation (every as-needed task, and any scheduled task the house has not
  * ordered yet — an empty rotation is a legitimate "we don't do turns here").
  *
- * Completions advance the turn regardless of who performed them: if Alex does
- * Misha's turn, the work is done and the rota moves on. Anything else would
+ * Completions advance the turn regardless of who performed them: if one housemate does
+ * another's turn, the work is done and the rota moves on. Anything else would
  * make covering for someone cost you your own place in the queue.
  */
 export function currentTurnResidentId(

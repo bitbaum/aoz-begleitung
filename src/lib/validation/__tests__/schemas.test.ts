@@ -248,9 +248,9 @@ describe('HousingUnitInputSchema', () => {
   }
 
   it('accepts an optional buildingCode', () => {
-    const result = HousingUnitInputSchema.safeParse({ ...validHousing, buildingCode: 'WITIKON-A' })
+    const result = HousingUnitInputSchema.safeParse({ ...validHousing, buildingCode: 'HAUS-A' })
     expect(result.success).toBe(true)
-    if (result.success) expect(result.data.buildingCode).toBe('WITIKON-A')
+    if (result.success) expect(result.data.buildingCode).toBe('HAUS-A')
   })
 
   it('accepts valid input with defaults', () => {

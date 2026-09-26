@@ -249,8 +249,8 @@ export const permitRequirement = pgEnum('PermitRequirement', [
  * with Betreuung.
  *
  * CONFIRMED means "a member of staff has SEEN this", never "this is true".
- * Franziska cannot ring the insurer to verify a policy number, and a product
- * that implied she had would be asserting something about a person's insurance
+ * The all-domains Betreuerin cannot ring the insurer to verify a policy number, and a product
+ * that implied they had would be asserting something about a person's insurance
  * or permit that it cannot know — the same failure as an opportunity claiming
  * `permitRequirement: NONE` by default.
  */
@@ -1118,8 +1118,8 @@ export const resident = pgTable(
      * a placeholder's code clears this flag: the profile is then that person's.
      *
      * WHY IT IS PROVENANCE AND NOT "unclaimed". Deriving it from "has no
-     * Account" would be wrong in the direction that matters: Ihor, Misha, Alex
-     * and Julia are real clients who have never registered, and excluding them
+     * Account" would be wrong in the direction that matters: most of the
+     * live residents are real clients who have never registered, and excluding them
      * would under-report the caseload the pilot is judged on. Placeholder-ness
      * is decided when the row is CREATED, not by what the person has done since.
      *
@@ -2545,7 +2545,7 @@ export const staffUnit = pgTable(
 // A client's insurance, the health professionals they see, and their permit —
 // entered by the CLIENT, checked by Betreuung. Before this, extending an
 // insurance every six months or booking a dentist meant writing to your
-// Betreuerin and waiting; the facts lived in her inbox rather than in the
+// Betreuerin and waiting; the facts lived in their inbox rather than in the
 // product.
 //
 // THE RULE, enforced by

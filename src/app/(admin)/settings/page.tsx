@@ -34,7 +34,7 @@ export const dynamic = 'force-dynamic'
  * credential — `loginByCode` takes it alone, no password. So the narrowest
  * role in the product could type /settings, read `AOZ-ADMIN1`, and sign in as
  * the system administrator. Verified against production on 2026-08-31 as
- * Simon Binder (JOBCOACH / OWN_DOMAIN / not an admin): the nav correctly
+ * the Jobcoach (JOBCOACH / OWN_DOMAIN / not an admin): the nav correctly
  * omitted the link and the route served the page anyway.
  *
  * Hiding a link is not access control. The nav already asked the right

@@ -56,7 +56,7 @@ The only thing that matters: **prove the metrics** (incidents −30%,
 relocations −50%, mediation hours −40%) at 1–2 locations against the
 baseline. Everything in H1 serves that.
 
-- ✅ Real deployment (Witikonerstrasse 458), demo doors, governance,
+- ✅ Real deployment (the pilot flat), demo doors, governance,
   expenses, report routing.
 - ✅ Signed Hausordnung as the in-app org rule catalog, with per-version
   acknowledgement — done (see changelog).

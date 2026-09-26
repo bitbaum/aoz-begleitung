@@ -12,7 +12,7 @@ import { ASSIGNABLE_STAFF_ROLES, type StaffRole } from '@/lib/auth/role-policy'
  * flag, so every staff member READ all four domains and merely could not type
  * in three of them. A job coach opening any client saw Housing's "Schlüssel:
  * fehlt" and Sozialarbeit's "Nächster Schritt" — notes another discipline
- * wrote about a person, on a page he opened to do a different job.
+ * wrote about a person, on a page they opened to do a different job.
  *
  * A rendering test is the only thing that catches a regression here: putting
  * `CARE_ROLES.map` back type-checks, lints and looks completely fine.
@@ -98,8 +98,8 @@ describe('CareWorkspace domain boundary', () => {
   })
 
   it('gives a viewer with oversight all four seats — whatever their role', () => {
-    // This is Franziska: a Betreuerin who also covers every seat. It used to
-    // require the ADMIN role, which erased the fact that housing is her
+    // This is the all-domains Betreuerin, covering every seat. It used to
+    // require the ADMIN role, which erased the fact that housing is the
     // domain. Breadth is now its own axis, so the role stays true.
     render(
       <CareWorkspace

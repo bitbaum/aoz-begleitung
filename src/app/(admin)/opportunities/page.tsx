@@ -55,8 +55,8 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
     : undefined
   const kind = kindParam in OPPORTUNITY_KIND_LABELS ? (kindParam as OpportunityKindId) : undefined
 
-  // No `?board=` means nobody has chosen, so the role answers. Simon opens on
-  // work, Sandra on volunteering, Franziska on everything — and each of them
+  // No `?board=` means nobody has chosen, so the role answers. The Jobcoach opens on
+  // work, the Freiwilligenarbeit coordinator on volunteering, the all-domains Betreuerin on everything — and each of them
   // stops setting the same filter on every visit.
   const board = resolveIntegrationBoard(firstParam(params.board), staff.role)
   const boardKinds = boardOpportunityKinds(board)

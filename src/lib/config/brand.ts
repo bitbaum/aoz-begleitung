@@ -244,7 +244,7 @@ export const BRANDS: Record<BrandId, Brand> = {
     features: AOZ_FEATURES,
   },
 
-  // Real shared-flat deployments (first: Witikonerstrasse 458). Same product,
+  // Real shared-flat deployments (first: the pilot flat). Same product,
   // different register: nobody in a WG is "placed" by a "system".
   wg: {
     id: 'wg',

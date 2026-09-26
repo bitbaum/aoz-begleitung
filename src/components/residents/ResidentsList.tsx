@@ -88,7 +88,7 @@ function ResidentRow({ resident, canWrite }: { resident: ResidentListItem; canWr
               {/*
                 A seeded profile waiting to be claimed must never be mistaken
                 for someone who needs support. Without this, "Amir" reads
-                exactly like Ihor on the same screen, and a Betreuerin could
+                exactly like a real client on the same screen, and a Betreuerin could
                 open a case, record a check-in, or chase a person who does not
                 exist yet.
               */}

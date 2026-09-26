@@ -4,12 +4,12 @@
  * ⚠️ THIS CLOSES A HOLE IN THE FEATURE IT BELONGS TO. `/approvals` queries
  * `status = 'PENDING'`, and nothing else on the staff side read these tables —
  * so the moment a Betreuerin pressed "Gesehen", the insurance disappeared from
- * every staff surface. She could never afterwards look up which insurance a
+ * every staff surface. They could never afterwards look up which insurance a
  * client has, or who their dentist is, which is the entire reason the client
  * recorded it.
  *
  * Written and then read by nobody: the exact class this feature was built to
- * end, reproduced inside it. Found by walking the product as Simon rather than
+ * end, reproduced inside it. Found by walking the product as the Jobcoach rather than
  * by reading the code.
  *
  * Visibility is the SAME per-kind rule as the queue (`mayReadFact`), applied

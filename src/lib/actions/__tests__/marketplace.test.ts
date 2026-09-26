@@ -387,7 +387,7 @@ describe('your own posts, for the dashboard', () => {
       row({
         postedById: ME,
         status: 'CLAIMED',
-        claimedBy: { code: 'RES-BBB', displayName: 'Ihor' },
+        claimedBy: { code: 'RES-BBB', displayName: 'Hana' },
         claimedById: OTHER,
       }),
     ])
@@ -395,7 +395,7 @@ describe('your own posts, for the dashboard', () => {
     const [post] = await listMyMarketplacePosts()
 
     expect(post.status).toBe('CLAIMED')
-    expect(post.claimedByName).toBe('Ihor')
+    expect(post.claimedByName).toBe('Hana')
     // You are the poster, so the handover details are yours to see.
     expect(post.contactNote).toBe('Zimmer 2, abends')
   })
