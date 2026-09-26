@@ -164,11 +164,14 @@ export default async function PortalOpportunitiesPage(props: Props) {
                     ) : null}
                     {listing.schedule ? (
                       <div>
+                        <dt className="eyebrow">{t('opportunities.when')}</dt>
+                        <dd className="text-ui-text">{listing.schedule}</dd>
+                      </div>
+                    ) : null}
+                    {listing.hoursPerWeek ? (
+                      <div>
                         <dt className="eyebrow">{t('opportunities.perWeek')}</dt>
-                        <dd className="text-ui-text">
-                          {listing.schedule}
-                          {listing.hoursPerWeek ? ` · ${listing.hoursPerWeek}` : ''}
-                        </dd>
+                        <dd className="numeric text-ui-text">{listing.hoursPerWeek}</dd>
                       </div>
                     ) : null}
                   </dl>

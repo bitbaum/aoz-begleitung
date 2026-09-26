@@ -89,11 +89,13 @@ export function ResidentProfileSidebar({ resident }: ResidentProfileSidebarProps
   return (
     <div className="space-y-6">
       {/* CRITICAL: Housing Authorization - Most important info at top */}
+      {/* A hairline card like every other one; only a documented entitlement
+          gets the info tint, so the tint means something when it appears. */}
       <div
-        className={`card border-2 ${resident.hasMedicalDocumentation ? 'border-status-info/40 bg-status-info/8' : 'border-ui-border'}`}
+        className={`card ${resident.hasMedicalDocumentation ? 'border-status-info/40 bg-status-info/8' : ''}`}
       >
-        <h2 className="text-lg font-semibold text-ui-text mb-4 flex items-center gap-2">
-          {'\u{1F3E0}'} {RESIDENT_PROFILE_SIDEBAR_LABELS.authCardTitle}
+        <h2 className="text-lg font-semibold text-ui-text mb-4">
+          {RESIDENT_PROFILE_SIDEBAR_LABELS.authCardTitle}
         </h2>
         <dl className="space-y-3 text-sm">
           <div className="flex justify-between items-center">

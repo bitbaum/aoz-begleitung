@@ -372,12 +372,12 @@ export function ActionDashboard({
                 <Clock className="w-5 h-5" />
               )
             }
+            // "keine aktuell" under "13 überfällig" read as a contradiction;
+            // the fraction says the same thing and cannot be misread.
             subtext={
-              onTimeCheckIns === 0
-                ? DASHBOARD_LABELS.statNoneCurrent
-                : onTimeCheckIns === totalPlacements
-                  ? DASHBOARD_LABELS.statAllCurrent
-                  : `${onTimeCheckIns}/${totalPlacements} ${DASHBOARD_LABELS.statCurrentSuffix}`
+              onTimeCheckIns === totalPlacements
+                ? DASHBOARD_LABELS.statAllCurrent
+                : `${onTimeCheckIns}/${totalPlacements} ${DASHBOARD_LABELS.statCurrentSuffix}`
             }
           />
         )}

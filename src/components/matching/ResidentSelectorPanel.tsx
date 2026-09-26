@@ -75,7 +75,7 @@ export function ResidentSelectorPanel({
           {filteredUnplacedResidents.map((resident) => (
             <div
               key={resident.id}
-              className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+              className={`flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg border transition-colors ${
                 params.resident === resident.id
                   ? 'border-brand-primary bg-brand-primary/5'
                   : 'border-ui-border'
@@ -83,10 +83,10 @@ export function ResidentSelectorPanel({
             >
               <Link
                 href={`/residents/${resident.id}`}
-                className="flex items-center gap-3 flex-1 hover:opacity-80"
+                className="flex min-w-0 items-center gap-3 flex-1 hover:opacity-80"
               >
                 <div className="avatar-sm">{residentInitials(resident)}</div>
-                <div>
+                <div className="min-w-0">
                   <p className="inline-flex items-center py-2 -my-2 font-medium text-ui-text hover:text-brand-primary">
                     {residentName(resident)}
                   </p>
@@ -99,17 +99,14 @@ export function ResidentSelectorPanel({
                   </p>
                 </div>
               </Link>
+              {/* A real button: the grey fill it used to have read as disabled. */}
               <Link
                 href={`/matching?resident=${resident.id}`}
-                className={`px-3 py-2 min-h-[44px] flex items-center justify-center rounded text-sm font-medium transition-colors ${
-                  params.resident === resident.id
-                    ? 'bg-brand-primary text-ui-on-accent'
-                    : 'bg-ui-subtle text-ui-muted hover:bg-brand-primary hover:text-ui-on-accent'
-                }`}
+                className={params.resident === resident.id ? 'btn-secondary' : 'btn-outline'}
               >
                 {params.resident === resident.id
                   ? MATCHING_LABELS.selected
-                  : MATCHING_LABELS.matching}
+                  : MATCHING_LABELS.findUnitAction}
               </Link>
             </div>
           ))}
@@ -123,26 +120,23 @@ export function ResidentSelectorPanel({
             {MATCHING_LABELS.placedResidents} ({placedResidents.length})
           </h3>
           <p className="text-xs text-ui-muted mb-3">{MATCHING_LABELS.selectForAnalysis}</p>
-          <section
-            aria-label={MATCHING_LABELS.placedResidents}
-            className="space-y-2 max-h-64 overflow-y-auto"
-          >
+          <section aria-label={MATCHING_LABELS.placedResidents} className="space-y-2">
             {placedResidents.map((resident) => (
               <div
                 key={resident.id}
-                className={`flex items-center justify-between p-2 rounded-lg border transition-colors ${
+                className={`flex flex-wrap items-center justify-between gap-2 p-2 rounded-lg border transition-colors ${
                   params.resident === resident.id
                     ? 'border-brand-primary bg-brand-primary/5'
-                    : 'border-ui-border bg-ui-subtle'
+                    : 'border-ui-border'
                 }`}
               >
                 <Link
                   href={`/residents/${resident.id}`}
                   className="flex items-center gap-2 flex-1 hover:opacity-80"
                 >
-                  <div className="avatar-sm w-7 h-7 bg-ui-muted">{residentInitials(resident)}</div>
+                  <div className="avatar-sm">{residentInitials(resident)}</div>
                   <div>
-                    <p className="text-sm font-medium text-ui-muted">{residentName(resident)}</p>
+                    <p className="text-sm font-medium text-ui-text">{residentName(resident)}</p>
                     <p className="text-xs text-ui-muted">
                       {resident.placements[0]?.housingUnit?.code || MATCHING_LABELS.placed}
                     </p>
@@ -150,11 +144,7 @@ export function ResidentSelectorPanel({
                 </Link>
                 <Link
                   href={`/matching?resident=${resident.id}`}
-                  className={`min-h-[44px] px-3 py-2 rounded text-xs font-medium transition-colors flex items-center ${
-                    params.resident === resident.id
-                      ? 'bg-brand-primary text-ui-on-accent'
-                      : 'bg-ui-border text-ui-muted hover:bg-ui-border-strong'
-                  }`}
+                  className={params.resident === resident.id ? 'btn-secondary' : 'btn-outline'}
                 >
                   {MATCHING_LABELS.compare}
                 </Link>

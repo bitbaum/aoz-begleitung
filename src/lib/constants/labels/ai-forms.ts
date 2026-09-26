@@ -5,14 +5,14 @@
 export const AI_FORM_LABELS = {
   fillTitle: 'Aus Gesprächsnotizen ausfüllen',
   fillHint:
-    'Beschreibe das Aufnahmegespräch in eigenen Worten. Das Formular wird ausgefüllt — überprüfe jede Angabe, bevor du speicherst.',
+    'Beschreiben Sie das Aufnahmegespräch in eigenen Worten. Das Formular wird ausgefüllt — prüfen Sie jede Angabe, bevor Sie speichern.',
   fillPlaceholder:
     'z.B. Frau, 34, alleinstehend, spricht Arabisch und etwas Deutsch. Steht früh auf, hätte gerne ein Einzelzimmer. Raucht draussen, kocht lieber mit eigenem Geschirr. Reagiert empfindlich auf Lärm.',
   fillSubmit: 'Ausfüllen',
 
   refineTitle: 'Änderung beschreiben',
   refineHint:
-    'Sag, was anders sein soll — z.B. «spricht auch Französisch» oder «doch Nichtraucherin».',
+    'Sagen Sie, was anders sein soll — z.B. «spricht auch Französisch» oder «doch Nichtraucherin».',
   refinePlaceholder: 'z.B. Lärmtoleranz eher 2, und sie kann ein Zimmer teilen',
   refineSubmit: 'Übernehmen',
 
@@ -50,8 +50,8 @@ export const AI_FORM_MESSAGES = {
   unreadable: 'Die Antwort der KI war nicht lesbar. Bitte anders formulieren.',
   nothingChanged: (intent: 'fill' | 'refine') =>
     intent === 'refine'
-      ? 'Nichts geändert — nenne das Feld, das anders sein soll, oder füge mehr Angaben ein.'
-      : 'Daraus liess sich nichts ausfüllen. Beschreibe es anders oder ausführlicher.',
+      ? 'Nichts geändert — nennen Sie das Feld, das anders sein soll, oder fügen Sie mehr Angaben ein.'
+      : 'Daraus liess sich nichts ausfüllen. Beschreiben Sie es anders oder ausführlicher.',
   updated: (labels: readonly string[]) =>
     labels.length === 1
       ? `${labels[0]} aktualisiert.`

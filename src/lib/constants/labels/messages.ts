@@ -20,5 +20,5 @@ export const MESSAGES_LABELS = {
   fromStaff: 'Betreuung',
   /** Said where staff write, because a resident reads this in their language. */
   languageHint:
-    'Die Bewohnenden lesen das Portal in ihrer eigenen Sprache — deine Nachricht wird nicht übersetzt.',
+    'Die Bewohnenden lesen das Portal in ihrer eigenen Sprache — Ihre Nachricht wird nicht übersetzt.',
 } as const

@@ -55,16 +55,13 @@ export async function PortalHousingCard({
         <span className="badge badge-active">{t('dashboard.active')}</span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4">
+      {/* No compatibility score here. It is the staff's matching judgement
+          about this person and the people they live with; shown to the
+          resident it reads as a verdict on their household. */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
         <InfoBox label={t('dashboard.moveIn')} value={formatDate(placement.startDate)} />
         <InfoBox label={t('dashboard.rooms')} value={`${housingUnit?.totalRooms || 0}`} />
         <InfoBox label={t('dashboard.roommatesCount')} value={`${roommatesCount}`} />
-        <InfoBox
-          label={t('dashboard.compatibility')}
-          value={
-            placement.compatibilityScore ? `${Math.round(placement.compatibilityScore)}%` : '--'
-          }
-        />
       </div>
 
       {/* House Rules Summary */}

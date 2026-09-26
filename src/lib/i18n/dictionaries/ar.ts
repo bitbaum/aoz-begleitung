@@ -629,6 +629,7 @@ export const ar: Dictionary = {
   'opportunities.filterAll': 'كل الأماكن',
   'opportunities.filterLabel': 'نوع المكان',
   'opportunities.germanLevel': 'الألمانية',
+  'opportunities.when': 'متى',
   'opportunities.perWeek': 'ساعة/أسبوع',
   'opportunities.okInterest': 'تم التسجيل — سيتواصل معك فريقك.',
   'opportunities.okWithdrawn': 'تم سحب اهتمامك.',

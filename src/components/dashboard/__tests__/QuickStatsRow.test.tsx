@@ -40,7 +40,8 @@ describe('QuickStat', () => {
 
   it('appends suffix to value when provided', () => {
     render(<QuickStat {...BASE} value={3} suffix=" überfällig" />)
-    expect(screen.getByText(/3 überfällig/)).toBeInTheDocument()
+    // Number and word are styled apart but must still read as "3 überfällig".
+    expect(screen.getByRole('link').textContent).toMatch(/3 überfällig/)
   })
 
   it('renders the icon', () => {
