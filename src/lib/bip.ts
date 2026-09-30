@@ -1,8 +1,9 @@
 /**
  * Building in Public — second studio consumer of npm `bip-kit`.
  *
- * AOZ keeps `marked` for HTML rendering (repo-linked posts). bip-kit is the
- * SSOT for block parsing / video allowlist / roadmap·changelog types.
+ * bip-kit reads and renders the blog (@see lib/blog/posts.ts, blocks.ts);
+ * `marked` is left for the changelog and roadmap. This module re-exports the
+ * parser, video allowlist and roadmap·changelog types.
  * @see docs/building-in-public.md
  * @see https://github.com/bitbaum/bip-kit
  */

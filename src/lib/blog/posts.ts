@@ -1,5 +1,5 @@
-import { readdirSync, readFileSync } from 'fs'
 import { join } from 'path'
+import { readCollection, type CollectionEntry } from 'bip-kit/node'
 
 /**
  * The engineering blog, read from `docs/blog/*.md`.
@@ -13,7 +13,9 @@ import { join } from 'path'
  * WHY THERE IS NO FRONTMATTER. The title is the `# h1` and the date is in the
  * filename — both already load-bearing, both already conventions the folder
  * follows. Adding `title:` frontmatter would mean the title exists twice in one
- * file, which is the same drift one level down.
+ * file, which is the same drift one level down. bip-kit's collection reader
+ * (`bip-kit/node`) reads exactly this shape: it takes the date from the name,
+ * the title from the `# h1`, and drops the `*YYYY-MM-DD*` dateline.
  *
  * WHY THIS ONLY EVER RUNS AT BUILD TIME. The blog routes are `force-static`
  * with `dynamicParams = false`, so every page is prerendered on the CI runner,
@@ -24,9 +26,6 @@ import { join } from 'path'
  */
 
 const BLOG_DIR = join(process.cwd(), 'docs', 'blog')
-
-/** `YYYY-MM-DD-slug.md` — the naming convention documented in the folder README. */
-const FILENAME_PATTERN = /^(\d{4}-\d{2}-\d{2})-([a-z0-9-]+)\.md$/
 
 export interface BlogPost {
   /** URL segment: the filename stem with the date prefix removed. */
@@ -42,64 +41,31 @@ export interface BlogPost {
   filename: string
 }
 
-function parsePost(filename: string, raw: string): BlogPost {
-  const match = FILENAME_PATTERN.exec(filename)
-  if (!match) {
-    throw new Error(`Blog post "${filename}" does not follow the YYYY-MM-DD-slug.md convention.`)
-  }
-  const [, date, slug] = match
-
-  const lines = raw.split('\n')
-
-  const titleIndex = lines.findIndex((line) => line.startsWith('# '))
-  if (titleIndex === -1) {
-    throw new Error(`Blog post "${filename}" has no "# Title" heading.`)
-  }
-  const title = lines[titleIndex].slice(2).trim()
-
-  // The rendered page prints the date from the filename, so the `*2026-08-15*`
-  // line the posts carry for plain-file readers is dropped here rather than
-  // shown twice. Only the one directly under the title is treated as the
-  // dateline; an emphasised line further down is ordinary prose.
-  const rest = lines.slice(titleIndex + 1)
-  const datelineIndex = rest.findIndex((line) => line.trim() !== '')
-  const isDateline =
-    datelineIndex !== -1 && /^\*\d{4}-\d{2}-\d{2}\*$/.test(rest[datelineIndex].trim())
-
-  const body = (isDateline ? rest.slice(datelineIndex + 1) : rest).join('\n').trim()
-
-  return { slug, title, date, body, excerpt: firstParagraph(body), filename }
-}
-
 /**
- * First prose paragraph, flattened to plain text. Skips anything that is not
- * running prose (headings, tables, code fences, lists) so a post that opens on
- * a table does not get a row of pipes as its teaser.
+ * bip-kit's reader accepts looser files than this folder does (frontmatter
+ * titles, undated names); the folder's own convention is enforced here so a
+ * stray file fails the build instead of publishing under a made-up title.
  */
-function firstParagraph(body: string): string {
-  const blocks = body.split(/\n\s*\n/)
-  const prose = blocks.find((block) => {
-    const trimmed = block.trim()
-    return trimmed.length > 0 && !/^[#>|\-*`]/.test(trimmed)
-  })
-  if (!prose) return ''
-
-  return prose
-    .replace(/\s+/g, ' ')
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // links → their text
-    .replace(/[*_`]/g, '')
-    .trim()
+function toPost(entry: CollectionEntry): BlogPost {
+  if (!entry.date || entry.meta.date || entry.meta.publishedAt) {
+    throw new Error(`Blog post "${entry.file}" does not follow the YYYY-MM-DD-slug.md convention.`)
+  }
+  if (entry.meta.title || entry.title === entry.file.replace(/\.md$/, '')) {
+    throw new Error(`Blog post "${entry.file}" has no "# Title" heading.`)
+  }
+  return {
+    slug: entry.slug,
+    title: entry.title,
+    date: entry.date,
+    body: entry.body.trim(),
+    excerpt: entry.summary,
+    filename: entry.file,
+  }
 }
 
-/** Every post, newest first. Ties break on slug so the order is deterministic. */
+/** Every post, newest first (ties by title). */
 export function getAllPosts(): BlogPost[] {
-  const files = readdirSync(BLOG_DIR).filter((name) => FILENAME_PATTERN.test(name))
-
-  return files
-    .map((name) => parsePost(name, readFileSync(join(BLOG_DIR, name), 'utf8')))
-    .sort((a, b) =>
-      a.date === b.date ? a.slug.localeCompare(b.slug) : b.date.localeCompare(a.date),
-    )
+  return readCollection(BLOG_DIR).map(toPost)
 }
 
 export function getPostBySlug(slug: string): BlogPost | null {
