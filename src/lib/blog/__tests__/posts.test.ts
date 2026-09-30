@@ -1,7 +1,8 @@
 import { existsSync, readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import { getAllPosts, getPostBySlug } from '@/lib/blog/posts'
-import { collectLinkHrefs, parsePostBlocks } from '@/lib/blog/blocks'
+import { collectLinkHrefs, parsePostBlocks, parseRepoDocBlocks } from '@/lib/blog/blocks'
+import { getChangelogDoc, getRoadmapDoc } from '@/lib/content/static-docs'
 
 const BLOG_DIR = join(process.cwd(), 'docs', 'blog')
 
@@ -163,5 +164,41 @@ describe('blog block rendering', () => {
 
     expect(blocks[0]).toMatchObject({ type: 'h2', id: 'ueber-uns' })
     expect(toc.map((entry) => entry.id)).toEqual(['ueber-uns', 'der-zweite-teil'])
+  })
+})
+
+describe('changelog and roadmap rendering', () => {
+  const docs = [
+    { name: 'changelog', blocks: parseRepoDocBlocks(getChangelogDoc().body, '.') },
+    { name: 'roadmap', blocks: parseRepoDocBlocks(getRoadmapDoc().body, 'docs') },
+  ]
+
+  it("resolves repo links against the doc's own folder", () => {
+    const hrefs = collectLinkHrefs(parseRepoDocBlocks('[c](../CHANGELOG.md)', 'docs'))
+
+    expect(hrefs).toEqual(['https://github.com/bitbaum/aoz-begleitung/blob/master/CHANGELOG.md'])
+  })
+
+  it('keeps a bullet that wraps onto an indented line as one item', () => {
+    // Prettier wraps long bullets this way throughout both docs; without the
+    // normalization the rest of the sentence rendered as its own paragraph.
+    const blocks = parseRepoDocBlocks('- a bullet that\n  wraps\n- two', '.')
+
+    expect(blocks).toMatchObject([{ type: 'ul', items: ['a bullet that wraps', 'two'] }])
+  })
+
+  it('never serves a link to a .md file or to a repo file that does not exist', () => {
+    const GITHUB_FILE = /^https:\/\/github\.com\/[^/]+\/[^/]+\/blob\/master\/([^#]+)/
+
+    for (const { name, blocks } of docs) {
+      const hrefs = collectLinkHrefs(blocks)
+      const broken = hrefs.filter((href) => href.includes('.md') && !href.startsWith('http'))
+      const missing = hrefs
+        .map((href) => GITHUB_FILE.exec(href)?.[1])
+        .filter((path): path is string => path !== undefined)
+        .filter((path) => !existsSync(join(process.cwd(), path)))
+
+      expect({ name, broken, missing }).toEqual({ name, broken: [], missing: [] })
+    }
   })
 })

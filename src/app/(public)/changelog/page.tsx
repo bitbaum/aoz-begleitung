@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getChangelogDoc } from '@/lib/content/static-docs'
-import { renderRepoMarkdown } from '@/lib/blog/markdown'
+import 'bip-kit/styles.css'
+import '@/lib/blog/blog.css'
+import { parseRepoDocBlocks } from '@/lib/blog/blocks'
+import { BlogPostBody } from '@/lib/blog/BlogPostBody'
 
 export const dynamic = 'force-static'
 
@@ -32,10 +35,7 @@ export default function PublicChangelogPage() {
         </div>
       </header>
 
-      <div
-        className="prose-post"
-        dangerouslySetInnerHTML={{ __html: renderRepoMarkdown(changelog.body, '.') }}
-      />
+      <BlogPostBody blocks={parseRepoDocBlocks(changelog.body, '.')} />
     </article>
   )
 }

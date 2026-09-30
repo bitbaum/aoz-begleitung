@@ -1,6 +1,6 @@
 /**
- * Design tokens → bip-kit's --bp-* theming contract, for the blog only (this
- * file is imported by the blog post route, not by globals.css).
+ * Design tokens → bip-kit's --bp-* theming contract, for the bip-kit pages only
+ * (imported by the blog post, changelog and roadmap routes, not by globals.css).
  *
  * Every value references the design-token SSOT (src/app/globals.css). The
  * tokens are RGB channel triples, so each mapping wraps them in rgb(). Both
@@ -32,8 +32,8 @@
   --bp-fg-faint: rgb(var(--color-ui-muted));
   --bp-border: rgb(var(--color-ui-border));
 
-  /* Colour is rationed: links stay monochrome (like .prose-post did) and
-     only pick up the brand red on hover — see the override below. */
+  /* Colour is rationed: links stay monochrome and only pick up the brand
+     red on hover — see the override below. */
   --bp-accent: rgb(var(--color-ui-text));
   --bp-accent-contrast: rgb(var(--color-ui-inverse));
 
@@ -48,9 +48,8 @@
   --bp-danger-bg: rgb(var(--color-status-error) / 0.08);
 }
 
-/* Links: underline in the hairline colour, brand red on hover — the same
-   rationing .prose-post applied (brand red twenty times a page would stop
-   meaning "the action that matters"). */
+/* Links: underline in the hairline colour, brand red on hover (brand red
+   twenty times a page would stop meaning "the action that matters"). */
 .bp-article a {
   text-decoration-color: rgb(var(--color-ui-border-strong));
   transition:
