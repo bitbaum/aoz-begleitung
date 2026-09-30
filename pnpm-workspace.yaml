@@ -22,7 +22,7 @@ minimumReleaseAgeExclude:
   - '@bitbaum/ai-kit'
   # @bitbaum/mail-kit 0.1.0 is likewise our own package, published 2026-09-05.
   - '@bitbaum/mail-kit'
-  # bip-kit is our own package too; 0.2.x releases are days old.
+  # bip-kit is our own package too; each release is days old when adopted.
   - 'bip-kit'
   # ai-forms is ours as well (the form assistant); releases ship same-day.
   - 'ai-forms'
