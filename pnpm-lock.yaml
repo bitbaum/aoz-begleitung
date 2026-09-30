@@ -30,8 +30,8 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3
       bip-kit:
-        specifier: ^0.5.1
-        version: 0.5.1(katex@0.16.47)(mermaid@12.0.0)(react@19.2.8)(shiki@4.4.3)
+        specifier: ^0.5.2
+        version: 0.5.2(katex@0.16.47)(mermaid@12.0.0)(react@19.2.8)(shiki@4.4.3)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -44,9 +44,6 @@ importers:
       lucide-react:
         specifier: ^1.43.0
         version: 1.43.0(react@19.2.8)
-      marked:
-        specifier: 18.0.12
-        version: 18.0.12
       mermaid:
         specifier: ^12.0.0
         version: 12.0.0
@@ -2367,8 +2364,8 @@ packages:
   bignumber.js@9.3.1:
     resolution: {integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==}
 
-  bip-kit@0.5.1:
-    resolution: {integrity: sha512-0+AbK4rrnz+RZbrDCD/i2bbroja4rQcS77ntfrQCF9cZd8tfvxawI5ObJrgiN1se3+JmVeMJGPptMRCQBTIVaw==}
+  bip-kit@0.5.2:
+    resolution: {integrity: sha512-hwLsVvwSo/AbdqRX07D0XkF2mGTOL9f+2+p/vJoQnMkl2m3NMTicglZrTQBe6heq6EEd7H69ecl2IjydFF83Ug==}
     engines: {node: '>=20'}
     peerDependencies:
       katex: '>=0.16'
@@ -3688,11 +3685,6 @@ packages:
 
   marked@16.4.2:
     resolution: {integrity: sha512-TI3V8YYWvkVf3KJe1dRkpnjs68JUPyEa5vjKrp1XEEJUAOaQc+Qj+L1qWbPd0SJuAdQkFU0h73sXXqwDYxsiDA==}
-    engines: {node: '>= 20'}
-    hasBin: true
-
-  marked@18.0.12:
-    resolution: {integrity: sha512-LEm4ga2YeI2T3GVHj9b0BaDPPk93LLTHMFeMyQbNIzPxc8vCI0y/scy0ZA6z6lXKyT9j9Nhl/OC6ZYKYGuFScA==}
     engines: {node: '>= 20'}
     hasBin: true
 
@@ -6624,7 +6616,7 @@ snapshots:
 
   bignumber.js@9.3.1: {}
 
-  bip-kit@0.5.1(katex@0.16.47)(mermaid@12.0.0)(react@19.2.8)(shiki@4.4.3):
+  bip-kit@0.5.2(katex@0.16.47)(mermaid@12.0.0)(react@19.2.8)(shiki@4.4.3):
     dependencies:
       react: 19.2.8
     optionalDependencies:
@@ -8057,8 +8049,6 @@ snapshots:
   make-error@1.3.6: {}
 
   marked@16.4.2: {}
-
-  marked@18.0.12: {}
 
   math-intrinsics@1.1.0: {}
 

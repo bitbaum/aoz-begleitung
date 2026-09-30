@@ -317,75 +317,6 @@
     @apply numeric text-3xl font-semibold leading-none text-ui-text;
   }
 
-  /* Long-form prose rendered from `marked` HTML — the changelog and roadmap
-   pages, which still go through `renderRepoMarkdown`. (The blog moved to
-   bip-kit's typed blocks and its own `bp-*` classes; see lib/blog/blog.css.
-   These rules stay because those two pages still need them, not as leftovers.)
-   Element selectors are the right tool here: the HTML comes from a markdown
-   renderer and cannot carry classes. Everything below still resolves to
-   design tokens.
-
-   Links are deliberately NOT brand-coloured. In an article the brand red would
-   fire twenty times a page and stop meaning "this is the action that matters",
-   which is the whole basis of rationing it — so a link is an underline that
-   picks up the brand only on hover. */
-  .prose-post {
-    @apply text-ui-text leading-relaxed;
-  }
-  .prose-post > * + * {
-    @apply mt-5;
-  }
-  .prose-post h2 {
-    @apply text-xl sm:text-2xl font-semibold text-ui-text mt-10 pt-1;
-  }
-  .prose-post h3 {
-    @apply text-base sm:text-lg font-semibold text-ui-text mt-8;
-  }
-  .prose-post a {
-    @apply underline underline-offset-2 decoration-ui-border-strong
-         hover:text-brand-primary hover:decoration-brand-primary transition-colors;
-  }
-  .prose-post strong {
-    @apply font-semibold text-ui-text;
-  }
-  .prose-post ul {
-    @apply list-disc pl-5 space-y-1.5;
-  }
-  .prose-post ol {
-    @apply list-decimal pl-5 space-y-1.5;
-  }
-  .prose-post blockquote {
-    @apply border-l-2 border-ui-border-strong pl-4 text-ui-muted;
-  }
-  .prose-post hr {
-    @apply border-ui-border my-10;
-  }
-  .prose-post code {
-    @apply font-mono text-sm bg-ui-subtle border border-ui-border rounded-sm px-1 py-0.5;
-  }
-  /* The block form owns its own frame, so the inline chrome is stripped back off
-   the <code> inside it rather than double-drawn. */
-  .prose-post pre {
-    @apply bg-ui-subtle border border-ui-border rounded-lg p-4 overflow-x-auto text-sm;
-  }
-  .prose-post pre code {
-    @apply bg-transparent border-0 p-0 text-sm;
-  }
-  /* Tables scroll inside their own frame: a wide table must never be the reason
-   the page itself scrolls sideways on a phone. */
-  .prose-post table {
-    @apply block w-max max-w-full overflow-x-auto text-sm border-collapse;
-  }
-  .prose-post thead th {
-    @apply eyebrow text-left align-bottom border-b border-ui-border-strong pb-2 pr-4;
-  }
-  .prose-post tbody td {
-    @apply align-top border-b border-ui-border py-2.5 pr-4;
-  }
-  .prose-post tbody tr:last-child td {
-    @apply border-b-0;
-  }
-
   /* ── Surfaces ───────────────────────────────────────────────────────────── */
 
   /* min-w-0: a card is routinely a flex/grid item (stat grids, list rows). Without
@@ -431,7 +362,7 @@
 
   /* A row whose content length is config-driven (nav groups, filter chips) must
    never be the reason the chrome around it breaks — same principle as
-   `.prose-post table` below: it scrolls inside its own frame instead of
+   a bip-kit article table: it scrolls inside its own frame instead of
    overflowing into a sibling. Hides the scrollbar so a fully-loaded row (an
    ADMIN with every permission) still reads as a normal bar, not a scroll
    affordance, while a narrower one (fewer permissions, a narrower window)

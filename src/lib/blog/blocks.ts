@@ -1,9 +1,9 @@
-import { extractToc, parseContentBlocks, parseInline } from 'bip-kit'
+import { extractToc, normalizeMarkdown, parseContentBlocks, parseInline } from 'bip-kit'
 import type { ContentBlock, Inline, TocEntry } from 'bip-kit'
-import { rewriteBlogLinks } from './markdown'
+import { rewriteBlogLinks, rewriteRepoLinks } from './markdown'
 
 /**
- * Blog body → bip-kit typed blocks.
+ * Repo markdown (blog posts, changelog, roadmap) → bip-kit typed blocks.
  *
  * The old pipeline was `marked` → HTML string → dangerouslySetInnerHTML. Typed
  * blocks remove that raw-HTML surface by construction: markdown becomes a
@@ -12,18 +12,27 @@ import { rewriteBlogLinks } from './markdown'
  *
  * The repo-link rewrite happens on the raw markdown first, so `.md` targets
  * are already routes/GitHub URLs by the time they become link spans.
- * bip-kit has no h1 block on purpose: the title is extracted from the `# h1`
- * by posts.ts before the body ever reaches this parser (title-is-h1 stays the
- * folder's convention).
+ * bip-kit has no h1 block on purpose: the title is taken from the `# h1`
+ * (posts.ts, static-docs.ts) before the body ever reaches this parser.
  */
 export interface ParsedPost {
   blocks: ContentBlock[]
   toc: TocEntry[]
 }
 
+/** A post body is already normalized by bip-kit's collection reader (posts.ts). */
 export function parsePostBlocks(body: string): ParsedPost {
   const blocks = parseContentBlocks(rewriteBlogLinks(body))
   return { blocks, toc: extractToc(blocks) }
+}
+
+/**
+ * A repo doc read straight from disk (static-docs.ts), so it gets the same
+ * normalization the collection reader gives posts: wrapped bullets stay one
+ * item, nested items flatten. `baseDir` is the doc's folder, for link rewriting.
+ */
+export function parseRepoDocBlocks(body: string, baseDir: string): ContentBlock[] {
+  return parseContentBlocks(normalizeMarkdown(rewriteRepoLinks(body, baseDir)))
 }
 
 function hrefsFromSpans(spans: Inline[], into: string[]): void {
