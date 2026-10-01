@@ -15,6 +15,7 @@ import {
   PERMIT_REQUIREMENT_LABELS,
 } from '@/lib/config/opportunities'
 import { getOpportunityDetail, residentsAvailableFor } from '@/lib/data/opportunities'
+import { staffViewerWorld } from '@/lib/demo/world'
 import { openSeats } from '@/lib/opportunities/pipeline'
 import { residentName } from '@/lib/utils/resident-name'
 import { OPPORTUNITIES_ADMIN_LABELS as L } from '@/lib/constants'
@@ -53,7 +54,10 @@ export default async function OpportunityDetailPage({ params }: Props) {
   const opportunity = await getOpportunityDetail(id)
   if (!opportunity) notFound()
 
-  const available = canWrite ? await residentsAvailableFor(id) : []
+  // Only people of the coach's own world can be put forward.
+  const available = canWrite
+    ? await residentsAvailableFor(id, await staffViewerWorld(staff.id))
+    : []
   const stages = opportunity.applications.map((a) => a.stage)
   const free = openSeats(opportunity, stages)
 

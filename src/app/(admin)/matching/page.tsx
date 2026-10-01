@@ -30,6 +30,7 @@ import { MatchResultsPanel } from '@/components/matching/MatchResultsPanel'
 import { residentName } from '@/lib/utils/resident-name'
 import { requirePermission } from '@/lib/auth'
 import { belongsToSameWorld, isDemoResidentCode, isDemoUnitCode } from '@/lib/analytics/real-data'
+import { residentCodeInWorld, staffViewerWorld, unitCodeInWorld } from '@/lib/demo/world'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,8 +45,14 @@ interface Props {
 }
 
 export default async function MatchingPage({ searchParams }: Props) {
-  await requirePermission('placements:write')
+  const viewer = await requirePermission('placements:write')
   const params = await searchParams
+
+  // The candidate LISTS follow the viewer's world too, not only the scoring:
+  // a real caseworker is never shown an invented person or flat to place, and
+  // a demo door never a real one. @see lib/demo/world.ts
+  const world = await staffViewerWorld(viewer.id)
+  const residentInWorld = residentCodeInWorld(resident.code, world)
   const residentQuery = (params.q || '').trim().toLowerCase()
 
   // All four queries are independent — fetch in parallel
@@ -60,6 +67,7 @@ export default async function MatchingPage({ searchParams }: Props) {
       // active placement, expressed as a NOT IN subquery.
       where: and(
         eq(resident.status, 'ACTIVE'),
+        residentInWorld,
         notInArray(
           resident.id,
           db
@@ -74,6 +82,7 @@ export default async function MatchingPage({ searchParams }: Props) {
       // `placements: { some: { status: ACTIVE } }` — as an IN subquery.
       where: and(
         eq(resident.status, 'PLACED'),
+        residentInWorld,
         inArray(
           resident.id,
           db
@@ -91,9 +100,12 @@ export default async function MatchingPage({ searchParams }: Props) {
       },
       orderBy: [asc(resident.code)],
     }),
-    db.$count(resident),
+    db.$count(resident, residentInWorld),
     db.query.housingUnit.findMany({
-      where: inArray(housingUnit.status, ['AVAILABLE', 'FULL']),
+      where: and(
+        inArray(housingUnit.status, ['AVAILABLE', 'FULL']),
+        unitCodeInWorld(housingUnit.code, world),
+      ),
       with: {
         placements: {
           where: eq(placement.status, 'ACTIVE'),

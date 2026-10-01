@@ -21,6 +21,7 @@ import {
   type OpportunityStatusId,
 } from '@/lib/config/opportunities'
 import { countActive, listOpportunities, opportunityStats } from '@/lib/data/opportunities'
+import { staffViewerWorld } from '@/lib/demo/world'
 import { openSeats } from '@/lib/opportunities/pipeline'
 import { isAwaitingAnswer } from '@/lib/jobcoach/queue'
 import { OPPORTUNITIES_ADMIN_LABELS as L } from '@/lib/constants'
@@ -61,9 +62,11 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
   const board = resolveIntegrationBoard(firstParam(params.board), staff.role)
   const boardKinds = boardOpportunityKinds(board)
 
+  // A real coach sees real listings; a demo door only invented ones.
+  const world = await staffViewerWorld(staff.id)
   const [stats, opportunities] = await Promise.all([
-    opportunityStats(boardKinds),
-    listOpportunities({ status, kind, kinds: boardKinds, query }),
+    opportunityStats(world, boardKinds),
+    listOpportunities({ status, kind, kinds: boardKinds, query, world }),
   ])
 
   // The board is not a filter to reset — it is where this coach works. Clearing

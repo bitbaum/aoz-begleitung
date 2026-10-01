@@ -54,10 +54,21 @@ function LoginForm() {
     }
   }, [])
 
-  // Pre-fill code from URL param (used by email invite links)
+  // A personal sign-in link (`/login?code=…`, also what invite emails send).
+  // The code IS the login — staff have no account to create — so the link
+  // signs in straight away instead of stopping at a prefilled form. Once only:
+  // a failed attempt leaves the form for a retry by hand.
+  const autoLoginTried = useRef(false)
   useEffect(() => {
     const urlCode = searchParams.get('code')
-    if (urlCode) setCode(urlCode.toUpperCase())
+    if (!urlCode) return
+    const normalized = urlCode.trim().toUpperCase()
+    setCode(normalized)
+    if (autoLoginTried.current) return
+    autoLoginTried.current = true
+    void submitLogin({ code: normalized })
+    // submitLogin is stable for this purpose; the guard above makes it once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
 
   // Clear any pending redirect timer on unmount
