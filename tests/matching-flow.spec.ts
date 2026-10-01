@@ -93,7 +93,7 @@ test.describe('Resident selection', () => {
     await expect(scoreLocator.first()).toBeVisible({ timeout: 10_000 })
   })
 
-  test('Standard / Fast Mode toggle is visible after selecting a resident', async ({ page }) => {
+  test('Ausführlich / Kurzliste toggle is visible after selecting a resident', async ({ page }) => {
     await page.goto('/matching')
 
     const matchingBtn = page.getByRole('link', { name: 'Unterkunft finden' }).first()
@@ -102,11 +102,11 @@ test.describe('Resident selection', () => {
     await matchingBtn.click()
     await expect(page).toHaveURL(/[?&]resident=/, { timeout: 15_000 })
 
-    await expect(page.getByRole('link', { name: 'Standard' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Fast Mode' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Ausführlich' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Kurzliste' })).toBeVisible()
   })
 
-  test('Fast Mode toggle updates URL and preserves resident param', async ({ page }) => {
+  test('Kurzliste toggle updates URL and preserves resident param', async ({ page }) => {
     await page.goto('/matching')
 
     const matchingBtn = page.getByRole('link', { name: 'Unterkunft finden' }).first()
@@ -115,7 +115,7 @@ test.describe('Resident selection', () => {
     await matchingBtn.click()
     await expect(page).toHaveURL(/[?&]resident=/, { timeout: 15_000 })
 
-    await page.getByRole('link', { name: 'Fast Mode' }).click()
+    await page.getByRole('link', { name: 'Kurzliste' }).click()
     await expect(page).toHaveURL(/mode=fast/, { timeout: 10_000 })
     await expect(page).toHaveURL(/resident=/)
     await expect(page.getByText(/Matches für/i)).toBeVisible()

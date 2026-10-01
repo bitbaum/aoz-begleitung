@@ -687,14 +687,14 @@ export const CHECKIN_FORM_LABELS = {
 
 export const MATCH_RESULTS_LABELS = {
   heading: (code: string) => `Matches für ${code}`,
-  modeStandard: 'Standard',
-  modeFast: 'Fast Mode',
+  modeStandard: 'Ausführlich',
+  modeFast: 'Kurzliste',
   cancel: 'Abbrechen',
   quickActionDesc: (code: string, score: number) =>
     `Schnellaktion: Bestes Match ist ${code} (${score}%). Top-Empfehlungen sind unten hervorgehoben.`,
   quickActionBtn: 'Bestes Match platzieren',
-  fastModeTitle: 'Fast Mode · Top 5',
-  fastModeSubtitle: 'Kompakte Ansicht für schnelle Entscheidungen',
+  fastModeTitle: 'Kurzliste · Top 5',
+  fastModeSubtitle: 'Die fünf besten Unterkünfte auf einen Blick',
   fitInfo: (score: number, current: number, total: number) =>
     `Fit: ${score}% · Belegung: ${current}/${total}`,
   topMatchesTitle: 'Top Empfehlungen',
