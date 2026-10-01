@@ -14,7 +14,7 @@ import { IN_CARE_RESIDENT_STATUSES } from '@/lib/config/resident-status'
 import { and, asc, eq, gte, inArray, ne } from 'drizzle-orm'
 import { db, incident, placement, resident } from '@/lib/db'
 import { zurichMonthKey, getZurichParts } from '@/lib/utils'
-import { excludesDemo, isDemoResidentCode, loadDemoScope } from './real-data'
+import { excludesPlaceholders, loadPlaceholderScope } from './real-data'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -102,13 +102,11 @@ export async function calculateMissionKPIs(months: number = 6): Promise<MissionK
 
   // ── Fetch data ─────────────────────────────────────────────────────
 
-  // Every query below selects the ids that identify a demo row, and every
-  // result is passed through `excludesDemo`. Without it the pilot's headline
-  // number counted a nightly-reseeded demo world: measured 2026-09-03, seven of
-  // eight interpersonal incidents in 180 days were demo. @see ./real-data.ts
-  const [demoScope, rawIncidents, rawEndedPlacements, rawResidents, rawPlacements] =
+  // Every resident-linked result is passed through `excludesPlaceholders`: an
+  // unclaimed placeholder profile is nobody being served. @see ./real-data.ts
+  const [placeholderScope, rawIncidents, rawEndedPlacements, rawResidents, rawPlacements] =
     await Promise.all([
-      loadDemoScope(),
+      loadPlaceholderScope(),
 
       // Interpersonal incidents in range
       db.query.incident.findMany({
@@ -129,7 +127,7 @@ export async function calculateMissionKPIs(months: number = 6): Promise<MissionK
           gte(resident.createdAt, startDate),
           inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]),
         ),
-        columns: { id: true, createdAt: true, code: true },
+        columns: { id: true, createdAt: true },
       }),
 
       // First placement per recent resident
@@ -140,12 +138,12 @@ export async function calculateMissionKPIs(months: number = 6): Promise<MissionK
       }),
     ])
 
-  const incidents = excludesDemo(rawIncidents, demoScope)
-  const endedPlacements = excludesDemo(rawEndedPlacements, demoScope)
-  const placements = excludesDemo(rawPlacements, demoScope)
-  // Residents carry their own code rather than a residentId, so the shared
-  // predicate does not apply — the code IS the identifier here.
-  const residents = rawResidents.filter((row) => !isDemoResidentCode(row.code))
+  // Incidents are linked to a flat here, not to a person: nothing to exclude.
+  const incidents = rawIncidents
+  const endedPlacements = excludesPlaceholders(rawEndedPlacements, placeholderScope)
+  const placements = excludesPlaceholders(rawPlacements, placeholderScope)
+  // Resident rows carry their own id rather than a residentId.
+  const residents = rawResidents.filter((row) => !placeholderScope.residentIds.has(row.id))
 
   // ── Build monthly data points ──────────────────────────────────────
 

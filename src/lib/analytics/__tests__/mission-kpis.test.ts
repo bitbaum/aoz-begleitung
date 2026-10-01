@@ -23,11 +23,9 @@ vi.mock('@/lib/db', async () => ({
       incident: { findMany: (...args: unknown[]) => mockIncidentFindMany(...args) },
       placement: { findMany: (...args: unknown[]) => mockPlacementFindMany(...args) },
       resident: { findMany: (...args: unknown[]) => mockResidentFindMany(...args) },
-      // Read by `loadDemoScope`, which every KPI query now passes through so a
-      // nightly-reseeded demo apartment cannot count toward the pilot. These
-      // fixtures carry no demo codes, so the scope resolves empty and the
-      // expectations below are unchanged — which is the point: excluding demo
-      // must not move a number on an instance that has none.
+      // Kept so an unexpected housing-unit read resolves empty rather than
+      // throwing. Placeholders are read through `resident.findMany`; these
+      // fixtures carry none, so the expectations below are unchanged.
       housingUnit: { findMany: () => mockHousingUnitFindMany() },
     },
   },

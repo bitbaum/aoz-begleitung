@@ -1,8 +1,8 @@
 # AOZ Begleitung
 
 created_date: 2025-06-01
-last_modified_date: 2026-09-04
-last_modified_summary: Two repo-wide rules from posting the first real listing — a server action must RETURN what the user has to act on (a throw reaches the error boundary and destroys the form), and ids use idSchema rather than a shape assertion that the cuid2 migration invalidated for 96% of rows.
+last_modified_date: 2026-10-01
+last_modified_summary: Site is fully real — demo world and nightly reset removed; quick access signs in as named real staff accounts (QUICK_ACCESS_STAFF_CODES). Earlier: two repo-wide rules from posting the first real listing — a server action must RETURN what the user has to act on (a throw reaches the error boundary and destroys the form), and ids use idSchema rather than a shape assertion that the cuid2 migration invalidated for 96% of rows.
 
 @~/.claude/CLAUDE.md
 
@@ -104,13 +104,12 @@ Two rules these follow, and both are load-bearing:
   progressing"; null says "nobody is assigned". They look identical on a tile
   and mean opposite things about whose problem it is.
 
-⚠️ **And no KPI is trustworthy until the demo world is excluded.** The pilot
-numbers were computed over demo AND real rows: measured 2026-09-03, seven of
-eight interpersonal incidents in 180 days belonged to `DEMO-U12`/`DEMO-U09`,
-re-seeded nightly at 04:05, and the page reported "67% mehr Konflikte ·
-Verschlechterung" off them. `lib/analytics/real-data.ts` excludes demo rows by
-the same CODE PREFIX the scoped reset deletes by, so a row the reset can clean
-is exactly a row the KPIs ignore. Any new metric must pass through it.
+⚠️ **No KPI may count someone nobody is serving.** `lib/analytics/real-data.ts`
+excludes unclaimed placeholder profiles (`Resident.isPlaceholder`); any new
+metric must pass through it. History: until 2026-10-01 it also excluded an
+invented demo world — measured 2026-09-03, seven of eight interpersonal
+incidents in 180 days were demo and the page reported "67% mehr Konflikte ·
+Verschlechterung" off them. That world has been removed.
 
 **Cost and savings are ASSUMPTIONS until a pilot measures them.** This block
 used to state "CHF 1,150/month minimum" and "Savings ~CHF 400–500/month" as
@@ -304,7 +303,7 @@ curl -s https://aoz.orangecat.ch/login | grep -oE 'AOZH?' | sort -u
 - **`ALL_RESIDENT_CODE_PREFIXES`** is the client-side twin, and it carries
   `LEGACY_RESIDENT_CODE_PREFIXES = ['RES-']` forever: every code in every live
   database starts with `RES-`, printed on paper and handed to a person. Login,
-  registration, log redaction and the demo reset all match the FULL list;
+  registration and log redaction all match the FULL list;
   only code GENERATION reads `BRAND.residentCodePrefix`. Matching the active
   prefix alone would answer "Ungültiger Code" to every existing resident.
 - **`ALL_CODE_PREFIXES`** is the list of every prefix any brand has ever
@@ -1061,16 +1060,13 @@ portal lets them OPTIONALLY set `displayName`, `bio` and a photo:
 (audited). The page shows rooms (from the spot hierarchy), occupants and
 profiles.
 
-### Real deployments vs demo
+### Real deployments
 
 `scripts/db/seed-real.ts` seeds a REAL apartment from `scripts/db/real/*.ts` config
 (layout + who lives where; login codes are generated at runtime and printed
-once — never committed). `--wipe` converts a demo instance in place. A real
-instance must run with `DEMO_ACCESS_ENABLED=false` and the reset timer
-disabled — the daily demo reset would truncate real data. The production
-instance `aoz.orangecat.ch` runs in REAL mode since 2026-08-13
-(the pilot flat); the demo remains fully env-switchable for a future
-dedicated demo deployment.
+once — never committed). The production instance `aoz.orangecat.ch` holds
+real data only; there is no demo mode, no reset and no `--wipe` any more
+(removed 2026-10-01). See "Quick Access" below.
 
 ---
 
@@ -1348,7 +1344,7 @@ One email namespace across the whole product, because there is exactly one
 ### Flows
 
 ```
-/login                       → email+password (primary) or code (toggle); demo doors
+/login                       → email+password (primary) or code (toggle); quick-access buttons
 /register                    → claim your code: { code, email, password } → auto-login
 /forgot-password             → request reset link (generic success, no enumeration)
 /reset-password?token=…      → set new password (also verifies the email)
@@ -1367,7 +1363,7 @@ One email namespace across the whole product, because there is exactly one
 - Rate limiting per IP on every public auth route (`getClientIp` SSOT)
 - Login failures are ONE generic message — anything specific is an enumeration oracle
 - Email login for a resident sets the same `resident_code` cookie: the portal
-  is unchanged, and demo residents can register/reset too (daily reset wipes them)
+  is unchanged
 - A code-only account with a known email (the seeded admin) bootstraps its
   first password via forgot-password — mailbox control is the proof
 
@@ -1379,45 +1375,38 @@ Resend (`lib/email/service.ts`), fleet key, sender on the verified
 password-reset flow REFUSES loudly (see above). Absolute links come from
 `NEXT_PUBLIC_APP_URL` (`lib/config/app-url.ts`).
 
-### Demo Access — invented people on the main site, cleaned nightly
+### Quick Access — named real staff accounts, no demo world
 
-**Decided by George 2026-09-26: the demo lives on aoz.orangecat.ch, beside the
-real flat.** Anyone can open a door on `/login` without an account and use the
-real product as any role. A separate demo app and database (`aoz-demo`) ran
-for one day and was retired as more machinery than the job needs — do not
-rebuild it.
+**Decided by George 2026-10-01: the site is totally real.** There is no
+invented data, no demo world and no nightly reset. `/login` shows one-click
+buttons (`#demo` anchor, `GET/POST /api/auth/demo` — the path kept its old
+name) that sign in as **named real staff accounts**, so the team can use the
+product without bothering with registration yet.
 
-- **What is invented is marked, and only that is ever deleted.** Residents
-  carry a demo code prefix (`KL-DEMO…`), flats a `DEMO-` code, and invented
-  listings are authored by a demo staff account. `lib/demo/scoped-reset.ts`
-  deletes exactly those rows plus everything that references them, walking the
-  database's OWN foreign keys, so a new table can never make the nightly reset
-  fail. It never truncates. Rehearsed on a full-schema database 2026-09-26:
-  260 non-demo rows untouched across two resets, and a listing posted through a
-  demo door was gone the next night.
-- **`POST /api/cron/reset-demo`** (04:05, `appcron-aoz-wohnen-reset-demo`) runs
-  the scoped reset whenever `DEMO_ACCESS_ENABLED=true`. The full wipe
-  (`scope: 'full'`) exists for a local dev database only.
-- **The resident door opens only onto an invented or placeholder resident.** A
-  real client's code never matches either, so the public door cannot land in a
-  real person's flat — pinned by `api/auth/__tests__/demo.test.ts`.
-- **The KPIs exclude every invented row** by the same prefixes
-  (`lib/analytics/real-data.ts`), so the pilot numbers stay real.
-- **The staff doors can see the real flat** — George's accepted trade-off:
-  testers see the whole Verwaltung side. Invented people name no real place,
-  organisation or phone number (`Beispielstrasse`, `(erfunden)`, `000 …`).
+- **Which buttons:** `QUICK_ACCESS_STAFF_CODES` (server env on the box,
+  comma-separated, button order = env order). Each code that resolves to an
+  ACTIVE `User` becomes a button labelled «Vorname N. · Rolle»
+  (`LOGIN_LABELS.demo.staffDoor`, `ROLE_LABELS`); a code that does not resolve
+  or is inactive offers nothing. POST opens only a door GET would offer, and is
+  rate-limited per IP. Config: `src/lib/quick-access/config.ts`.
+- **Master switch:** `DEMO_ACCESS_ENABLED=true` (the box's existing name) or
+  `QUICK_ACCESS_ENABLED=true`.
+- **Claiming:** each staff member can later claim their account at
+  `/register` with their code (email + password) — the code keeps working.
+- **Client button:** `DEMO_RESIDENT_CODE`, offered ONLY while that resident
+  `isPlaceholder`. The day the person claims the profile the button and the
+  POST both close (`api/auth/__tests__/demo.test.ts`).
+- **Placeholder profiles are the only seeded people** (below), claimed the
+  same way at `/register`.
 
-**On production: claimable placeholder profiles.** What follows describes the
-real instance, where invented rows were deleted on 2026-09-08.
-
-**What was removed from production and why.** `lib/demo/seed-data.ts` invented 15 residents in
-5 `DEMO-` units with incidents, expenses and a governance narrative, truncated
-and re-seeded nightly at 04:05. Measured on the live database that morning:
-**fabricated rows outnumbered real ones three to one** (15 residents vs 5, 5
-units vs 118, 13 placements vs 4, 7 incidents vs 1). George's instruction was
-"no fake data anytime anywhere". The rows were deleted in one transaction and
-the `appcron-aoz-wohnen-reset-demo.timer` stopped and disabled, because
-deleting seeded data while its re-seeding timer is armed buys you one night.
+**History.** An invented demo world existed until 2026-10-01: `KL-DEMO…`
+residents, `DEMO-` flats, generated `AOZ-DEMO…` staff doors, listings authored
+by them, a viewer "world" filter on every list, and `POST /api/cron/reset-demo`
+re-seeding it at 04:05. Measured 2026-09-08, fabricated rows outnumbered real
+ones three to one; on 2026-09-03 seven of eight incidents in the pilot KPI were
+demo. It was deleted from production and the machinery
+(`lib/demo/*`, `scripts/db/seed-demo.ts`, the cron route) removed from the code
+at the owner's request, so fake people cannot be re-seeded. Do not rebuild it.
 
 **What replaced it: CLAIMABLE PLACEHOLDER PROFILES.** The point of the old demo
 was a lived-in flat to look at. The point of the new one is a flat somebody can
@@ -1613,7 +1602,7 @@ pnpm run db:generate     # Generate a migration from schema.ts changes
 pnpm run db:migrate      # Run pending migrations
 pnpm run db:push         # Push schema changes (development only)
 pnpm run db:studio       # Database browser
-pnpm run db:seed         # Seed demo data
+pnpm run db:seed         # Seed a LOCAL dev/E2E database (never production)
 pnpm run test            # Run Vitest tests (4065 tests, verified 2026-09-07)
 pnpm run test:e2e        # Run Playwright tests (201 tests)
 ```

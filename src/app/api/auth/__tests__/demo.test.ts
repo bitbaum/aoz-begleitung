@@ -1,11 +1,11 @@
 /**
- * Tests for the demo login endpoint (POST /api/auth/demo).
+ * Tests for the quick-access endpoint (GET/POST /api/auth/demo).
  *
- * Tests: role validation, the DEMO_ACCESS_ENABLED gate, rate limiting,
- * session issuance for both roles, and — the regression this file exists
- * for — that the STAFF demo works in production. An earlier guard refused
- * role=staff whenever NODE_ENV was 'production', which left the login page
- * showing a staff demo button that could never succeed.
+ * The site is fully real (2026-10-01): the staff buttons sign in as NAMED
+ * REAL accounts listed in QUICK_ACCESS_STAFF_CODES, and the client button
+ * signs in as an unclaimed placeholder. Under test: which doors are offered,
+ * that POST opens only an offered door, the master switch, rate limiting, and
+ * that the client door dies once its profile is claimed.
  */
 
 import { NextRequest } from 'next/server'
@@ -45,16 +45,34 @@ vi.mock('@/lib/logger', async () => ({
   },
 }))
 
-// A door is offered only when its ACCOUNT exists, so the endpoint reads the
-// database. Config presence proves nothing now that codes are derived: it
-// would offer five buttons on an instance where the seed never ran.
-const mockUserFindMany = vi.fn()
+/**
+ * The staff table as the route would see it. The mock applies the query's
+ * own condition (requested codes AND active) so a test can prove an inactive
+ * or unknown account offers nothing — returning a fixed list would make the
+ * "inactive" case pass by construction.
+ */
+interface StaffRow {
+  code: string
+  name: string
+  role: string
+  active: boolean
+}
+let staffTable: StaffRow[] = []
 const mockResidentFindFirst = vi.fn()
 vi.mock('@/lib/db', async () => ({
   ...(await vi.importActual<object>('@/lib/db')),
   db: {
     query: {
-      user: { findMany: (...args: unknown[]) => mockUserFindMany(...args) },
+      user: {
+        findMany: async () => {
+          const requested = new Set(
+            (process.env.QUICK_ACCESS_STAFF_CODES ?? '').split(',').map((c) => c.trim()),
+          )
+          return staffTable
+            .filter((row) => row.active && requested.has(row.code))
+            .map(({ code, name, role }) => ({ code, name, role }))
+        },
+      },
       resident: { findFirst: (...args: unknown[]) => mockResidentFindFirst(...args) },
     },
   },
@@ -62,376 +80,214 @@ vi.mock('@/lib/db', async () => ({
 
 // --- Import after mocks ---
 import { POST, GET } from '../demo/route'
-import { demoStaffDoors } from '@/lib/demo/roles'
+import { quickAccessName, quickAccessStaffCodes } from '@/lib/quick-access/config'
 
 // --- Helpers ---
 
-const STAFF_CODE = 'AOZH-DEMO01'
-const RESIDENT_CODE = 'RES-001'
+const SIMON = { code: 'AOZ-4Z3GBR', name: 'Simon Berger', role: 'JOBCOACH', active: true }
+const LENA = { code: 'AOZ-HWGA8G', name: 'Lena Muster', role: 'BETREUUNG', active: true }
+const GONE = { code: 'AOZ-PMCUTD', name: 'Ex Kollegin', role: 'SOZIALARBEIT', active: false }
+const RESIDENT_CODE = 'KL-PLACE1'
 
-function createDemoRequest(body: Record<string, unknown>): NextRequest {
+function post(role: unknown): NextRequest {
   return new NextRequest('http://localhost/api/auth/demo', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ role }),
   })
+}
+
+async function doors(): Promise<{ id: string; label: string }[]> {
+  return (await (await GET()).json()).data.doors
 }
 
 const STAFF_USER = {
-  id: 'demo-user-id',
+  id: 'simon-id',
   email: '',
-  name: 'Demo-Zugang',
-  role: 'ADMIN' as const,
-  scope: 'ALL_DOMAINS' as const,
-  isSystemAdmin: true,
+  name: 'Simon Berger',
+  role: 'JOBCOACH' as const,
+  scope: 'OWN_DOMAIN' as const,
+  isSystemAdmin: false,
 }
 
-describe('POST /api/auth/demo', () => {
-  const originalEnv = { ...process.env }
+const originalEnv = { ...process.env }
 
-  beforeEach(() => {
-    vi.clearAllMocks()
-    process.env.DEMO_ACCESS_ENABLED = 'true'
-    process.env.DEMO_STAFF_CODE = STAFF_CODE
-    process.env.DEMO_RESIDENT_CODE = RESIDENT_CODE
-    mockCheckRateLimit.mockReturnValue({ allowed: true })
-    mockLoginByCode.mockResolvedValue({
-      success: true,
-      type: 'staff',
-      user: STAFF_USER,
-    })
-    // Every staff door's account exists unless a test says otherwise. The
-    // where arg is now a drizzle expression, so derive the codes from the same
-    // source the route does instead of picking the Prisma `in` list apart.
-    mockUserFindMany.mockImplementation(async () =>
-      demoStaffDoors().map((door) => ({ code: door.code })),
-    )
-    // isPlaceholder MATTERS now: the resident door opens only while the
-    // profile is still a placeholder, so a claimed one closes it.
-    mockResidentFindFirst.mockResolvedValue({ id: 'demo-resident-id', isPlaceholder: true })
+beforeEach(() => {
+  vi.clearAllMocks()
+  process.env = { ...originalEnv }
+  delete process.env.QUICK_ACCESS_ENABLED
+  process.env.DEMO_ACCESS_ENABLED = 'true'
+  // Env order deliberately differs from table order: the env decides.
+  process.env.QUICK_ACCESS_STAFF_CODES = `${SIMON.code}, ${LENA.code},${GONE.code},AOZ-NOPE00`
+  process.env.DEMO_RESIDENT_CODE = RESIDENT_CODE
+  staffTable = [LENA, GONE, SIMON]
+  mockCheckRateLimit.mockReturnValue({ allowed: true })
+  mockLoginByCode.mockResolvedValue({ success: true, type: 'staff', user: STAFF_USER })
+  mockResidentFindFirst.mockResolvedValue({ id: 'r1', isPlaceholder: true })
+})
+
+afterEach(() => {
+  process.env = { ...originalEnv }
+})
+
+describe('quick-access configuration', () => {
+  it('parses the code list: trimmed, uppercased, blanks and duplicates dropped', () => {
+    process.env.QUICK_ACCESS_STAFF_CODES = ' aoz-aaaaaa ,,AOZ-BBBBBB, aoz-aaaaaa '
+    expect(quickAccessStaffCodes()).toEqual(['AOZ-AAAAAA', 'AOZ-BBBBBB'])
   })
 
-  afterEach(() => {
-    process.env = { ...originalEnv }
+  it('shortens a name to first name and last initial', () => {
+    expect(quickAccessName('Simon Berger')).toBe('Simon B.')
+    expect(quickAccessName('  Anna Maria  von Wil ')).toBe('Anna W.')
+    expect(quickAccessName('Georgy')).toBe('Georgy')
+  })
+})
+
+describe('GET — which doors are offered', () => {
+  it('offers each configured ACTIVE account as a named door, in env order', async () => {
+    expect(await doors()).toEqual([
+      { id: 'staff-1', label: 'Simon B. · Jobcoach' },
+      { id: 'staff-2', label: 'Lena M. · Betreuung' },
+      { id: 'resident', label: expect.any(String) },
+    ])
   })
 
-  describe('the demo lives on the main site', () => {
-    it('opens its doors in a production build when switched on', async () => {
-      // Decided 2026-09-26: invented residents live beside the real flat on
-      // aoz.orangecat.ch, cleaned nightly by the scoped reset.
-      const env = process.env as Record<string, string | undefined>
-      const previous = env.NODE_ENV
-      env.NODE_ENV = 'production'
-      process.env.DEMO_ACCESS_ENABLED = 'true'
-      try {
-        const body = await (await GET()).json()
-        expect(body.data.staff).toBe(true)
-        expect(body.data.resident).toBe(true)
-        expect(body.data).not.toHaveProperty('demoUrl')
-      } finally {
-        env.NODE_ENV = previous
-      }
-    })
+  it('offers no door for an inactive account or a code that does not resolve', async () => {
+    const ids = (await doors()).map((door) => door.id)
+    expect(ids).not.toContain(GONE.code)
+    expect(ids).not.toContain('AOZ-NOPE00')
   })
 
-  describe('validation and configuration', () => {
-    it('stays shut in production unless DEMO_ACCESS_ENABLED=true', async () => {
-      const env = process.env as Record<string, string | undefined>
-      const previous = env.NODE_ENV
-      env.NODE_ENV = 'production'
-      process.env.DEMO_ACCESS_ENABLED = 'false'
+  it('offers no staff door when no codes are configured', async () => {
+    delete process.env.QUICK_ACCESS_STAFF_CODES
+    expect((await doors()).map((door) => door.id)).toEqual(['resident'])
+  })
 
-      try {
-        // GET endpoint should report no doors
-        const getResponse = await GET()
-        const getBody = await getResponse.json()
-        expect(getBody.data.doors).toEqual([])
-        expect(getBody.data.staff).toBe(false)
-        expect(getBody.data.resident).toBe(false)
+  it('reports nothing when the master switch is off', async () => {
+    process.env.DEMO_ACCESS_ENABLED = 'false'
+    const body = await (await GET()).json()
+    expect(body.data).toEqual({ doors: [], staff: false, resident: false })
+  })
 
-        // POST endpoint should refuse
-        const postResponse = await POST(createDemoRequest({ role: 'ADMIN' }))
-        expect(postResponse.status).toBe(404)
-        expect(mockLoginByCode).not.toHaveBeenCalled()
-        expect(mockSetSessionCookie).not.toHaveBeenCalled()
-      } finally {
-        env.NODE_ENV = previous
-      }
-    })
+  it('accepts the new switch name as well as the old one', async () => {
+    delete process.env.DEMO_ACCESS_ENABLED
+    process.env.QUICK_ACCESS_ENABLED = 'true'
+    expect((await doors()).length).toBeGreaterThan(0)
+  })
 
-    it('offers the resident door onto an invented resident', async () => {
-      // A demo-prefixed code is never issued to a real person, and the nightly
-      // reset re-creates the row, so the door is safe though it is no
-      // placeholder. A real client's code never matches (tested below).
-      process.env.DEMO_RESIDENT_CODE = 'KL-DEMO1'
-      mockResidentFindFirst.mockResolvedValue({ id: 'demo-resident-id', isPlaceholder: false })
-      const body = await (await GET()).json()
-      expect(body.data.resident).toBe(true)
-    })
+  it('never sends a door the server-side code field', async () => {
+    for (const door of await doors()) expect(Object.keys(door).sort()).toEqual(['id', 'label'])
+  })
 
-    it('rejects an unknown role', async () => {
-      // 404, not 400: "no such role" and "that door is not on offer here" are
-      // the same fact to the caller, and answering them differently would tell
-      // a prober which roles exist.
-      const response = await POST(createDemoRequest({ role: 'superadmin' }))
+  it('publishes no login code anywhere in the response', async () => {
+    // GET answers anyone who loads /login. A published staff code could be
+    // claimed at /register by a stranger before its colleague does.
+    const body = JSON.stringify(await (await GET()).json())
+    expect(body).not.toContain(SIMON.code)
+    expect(body).not.toContain(LENA.code)
+  })
+})
+
+describe('POST — only a door GET would offer', () => {
+  it('signs in as the named account behind an offered door', async () => {
+    const response = await POST(post('staff-1'))
+    expect(await response.json()).toEqual({ success: true, type: 'staff' })
+    expect(mockLoginByCode).toHaveBeenCalledWith(SIMON.code, expect.any(String))
+    expect(mockSetSessionCookie).toHaveBeenCalledWith(STAFF_USER)
+  })
+
+  it('refuses a configured code sent as the id — ids are opaque', async () => {
+    const response = await POST(post(SIMON.code))
+    expect(response.status).toBe(404)
+    expect(mockLoginByCode).not.toHaveBeenCalled()
+  })
+
+  it('refuses a real code that is not on offer', async () => {
+    // A valid staff code that simply is not configured: if POST used the id
+    // as a code, this endpoint would sign anyone in with any guessable code.
+    staffTable.push({ code: 'AOZ-OTHER1', name: 'Nicht Gelistet', role: 'ADMIN', active: true })
+    const response = await POST(post('AOZ-OTHER1'))
+    expect(response.status).toBe(404)
+    expect(mockLoginByCode).not.toHaveBeenCalled()
+  })
+
+  it('refuses an inactive account even though its code is configured', async () => {
+    const response = await POST(post(GONE.code))
+    expect(response.status).toBe(404)
+    expect(mockLoginByCode).not.toHaveBeenCalled()
+  })
+
+  it('refuses the retired role identifiers', async () => {
+    for (const role of ['staff', 'ADMIN', 'JOBCOACH', '', 42]) {
+      const response = await POST(post(role))
       expect(response.status).toBe(404)
-      expect(mockLoginByCode).not.toHaveBeenCalled()
-    })
-
-    it('opens a door for every staff role, not just one', async () => {
-      // The reason this endpoint changed: the product a Jobcoach sees and the
-      // product Leitung sees are different applications.
-      const response = await GET()
-      const body = await response.json()
-      const ids = body.data.doors.map((door: { id: string }) => door.id)
-
-      expect(ids).toEqual(
-        expect.arrayContaining([
-          'ADMIN',
-          'BETREUUNG',
-          'SOZIALARBEIT',
-          'JOBCOACH',
-          'FREIWILLIGENARBEIT',
-          'resident',
-        ]),
-      )
-    })
-
-    it('offers no door whose account is missing', async () => {
-      // The rule the old version stated and this one keeps: a button appears
-      // only when pressing it can succeed.
-      mockUserFindMany.mockResolvedValue([])
-      mockResidentFindFirst.mockResolvedValue(null)
-
-      const response = await GET()
-      const body = await response.json()
-
-      expect(body.data.doors).toEqual([])
-    })
-
-    it('still answers the old role=staff identifier', async () => {
-      // Old clients and bookmarks send it; breaking them would retire a door
-      // that worked yesterday for no reason the user could act on.
-      const response = await POST(createDemoRequest({ role: 'staff' }))
-      expect(response.status).toBe(200)
-    })
-
-    it('returns 404 when demo access is disabled', async () => {
-      process.env.DEMO_ACCESS_ENABLED = 'false'
-      const response = await POST(createDemoRequest({ role: 'staff' }))
-      expect(response.status).toBe(404)
-      expect(mockLoginByCode).not.toHaveBeenCalled()
-    })
-
-    it('returns 404 when the account behind the requested door is missing', async () => {
-      // What closes a door is now the ACCOUNT, not an env var: codes are
-      // derived, so unsetting `DEMO_STAFF_CODE` only changes which code the
-      // Leitung door uses. An instance where the seed never ran must still
-      // offer nothing rather than five buttons that all answer "invalid code".
-      mockUserFindMany.mockResolvedValue([])
-
-      const response = await POST(createDemoRequest({ role: 'ADMIN' }))
-
-      expect(response.status).toBe(404)
-      expect(mockLoginByCode).not.toHaveBeenCalled()
-    })
-
-    it('keeps the legacy env code as the Leitung door when one is set', async () => {
-      // A deployment already running DEMO_STAFF_CODE has that code in
-      // circulation; retiring it silently would break the door people know.
-      await POST(createDemoRequest({ role: 'ADMIN' }))
-
-      expect(mockLoginByCode).toHaveBeenCalledWith(STAFF_CODE, expect.any(String))
-    })
+    }
+    expect(mockLoginByCode).not.toHaveBeenCalled()
   })
 
-  describe('staff demo', () => {
-    it('issues a staff session in non-production environments', async () => {
-      const response = await POST(createDemoRequest({ role: 'staff' }))
-      const body = await response.json()
-      expect(body).toEqual({ success: true, type: 'staff' })
-      expect(mockLoginByCode).toHaveBeenCalledWith(STAFF_CODE, expect.any(String))
-      expect(mockSetSessionCookie).toHaveBeenCalledWith(STAFF_USER)
-    })
-
-    it('refuses the staff door in production while demo access is off', async () => {
-      const env = process.env as Record<string, string | undefined>
-      const previous = env.NODE_ENV
-      env.NODE_ENV = 'production'
-      process.env.DEMO_ACCESS_ENABLED = 'false'
-      try {
-        const response = await POST(createDemoRequest({ role: 'staff' }))
-        const body = await response.json()
-        expect(response.status).toBe(404)
-        expect(mockSetSessionCookie).not.toHaveBeenCalled()
-        expect(mockLoginByCode).not.toHaveBeenCalled()
-      } finally {
-        env.NODE_ENV = previous
-      }
-    })
+  it('refuses everything when the master switch is off', async () => {
+    process.env.DEMO_ACCESS_ENABLED = 'false'
+    const response = await POST(post('staff-1'))
+    expect(response.status).toBe(404)
+    expect(mockLoginByCode).not.toHaveBeenCalled()
   })
 
-  describe('resident demo', () => {
-    it('issues a resident session in non-production environments', async () => {
-      mockLoginByCode.mockResolvedValue({
-        success: true,
-        type: 'resident',
-        code: RESIDENT_CODE,
-      })
-      const response = await POST(createDemoRequest({ role: 'resident' }))
-      const body = await response.json()
-      expect(body).toEqual({ success: true, type: 'resident' })
-      expect(mockLoginByCode).toHaveBeenCalledWith(RESIDENT_CODE, expect.any(String))
-      expect(mockSetResidentCookie).toHaveBeenCalledWith(RESIDENT_CODE)
-    })
+  it('returns 401 when the login itself fails', async () => {
+    mockLoginByCode.mockResolvedValue({ success: false, error: 'Ungültiger Code' })
+    const response = await POST(post('staff-1'))
+    expect(response.status).toBe(401)
+  })
+})
 
-    it('refuses the resident door in production while demo access is off', async () => {
-      mockLoginByCode.mockResolvedValue({
-        success: true,
-        type: 'resident',
-        code: RESIDENT_CODE,
-      })
-      const env = process.env as Record<string, string | undefined>
-      const previous = env.NODE_ENV
-      env.NODE_ENV = 'production'
-      process.env.DEMO_ACCESS_ENABLED = 'false'
-      try {
-        const response = await POST(createDemoRequest({ role: 'resident' }))
-        expect(response.status).toBe(404)
-        expect(mockSetResidentCookie).not.toHaveBeenCalled()
-        expect(mockLoginByCode).not.toHaveBeenCalled()
-      } finally {
-        env.NODE_ENV = previous
-      }
-    })
+describe('throttling', () => {
+  it('refuses when the IP is rate-limited', async () => {
+    mockCheckRateLimit.mockReturnValue({ allowed: false, retryAfter: 42 })
+    const response = await POST(post('staff-1'))
+    expect(response.status).toBe(429)
+    expect(mockLoginByCode).not.toHaveBeenCalled()
   })
 
-  describe('throttling', () => {
-    it('refuses when the IP is rate-limited', async () => {
-      mockCheckRateLimit.mockReturnValue({ allowed: false, retryAfter: 42 })
-      const response = await POST(createDemoRequest({ role: 'staff' }))
-      expect(response.status).toBe(429)
-      expect(mockLoginByCode).not.toHaveBeenCalled()
-    })
-
-    it('counts successful demo sessions against the rate limit', async () => {
-      await POST(createDemoRequest({ role: 'staff' }))
-      expect(mockRecordLoginAttempt).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  describe('failures', () => {
-    it('returns 401 when the configured code does not resolve to an account', async () => {
-      mockLoginByCode.mockResolvedValue({ success: false, error: 'Ungültiger Code' })
-      const response = await POST(createDemoRequest({ role: 'staff' }))
-      expect(response.status).toBe(401)
-    })
-  })
-
-  describe('GET availability (drives the login page buttons)', () => {
-    it('reports both kinds of door when the accounts are there', async () => {
-      const body = await (await GET()).json()
-      expect(body.success).toBe(true)
-      expect(body.data.staff).toBe(true)
-      expect(body.data.resident).toBe(true)
-    })
-
-    it('gives every door a label a person can read', async () => {
-      // A button reading "FREIWILLIGENARBEIT" is a database value on screen.
-      const body = await (await GET()).json()
-      const labels = body.data.doors.map((door: { label: string }) => door.label)
-
-      // 'Systemadministration', not 'Leitung'. This assertion used to pin the
-      // old ADMIN label, which named an organisational rank AOZ genuinely has
-      // for the one role that does not confer it — see role-labels.test.ts.
-      // The rule the test is really about is that a door never shows a raw
-      // enum value; the specific words come from ROLE_LABELS.
-      expect(labels).toEqual(
-        expect.arrayContaining(['Systemadministration', 'Betreuung', 'Jobcoach']),
-      )
-      expect(labels.every((label: string) => label === label.trim() && label.length > 0)).toBe(true)
-      expect(labels).not.toContain('FREIWILLIGENARBEIT')
-    })
-
-    it('hides the staff doors when their accounts are gone', async () => {
-      mockUserFindMany.mockResolvedValue([])
-      const body = await (await GET()).json()
-
-      expect(body.data.staff).toBe(false)
-      expect(body.data.resident).toBe(true)
-    })
-
-    it('resident stays available without an env code (scope default resolves one)', async () => {
-      delete process.env.DEMO_RESIDENT_CODE
-      const body = await (await GET()).json()
-      expect(body.data.resident).toBe(true)
-    })
-
-    it('reports nothing when demo access is disabled', async () => {
-      process.env.DEMO_ACCESS_ENABLED = 'false'
-      const body = await (await GET()).json()
-      expect(body.data).toEqual({
-        doors: [],
-        staff: false,
-        resident: false,
-      })
-    })
+  it('counts successful sessions against the rate limit', async () => {
+    await POST(post('staff-1'))
+    expect(mockRecordLoginAttempt).toHaveBeenCalledTimes(1)
   })
 })
 
 /**
- * The anonymous door dies the moment its profile is claimed.
+ * The anonymous client door dies the moment its profile is claimed.
  *
  * `DEMO_RESIDENT_CODE` points at a PLACEHOLDER — a seeded profile with nobody
- * behind it. That is what makes a no-account public login acceptable at all.
- *
- * But a placeholder exists in order to be TAKEN OVER. The day the person who
- * moves in registers with that code, `isPlaceholder` clears and the row becomes
- * theirs: same id, same code, same env var. Without this check the public door
- * would silently become a door onto a real client's flat, roommates, expenses
- * and reports — no config changed, no error raised, the button still working.
- *
- * Config discipline cannot prevent it, because the event that causes it is a
- * resident registering, and nobody is watching an env var for that. So the
- * guard reads the same fact the "Platzhalter" marker does.
+ * behind it. A placeholder exists in order to be TAKEN OVER; the day the
+ * person registers with that code, `isPlaceholder` clears and the row becomes
+ * theirs. Without this check the public door would silently become a door
+ * onto a real client's flat.
  */
-describe('the resident door and a claimed profile', () => {
-  beforeEach(() => {
-    process.env.DEMO_ACCESS_ENABLED = 'true'
-    process.env.DEMO_RESIDENT_CODE = RESIDENT_CODE
-    mockCheckRateLimit.mockReturnValue({ allowed: true })
-  })
-
-  it('is offered while the profile is an unclaimed placeholder', async () => {
-    mockResidentFindFirst.mockResolvedValue({ id: 'r1', isPlaceholder: true })
-    const body = await (await GET()).json()
-    expect(body.data.resident).toBe(true)
+describe('the client door', () => {
+  it('signs in as the placeholder while it is unclaimed', async () => {
+    mockLoginByCode.mockResolvedValue({ success: true, type: 'resident', code: RESIDENT_CODE })
+    const response = await POST(post('resident'))
+    expect(await response.json()).toEqual({ success: true, type: 'resident' })
+    expect(mockLoginByCode).toHaveBeenCalledWith(RESIDENT_CODE, expect.any(String))
+    expect(mockSetResidentCookie).toHaveBeenCalledWith(RESIDENT_CODE)
   })
 
   it('disappears once a real person has claimed it', async () => {
     mockResidentFindFirst.mockResolvedValue({ id: 'r1', isPlaceholder: false })
-    const body = await (await GET()).json()
-    expect(body.data.resident).toBe(false)
-    expect(body.data.doors.map((d: { id: string }) => d.id)).not.toContain('resident')
+    expect((await doors()).map((d) => d.id)).not.toContain('resident')
   })
 
-  it('REFUSES the login, not merely the button', async () => {
-    // Hiding a button is not a gate: the POST is the thing that issues a
-    // session, and anyone can send it.
+  it('REFUSES the login once claimed, not merely the button', async () => {
     mockResidentFindFirst.mockResolvedValue({ id: 'r1', isPlaceholder: false })
-    const request = new NextRequest('http://localhost/api/auth/demo', {
-      method: 'POST',
-      body: JSON.stringify({ role: 'resident' }),
-      headers: { 'content-type': 'application/json' },
-    })
-    const response = await POST(request)
+    const response = await POST(post('resident'))
     expect(response.status).toBe(404)
     expect(mockSetResidentCookie).not.toHaveBeenCalled()
   })
 
-  it('still refuses when the profile does not exist at all', async () => {
+  it('is not offered for a code with no profile, or with no code configured', async () => {
     mockResidentFindFirst.mockResolvedValue(null)
-    const body = await (await GET()).json()
-    expect(body.data.resident).toBe(false)
+    expect((await doors()).map((d) => d.id)).not.toContain('resident')
+    delete process.env.DEMO_RESIDENT_CODE
+    mockResidentFindFirst.mockResolvedValue({ id: 'r1', isPlaceholder: true })
+    expect((await doors()).map((d) => d.id)).not.toContain('resident')
   })
 })

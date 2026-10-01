@@ -5,11 +5,11 @@
  *   npx ts-node -r tsconfig-paths/register --compiler-options '{"module":"CommonJS"}' \
  *     scripts/db/seed-placeholders.ts [--dry-run]
  *
- * ## What this is, and why it is not the demo seed
+ * ## What this is
  *
- * The demo world this replaces was throwaway fiction: DEMO-prefixed rows,
- * truncated and re-seeded nightly at 04:05. Nobody could take one of those
- * profiles over, because the takeover was erased before morning.
+ * The invented demo world that preceded it (DEMO-prefixed rows, re-seeded
+ * nightly) was removed on 2026-10-01. Nobody could take one of those profiles
+ * over, because the takeover was erased before morning.
  *
  * These are the opposite. Real AOZ addresses, real unit codes already in the
  * database, real generated login codes — and `isPlaceholder`, which is the only
@@ -33,7 +33,6 @@ import { and, eq, inArray } from 'drizzle-orm'
 import { db, housingUnit, placement, placementSpot, resident as residentTable } from '@/lib/db'
 import { PLACEHOLDER_APARTMENTS, type PlaceholderApartment } from './real/witikonerstrasse-426'
 import { generateResidentCode } from '@/lib/auth/code-generation'
-import { upsertDemoStaff } from '@/lib/demo/staff'
 
 const DRY_RUN = process.argv.includes('--dry-run')
 
@@ -197,16 +196,6 @@ async function main() {
       ? 'Placeholder seed — DRY RUN, nothing is written\n'
       : 'Seeding claimable placeholder profiles\n',
   )
-
-  // The no-account staff door used to be re-upserted by the nightly reset,
-  // which no longer exists. Provisioning it belongs here instead: this script
-  // sets up the world a visitor is shown, and a door with nothing behind it is
-  // as useless as data with no door. Idempotent, and a no-op when
-  // DEMO_STAFF_CODE is unset.
-  if (!DRY_RUN) {
-    const door = await upsertDemoStaff(db)
-    if (door) console.log(`  ✓ staff door ${door.code}\n`)
-  }
 
   let total = 0
   for (const apartment of PLACEHOLDER_APARTMENTS) {

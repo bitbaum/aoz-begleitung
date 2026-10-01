@@ -39,7 +39,7 @@ const REACH_FIELDS = ['scope', 'isSystemAdmin'] as const
 
 /**
  * A payload states its reach by naming each field, or by spreading a value
- * NAMED for being reach — `reach`, `demoStaffReachFor(...)`,
+ * NAMED for being reach — `reach`,
  * `WIDEST_CAPABILITIES`, `OPERATOR_CAPABILITIES`.
  *
  * Spreading is the better form: it is the one that survives a fourth axis
@@ -181,13 +181,12 @@ describe('the retired all-in-one role is not minted anywhere new', () => {
    * ADMIN survives in the enum so live JWTs and existing rows resolve. What it
    * used to grant is now `scope` + `isSystemAdmin`, which any role can be
    * given — so there is no reason left to write a new one, and every place
-   * that did has been converted. The demo's Leitung door is the documented
-   * exception: its whole purpose is to show what a legacy Leitung account
-   * sees, and it states its reach explicitly alongside.
+   * that did has been converted. The last exception, the generated demo
+   * Leitung door, was removed with the invented demo world on 2026-10-01.
    */
-  const EXPECTED_LEGACY_MINTS = ['src/lib/demo/staff.ts']
+  const EXPECTED_LEGACY_MINTS: string[] = []
 
-  it('only the demo door still writes role: ADMIN', () => {
+  it('nothing writes role: ADMIN any more', () => {
     const offenders = sourceFiles()
       .filter((file) => /role:\s*'ADMIN'/.test(code(fs.readFileSync(file, 'utf8'))))
       .map((file) => path.relative(REPO_ROOT, file))

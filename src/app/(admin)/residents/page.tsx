@@ -33,7 +33,6 @@ import {
 } from '@/lib/auth/role-policy'
 import { getMyResidentIds } from '@/lib/actions/care'
 import { STAFF_ROLE_CARE_DOMAIN } from '@/lib/config/care'
-import { REAL_WORLD, residentCodeInWorld, staffViewerWorld } from '@/lib/demo/world'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,14 +77,8 @@ export default async function ResidentsListPage({ searchParams }: Props) {
   // with sites.
   const siteFilter = currentUser ? residentScopeFilter(currentUser) : null
 
-  // A real staff member never sees an invented client, a demo door never a
-  // real one — in the list AND in the tiles above it. @see lib/demo/world.ts
-  const world = currentUser ? await staffViewerWorld(currentUser.id) : REAL_WORLD
-  const inWorld = residentCodeInWorld(resident.code, world)
-
   const residentsWhere = and(
     siteFilter ?? undefined,
-    inWorld,
     view === 'active'
       ? inArray(resident.status, ['ACTIVE', 'PLACED'])
       : view === 'archived'
@@ -149,14 +142,12 @@ export default async function ResidentsListPage({ searchParams }: Props) {
       db
         .select({ status: resident.status, count: count() })
         .from(resident)
-        .where(inWorld)
         .groupBy(resident.status),
       // Count of ACTIVE residents with no active placement (separate query)
       db.$count(
         resident,
         and(
           eq(resident.status, 'ACTIVE'),
-          inWorld,
           notInArray(
             resident.id,
             db

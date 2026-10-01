@@ -24,10 +24,10 @@
  * same world, so a demo can be described in advance and a test can assert on
  * it. Variation comes from the resident's position in the code-sorted list.
  *
- * Shared by BOTH seeds — the demo world (lib/demo/seed-data.ts) and the
- * development dataset (prisma/seed.ts) — which is why it lives here and not
- * under lib/demo/. It takes resident ids and reads their profiles itself, so
- * neither caller has to thread anything through.
+ * Used by the LOCAL development / E2E seed (scripts/db/seed.ts) only. The
+ * invented demo world that also used it was removed on 2026-10-01; production
+ * holds no generated people. It takes resident ids and reads their profiles
+ * itself, so the caller has nothing to thread through.
  *
  * Relative-import-safe (no '@/' aliases): loaded through ts-node.
  */

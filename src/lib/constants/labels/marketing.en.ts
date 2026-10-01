@@ -29,7 +29,7 @@ const PLACEMENT_COPY: MarketingCopy = {
     'Housing, daily life in the house, community and integration in a single record — professionals and clients see the same state of play.',
   ctaPrimary: 'See the product',
   ctaSecondary: 'Sign in',
-  ctaNote: 'No account needed. You get the real product with example data.',
+  ctaNote: 'No account needed. Direct access for the team — one click, the real product.',
 
   problemEyebrow: 'The problem',
   problemTitle: 'Integration usually fails on fragmentation, not on willingness.',
@@ -106,7 +106,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   scienceEyebrow: 'Scientific basis',
   scienceTitle: `Method rather than opinion: ${FACTOR_COUNT} matching factors — and everyday mechanics built on documented findings.`,
-  scienceBody: `The compatibility factors are derived from published research — Swiss studies first, international ones for context, ${SOURCE_COUNT} sources in total — and the strength of evidence is shown for each factor: some findings come from other forms of housing and are, for collective accommodation, a reasoned assumption that the pilot tests. And the mechanics beyond matching follow the same standard: from self-share bias in the cleaning rota to the rule that safety is never put to a vote. The full methodology including the source list is readable in the product by every professional — and in the demo, by you.`,
+  scienceBody: `The compatibility factors are derived from published research — Swiss studies first, international ones for context, ${SOURCE_COUNT} sources in total — and the strength of evidence is shown for each factor: some findings come from other forms of housing and are, for collective accommodation, a reasoned assumption that the pilot tests. And the mechanics beyond matching follow the same standard: from self-share bias in the cleaning rota to the rule that safety is never put to a vote. The full methodology including the source list is readable in the product by every professional — and through the direct access on the sign-in page.`,
   science: [
     {
       title: 'Cleanliness is a direction, not an average',
@@ -177,7 +177,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   closingTitle: 'Take a look.',
   closingBody:
-    'The demo is the real product with example data — administration, support and the resident portal. Blog, roadmap and changelog make the product decisions traceable.',
+    'The direct access on the sign-in page opens the real product — administration, support and the resident portal. Blog, roadmap and changelog make the product decisions traceable.',
 }
 
 const HOUSEHOLD_COPY: MarketingCopy = {
@@ -187,7 +187,7 @@ const HOUSEHOLD_COPY: MarketingCopy = {
     'Who took the rubbish out, who paid for the toilet paper, and when is it too loud? All in one place — so it does not get renegotiated from scratch every time.',
   ctaPrimary: 'Try it',
   ctaSecondary: 'Sign in',
-  ctaNote: 'No account needed. You get the real product with example data.',
+  ctaNote: 'No account needed. Direct access for the team — one click, the real product.',
 
   problemEyebrow: 'Why',
   problemTitle: 'An argument in a shared flat is rarely an argument about the thing itself.',
@@ -321,8 +321,7 @@ const HOUSEHOLD_COPY: MarketingCopy = {
   ],
 
   closingTitle: 'Have a look.',
-  closingBody:
-    'The demo is the real product with example data — you see exactly what the residents see.',
+  closingBody: 'The direct access opens the real product — you see exactly what the residents see.',
 }
 
 export const marketingEn: MarketingRegisters = {

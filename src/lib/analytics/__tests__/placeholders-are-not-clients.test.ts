@@ -3,7 +3,7 @@ import { join } from 'path'
 
 import { describe, expect, it } from 'vitest'
 
-import { excludesDemo, isRealRow, type DemoScope } from '@/lib/analytics/real-data'
+import { excludesPlaceholders, isRealRow, type PlaceholderScope } from '@/lib/analytics/real-data'
 
 /**
  * A seeded profile is not a client until someone claims it.
@@ -32,21 +32,24 @@ function sourceOf(relative: string): string {
 }
 
 describe('the scope the KPIs exclude', () => {
-  it('drops a placeholder the same way it drops a demo row', () => {
-    const scope: DemoScope = { residentIds: new Set(['placeholder-1']), unitIds: new Set() }
+  it('drops a placeholder', () => {
+    const scope: PlaceholderScope = { residentIds: new Set(['placeholder-1']) }
     expect(isRealRow({ residentId: 'placeholder-1' }, scope)).toBe(false)
     expect(isRealRow({ residentId: 'real-1' }, scope)).toBe(true)
   })
 
   it('keeps a real client who never registered', () => {
     // A real client with no Account and no email: entirely real.
-    const scope: DemoScope = { residentIds: new Set(['placeholder-1']), unitIds: new Set() }
+    const scope: PlaceholderScope = { residentIds: new Set(['placeholder-1']) }
     const rows = [{ residentId: 'hana' }, { residentId: 'placeholder-1' }, { residentId: 'noor' }]
-    expect(excludesDemo(rows, scope)).toEqual([{ residentId: 'hana' }, { residentId: 'noor' }])
+    expect(excludesPlaceholders(rows, scope)).toEqual([
+      { residentId: 'hana' },
+      { residentId: 'noor' },
+    ])
   })
 })
 
-describe('loadDemoScope collects them', () => {
+describe('loadPlaceholderScope collects them', () => {
   const source = sourceOf('src/lib/analytics/real-data.ts')
 
   it('selects the flag at all', () => {
@@ -57,8 +60,7 @@ describe('loadDemoScope collects them', () => {
   })
 
   it('puts placeholders in the excluded set', () => {
-    expect(source).toMatch(/isPlaceholder/)
-    expect(source).toMatch(/isDemoResidentCode\([^)]*\)\s*\|\|\s*\w+\.isPlaceholder/)
+    expect(source).toMatch(/filter\(\(\w+\) => \w+\.isPlaceholder\)/)
   })
 
   it('does not rely on a code prefix for them', () => {

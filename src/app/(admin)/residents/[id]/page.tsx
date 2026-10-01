@@ -68,7 +68,6 @@ import { writableCareDomains } from '@/lib/config/care'
 import { listResidentDocuments } from '@/lib/actions/documents'
 import { listApplicationsForResident } from '@/lib/data/opportunities'
 import { ResidentThreadsCard } from '@/components/opportunities/ResidentThreadsCard'
-import { belongsToSameWorld, isDemoResidentCode, isDemoUnitCode } from '@/lib/analytics/real-data'
 
 export async function generateMetadata({
   params,
@@ -218,21 +217,12 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
   // Create resident profile for matching calculations
   const residentProfile = toResidentProfile(resident)
 
-  // Which world this person belongs to. Every candidate list below is filtered
-  // to match it, so a real client is never offered a demo flat and a demo
-  // visitor still sees the matcher work. @see lib/analytics/real-data.ts
-  const subjectIsDemo = isDemoResidentCode(resident.code)
-
   if (currentPlacement) {
     // Calculate full compatibility data for all available units (for transfer recommendations)
     // This includes: apartment fit score, pairwise compatibility with each resident
     for (const unit of availableUnits) {
       if (unit.id === currentPlacement.housingUnitId) continue // Skip current unit
       if (unit.spots.length === 0) continue // No available spots
-      // A transfer recommendation across the demo boundary is the same bug as a
-      // placement one, and worse: it proposes MOVING someone who already lives
-      // somewhere into a flat that is deleted nightly.
-      if (!belongsToSameWorld(subjectIsDemo, isDemoUnitCode(unit.code))) continue
 
       const currentResidentProfiles = unit.placements.map((p) => ({
         profile: toResidentProfile(p.resident),
@@ -314,8 +304,6 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
     // Calculate fit for each unit
     compatibleUnits = unitsWithResidents
       .filter((u) => u.spots.length > 0) // Has available spots
-      // Never across the demo boundary. @see lib/analytics/real-data.ts
-      .filter((u) => belongsToSameWorld(subjectIsDemo, isDemoUnitCode(u.code)))
       .map((unit) => {
         const currentResidents = unit.placements.map((p) => toResidentProfile(p.resident))
         const apartmentProfile = calculateApartmentProfile(currentResidents)
@@ -327,7 +315,6 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
 
     // Calculate pairwise compatibility
     compatibleResidents = otherUnplaced
-      .filter((other) => belongsToSameWorld(subjectIsDemo, isDemoResidentCode(other.code)))
       .map((other) => {
         const otherProfile = toResidentProfile(other)
         const compat = calculateCompatibility(residentProfile, otherProfile)

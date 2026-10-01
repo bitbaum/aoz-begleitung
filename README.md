@@ -1,8 +1,8 @@
 # AOZ Begleitung
 
 created_date: 2025-06-01
-last_modified_date: 2026-09-26
-last_modified_summary: Rewritten person-centred. Stale numbers removed (factor and test counts drift; they are now read from the code or CI), dimensions corrected, AI and the demo instance described, real env variables listed.
+last_modified_date: 2026-10-01
+last_modified_summary: The site is fully real — the invented demo world and its nightly reset are gone; /login offers quick access as named real staff accounts (QUICK_ACCESS_STAFF_CODES).
 
 A platform for **accompanying people** in refugee accommodation and
 integration work. It is organised around the two questions staff arrive with —
@@ -16,8 +16,9 @@ It is meant to sit **beside** an organisation's case-management system
 integration layer those systems do not cover, plus a portal residents use in
 their own language.
 
-**Try it without an account:** <https://aoz.orangecat.ch/login#demo> — pick a
-role and use the real product. The invented people there are reset every night.
+**Quick access for the team:** <https://aoz.orangecat.ch/login#demo> — one
+click signs in as a named staff account; no registration needed. Everything on
+the site is real; the only seeded people are unclaimed placeholder profiles.
 **Where AI is used and what it sends:** <https://aoz.orangecat.ch/ki-datenschutz>.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -73,10 +74,9 @@ household scores by its worst pairing, never the average. Details and sources:
 
 ## Where it runs
 
-One app: **aoz.orangecat.ch** (`aoz-wohnen`, database `aoz_wohnen`). The demo
-lives there too — invented residents and flats beside the real ones, marked by
-their codes and reset every night without touching anything real
-(`src/lib/demo/scoped-reset.ts`).
+One app: **aoz.orangecat.ch** (`aoz-wohnen`, database `aoz_wohnen`). It holds
+real data only; there is no demo world and no nightly reset (removed
+2026-10-01).
 
 Self-hosted on Hetzner (box `bitbaum`). Deploy is push to `master` → CI →
 `.github/workflows/deploy.yml`. Env SSOT is `/opt/<app>/shared/.env` on the
@@ -98,7 +98,9 @@ pnpm run verify         # format, lint, typecheck, tests — what CI runs
 | `SESSION_SECRET` | Session signing key (a production build refuses to start without it) |
 | `NEXT_PUBLIC_APP_URL` | Absolute links in emails |
 | `NEXT_PUBLIC_BRAND` | Brand preset, inlined at build time (`src/lib/config/brand.ts`) |
-| `DEMO_ACCESS_ENABLED` | `true` opens the no-account demo doors on `/login` |
+| `DEMO_ACCESS_ENABLED` | `true` opens the quick-access buttons on `/login` (`QUICK_ACCESS_ENABLED` also works) |
+| `QUICK_ACCESS_STAFF_CODES` | Comma-separated real staff codes, one button each, in this order |
+| `DEMO_RESIDENT_CODE` | Optional client button — only while that profile is an unclaimed placeholder |
 | `GROQ_API_KEY`, `OPENROUTER_API_KEY` | AI features (test access; see `/ki-datenschutz`) |
 
 The full list with comments is `.env.example`. Test counts are what CI

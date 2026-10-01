@@ -6,7 +6,6 @@ import { getDateDaysAgo } from '@/lib/utils'
 import { requirePermission } from '@/lib/auth'
 import { placeableBeds } from '@/lib/config/capacity'
 import { unitScopeFilter } from '@/lib/auth/site-access'
-import { staffViewerWorld, unitCodeInWorld } from '@/lib/demo/world'
 
 export const metadata: Metadata = { title: 'Unterkünfte' }
 import {
@@ -40,15 +39,10 @@ export default async function HousingListPage({ searchParams }: Props) {
   // issued before the site axis existed.
   const unitFilter = unitScopeFilter(viewer)
 
-  // Real staff see real flats only; a demo door sees only the DEMO- ones.
-  // Applied to the list AND the tab counts. @see lib/demo/world.ts
-  const inWorld = unitCodeInWorld(housingUnit.code, await staffViewerWorld(viewer.id))
-
   const [unitRows, allUnitRows] = await Promise.all([
     db.query.housingUnit.findMany({
       where: and(
         unitFilter ?? undefined,
-        inWorld,
         view === 'active'
           ? inArray(housingUnit.status, ['AVAILABLE', 'FULL', 'MAINTENANCE'])
           : view === 'archived'
@@ -98,7 +92,7 @@ export default async function HousingListPage({ searchParams }: Props) {
       // Scoped as well: this feeds the view counts beside the tabs, and an
       // unscoped count tells a restricted viewer how many houses exist that
       // they cannot open.
-      where: and(unitFilter ?? undefined, inWorld),
+      where: unitFilter ?? undefined,
       columns: {
         status: true,
         totalBeds: true,
