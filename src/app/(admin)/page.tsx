@@ -40,6 +40,19 @@ import { hasPermission } from '@/lib/auth/role-policy'
 import { mayReadFact } from '@/lib/client-facts/policy'
 import { expiringFacts } from '@/lib/client-facts/renewals'
 import { EMPTY_DEMO_SCOPE, isRealRow, loadDemoScope } from '@/lib/analytics/real-data'
+import {
+  isDemoResident,
+  isDemoUnit,
+  REAL_WORLD,
+  residentCodeInWorld,
+  residentsInWorld,
+  staffIdInWorld,
+  staffViewerWorld,
+  unitCodeInWorld,
+  unitIdInWorld,
+  unitsInWorld,
+  visibleIn,
+} from '@/lib/demo/world'
 import { RESIDENT_NAME_SELECT, residentName } from '@/lib/utils/resident-name'
 import { getCheckInInterval, VERY_OVERDUE_THRESHOLD_DAYS } from '@/lib/config/checkin-intervals'
 import {
@@ -77,6 +90,11 @@ export default async function AdminDashboard() {
   // Which care seat this person works. Derived from the role — the bijection is
   // already SSOT in config/care.ts and must never be restated as a literal.
   const viewerSeat = STAFF_ROLE_CARE_DOMAIN[viewer.role]
+
+  // Which world this viewer lives in. Every list below is narrowed to it: a
+  // real staff member never sees an invented person or flat, a demo door
+  // never sees a real one. @see lib/demo/world.ts
+  const world = user ? await staffViewerWorld(user.id) : REAL_WORLD
 
   // Fetch only what this role's dashboard renders (config/dashboard.ts is
   // the SSOT for that mapping) — a Jobcoach's dashboard runs the learning
@@ -117,22 +135,31 @@ export default async function AdminDashboard() {
     applicationsWaiting,
     approvalsPending,
   ] = await Promise.all([
-    db.$count(resident),
+    db.$count(resident, residentCodeInWorld(resident.code, world)),
     // Only used to pick the first setup step, which requires housing:write —
     // a subset of the housing:read this section is gated on.
-    show('occupancy') ? db.$count(housingUnit) : 0,
+    show('occupancy') ? db.$count(housingUnit, unitCodeInWorld(housingUnit.code, world)) : 0,
     show('matching')
       ? db.query.resident.findMany({
-          where: inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]),
+          where: and(
+            inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]),
+            residentCodeInWorld(resident.code, world),
+          ),
           columns: { ...RESIDENT_NAME_SELECT, status: true, createdAt: true },
         })
       : [],
     show('occupancy')
       ? db.query.housingUnit.findMany({
+          where: unitCodeInWorld(housingUnit.code, world),
           columns: { totalBeds: true, status: true },
         })
       : [],
-    show('occupancy') ? db.$count(placement, eq(placement.status, 'ACTIVE')) : 0,
+    show('occupancy')
+      ? db.$count(
+          placement,
+          and(eq(placement.status, 'ACTIVE'), unitIdInWorld(placement.housingUnitId, world)),
+        )
+      : 0,
     show('checkIns')
       ? db.query.placement.findMany({
           where: eq(placement.status, 'ACTIVE'),
@@ -176,7 +203,10 @@ export default async function AdminDashboard() {
     show('maintenance')
       ? db.$count(
           maintenanceRequest,
-          inArray(maintenanceRequest.status, ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'ON_HOLD']),
+          and(
+            inArray(maintenanceRequest.status, ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'ON_HOLD']),
+            unitIdInWorld(maintenanceRequest.housingUnitId, world),
+          ),
         )
       : 0,
     show('transferRequests')
@@ -220,7 +250,11 @@ export default async function AdminDashboard() {
     show('events')
       ? db.$count(
           houseEvent,
-          and(eq(houseEvent.status, 'PUBLISHED'), gte(houseEvent.startsAt, now)),
+          and(
+            eq(houseEvent.status, 'PUBLISHED'),
+            gte(houseEvent.startsAt, now),
+            unitIdInWorld(houseEvent.housingUnitId, world),
+          ),
         )
       : 0,
     // Who is waiting for an answer. `staffInbox()` already sorts oldest-wait
@@ -242,12 +276,21 @@ export default async function AdminDashboard() {
     show('incidents')
       ? getIncidentsNeedingFollowUp()
       : Promise.resolve({ overdue: [], dueSoon: [], urgent: [] }),
-    show('team') ? db.$count(userTable, eq(userTable.active, true)) : 0,
+    show('team')
+      ? db.$count(userTable, and(eq(userTable.active, true), staffIdInWorld(userTable.id, world)))
+      : 0,
     // Provisioned and never used. A staff code that was issued but never
     // signed in with is invisible everywhere else in the product — it is not
     // an error, it is an unfinished handover, and only Leitung can close it.
     show('team')
-      ? db.$count(userTable, and(eq(userTable.active, true), isNull(userTable.lastLoginAt)))
+      ? db.$count(
+          userTable,
+          and(
+            eq(userTable.active, true),
+            isNull(userTable.lastLoginAt),
+            staffIdInWorld(userTable.id, world),
+          ),
+        )
       : 0,
     // How many clients sit in THIS person's care seat.
     //
@@ -312,7 +355,7 @@ export default async function AdminDashboard() {
     // Every request a resident raised that nobody has taken up, for everyone
     // who may answer it — not only the holder of that resident's seat.
     // @see lib/inbox/waiting.ts
-    show('applications') ? waitingApplications(viewer) : [],
+    show('applications') ? waitingApplications(viewer, world) : [],
     show('approvals') && user
       ? pendingFactQueue({ userId: user.id, scope: viewer.scope, ownDomain: ownSeat(viewer.role) })
       : [],
@@ -332,7 +375,7 @@ export default async function AdminDashboard() {
    * quiet ones, so the first entry IS the person who has waited longest —
    * which is what the tile leads with.
    */
-  const waitingThreads = inboxThreads
+  const waitingThreads = residentsInWorld(inboxThreads, world, (thread) => thread.resident)
     .filter((thread) => thread.unreadCount > 0 && thread.waitingSince)
     .map((thread) => ({
       residentId: thread.resident.id,
@@ -347,12 +390,20 @@ export default async function AdminDashboard() {
    * failure and would crowd out the ones that already slipped — the triage
    * still computes it, and /incidents is where you go to look ahead.
    */
-  const overdueFollowUps = followUpTriage.overdue.map((row) => ({
-    id: row.id,
-    subject: row.subject ? residentName(row.subject) : null,
-    unitCode: row.housingUnit?.code ?? null,
-    daysOverdue: row.nextFollowUpDate ? daysSinceCeil(row.nextFollowUpDate) : 0,
-  }))
+  const overdueFollowUps = followUpTriage.overdue
+    .filter((row) =>
+      visibleIn(
+        world,
+        (row.subject ? isDemoResident(row.subject) : false) ||
+          (row.housingUnit ? isDemoUnit(row.housingUnit) : false),
+      ),
+    )
+    .map((row) => ({
+      id: row.id,
+      subject: row.subject ? residentName(row.subject) : null,
+      unitCode: row.housingUnit?.code ?? null,
+      daysOverdue: row.nextFollowUpDate ? daysSinceCeil(row.nextFollowUpDate) : 0,
+    }))
 
   /**
    * Insurances and permits running out — the tile this whole feature exists
@@ -361,7 +412,7 @@ export default async function AdminDashboard() {
    * `clientFacts:read` sees none of it at all.
    */
   const expiringRenewals = hasPermission(viewer, 'clientFacts:read')
-    ? (await expiringFacts(new Date()))
+    ? residentsInWorld(await expiringFacts(new Date()), world, (fact) => fact.resident)
         .filter((fact) =>
           mayReadFact(fact.kind, {
             scope: viewer.scope,
@@ -385,16 +436,18 @@ export default async function AdminDashboard() {
   const seatKinds: readonly string[] = boardOpportunityKinds(
     viewerSeat === 'JOB' ? 'job' : 'volunteering',
   )
-  const caseloadClients = jobCaseload.map(({ resident }) => ({
-    residentId: resident.id,
-    name: residentName(resident),
-    createdAt: resident.createdAt,
-    learningRecords: resident.learningRecords,
-    applications: resident.opportunityApplications.filter(
-      (application) =>
-        !isAwaitingAnswer(application) || seatKinds.includes(application.opportunity.kind),
-    ),
-  }))
+  const caseloadClients = residentsInWorld(jobCaseload, world, (row) => row.resident).map(
+    ({ resident }) => ({
+      residentId: resident.id,
+      name: residentName(resident),
+      createdAt: resident.createdAt,
+      learningRecords: resident.learningRecords,
+      applications: resident.opportunityApplications.filter(
+        (application) =>
+          !isAwaitingAnswer(application) || seatKinds.includes(application.opportunity.kind),
+      ),
+    }),
+  )
 
   // One caseload, the signals of whichever domain the viewer works. The Freiwilligenarbeit coordinator's
   // questions are not the Jobcoach's — "has anyone answered them, and is anyone doing
@@ -419,8 +472,9 @@ export default async function AdminDashboard() {
   //    denominator for them is the whole real population — the same distinction
   //    `assignedResidentCount` above already draws.
   const myResidentIds = new Set(myCaseloadResidentIds.map((row) => row.residentId))
+  // For a demo door the narrowing flips: it sees the invented world's records.
   const learningRecords = learningRecordsRaw
-    .filter((row) => isRealRow(row, demoScope))
+    .filter((row) => isRealRow(row, demoScope) !== world.isDemo)
     .filter((row) => viewer.scope === 'ALL_DOMAINS' || myResidentIds.has(row.residentId))
 
   const learningInProgressCount = learningRecords.filter(
@@ -443,7 +497,7 @@ export default async function AdminDashboard() {
   // =============================================================================
 
   // Calculate check-in status for all placements
-  const checkInStatuses = placements.map((p) => {
+  const checkInStatuses = residentsInWorld(placements, world, (p) => p.resident).map((p) => {
     const supportLevel = p.resident.supportLevel || 'STANDARD'
     const intervalDays = getCheckInInterval(supportLevel)
     const lastCheckIn = p.checkIns?.[0]
@@ -485,7 +539,7 @@ export default async function AdminDashboard() {
   // Unplaced Residents
   // =============================================================================
 
-  const unplacedResidents = residents
+  const unplacedResidents = residentsInWorld(residents, world, (r) => r)
     .filter((r) => r.status === 'ACTIVE')
     .map((r) => ({
       id: r.id,
@@ -499,7 +553,10 @@ export default async function AdminDashboard() {
   // Critical Incidents (Unresolved)
   // =============================================================================
 
-  const criticalIncidents = recentIncidents
+  // Incidents belong to a flat; a flat's world is its code.
+  const incidentsInWorld = unitsInWorld(recentIncidents, world, (i) => i.housingUnit)
+
+  const criticalIncidents = incidentsInWorld
     .filter((i) => i.severity === 'CRITICAL' && !i.resolvedAt)
     .map((i) => ({
       id: i.id,
@@ -513,7 +570,7 @@ export default async function AdminDashboard() {
   // Conflict-free Days (Interpersonal incidents only)
   // =============================================================================
 
-  const interpersonalIncidents = recentIncidents.filter((i) => i.category === 'INTERPERSONAL')
+  const interpersonalIncidents = incidentsInWorld.filter((i) => i.category === 'INTERPERSONAL')
   let conflictFreeDays: number = PROBLEM_DETECTION.recentIncidentsDays
 
   if (interpersonalIncidents.length > 0) {
@@ -580,20 +637,24 @@ export default async function AdminDashboard() {
   // Cross-pillar queues (transfers, governance)
   // =============================================================================
 
-  const pendingTransfers = pendingTransfersRaw.map((t) => ({
-    id: t.id,
-    residentCode: t.resident.code,
-    residentDisplayName: t.resident.displayName,
-    unitCode: t.currentPlacement?.housingUnit.code ?? null,
-    daysSinceCreated: daysSinceCeil(t.createdAt, now),
-  }))
+  const pendingTransfers = residentsInWorld(pendingTransfersRaw, world, (t) => t.resident).map(
+    (t) => ({
+      id: t.id,
+      residentCode: t.resident.code,
+      residentDisplayName: t.resident.displayName,
+      unitCode: t.currentPlacement?.housingUnit.code ?? null,
+      daysSinceCreated: daysSinceCeil(t.createdAt, now),
+    }),
+  )
 
-  const proposalsAwaitingStaff = proposalsRaw.map((p) => ({
-    id: p.id,
-    title: p.title,
-    unitCode: p.housingUnit.code,
-    daysWaiting: daysSinceCeil(p.decidedAt ?? p.updatedAt, now),
-  }))
+  const proposalsAwaitingStaff = unitsInWorld(proposalsRaw, world, (p) => p.housingUnit).map(
+    (p) => ({
+      id: p.id,
+      title: p.title,
+      unitCode: p.housingUnit.code,
+      daysWaiting: daysSinceCeil(p.decidedAt ?? p.updatedAt, now),
+    }),
+  )
 
   return (
     <ActionDashboard
@@ -602,11 +663,13 @@ export default async function AdminDashboard() {
       housingUnitCount={housingUnitCount}
       assignedResidentCount={assignedResidentCount}
       waitingApplications={applicationsWaiting}
-      pendingApprovals={approvalsPending.map((item) => ({
-        id: item.id,
-        name: residentName(item.resident),
-        summary: item.summary,
-      }))}
+      pendingApprovals={residentsInWorld(approvalsPending, world, (item) => item.resident).map(
+        (item) => ({
+          id: item.id,
+          name: residentName(item.resident),
+          summary: item.summary,
+        }),
+      )}
       jobQueue={jobQueue}
       volunteeringQueue={volunteeringQueue}
       waitingThreads={waitingThreads}

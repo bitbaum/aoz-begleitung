@@ -10,6 +10,7 @@ import {
   permitRequirementLabel,
 } from '@/lib/i18n/opportunity-labels'
 import { residentOpportunityBoard } from '@/lib/data/opportunities'
+import { residentViewerWorld } from '@/lib/demo/world'
 import { expressInterest, withdrawInterest } from '@/lib/actions/opportunities'
 import {
   APPLICATION_STAGE_BADGES,
@@ -59,9 +60,13 @@ export default async function PortalOpportunitiesPage(props: Props) {
 
   // The translator first, because the board is resolved INTO this reader's
   // language server-side — the payload carries one language, not six.
-  const { t, locale } = await getRequestTranslator()
+  // A real client sees real listings only; a demo resident only invented ones.
+  const [{ t, locale }, world] = await Promise.all([
+    getRequestTranslator(),
+    residentViewerWorld(resident),
+  ])
   const [{ mine, open }, params] = await Promise.all([
-    residentOpportunityBoard(resident.id, locale),
+    residentOpportunityBoard(resident.id, world, locale),
     searchParams,
   ])
 

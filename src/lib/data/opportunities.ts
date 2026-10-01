@@ -6,6 +6,7 @@
 import { IN_CARE_RESIDENT_STATUSES } from '@/lib/config/resident-status'
 import { and, asc, desc, eq, ilike, inArray, isNull, notInArray, or, type SQL } from 'drizzle-orm'
 import { db, escapeLike, opportunity, opportunityApplication, resident } from '@/lib/db'
+import { listingAuthorInWorld, residentCodeInWorld, type ViewerWorld } from '@/lib/demo/world'
 import { RESIDENT_NAME_SELECT } from '@/lib/utils/resident-name'
 import type {
   ApplicationStageId,
@@ -51,11 +52,17 @@ export interface OpportunityListFilters {
   kinds?: readonly OpportunityKindId[]
   query?: string
   publishedOnly?: boolean
+  /**
+   * Whose listings: the invented world's or the real one's. Required, so a
+   * new caller cannot forget it and show a real coach invented employers.
+   * @see lib/demo/world.ts
+   */
+  world: ViewerWorld
 }
 
 function listWhere(filters: OpportunityListFilters): SQL | undefined {
   const query = filters.query?.trim() ?? ''
-  const conditions: SQL[] = []
+  const conditions: SQL[] = [listingAuthorInWorld(opportunity.createdByUserId, filters.world)]
   if (filters.publishedOnly) {
     conditions.push(eq(opportunity.status, 'PUBLISHED'))
   } else if (filters.status) {
@@ -85,7 +92,7 @@ function listWhere(filters: OpportunityListFilters): SQL | undefined {
  * Listings with the stages of everyone attached, so a caller can compute open
  * seats without a second query per row.
  */
-export async function listOpportunities(filters: OpportunityListFilters = {}) {
+export async function listOpportunities(filters: OpportunityListFilters) {
   return db.query.opportunity.findMany({
     where: listWhere(filters),
     with: {
@@ -128,26 +135,36 @@ export async function getOpportunityDetail(id: string) {
  * "how many places exist" is not the question a coach opens this page with —
  * "who is mid-flight and who is waiting on me" is.
  */
-export async function opportunityStats(kinds?: readonly OpportunityKindId[]) {
+export async function opportunityStats(world: ViewerWorld, kinds?: readonly OpportunityKindId[]) {
   // The tiles must describe the list underneath them. Once the board opens on
   // the coach's own half, unscoped totals would report the Freiwilligenarbeit coordinator's waiting people
   // above the Jobcoach's listings — a number that is true of nothing on the screen.
-  const scoped = kinds && kinds.length > 0 ? inArray(opportunity.kind, [...kinds]) : undefined
+  // The same holds for the world: a real coach's tiles count real listings only.
+  const scoped = and(
+    listingAuthorInWorld(opportunity.createdByUserId, world),
+    kinds && kinds.length > 0 ? inArray(opportunity.kind, [...kinds]) : undefined,
+  )
 
-  const listingsIn = (extra?: SQL) => (scoped ? and(scoped, extra) : extra)
+  const listingsIn = (extra?: SQL) => and(scoped, extra)
 
   // Applications reach `kind` only through their listing, so they scope by
-  // membership rather than by a column of their own.
+  // membership rather than by a column of their own — and they count only
+  // people of the viewer's world, the same rule the Eingang badge follows.
   const applicationsOn = (extra: SQL | undefined): SQL | undefined =>
-    scoped
-      ? and(
-          extra,
-          inArray(
-            opportunityApplication.opportunityId,
-            db.select({ id: opportunity.id }).from(opportunity).where(scoped),
-          ),
-        )
-      : extra
+    and(
+      extra,
+      inArray(
+        opportunityApplication.opportunityId,
+        db.select({ id: opportunity.id }).from(opportunity).where(scoped),
+      ),
+      inArray(
+        opportunityApplication.residentId,
+        db
+          .select({ id: resident.id })
+          .from(resident)
+          .where(residentCodeInWorld(resident.code, world)),
+      ),
+    )
 
   const [total, published, drafts, activePeople, openThreads, awaitingAnswer] = await Promise.all([
     db.$count(opportunity, listingsIn()),
@@ -176,7 +193,7 @@ export async function opportunityStats(kinds?: readonly OpportunityKindId[]) {
  * offering them again would produce a constraint error at the one moment a
  * coach is trying to record something real.
  */
-export async function residentsAvailableFor(opportunityId: string) {
+export async function residentsAvailableFor(opportunityId: string, world: ViewerWorld) {
   const attached = await db.query.opportunityApplication.findMany({
     where: eq(opportunityApplication.opportunityId, opportunityId),
     columns: { residentId: true },
@@ -192,6 +209,9 @@ export async function residentsAvailableFor(opportunityId: string) {
       // not put forward exactly the people most ready for a job. Housing is one
       // part of a person's situation, not a gate on the others.
       inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]),
+      // Only people of the viewer's world — a real coach is never offered an
+      // invented client to put forward. @see lib/demo/world.ts
+      residentCodeInWorld(resident.code, world),
       // `notInArray` with an empty list is invalid SQL; with nobody attached
       // there is nothing to exclude.
       ...(attachedIds.length ? [notInArray(resident.id, attachedIds)] : []),
@@ -261,7 +281,17 @@ function localise<T extends TranslatableListing & { translations?: unknown }>(
   }
 }
 
-export async function residentOpportunityBoard(residentId: string, locale: string = 'de') {
+/**
+ * `world` is the RESIDENT's: a real client never sees an invented employer
+ * (they could press "Ich habe Interesse" on a place that does not exist), and
+ * a demo resident sees only the invented listings. Their own threads are
+ * shown whatever their world — they are theirs.
+ */
+export async function residentOpportunityBoard(
+  residentId: string,
+  world: ViewerWorld,
+  locale: string = 'de',
+) {
   const [mine, published] = await Promise.all([
     db.query.opportunityApplication.findMany({
       where: eq(opportunityApplication.residentId, residentId),
@@ -269,7 +299,10 @@ export async function residentOpportunityBoard(residentId: string, locale: strin
       orderBy: [desc(opportunityApplication.stageChangedAt)],
     }),
     db.query.opportunity.findMany({
-      where: eq(opportunity.status, 'PUBLISHED'),
+      where: and(
+        eq(opportunity.status, 'PUBLISHED'),
+        listingAuthorInWorld(opportunity.createdByUserId, world),
+      ),
       with: { applications: { columns: { stage: true } } },
       orderBy: [asc(opportunity.startsAt), desc(opportunity.updatedAt)],
     }),
