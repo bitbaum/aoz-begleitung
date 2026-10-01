@@ -36,12 +36,6 @@ import {
   resident,
   transferRequest,
 } from '@/lib/db'
-import {
-  residentCodeInWorld,
-  residentsInWorld,
-  staffViewerWorld,
-  type ViewerWorld,
-} from '@/lib/demo/world'
 import { logger } from '@/lib/logger'
 import { residentName } from '@/lib/utils/resident-name'
 
@@ -74,22 +68,15 @@ export interface WaitingApplication {
 
 /**
  * The WHERE both the list and the badge count use: awaiting an answer, on a
- * listing this viewer answers, from a person in the viewer's world. A real
- * Jobcoach is never asked to answer an invented resident, and a demo door
- * never shows a real person's request. @see lib/demo/world.ts
+ * listing this viewer answers.
  */
-export function waitingApplicationsWhere(kinds: readonly OpportunityKindId[], world: ViewerWorld) {
-  return and(
-    awaitingAnswerFilter(),
-    inArray(opportunity.kind, [...kinds]),
-    residentCodeInWorld(resident.code, world),
-  )
+export function waitingApplicationsWhere(kinds: readonly OpportunityKindId[]) {
+  return and(awaitingAnswerFilter(), inArray(opportunity.kind, [...kinds]))
 }
 
 /** Requests nobody has picked up yet, oldest first. Empty without the verb. */
 export async function waitingApplications(
   viewer: StaffCapabilities,
-  world: ViewerWorld,
 ): Promise<WaitingApplication[]> {
   if (!hasPermission(viewer, 'opportunities:write')) return []
   const kinds = answerableOpportunityKinds(viewer)
@@ -108,7 +95,7 @@ export async function waitingApplications(
     .from(opportunityApplication)
     .innerJoin(opportunity, eq(opportunity.id, opportunityApplication.opportunityId))
     .innerJoin(resident, eq(resident.id, opportunityApplication.residentId))
-    .where(waitingApplicationsWhere(kinds, world))
+    .where(waitingApplicationsWhere(kinds))
     .orderBy(asc(opportunityApplication.createdAt))
 
   return rows.map(({ code, displayName, ...row }) => ({
@@ -117,10 +104,7 @@ export async function waitingApplications(
   }))
 }
 
-async function waitingApplicationCount(
-  viewer: StaffCapabilities,
-  world: ViewerWorld,
-): Promise<number> {
+async function waitingApplicationCount(viewer: StaffCapabilities): Promise<number> {
   if (!hasPermission(viewer, 'opportunities:write')) return 0
   const kinds = answerableOpportunityKinds(viewer)
   if (kinds.length === 0) return 0
@@ -128,8 +112,7 @@ async function waitingApplicationCount(
     .select({ n: sql<number>`count(*)::int` })
     .from(opportunityApplication)
     .innerJoin(opportunity, eq(opportunity.id, opportunityApplication.opportunityId))
-    .innerJoin(resident, eq(resident.id, opportunityApplication.residentId))
-    .where(waitingApplicationsWhere(kinds, world))
+    .where(waitingApplicationsWhere(kinds))
   return row?.n ?? 0
 }
 
@@ -138,43 +121,32 @@ async function waitingApplicationCount(
  * same rule `staffInbox()` uses for `waitingSince`, as one COUNT rather than a
  * load of every message, because this runs on every staff page.
  */
-async function waitingThreadCount(viewer: StaffCapabilities, world: ViewerWorld): Promise<number> {
+async function waitingThreadCount(viewer: StaffCapabilities): Promise<number> {
   if (!hasPermission(viewer, 'messages:read')) return 0
   const [row] = await db
     .select({ n: countDistinct(message.threadId) })
     .from(message)
-    .innerJoin(resident, eq(resident.id, message.authorResidentId))
-    .where(
-      and(
-        isNotNull(message.authorResidentId),
-        isNull(message.readAt),
-        residentCodeInWorld(resident.code, world),
-      ),
-    )
+    .where(and(isNotNull(message.authorResidentId), isNull(message.readAt)))
   return Number(row?.n ?? 0)
 }
 
-async function pendingTransferCount(
-  viewer: StaffCapabilities,
-  world: ViewerWorld,
-): Promise<number> {
+async function pendingTransferCount(viewer: StaffCapabilities): Promise<number> {
   if (!hasPermission(viewer, 'placements:write')) return 0
   const [row] = await db
     .select({ n: sql<number>`count(*)::int` })
     .from(transferRequest)
-    .innerJoin(resident, eq(resident.id, transferRequest.residentId))
-    .where(and(eq(transferRequest.status, 'PENDING'), residentCodeInWorld(resident.code, world)))
+    .where(eq(transferRequest.status, 'PENDING'))
   return row?.n ?? 0
 }
 
-async function pendingFactCount(viewer: WaitingViewer, world: ViewerWorld): Promise<number> {
+async function pendingFactCount(viewer: WaitingViewer): Promise<number> {
   if (!hasPermission(viewer, 'clientFacts:read')) return 0
   const items = await pendingFactQueue({
     userId: viewer.id,
     scope: viewer.scope,
     ownDomain: ownSeat(viewer.role),
   })
-  return residentsInWorld(items, world, (item) => item.resident).length
+  return items.length
 }
 
 export interface WaitingCounts {
@@ -186,16 +158,12 @@ export interface WaitingCounts {
 }
 
 /** Per-queue counts of people waiting on this viewer. */
-export async function waitingCounts(
-  viewer: WaitingViewer,
-  world?: ViewerWorld,
-): Promise<WaitingCounts> {
-  const inWorld = world ?? (await staffViewerWorld(viewer.id))
+export async function waitingCounts(viewer: WaitingViewer): Promise<WaitingCounts> {
   const [applications, approvals, messages, transfers] = await Promise.all([
-    waitingApplicationCount(viewer, inWorld),
-    pendingFactCount(viewer, inWorld),
-    waitingThreadCount(viewer, inWorld),
-    pendingTransferCount(viewer, inWorld),
+    waitingApplicationCount(viewer),
+    pendingFactCount(viewer),
+    waitingThreadCount(viewer),
+    pendingTransferCount(viewer),
   ])
   return {
     applications,

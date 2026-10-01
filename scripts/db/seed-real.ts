@@ -2,14 +2,11 @@
  * Seed a REAL apartment (no demo data) from scripts/db/real/*.ts config.
  *
  * Usage:
- *   npx ts-node -r tsconfig-paths/register --compiler-options '{"module":"CommonJS"}' scripts/db/seed-real.ts [--wipe]
+ *   npx ts-node -r tsconfig-paths/register --compiler-options '{"module":"CommonJS"}' scripts/db/seed-real.ts
  *
- * --wipe first truncates every table except User/AlgorithmWeight/SystemConfig
- * (same keep-list as the demo reset) — use it exactly once, when converting a
- * demo instance into the real one.
- *
- * Idempotent without --wipe: if the unit already has active placements the
- * script refuses to run, so a re-run can never duplicate people.
+ * Idempotent: if the unit already has active placements the script refuses to
+ * run, so a re-run can never duplicate people. (The `--wipe` flag that
+ * truncated a demo instance was removed with the demo world on 2026-10-01.)
  *
  * Login codes are GENERATED here and printed once — hand them out and store
  * them; they are intentionally not committed anywhere.
@@ -19,7 +16,6 @@ import { eq } from 'drizzle-orm'
 import { db, housingUnit, placement, placementSpot, resident as residentTable } from '@/lib/db'
 import { REAL_APARTMENT } from './real/witikonerstrasse-458'
 import { generateResidentCode } from '@/lib/auth/code-generation'
-import { wipeAllExceptKeepList } from '@/lib/demo/wipe'
 import { syncOrgRules } from '@/lib/governance/sync-org-rules'
 
 async function uniqueResidentCode(): Promise<string> {
@@ -38,12 +34,6 @@ async function uniqueResidentCode(): Promise<string> {
 }
 
 async function main() {
-  const wipe = process.argv.includes('--wipe')
-  if (wipe) {
-    const wiped = await wipeAllExceptKeepList(db)
-    console.log(`🧹 Wiped ${wiped} tables (keep-list preserved)`)
-  }
-
   const existing = await db.query.housingUnit.findFirst({
     where: eq(housingUnit.code, REAL_APARTMENT.unit.code),
     columns: { id: true },

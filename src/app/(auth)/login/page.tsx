@@ -28,13 +28,10 @@ function LoginForm() {
   const [password, setPassword] = useState('')
   const [code, setCode] = useState('')
   const [state, setState] = useState<LoginState>({ status: 'idle' })
-  // Which demo doors this deployment offers — server truth, not a build-baked
-  // flag, so a button only appears when pressing it can succeed. One per role:
-  // the product looks entirely different depending on who you are, and a
-  // single "staff" door shows a fifth of it while implying it is the whole.
+  // Which quick-access doors this deployment offers — server truth, not a
+  // build-baked flag, so a button only appears when pressing it can succeed.
+  // Each staff door is a named real account (QUICK_ACCESS_STAFF_CODES).
   const [demoDoors, setDemoDoors] = useState<{ id: string; label: string }[]>([])
-  // Set only where this instance has no doors of its own (production): the
-  // way to try the product without an account is the demo instance.
   const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -47,7 +44,7 @@ function LoginForm() {
         }
       })
       .catch(() => {
-        // No demo section on failure — the login form is unaffected.
+        // No quick-access section on failure — the login form is unaffected.
       })
     return () => {
       cancelled = true
@@ -162,13 +159,13 @@ function LoginForm() {
    */
   const demoDoorPanel =
     demoDoors.length > 0 && state.status !== 'success' ? (
-      <div className="mb-6 rounded-lg border border-ui-border bg-ui-subtle p-4">
+      <div id="demo" className="mb-6 rounded-lg border border-ui-border bg-ui-subtle p-4">
         <p className="text-sm font-medium text-ui-text">{LOGIN_LABELS.demo.title}</p>
         <p className="mt-0.5 mb-3 text-xs text-ui-muted">{LOGIN_LABELS.demo.description}</p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {demoDoors.map((door) => (
-            // Outline, not brand: these are six equal choices, and brand red
-            // marks the ONE action that matters on a screen. Six red blocks
+            // Outline, not brand: these are equal choices, and brand red
+            // marks the ONE action that matters on a screen. Red blocks
             // spend the whole palette on a menu and leave the form's own
             // submit with nothing to be louder than.
             <Button

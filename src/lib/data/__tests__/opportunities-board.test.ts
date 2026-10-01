@@ -24,7 +24,6 @@ vi.mock('@/lib/db', async () => ({
 import type { Mock } from 'vitest'
 import { residentOpportunityBoard } from '../opportunities'
 import { whereParts } from '@/test-utils/drizzle-where'
-import { REAL_WORLD } from '@/lib/demo/world'
 
 const mockDb = {
   opportunityApplication: { findMany: mockApplicationFindMany },
@@ -52,14 +51,14 @@ beforeEach(() => {
 
 describe('residentOpportunityBoard', () => {
   it('never hands the resident the other applicants', async () => {
-    const { open } = await residentOpportunityBoard('res-1', REAL_WORLD)
+    const { open } = await residentOpportunityBoard('res-1')
 
     expect(open).toHaveLength(1)
     expect(open[0]).not.toHaveProperty('applications')
   })
 
   it('reports the seats left rather than the people in them', async () => {
-    const { open } = await residentOpportunityBoard('res-1', REAL_WORLD)
+    const { open } = await residentOpportunityBoard('res-1')
 
     expect(open[0].seatsLeft).toBe(2)
   })
@@ -69,13 +68,13 @@ describe('residentOpportunityBoard', () => {
     // zero would take an open place off the board for everyone.
     ;(mockDb.opportunity.findMany as Mock).mockResolvedValue([listing({ seats: null })])
 
-    const { open } = await residentOpportunityBoard('res-1', REAL_WORLD)
+    const { open } = await residentOpportunityBoard('res-1')
 
     expect(open[0].seatsLeft).toBeNull()
   })
 
   it('only ever asks for published listings', async () => {
-    await residentOpportunityBoard('res-1', REAL_WORLD)
+    await residentOpportunityBoard('res-1')
 
     const where = (mockDb.opportunity.findMany as Mock).mock.calls[0][0].where
     expect(whereParts(where)).toEqual({ status: 'PUBLISHED' })
@@ -88,7 +87,7 @@ describe('residentOpportunityBoard', () => {
       { id: 'app-1', opportunityId: 'opp-1', stage: 'INTERESTED', opportunity: listing() },
     ])
 
-    const { mine, open } = await residentOpportunityBoard('res-1', REAL_WORLD)
+    const { mine, open } = await residentOpportunityBoard('res-1')
 
     expect(mine).toHaveLength(1)
     expect(open).toHaveLength(0)
@@ -100,13 +99,13 @@ describe('residentOpportunityBoard', () => {
       listing({ id: 'open', seats: 2, applications: [] }),
     ])
 
-    const { open } = await residentOpportunityBoard('res-1', REAL_WORLD)
+    const { open } = await residentOpportunityBoard('res-1')
 
     expect(open.map((row) => row.id)).toEqual(['open', 'full'])
   })
 
   it('scopes the applications it returns to the asking resident', async () => {
-    await residentOpportunityBoard('res-1', REAL_WORLD)
+    await residentOpportunityBoard('res-1')
 
     const where = (mockDb.opportunityApplication.findMany as Mock).mock.calls[0][0].where
     expect(whereParts(where)).toEqual({ residentId: 'res-1' })
@@ -143,7 +142,7 @@ describe('how to reach the organisation, and when', () => {
     async (stage) => {
       ;(mockDb.opportunityApplication.findMany as Mock).mockResolvedValue([withContact(stage)])
 
-      const { mine } = await residentOpportunityBoard('res-1', REAL_WORLD)
+      const { mine } = await residentOpportunityBoard('res-1')
 
       expect(mine[0].opportunity).toMatchObject({
         contactName: null,
@@ -159,7 +158,7 @@ describe('how to reach the organisation, and when', () => {
     async (stage) => {
       ;(mockDb.opportunityApplication.findMany as Mock).mockResolvedValue([withContact(stage)])
 
-      const { mine } = await residentOpportunityBoard('res-1', REAL_WORLD)
+      const { mine } = await residentOpportunityBoard('res-1')
 
       expect(mine[0].opportunity.contactEmail).toBe('r.meier@example.org')
     },
@@ -170,7 +169,7 @@ describe('how to reach the organisation, and when', () => {
       listing({ contactEmail: 'r.meier@example.org', contactPhone: '044 000 00 00' }),
     ])
 
-    const { open } = await residentOpportunityBoard('res-1', REAL_WORLD)
+    const { open } = await residentOpportunityBoard('res-1')
 
     expect(open[0]).not.toHaveProperty('contactEmail')
     expect(open[0]).not.toHaveProperty('contactPhone')

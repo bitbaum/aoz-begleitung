@@ -31,7 +31,7 @@ const PLACEMENT_COPY: MarketingCopy = {
     'Logement, quotidien de la maison, vie collective et intégration dans un seul parcours — les équipes et les personnes accompagnées voient la même situation.',
   ctaPrimary: 'Voir le produit',
   ctaSecondary: 'Se connecter',
-  ctaNote: 'Aucun compte nécessaire. Vous voyez le vrai produit avec des données d’exemple.',
+  ctaNote: 'Aucun compte nécessaire. Accès direct pour l’équipe — un clic, le vrai produit.',
 
   problemEyebrow: 'Le problème',
   problemTitle: 'L’intégration échoue souvent par fragmentation, pas par manque de volonté.',
@@ -108,7 +108,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   scienceEyebrow: 'Base scientifique',
   scienceTitle: `Une méthode, pas une opinion : ${FACTOR_COUNT} facteurs d’appariement — et une mécanique du quotidien fondée sur des résultats documentés.`,
-  scienceBody: `Les facteurs de compatibilité sont tirés de la recherche publiée — études suisses d’abord, internationales pour la mise en contexte, ${SOURCE_COUNT} sources au total — et la solidité des preuves est indiquée pour chaque facteur : certains résultats proviennent d’autres formes de logement et constituent, pour l’hébergement collectif, une hypothèse argumentée que le pilote vérifie. Et la mécanique au-delà de l’appariement suit les mêmes exigences : du biais d’auto-évaluation dans le plan de nettoyage à la règle selon laquelle la sécurité ne se met jamais au vote. La méthodologie complète et la liste des sources sont consultables dans le produit par toutes les équipes — et dans la démo, par vous.`,
+  scienceBody: `Les facteurs de compatibilité sont tirés de la recherche publiée — études suisses d’abord, internationales pour la mise en contexte, ${SOURCE_COUNT} sources au total — et la solidité des preuves est indiquée pour chaque facteur : certains résultats proviennent d’autres formes de logement et constituent, pour l’hébergement collectif, une hypothèse argumentée que le pilote vérifie. Et la mécanique au-delà de l’appariement suit les mêmes exigences : du biais d’auto-évaluation dans le plan de nettoyage à la règle selon laquelle la sécurité ne se met jamais au vote. La méthodologie complète et la liste des sources sont consultables dans le produit par toutes les équipes — et via l’accès direct sur la page de connexion.`,
   science: [
     {
       title: 'La propreté est une direction, pas une moyenne',
@@ -177,7 +177,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   closingTitle: 'Jetez-y un œil.',
   closingBody:
-    'La démo est le vrai produit avec des données d’exemple — administration, accompagnement et portail des résidentes et résidents. Le blog, la roadmap et le changelog rendent les décisions produit traçables.',
+    'L’accès direct sur la page de connexion ouvre le vrai produit — administration, accompagnement et portail des résidentes et résidents. Le blog, la roadmap et le changelog rendent les décisions produit traçables.',
 }
 
 const HOUSEHOLD_COPY: MarketingCopy = {
@@ -187,7 +187,7 @@ const HOUSEHOLD_COPY: MarketingCopy = {
     'Qui a sorti les poubelles, qui a payé le papier de toilette, et à partir de quand est-ce trop bruyant ? Tout au même endroit — pour ne pas tout renégocier à chaque fois.',
   ctaPrimary: 'Essayer',
   ctaSecondary: 'Se connecter',
-  ctaNote: 'Aucun compte nécessaire. Tu vois le vrai produit avec des données d’exemple.',
+  ctaNote: 'Aucun compte nécessaire. Accès direct pour l’équipe — un clic, le vrai produit.',
 
   problemEyebrow: 'Pourquoi',
   problemTitle: 'En colocation, une dispute porte rarement sur le sujet de la dispute.',
@@ -322,7 +322,7 @@ const HOUSEHOLD_COPY: MarketingCopy = {
 
   closingTitle: 'Regardez par vous-même.',
   closingBody:
-    'La démo est le vrai produit avec des données d’exemple — vous voyez exactement ce que voient les personnes qui y habitent.',
+    'L’accès direct ouvre le vrai produit — vous voyez exactement ce que voient les personnes qui y habitent.',
 }
 
 export const marketingFr: MarketingRegisters = {

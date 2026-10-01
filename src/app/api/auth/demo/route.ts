@@ -6,55 +6,78 @@ import { db, user, resident } from '@/lib/db'
 import { and, eq, inArray } from 'drizzle-orm'
 import { setResidentCookie } from '@/lib/portal-auth'
 import {
-  ALL_DEMO_RESIDENT_CODE_PREFIXES,
-  isDemoEnabled,
-  resolveDemoResidentCode,
-} from '@/lib/demo/config'
-import { demoStaffDoors } from '@/lib/demo/roles'
-import { isStaffRole } from '@/lib/auth/role-policy'
-import { ROLE_LABELS } from '@/lib/constants/labels'
+  isQuickAccessEnabled,
+  quickAccessName,
+  quickAccessResidentCode,
+  quickAccessStaffCodes,
+} from '@/lib/quick-access/config'
+import { LOGIN_LABELS, ROLE_LABELS } from '@/lib/constants/labels'
 import { BRAND } from '@/lib/config/brand'
 
-/** A door is identified by the staff role it opens, or by 'resident'. */
-type DemoDoorId = string
+/**
+ * Quick access: one-click sign-in on /login, no account needed.
+ *
+ * The site is fully real (decided by George 2026-10-01). The staff buttons
+ * sign in as NAMED REAL staff accounts listed in `QUICK_ACCESS_STAFF_CODES`;
+ * each of those people can later claim their account at /register. The
+ * client button signs in as an unclaimed placeholder profile.
+ *
+ * The route keeps its old path (`/api/auth/demo`) because the login page and
+ * cached bundles call it; the word "demo" no longer describes anything here.
+ */
 
-interface DemoDoor {
-  id: DemoDoorId
+/**
+ * A door id is OPAQUE: `staff-<n>` by position in the configured list, or
+ * 'resident'. Never the login code — GET answers anyone who loads /login, and
+ * a published staff code could be claimed at /register by a stranger before
+ * the colleague it belongs to. The code stays on the server (`OfferedDoor`).
+ */
+const RESIDENT_DOOR = 'resident'
+
+interface Door {
+  id: string
   label: string
 }
 
-function residentDoorLabel(): string {
-  return BRAND.clientTerm
+interface OfferedDoor extends Door {
+  /** Server-only: the login code behind the button. Never sent to the client. */
+  code: string
 }
 
 /**
- * Which demo doors this deployment can actually open.
+ * Which doors this deployment can actually open.
  *
- * The accounts are checked in the DATABASE, not merely in config. The codes
- * are derived now rather than configured, so config presence proves nothing —
- * it would happily offer five buttons on an instance where the seed never ran,
- * and every one of them would answer "invalid code". The rule the old version
- * stated is the right one and this keeps it: a button appears only when
- * pressing it can succeed.
+ * Every configured staff code is checked against the DATABASE: a code that
+ * does not resolve, or belongs to a deactivated account, offers no door —
+ * silently, because a button that answers "invalid code" is worse than none.
+ * Order follows the env var, so the operator decides who comes first.
  */
-async function availableDoors(): Promise<DemoDoor[]> {
-  if (!isDemoEnabled()) return []
+async function offeredDoors(): Promise<OfferedDoor[]> {
+  if (!isQuickAccessEnabled()) return []
 
-  const codes = demoStaffDoors().map((door) => door.code)
-  const present = await db.query.user.findMany({
-    where: and(inArray(user.code, codes), eq(user.active, true)),
-    columns: { code: true },
-  })
-  const live = new Set(present.map((user) => user.code))
+  const doors: OfferedDoor[] = []
 
-  const doors: DemoDoor[] = demoStaffDoors()
-    .filter((door) => live.has(door.code))
-    .map((door) => ({
-      id: door.role,
-      label: ROLE_LABELS[door.role] ?? door.role,
-    }))
+  const codes = quickAccessStaffCodes()
+  if (codes.length > 0) {
+    const rows = await db.query.user.findMany({
+      where: and(inArray(user.code, codes), eq(user.active, true)),
+      columns: { code: true, name: true, role: true },
+    })
+    const byCode = new Map(rows.map((row) => [row.code, row]))
+    for (const [index, code] of codes.entries()) {
+      const row = byCode.get(code)
+      if (!row) continue
+      const roleLabel = ROLE_LABELS[row.role] ?? row.role
+      const name = quickAccessName(row.name)
+      doors.push({
+        id: `staff-${index + 1}`,
+        code,
+        label: name ? LOGIN_LABELS.demo.staffDoor(name, roleLabel) : roleLabel,
+      })
+    }
+  }
 
-  const residentCode = resolveDemoResidentCode()
+  const residentCode = quickAccessResidentCode()
   if (residentCode) {
     const residentRow = await db.query.resident.findFirst({
       where: eq(resident.code, residentCode),
@@ -69,41 +92,22 @@ async function availableDoors(): Promise<DemoDoor[]> {
     // with that code, the row stops being a placeholder and becomes theirs —
     // same id, same code, same `DEMO_RESIDENT_CODE`. Without this condition,
     // the public door would silently turn into a door onto a real client's
-    // flat, roommates, expenses and reports. No config would have changed, no
-    // error would fire, and the button would keep working perfectly.
+    // flat, roommates, expenses and reports.
     //
     // Config discipline cannot prevent that, because the event that causes it
     // is a resident registering — something nobody is watching the env var
     // for. So the guard is in code and reads the same fact the marker does.
-    //
-    // An invented resident (a demo code prefix) is the other safe target: no
-    // real person is ever issued a demo code, and the nightly reset re-creates
-    // the row. Real clients never match either condition.
-    const invented = ALL_DEMO_RESIDENT_CODE_PREFIXES.some((prefix) =>
-      residentCode.startsWith(prefix),
-    )
-    if (residentRow && (residentRow.isPlaceholder || invented)) {
-      doors.push({ id: 'resident', label: residentDoorLabel() })
+    if (residentRow?.isPlaceholder) {
+      doors.push({ id: RESIDENT_DOOR, code: residentCode, label: BRAND.clientTerm })
     }
   }
 
   return doors
 }
 
-/** The code behind a door id, or null when that door is not on offer. */
-async function codeForDoor(id: DemoDoorId): Promise<string | null> {
-  const doors = await availableDoors()
-  if (!doors.some((door) => door.id === id)) return null
-
-  if (id === 'resident') return resolveDemoResidentCode()
-  if (!isStaffRole(id)) return null
-
-  return demoStaffDoors().find((door) => door.role === id)?.code ?? null
-}
-
 export async function GET() {
   try {
-    const doors = await availableDoors()
+    const doors: Door[] = (await offeredDoors()).map(({ id, label }) => ({ id, label }))
 
     return NextResponse.json({
       success: true,
@@ -111,12 +115,12 @@ export async function GET() {
         doors,
         // Kept so an older cached login bundle still renders its two buttons
         // instead of none while the new one rolls out.
-        staff: doors.some((door) => door.id !== 'resident'),
-        resident: doors.some((door) => door.id === 'resident'),
+        staff: doors.some((door) => door.id !== RESIDENT_DOOR),
+        resident: doors.some((door) => door.id === RESIDENT_DOOR),
       },
     })
   } catch (error) {
-    logger.errorWithCause('Demo door listing failed', error)
+    logger.errorWithCause('Quick access door listing failed', error)
     return NextResponse.json({ success: true, data: { doors: [], staff: false, resident: false } })
   }
 }
@@ -124,24 +128,24 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const requested = typeof body?.role === 'string' ? body.role : ''
+    const requested = typeof body?.role === 'string' ? body.role.trim() : ''
 
-    // 'staff' is the old identifier for what is now the Leitung door. Old
-    // clients and bookmarks still send it, and answering them "invalid" would
-    // break a door that worked yesterday for no reason the user could act on.
-    const doorId = requested === 'staff' ? 'ADMIN' : requested
-
-    const code = doorId ? await codeForDoor(doorId) : null
-    if (!code) {
+    // Only a door GET would offer can be opened. The id is matched against the
+    // offered list rather than used as a code directly: otherwise this
+    // endpoint would sign anyone in with ANY staff code they could guess.
+    const door = requested
+      ? (await offeredDoors()).find((offered) => offered.id === requested)
+      : undefined
+    if (!door) {
       return NextResponse.json(
-        { success: false, error: 'Demo-Zugang ist nicht konfiguriert' },
+        { success: false, error: LOGIN_LABELS.demo.notConfigured },
         { status: 404 },
       )
     }
 
     const clientIp = getClientIp(request)
 
-    // Throttle: the demo endpoint issues real sessions; rate-limit per IP.
+    // Throttle: this endpoint issues real sessions; rate-limit per IP.
     const rateCheck = checkRateLimit(clientIp)
     if (!rateCheck.allowed) {
       return NextResponse.json(
@@ -153,16 +157,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await loginByCode(code.trim().toUpperCase(), clientIp)
+    const result = await loginByCode(door.code, clientIp)
 
     if (!result.success) {
       return NextResponse.json({ success: false, error: result.error }, { status: 401 })
     }
 
     // Count the SUCCESS. loginByCode already records failed codes, but the
-    // thing this endpoint throttles is session issuance, and a demo code is
-    // valid by definition — so without this one IP could mint unlimited
-    // sessions from a known-good code while the counter stayed at zero.
+    // thing this endpoint throttles is session issuance, and a configured code
+    // is valid by definition — so without this one IP could mint unlimited
+    // sessions while the counter stayed at zero.
     recordLoginAttempt(clientIp)
 
     if (result.type === 'staff') {
@@ -174,10 +178,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, type: 'resident' })
   } catch (error) {
-    logger.errorWithCause('Demo login failed', error)
-    return NextResponse.json(
-      { success: false, error: 'Demo-Zugang fehlgeschlagen' },
-      { status: 500 },
-    )
+    logger.errorWithCause('Quick access login failed', error)
+    return NextResponse.json({ success: false, error: LOGIN_LABELS.demo.failed }, { status: 500 })
   }
 }

@@ -117,16 +117,17 @@ export const LOGIN_LABELS = {
     generic: 'Ein Fehler ist aufgetreten',
   },
   help: `Bei Problemen wenden Sie sich an die ${BRAND.shortName}-Verwaltung.`,
+  // Quick access: one button per NAMED REAL staff account
+  // (QUICK_ACCESS_STAFF_CODES), plus an unclaimed placeholder client. Not a
+  // demo — there is no invented data on this site any more (2026-10-01).
   demo: {
-    title: 'Direkt ausprobieren',
-    // The person's term comes from the brand, like their code prefix does —
-    // this line used to say "Bewohner:in", a third gendering convention beside
-    // the gender star used everywhere else in the product.
-    // Names the choice, because the choice is the point: the product looks
-    // different for every role, and the visitor picks which one to stand in.
-    description: `Ohne Konto, ein Klick: Sie sehen das echte Produkt aus der Sicht der Rolle, die Sie wählen — auch als ${BRAND.clientTerm}.`,
-    staff: `${BRAND.shortName}-Verwaltung`,
-    resident: `Als ${BRAND.clientTerm} ausprobieren`,
+    title: 'Direkter Zugang für das Team',
+    description:
+      'Ohne Konto, ein Klick. Ihr eigenes Konto mit E-Mail und Passwort können Sie später unter «Konto erstellen» mit Ihrem Code einrichten.',
+    /** «Simon B. · Jobcoach» — the person's name, then what they do. */
+    staffDoor: (name: string, roleLabel: string) => `${name} · ${roleLabel}`,
+    notConfigured: 'Dieser Zugang ist nicht verfügbar.',
+    failed: 'Anmeldung über den direkten Zugang fehlgeschlagen.',
   },
 } as const
 

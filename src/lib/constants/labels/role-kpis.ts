@@ -8,7 +8,7 @@ export const ROLE_KPI_LABELS = {
 
   /** Says whose numbers these are — a personal caseload or the whole pilot. */
   scopeOwn: 'Ihre begleiteten Personen.',
-  scopeAll: 'Alle Klient*innen — ohne Demo-Daten.',
+  scopeAll: 'Alle Klient*innen — ohne noch nicht übernommene Platzhalter-Profile.',
 
   unitDays: 'Tage · ',
   /**

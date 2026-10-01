@@ -15,12 +15,12 @@
  * whole real population instead: for them these are pilot numbers, not a
  * personal scorecard.
  *
- * Demo rows never count, in either case. @see ./real-data.ts
+ * Unclaimed placeholder profiles never count, in either case. @see ./real-data.ts
  */
 
 import { and, eq, inArray } from 'drizzle-orm'
 import { careAssignment, db, resident } from '@/lib/db'
-import { loadDemoScope } from './real-data'
+import { loadPlaceholderScope } from './real-data'
 import { isAwaitingAnswer } from '@/lib/jobcoach/queue'
 import {
   computeJobKpis,
@@ -39,14 +39,14 @@ export interface RoleKpiRequest {
 }
 
 /**
- * The residents a KPI set covers, already stripped of demo rows.
+ * The residents a KPI set covers, already stripped of placeholders.
  *
  * Returns ids only; the caller fetches what each KPI needs. Splitting it this
  * way keeps "who counts" in one place — the question every KPI shares — while
  * letting the job and volunteering sets ask for different columns.
  */
 async function caseloadResidentIds(request: RoleKpiRequest): Promise<string[]> {
-  const demoScope = await loadDemoScope()
+  const scope = await loadPlaceholderScope()
 
   if (request.staffId) {
     const rows = await db.query.careAssignment.findMany({
@@ -56,11 +56,11 @@ async function caseloadResidentIds(request: RoleKpiRequest): Promise<string[]> {
       ),
       columns: { residentId: true },
     })
-    return rows.map((r) => r.residentId).filter((id) => !demoScope.residentIds.has(id))
+    return rows.map((r) => r.residentId).filter((id) => !scope.residentIds.has(id))
   }
 
   const rows = await db.query.resident.findMany({ columns: { id: true } })
-  return rows.map((r) => r.id).filter((id) => !demoScope.residentIds.has(id))
+  return rows.map((r) => r.id).filter((id) => !scope.residentIds.has(id))
 }
 
 export async function loadJobKpis(request: RoleKpiRequest): Promise<KpiValue[]> {

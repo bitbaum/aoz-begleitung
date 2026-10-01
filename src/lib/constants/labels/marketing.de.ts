@@ -14,7 +14,7 @@ import {
  * reported yet, and a landing page that invents its own evidence is the one
  * thing that would disqualify it in front of the people being asked to trust
  * it with vulnerable residents. Everything claimed here is a description of
- * what the software does, which is checkable by pressing the demo button.
+ * what the software does, which is checkable by pressing a quick-access button.
  * That rule binds every translation too — a language is not a licence to make
  * a stronger claim than the German page makes.
  */
@@ -30,7 +30,7 @@ const PLACEMENT_COPY: MarketingCopy = {
     'Wohnen, Alltag im Haus, Gemeinschaft und Integration in einem Verlauf — Fachpersonen und Klient*innen sehen denselben Stand.',
   ctaPrimary: 'Produkt ansehen',
   ctaSecondary: 'Anmelden',
-  ctaNote: 'Kein Konto nötig. Sie sehen das echte Produkt mit Beispieldaten.',
+  ctaNote: 'Kein Konto nötig. Direkter Zugang für das Team — ein Klick, das echte Produkt.',
 
   problemEyebrow: 'Das Problem',
   problemTitle: 'Integration scheitert oft an Fragmentierung, nicht an fehlendem Willen.',
@@ -118,7 +118,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   scienceEyebrow: 'Wissenschaftliche Grundlage',
   scienceTitle: `Keine Meinung, sondern Methode: ${FACTOR_COUNT} Matching-Faktoren — und Alltagsmechanik nach dokumentierten Befunden.`,
-  scienceBody: `Die Kompatibilitätsfaktoren sind aus publizierter Forschung abgeleitet — Schweizer Studien zuerst, internationale zur Einordnung, insgesamt ${SOURCE_COUNT} Quellen —, und die Evidenzstärke ist je Faktor offen ausgewiesen: Manche Befunde stammen aus anderen Wohnformen und sind für Kollektivunterkünfte eine begründete Annahme, die der Pilot prüft. Und die Mechanik jenseits des Matchings folgt denselben Massstäben: vom Eigenanteil-Bias beim Putzplan bis zur Regel, dass Sicherheit nie zur Abstimmung steht. Die vollständige Methodik samt Quellenverzeichnis ist im Produkt für alle Fachpersonen einsehbar — und in der Demo für Sie.`,
+  scienceBody: `Die Kompatibilitätsfaktoren sind aus publizierter Forschung abgeleitet — Schweizer Studien zuerst, internationale zur Einordnung, insgesamt ${SOURCE_COUNT} Quellen —, und die Evidenzstärke ist je Faktor offen ausgewiesen: Manche Befunde stammen aus anderen Wohnformen und sind für Kollektivunterkünfte eine begründete Annahme, die der Pilot prüft. Und die Mechanik jenseits des Matchings folgt denselben Massstäben: vom Eigenanteil-Bias beim Putzplan bis zur Regel, dass Sicherheit nie zur Abstimmung steht. Die vollständige Methodik samt Quellenverzeichnis ist im Produkt für alle Fachpersonen einsehbar — auch über den direkten Zugang auf der Anmeldeseite.`,
   science: [
     {
       title: 'Sauberkeit ist eine Richtung, kein Durchschnitt',
@@ -187,7 +187,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   closingTitle: 'Sehen Sie es sich an.',
   closingBody:
-    'Die Demo ist das echte Produkt mit Beispieldaten — Verwaltung, Begleitung und das Portal der Klient*innen. Blog, Roadmap und Changelog machen die Produktentscheidungen nachvollziehbar.',
+    'Der direkte Zugang auf der Anmeldeseite öffnet das echte Produkt — Verwaltung, Begleitung und das Portal der Klient*innen. Blog, Roadmap und Changelog machen die Produktentscheidungen nachvollziehbar.',
 }
 
 /** The household register: the people who actually live in the flat. */
@@ -198,7 +198,7 @@ const HOUSEHOLD_COPY: MarketingCopy = {
     'Wer hat den Abfall rausgebracht, wer hat das WC-Papier bezahlt, und ab wann ist es zu laut? Alles an einem Ort — damit es nicht jedes Mal von vorn ausgehandelt wird.',
   ctaPrimary: 'Ausprobieren',
   ctaSecondary: 'Anmelden',
-  ctaNote: 'Kein Konto nötig. Du siehst das echte Produkt mit Beispieldaten.',
+  ctaNote: 'Kein Konto nötig. Direkter Zugang für das Team — ein Klick, das echte Produkt.',
 
   problemEyebrow: 'Warum',
   problemTitle: 'Streit in einer WG ist selten ein Streit über die Sache.',
@@ -332,7 +332,7 @@ const HOUSEHOLD_COPY: MarketingCopy = {
 
   closingTitle: 'Schau es dir an.',
   closingBody:
-    'Die Demo ist das echte Produkt mit Beispieldaten — du siehst genau das, was die Bewohnenden sehen.',
+    'Der direkte Zugang öffnet das echte Produkt — du siehst genau das, was die Bewohnenden sehen.',
 }
 
 export const marketingDe: MarketingRegisters = {

@@ -29,8 +29,6 @@ import { UnitModePanel } from '@/components/matching/UnitModePanel'
 import { MatchResultsPanel } from '@/components/matching/MatchResultsPanel'
 import { residentName } from '@/lib/utils/resident-name'
 import { requirePermission } from '@/lib/auth'
-import { belongsToSameWorld, isDemoResidentCode, isDemoUnitCode } from '@/lib/analytics/real-data'
-import { residentCodeInWorld, staffViewerWorld, unitCodeInWorld } from '@/lib/demo/world'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,14 +43,8 @@ interface Props {
 }
 
 export default async function MatchingPage({ searchParams }: Props) {
-  const viewer = await requirePermission('placements:write')
+  await requirePermission('placements:write')
   const params = await searchParams
-
-  // The candidate LISTS follow the viewer's world too, not only the scoring:
-  // a real caseworker is never shown an invented person or flat to place, and
-  // a demo door never a real one. @see lib/demo/world.ts
-  const world = await staffViewerWorld(viewer.id)
-  const residentInWorld = residentCodeInWorld(resident.code, world)
   const residentQuery = (params.q || '').trim().toLowerCase()
 
   // All four queries are independent — fetch in parallel
@@ -67,7 +59,6 @@ export default async function MatchingPage({ searchParams }: Props) {
       // active placement, expressed as a NOT IN subquery.
       where: and(
         eq(resident.status, 'ACTIVE'),
-        residentInWorld,
         notInArray(
           resident.id,
           db
@@ -82,7 +73,6 @@ export default async function MatchingPage({ searchParams }: Props) {
       // `placements: { some: { status: ACTIVE } }` — as an IN subquery.
       where: and(
         eq(resident.status, 'PLACED'),
-        residentInWorld,
         inArray(
           resident.id,
           db
@@ -100,12 +90,9 @@ export default async function MatchingPage({ searchParams }: Props) {
       },
       orderBy: [asc(resident.code)],
     }),
-    db.$count(resident, residentInWorld),
+    db.$count(resident),
     db.query.housingUnit.findMany({
-      where: and(
-        inArray(housingUnit.status, ['AVAILABLE', 'FULL']),
-        unitCodeInWorld(housingUnit.code, world),
-      ),
+      where: inArray(housingUnit.status, ['AVAILABLE', 'FULL']),
       with: {
         placements: {
           where: eq(placement.status, 'ACTIVE'),
@@ -142,13 +129,8 @@ export default async function MatchingPage({ searchParams }: Props) {
       )
       apartmentProfile.unitId = selectedUnit.id
 
-      // Calculate fit for each unplaced resident — same world only. The other
-      // direction of the same rule: a demo unit must not be offered a real
-      // person, which is how a demo tour would reach into the real flat.
+      // Calculate fit for each unplaced resident
       unitMatches = unplacedResidents
-        .filter((r) =>
-          belongsToSameWorld(isDemoUnitCode(selectedUnit!.code), isDemoResidentCode(r.code)),
-        )
         .map((resident) => {
           const residentProfile = toResidentProfile(resident)
           const apartmentFit = calculateApartmentFit(residentProfile, apartmentProfile)
@@ -184,16 +166,7 @@ export default async function MatchingPage({ searchParams }: Props) {
     selectedResident = foundResident ?? null
 
     if (foundResident) {
-      // Candidates never cross the demo boundary. Same rule as the client
-      // page's recommendations, and this is the surface where it matters most:
-      // /matching exists to make the placement decision, so a demo flat offered
-      // here is one keystroke from a real person being placed into a unit the
-      // 04:05 reset deletes. @see lib/analytics/real-data.ts
-      const filteredUnits = availableUnits
-        .filter((unit) => unit.placements.length < unit.totalBeds)
-        .filter((unit) =>
-          belongsToSameWorld(isDemoResidentCode(selectedResident!.code), isDemoUnitCode(unit.code)),
-        )
+      const filteredUnits = availableUnits.filter((unit) => unit.placements.length < unit.totalBeds)
 
       // Calculate matches with unit metrics (async)
       matches = await Promise.all(

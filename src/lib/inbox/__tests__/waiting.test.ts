@@ -8,8 +8,6 @@
 
 import { PgDialect } from 'drizzle-orm/pg-core'
 import { OPPORTUNITY_KINDS, WORK_OPPORTUNITY_KINDS } from '@/lib/config/opportunities'
-import { ALL_DEMO_RESIDENT_CODE_PREFIXES } from '@/lib/demo/config'
-import { REAL_WORLD, type ViewerWorld } from '@/lib/demo/world'
 import { hasPermission } from '@/lib/auth/role-policy'
 import {
   answerableOpportunityKinds,
@@ -68,33 +66,18 @@ describe('answerableOpportunityKinds', () => {
 describe('waitingApplications', () => {
   it('returns nothing, without a query, to someone who may not answer', async () => {
     // Betreuung reads the board and may not act on it.
-    await expect(waitingApplications(own('BETREUUNG'), REAL_WORLD)).resolves.toEqual([])
+    await expect(waitingApplications(own('BETREUUNG'))).resolves.toEqual([])
   })
 })
 
-/**
- * The live bug: the REAL Jobcoach's Eingang said 2, and both were invented
- * residents ("Elena", "Grace"). The list and the badge share one WHERE, so
- * proving it narrows by world proves both.
- */
-describe("waiting requests follow the viewer's world", () => {
+describe('the list and the badge share one WHERE', () => {
   const dialect = new PgDialect()
-  const realWorld: ViewerWorld = { isDemo: false, demoStaffIds: new Set(['demo-staff']) }
-  const demoWorld: ViewerWorld = { isDemo: true, demoStaffIds: new Set(['demo-staff']) }
-  const render = (world: ViewerWorld) =>
-    dialect.sqlToQuery(waitingApplicationsWhere(WORK_OPPORTUNITY_KINDS, world)!)
+  const render = () => dialect.sqlToQuery(waitingApplicationsWhere(WORK_OPPORTUNITY_KINDS)!)
 
-  it('a real viewer: every demo prefix is EXCLUDED from the residents asked about', () => {
-    const { sql, params } = render(realWorld)
-    expect(sql).toMatch(/not \(?\(?"Resident"\."code" like/i)
-    for (const prefix of ALL_DEMO_RESIDENT_CODE_PREFIXES) expect(params).toContain(`${prefix}%`)
-  })
-
-  it('a demo viewer: ONLY demo-prefixed residents', () => {
-    const { sql, params } = render(demoWorld)
-    expect(sql).not.toMatch(/not \(?\(?"Resident"\."code"/i)
-    expect(sql).toMatch(/"Resident"\."code" like/i)
-    for (const prefix of ALL_DEMO_RESIDENT_CODE_PREFIXES) expect(params).toContain(`${prefix}%`)
+  it('narrows to the listing kinds this viewer answers', () => {
+    const { sql, params } = render()
+    expect(sql).toMatch(/"Opportunity"\."kind" in/i)
+    for (const kind of WORK_OPPORTUNITY_KINDS) expect(params).toContain(kind)
   })
 
   it('the Eingang list query carries that WHERE', async () => {
@@ -110,12 +93,12 @@ describe("waiting requests follow the viewer's world", () => {
     }
     mockSelect.mockReturnValue(chain)
 
-    await waitingApplications(own('JOBCOACH'), realWorld)
+    await waitingApplications(own('JOBCOACH'))
 
-    expect(dialect.sqlToQuery(captured as never)).toEqual(render(realWorld))
+    expect(dialect.sqlToQuery(captured as never)).toEqual(render())
   })
 
-  it('the nav badge resolves the viewer by id and counts only their world', async () => {
+  it('the nav badge counts the same requests and every pending fact', async () => {
     const viewer = {
       id: 'simon',
       role: 'JOBCOACH',
@@ -135,22 +118,16 @@ describe("waiting requests follow the viewer's world", () => {
         return Promise.resolve([{ n: 0 }])
       },
     }
-    mockSelect.mockImplementation((fields: Record<string, unknown>) =>
-      'n' in fields
-        ? countChain
-        : // the demo staff lookup: simon is not among them
-          { from: () => ({ where: () => Promise.resolve([{ id: 'demo-staff' }]) }) },
-    )
+    mockSelect.mockReturnValue(countChain)
     mockFactQueue.mockResolvedValue([
-      { id: 'f1', resident: { code: `${ALL_DEMO_RESIDENT_CODE_PREFIXES[0]}3` } },
+      { id: 'f1', resident: { code: 'KL-AAAA01' } },
       { id: 'f2', resident: { code: 'KL-REAL01' } },
     ])
 
     const counts = await waitingCounts(viewer)
 
     const rendered = wheres.map((w) => dialect.sqlToQuery(w as never))
-    expect(rendered).toContainEqual(render(realWorld))
-    // One demo, one real pending fact: the real Jobcoach is asked about one.
-    expect(counts.approvals).toBe(1)
+    expect(rendered).toContainEqual(render())
+    expect(counts.approvals).toBe(2)
   })
 })

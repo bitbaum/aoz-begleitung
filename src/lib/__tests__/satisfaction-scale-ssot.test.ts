@@ -31,7 +31,12 @@ function sourceFiles(): string[] {
     encoding: 'utf8',
     cwd: process.cwd(),
   })
-  return out.split('\n').filter(Boolean)
+  // A tracked file deleted in the working tree (not yet committed) has nothing
+  // left to scan; reading it would fail the gate for a reason unrelated to it.
+  return out
+    .split('\n')
+    .filter(Boolean)
+    .filter((file) => fs.existsSync(file))
 }
 
 describe('the satisfaction scale is defined once', () => {
