@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Live check of the Einsatzplatz form assistant, through the DEMO door only.
+# Live check of the Einsatzplatz form assistant, through the first quick-access door.
 #
-# Safe against production: form-assist returns values and never saves, and the
-# demo door signs into the isolated demo world (re-seeded nightly), never a
-# real staff account. Usage: bash scripts/smoke/form-assist.sh [base-url]
+# Safe against production: form-assist returns values and never saves. The
+# door (staff-1, the first QUICK_ACCESS_STAFF_CODES entry) needs opportunities:write;
+# nothing is written. Usage: bash scripts/smoke/form-assist.sh [base-url]
 set -euo pipefail
 BASE=${1:-https://aoz.orangecat.ch}
 JAR=$(mktemp)
 trap 'rm -f "$JAR"' EXIT
 
-curl -fsS -c "$JAR" -H 'Content-Type: application/json' -d '{"role":"ADMIN"}' \
+curl -fsS -c "$JAR" -H 'Content-Type: application/json' -d '{"role":"staff-1"}' \
   "$BASE/api/auth/demo" >/dev/null
-echo "== signed in via demo door"
+echo "== signed in via quick-access door staff-1"
 
 post() {
   curl -sS -b "$JAR" -H 'Content-Type: application/json' -d "$1" "$BASE/api/ai/form-assist"

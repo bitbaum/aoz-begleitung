@@ -19,6 +19,7 @@ import { logger } from '@/lib/logger'
 import { z } from 'zod'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { requireStaffAuth } from '@/lib/auth'
+import { hasPermission } from '@/lib/auth/role-policy'
 
 /** Minimal schema — scores are now computed server-side */
 const placeResidentSchema = z.object({
@@ -71,6 +72,12 @@ function buildPlacementRationale(
 
 export async function placeResident(formData: FormData) {
   const user = await requireStaffAuth()
+  // A session is not a right. This took `requireStaffAuth()` alone, so any
+  // staff member could place a person into a flat — including roles whose
+  // menu does not offer /matching at all. Same verb as createPlacement.
+  if (!hasPermission(user, 'placements:write')) {
+    throw new Error(ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS)
+  }
   // Parse minimal form data (scores excluded — computed server-side)
   let validatedData
   try {

@@ -16,6 +16,7 @@
 
 import { MEGAMENU_GROUPS, visibleMegaMenuGroups } from '../navigation'
 import {
+  NARROWEST_CAPABILITIES,
   ASSIGNABLE_STAFF_ROLES,
   STAFF_SCOPES,
   type StaffCapabilities,
@@ -74,16 +75,11 @@ describe('flattening keeps the boundary it had inside the group', () => {
     // Without this the flattened entry would be offered to roles the grouped
     // version correctly hid it from — a dead end dressed as a destination.
     //
-    // Liegenschaften: since "Lernen & Beruf" moved in with the people, every
-    // integration role keeps two or more items in "Klient*innen" and stays an
-    // accordion. The building team reads the register and nothing else of it,
-    // which is the one-survivor shape the flattening rule is about.
-    const coordinator: StaffCapabilities = {
-      role: 'LIEGENSCHAFTEN',
-      scope: 'OWN_DOMAIN',
-      isSystemAdmin: false,
-    }
-    const groups = visibleMegaMenuGroups(coordinator)
+    // No real role has the one-survivor shape any more: Liegenschaften gained
+    // `residents:write` for intake (2026-10-01), so its "Klient*innen" holds
+    // the register AND "Neue*r Klient*in". The expired-session stand-in still
+    // reads only the register, which is the shape the flattening rule is about.
+    const groups = visibleMegaMenuGroups(NARROWEST_CAPABILITIES)
 
     const residents = groups.find((g) => 'href' in g && g.href === '/residents')
     expect(residents).toBeDefined()

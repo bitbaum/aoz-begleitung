@@ -11,12 +11,15 @@ interface RoomVisualizationWithPlacementProps {
   spots: HousingSpot[]
   housingUnitId: string
   compatibleResidents: CompatibleResident[]
+  /** Without placements:write a free bed is shown, not offered. */
+  canPlace?: boolean
 }
 
 export function RoomVisualizationWithPlacement({
   spots,
   housingUnitId,
   compatibleResidents,
+  canPlace = true,
 }: RoomVisualizationWithPlacementProps) {
   const router = useRouter()
   const [isPanelOpen, setIsPanelOpen] = useState(false)
@@ -47,7 +50,7 @@ export function RoomVisualizationWithPlacement({
       <RoomVisualization
         spots={spots}
         housingUnitId={housingUnitId}
-        onAvailableBedClick={handleAvailableBedClick}
+        onAvailableBedClick={canPlace ? handleAvailableBedClick : undefined}
         useBedGrid={true}
       />
 

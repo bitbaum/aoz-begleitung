@@ -16,6 +16,7 @@
  */
 
 import type { StaffRole } from '@/lib/auth/role-policy'
+import { deskFor } from '@/lib/config/roles'
 
 export const INTEGRATION_BOARD_IDS = ['overview', 'job', 'volunteering'] as const
 export type IntegrationBoardId = (typeof INTEGRATION_BOARD_IDS)[number]
@@ -33,9 +34,7 @@ export function isIntegrationBoardId(value: string): value is IntegrationBoardId
  * of places is nobody's file.
  */
 export function defaultIntegrationBoardForRole(role: StaffRole): IntegrationBoardId {
-  if (role === 'JOBCOACH') return 'job'
-  if (role === 'FREIWILLIGENARBEIT') return 'volunteering'
-  return 'overview'
+  return deskFor(role).integrationBoard
 }
 
 /**

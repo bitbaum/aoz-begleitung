@@ -300,3 +300,42 @@ describe('auth guard', () => {
     )
   })
 })
+
+// =============================================================================
+// permission guard
+// =============================================================================
+
+describe('placements:write guard', () => {
+  /**
+   * Approving or denying a transfer decides where somebody lives. It took a
+   * session alone, so a Jobcoach could decide it.
+   */
+  const signedInAs = async (role: 'JOBCOACH' | 'SOZIALARBEIT') => {
+    const { requireStaffAuth: mockRequireStaffAuth } = vi.mocked(await import('@/lib/auth'))
+    mockRequireStaffAuth.mockResolvedValueOnce({
+      id: 'staff-2',
+      email: '',
+      name: 'Someone',
+      role,
+      scope: 'OWN_DOMAIN',
+      isSystemAdmin: false,
+    } as never)
+  }
+
+  it.each(['JOBCOACH', 'SOZIALARBEIT'] as const)(
+    'refuses %s an approval without writing anything',
+    async (role) => {
+      await signedInAs(role)
+      const result = await approveTransferRequest({ requestId: 'tr-1' })
+      expect(result).toEqual({ success: false, error: ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS })
+      expect(mockTransferUpdate).not.toHaveBeenCalled()
+    },
+  )
+
+  it('refuses a denial the same way', async () => {
+    await signedInAs('JOBCOACH')
+    const result = await denyTransferRequest({ requestId: 'tr-1' })
+    expect(result).toEqual({ success: false, error: ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS })
+    expect(mockTransferUpdate).not.toHaveBeenCalled()
+  })
+})

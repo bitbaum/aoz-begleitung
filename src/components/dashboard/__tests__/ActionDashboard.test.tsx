@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { render, screen } from '@testing-library/react'
 import { ActionDashboard } from '../ActionDashboard'
+import { DASHBOARD_LABELS } from '@/lib/constants/labels'
 
 // --- Mocks ---
 
@@ -76,6 +77,7 @@ const BASE_PROPS = {
   waitingThreads: [],
   overdueFollowUps: [],
   expiringFacts: [],
+  openMaintenance: [],
   housingUnitCount: 4,
   occupiedBeds: 10,
   totalBeds: 20,
@@ -238,17 +240,38 @@ describe('ActionDashboard', () => {
     expect(screen.getAllByTestId('quick-stat')).toHaveLength(7)
   })
 
-  it('gives BETREUUNG one tile fewer — no team health', () => {
+  it('gives BETREUUNG the pulse of its own desk, in its order — no team, no stock', () => {
     render(
       <ActionDashboard
         {...BASE_PROPS}
         viewer={{ role: 'BETREUUNG', scope: 'OWN_DOMAIN', isSystemAdmin: false }}
       />,
     )
-    const stats = screen.getAllByTestId('quick-stat')
+    const stats = screen.getAllByTestId('quick-stat').map((s) => s.textContent?.split(':')[0])
 
-    expect(stats).toHaveLength(6)
-    expect(stats.some((s) => s.textContent?.includes('Team'))).toBe(false)
+    // Check-ins, harmony, learning — the desk's order (config/roles.ts).
+    expect(stats).toEqual(['Check-ins', 'Harmonie', 'Lernen & Beruf'])
+  })
+
+  it('gives LIEGENSCHAFTEN free beds and maintenance, never check-ins', () => {
+    render(
+      <ActionDashboard
+        {...BASE_PROPS}
+        viewer={{ role: 'LIEGENSCHAFTEN', scope: 'OWN_DOMAIN', isSystemAdmin: false }}
+        overdueCheckIns={[makeCheckIn('c1')]}
+        openMaintenance={[
+          { id: 'm1', title: 'Heizung tropft', unitCode: 'WIT-1', priority: 'HIGH', daysOpen: 3 },
+        ]}
+        openMaintenanceCount={1}
+      />,
+    )
+    const stats = screen.getAllByTestId('quick-stat').map((s) => s.textContent?.split(':')[0])
+    expect(stats).toEqual(['Freie Plätze', 'Wartung'])
+    // A check-in handed to the component is still not this desk's work.
+    expect(screen.queryByText(new RegExp(DASHBOARD_LABELS.tileCheckIns))).not.toBeInTheDocument()
+    // Maintenance is listed, and counted as the one open task.
+    expect(screen.getByText(`${DASHBOARD_LABELS.tileMaintenanceOpen} (1)`)).toBeInTheDocument()
+    expect(screen.getByText(DASHBOARD_LABELS.oneTaskWaiting)).toBeInTheDocument()
   })
 
   // The team tile's SUBTEXT ("n Konten waren noch nie angemeldet") is not
@@ -392,7 +415,7 @@ describe('ActionDashboard', () => {
     expect(tiles.some((t) => t.includes('Nachfassen überfällig'))).toBe(false)
   })
 
-  it('hides check-in and maintenance stats for SOZIALARBEIT but keeps occupancy', () => {
+  it('hides check-in, maintenance and occupancy stats for SOZIALARBEIT', () => {
     render(
       <ActionDashboard
         {...BASE_PROPS}
@@ -401,7 +424,8 @@ describe('ActionDashboard', () => {
     )
     expect(screen.queryByText(/Check-ins:/)).not.toBeInTheDocument()
     expect(screen.queryByText(/Wartung:/)).not.toBeInTheDocument()
-    expect(screen.getByText(/Freie Plätze: 10/)).toBeInTheDocument()
+    expect(screen.queryByText(/Freie Plätze:/)).not.toBeInTheDocument()
+    expect(screen.getByText(/Harmonie:/)).toBeInTheDocument()
   })
 
   it('shows correct freeBeds in the free-beds stat', () => {
@@ -616,15 +640,13 @@ describe('ActionDashboard', () => {
 
   it('shows real work rather than the onboarding notice', () => {
     // A specialist can be handed a task before anyone formalises the
-    // assignment. Telling them to go and get assigned while a critical
-    // incident sits unread would be the notice actively hiding the work.
+    // assignment. Telling them to go and get assigned while a permit waits
+    // for a look would be the notice actively hiding the work.
     render(
       <ActionDashboard
         {...SPECIALIST}
         assignedResidentCount={0}
-        criticalIncidents={[
-          { id: 'i1', type: 'VIOLENCE', unitCode: 'WIT-458', unitId: 'u1', daysSinceCreated: 1 },
-        ]}
+        pendingApprovals={[{ id: 'f1', name: 'Amina', summary: 'Ausweis B' }]}
       />,
     )
     expect(screen.queryByText('Noch keine Klient*innen zugewiesen')).not.toBeInTheDocument()

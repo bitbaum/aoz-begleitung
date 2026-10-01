@@ -13,6 +13,7 @@ import { APP_LABELS, PAGE_TITLES, ROLE_LABELS } from '@/lib/constants/labels'
 import { ImpersonationBanner } from '@/components/layout/ImpersonationBanner'
 import { getCurrentUser } from '@/lib/auth'
 import { RESIDENT_COOKIE } from '@/lib/auth/constants'
+import { deskFor } from '@/lib/config/roles'
 import { visibleMegaMenuGroups, visibleSystemLinks, withInboxBadge } from '@/lib/config/navigation'
 import { waitingBadgeCount } from '@/lib/inbox/waiting'
 
@@ -77,6 +78,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                   horizontal scroll nobody finds. Measured, not guessed. */}
               <UserMenu
                 user={{ name: user.name, email: user.email, role: user.role }}
+                deskDescription={deskFor(user.role).description}
                 hasPortalAccess={hasPortalAccess}
                 systemLinks={systemLinks}
               />

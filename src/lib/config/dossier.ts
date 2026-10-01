@@ -14,6 +14,7 @@
  */
 
 import type { StaffRole } from '@/lib/auth/role-policy'
+import { deskFor } from '@/lib/config/roles'
 
 export const DOSSIER_TABS = ['overview', 'integration', 'housing', 'living', 'documents'] as const
 export type DossierTab = (typeof DOSSIER_TABS)[number]
@@ -26,11 +27,9 @@ export const DOSSIER_TAB_LABELS: Record<DossierTab, string> = {
   documents: 'Unterlagen',
 }
 
-/** Where each role's own work on a person lives — the section it opens on. */
+/** Where each role's own work on a person lives — the section it opens on. @see config/roles.ts */
 export function defaultDossierTab(role: StaffRole): DossierTab {
-  if (role === 'JOBCOACH' || role === 'FREIWILLIGENARBEIT') return 'integration'
-  if (role === 'LIEGENSCHAFTEN') return 'housing'
-  return 'overview'
+  return deskFor(role).dossierTab
 }
 
 /**

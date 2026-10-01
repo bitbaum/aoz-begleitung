@@ -2,7 +2,7 @@
 
 created_date: 2025-06-01
 last_modified_date: 2026-10-01
-last_modified_summary: Site is fully real — demo world and nightly reset removed; quick access signs in as named real staff accounts (QUICK_ACCESS_STAFF_CODES). Earlier: two repo-wide rules from posting the first real listing — a server action must RETURN what the user has to act on (a throw reaches the error boundary and destroys the form), and ids use idSchema rather than a shape assertion that the cuid2 migration invalidated for 96% of rows.
+last_modified_summary: Staff desks — one role definition (config/roles.ts) drives dashboard order, hero, dossier tab and board; sysadmin holds every permission; Liegenschaften does intake. Earlier: Site is fully real — demo world and nightly reset removed; quick access signs in as named real staff accounts (QUICK_ACCESS_STAFF_CODES). Earlier: two repo-wide rules from posting the first real listing — a server action must RETURN what the user has to act on (a throw reaches the error boundary and destroys the form), and ids use idSchema rather than a shape assertion that the cuid2 migration invalidated for 96% of rows.
 
 @~/.claude/CLAUDE.md
 
@@ -1324,6 +1324,14 @@ Rules that follow, all enforced by `role-policy.test.ts`:
 - **No role grants a system permission.** `users:manage`, `system:configure`
   and `import:write` live in `SYSTEM_ADMIN_PERMISSIONS` and are granted by
   `isSystemAdmin` alone — not even by oversight over every domain.
+- **`isSystemAdmin` grants EVERYTHING** (`ALL_PERMISSIONS`: every role's verbs
+  + system + complaints) and ALL_DOMAINS reach (`effectiveScope`, applied once
+  in `getCurrentUser`). Whoever configures the product can open what it holds.
+- **LIEGENSCHAFTEN does intake** (`residents:write`, 2026-10-01): the housing
+  manager creates a new tenant and places them. It still reads no messages and
+  no client facts.
+- **Placing and transfer decisions require `placements:write`** in the action
+  itself (`placeResident`, approve/deny transfer) — they took a session alone.
 - **`hasPermission` takes the SUBJECT, not a role.** A bare role can no longer
   answer "may they?", and the type makes that impossible to forget.
 - **`scope` and `isSystemAdmin` are read from the ROW on every request, never
@@ -1337,6 +1345,36 @@ Rules that follow, all enforced by `role-policy.test.ts`:
 
 Permissions: `src/lib/auth/role-policy.ts`. Nav, invites, export/import and the
 algorithm page follow them.
+
+### Desks: what each role's day IS (`src/lib/config/roles.ts`)
+
+Permissions say what a role MAY do; its **desk** says what its work is and in
+what order. One `StaffDesk` per `StaffRole` declares: the one-line description
+(user menu, settings), dashboard `sections` in priority order, `hero` sources
+in priority order, `dossierTab`, `integrationBoard` (which also decides the
+caseload queue), the `quietDay` button and `checkInChip`. Never write
+`role === '…'` again — read the desk.
+
+| Role | Desk | Dashboard order | Hero leads with |
+|---|---|---|---|
+| BETREUUNG | Alltag begleiten | critical · check-ins · conflicts · proposals · messages · approvals · requests (read-only) · learning | critical, very-overdue check-in |
+| SOZIALARBEIT | Fallführung | renewals · approvals · messages · critical · conflicts | critical, renewals |
+| JOBCOACH | Arbeit & Ausbildung | job caseload · requests · approvals (permits) · learning | job queue |
+| FREIWILLIGENARBEIT | Freiwilligenarbeit & Gemeinschaft | volunteering caseload · requests · events · learning | volunteering queue |
+| LIEGENSCHAFTEN | Wohnungen & Platzierungen | matching · free beds · transfers · maintenance (listed) · critical (read) | matching |
+
+Rules, all pinned by `config/__tests__/roles.test.ts` over every role:
+
+- A desk only selects and orders; `DASHBOARD_SECTIONS` still gates each
+  section on its permission, and a desk may not list one the role lacks.
+- **Every counted queue can claim the hero.** A work section on a desk without
+  a hero source is the "3 Aufgaben" header over an "Alles erledigt!" hero —
+  shipped for Freiwilligenarbeit, whose queue never reached the hero.
+- ALL_DOMAINS (and so `isSystemAdmin`) gets its own desk first, then every
+  other permitted section and hero source.
+- The nav badge counts only queues the viewer's desk shows (`sectionVisible`),
+  so badge and dashboard cannot disagree.
+- Liegenschaften gets no check-ins anywhere (desk, hero, client cards).
 
 One email namespace across the whole product, because there is exactly one
 `Account.email` unique index; email login can never guess which table you meant.

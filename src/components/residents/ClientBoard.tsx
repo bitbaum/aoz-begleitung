@@ -38,6 +38,7 @@ import { CARE_ROLE_LABELS, type CareRoleId } from '@/lib/config/care'
 import { residentInitials, residentName } from '@/lib/utils/resident-name'
 import { EmptyState } from '@/components/ui/Page'
 import type { StaffRole } from '@/lib/auth/role-policy'
+import { deskFor } from '@/lib/config/roles'
 import { STAFF_ROLE_CARE_DOMAIN } from '@/lib/config/care'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -378,8 +379,8 @@ function ClientCard({ client, viewerRole }: { client: ClientBoardItem; viewerRol
         )}
       </div>
 
-      {/* ── Row 3: Check-in status (primary urgency signal for BETREUUNG/SOZIALARBEIT/ADMIN) ── */}
-      {(domain === 'HOUSING' || domain === 'SOCIAL' || !domain) && (
+      {/* ── Row 3: Check-in status — for the desks whose signal it is (config/roles.ts) ── */}
+      {deskFor(viewerRole).checkInChip && (
         <CheckInChip
           daysSince={client.daysSinceCheckIn}
           intervalDays={client.checkInIntervalDays}

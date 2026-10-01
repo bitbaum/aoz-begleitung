@@ -22,6 +22,16 @@
  *   Betreuerin (all domains)     BETREUUNG          + ALL_DOMAINS
  *   Jobcoach                     JOBCOACH           + OWN_DOMAIN
  *   Freiwilligenarbeit coord.    FREIWILLIGENARBEIT + OWN_DOMAIN
+ *
+ * This file answers "MAY they?". What a role's working day looks like — the
+ * desk it lands on, its dashboard order, its hero queue, its dossier tab — is
+ * `lib/config/roles.ts`, keyed by the same `StaffRole`. A desk only ever
+ * ORDERS what these permissions allow; it never grants anything.
+ *
+ * `isSystemAdmin` grants EVERY permission and the reach of ALL_DOMAINS
+ * (`effectiveScope`). Administering the product is not a care domain, but the
+ * person who administers it must be able to open everything they configure.
+ * No ROLE, and no scope, grants a system permission — that still holds.
  */
 
 export type StaffRole =
@@ -301,9 +311,12 @@ export const ROLE_PERMISSIONS = {
    * PEOPLE about their housing, and holds their HOUSING care seats. Those
    * are two jobs, and giving both the same role said they were one.
    *
+   * `residents:write` IS granted (2026-10-01, George): the Liegenschaften
+   * lead takes in new tenants — creates the person and places them — so
+   * intake must not wait on a care role being free. Preferences and care
+   * work stay with care; this is about getting someone a bed.
+   *
    * What this role does NOT get, and each omission is deliberate:
-   *   `residents:write`  — places people into flats; does not edit who
-   *                        they are. Intake and preferences stay with care.
    *   `messages:read`    — a resident writing to "die Betreuung" is writing to
    *                        their Betreuer*in, not to the person who owns the
    *                        building.
@@ -317,9 +330,10 @@ export const ROLE_PERMISSIONS = {
    */
   LIEGENSCHAFTEN: [
     'dashboard:read',
-    // You cannot run a house without knowing who lives in it, and a placement
-    // is a statement about a person. Read only.
+    // You cannot run a house without knowing who lives in it.
     'residents:read',
+    // Intake: a new tenant is created by whoever gives them the bed.
+    'residents:write',
     'housing:read',
     'housing:write',
     'placements:read',
@@ -405,6 +419,37 @@ export const WIDEST_CAPABILITIES: StaffCapabilities = {
   isSystemAdmin: true,
 }
 
+/**
+ * Every permission the product knows: each role's verbs, plus system and
+ * complaint permissions. This is what `isSystemAdmin` holds.
+ */
+export const ALL_PERMISSIONS: readonly StaffPermission[] = Array.from(
+  new Set<StaffPermission>([
+    ...STAFF_ROLES.flatMap((role) => ROLE_PERMISSIONS[role] as readonly StaffPermission[]),
+    ...SYSTEM_ADMIN_PERMISSIONS,
+    ...COMPLAINT_PERMISSIONS,
+  ]),
+)
+
+/**
+ * The reach a subject actually has. System administration reaches every
+ * domain — the person who configures the product must be able to open every
+ * file it holds — whatever the stored `scope` says.
+ *
+ * Applied once, where the session is built (`getCurrentUser`), so every
+ * `scope === 'ALL_DOMAINS'` question downstream gets the same answer.
+ */
+export function effectiveScope(subject: {
+  scope: StaffScopeId
+  isSystemAdmin: boolean
+}): StaffScopeId {
+  return subject.isSystemAdmin ? 'ALL_DOMAINS' : subject.scope
+}
+
+export function hasAllDomainReach(subject: StaffCapabilities): boolean {
+  return effectiveScope(subject) === 'ALL_DOMAINS'
+}
+
 export function canRoleAccess(allowedRoles: StaffRole[], currentRole: StaffRole): boolean {
   return allowedRoles.includes(currentRole)
 }
@@ -417,7 +462,8 @@ function grantsPermission(role: StaffRole, permission: string): boolean {
  * May this person do this?
  *
  * Each axis answers its own question and nothing else:
- *  - a system permission is granted by `isSystemAdmin` ALONE, never by a role;
+ *  - `isSystemAdmin` holds every permission; a system or complaint
+ *    permission is granted by it ALONE, never by a role or a scope;
  *  - ALL_DOMAINS works every seat, so it holds every domain's verbs;
  *  - otherwise the answer is their own domain's verbs.
  */
@@ -430,8 +476,13 @@ export function hasPermission(subject: StaffCapabilities, permission: string): b
     return UNIVERSAL_PERMISSIONS.includes(permission)
   }
 
+  // Administration holds everything, including the two kinds no role holds.
+  if (subject.isSystemAdmin) {
+    return (ALL_PERMISSIONS as readonly string[]).includes(permission)
+  }
+
   if ((SYSTEM_ADMIN_PERMISSIONS as readonly string[]).includes(permission)) {
-    return subject.isSystemAdmin
+    return false
   }
 
   // Checked HERE, above the role and scope logic, for the same reason system
@@ -439,14 +490,14 @@ export function hasPermission(subject: StaffCapabilities, permission: string): b
   // grant it, and oversight over every domain must not include reading
   // complaints that may name the person holding it.
   if ((COMPLAINT_PERMISSIONS as readonly string[]).includes(permission)) {
-    return subject.isSystemAdmin
+    return false
   }
 
   if (grantsPermission(subject.role, permission)) return true
 
   // Seeing every domain means working every seat — a Betreuerin covering the
   // whole house records learning and reads a CV like the coach would.
-  if (subject.scope === 'ALL_DOMAINS') {
+  if (hasAllDomainReach(subject)) {
     return STAFF_ROLES.some((role) => grantsPermission(role, permission))
   }
 

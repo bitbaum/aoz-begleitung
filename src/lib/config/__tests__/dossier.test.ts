@@ -8,7 +8,13 @@ describe('dossier sections', () => {
     expect(defaultDossierTab('FREIWILLIGENARBEIT')).toBe('integration')
     expect(defaultDossierTab('LIEGENSCHAFTEN')).toBe('housing')
     expect(defaultDossierTab('BETREUUNG')).toBe('overview')
-    expect(defaultDossierTab('SOZIALARBEIT')).toBe('overview')
+    // Fallführung lives in the person's Unterlagen — insurance, permit, offices.
+    expect(defaultDossierTab('SOZIALARBEIT')).toBe('documents')
+  })
+
+  it('falls back to overview when the home of the role is not visible', () => {
+    const withoutDocs = ALL.filter((id) => id !== 'documents')
+    expect(resolveDossierTab({ role: 'SOZIALARBEIT', visible: withoutDocs })).toBe('overview')
   })
 
   it('an explicit, visible tab wins', () => {
