@@ -146,7 +146,7 @@ const HERO_BUILDERS: Record<HeroSource, HeroBuilder> = {
   // erledigt!" when no bed was free, above a tile listing the same people.
   matching: ({ unplacedResidents, freeBeds }) => {
     if (unplacedResidents.length === 0) return null
-    const title = `${unplacedResidents.length} ${DASHBOARD_LABELS.heroPlaceResidentsSuffix}`
+    const title = DASHBOARD_LABELS.heroPlaceResidentsTitle(unplacedResidents.length)
     return freeBeds > 0
       ? {
           type: 'place',
