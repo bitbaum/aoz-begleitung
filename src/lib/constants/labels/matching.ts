@@ -69,7 +69,7 @@ export const MATCHING_LABELS = {
   // Matching page header
   title: 'Matching',
   findMatchingResidents: (address: string) => `Finden Sie passende Klient*innen für ${address}`,
-  step2SelectUnit: (code: string) => `Schritt 2 von 2: Wählen Sie eine Unterkunft für ${code}`,
+  step2SelectUnit: (name: string) => `Schritt 2 von 2: Wählen Sie eine Unterkunft für ${name}`,
   findOptimalPlacement: 'Finden Sie die optimale Platzierung für Klient*innen',
   whoFitsIn: (code: string) => `Wer passt in ${code}?`,
   profileCaptured: 'Profil erfasst',

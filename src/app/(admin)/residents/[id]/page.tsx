@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { BoardSwitcher } from '@/components/ui/BoardSwitcher'
 import { DOSSIER_TABS, DOSSIER_TAB_LABELS, resolveDossierTab } from '@/lib/config/dossier'
+import { deskFor } from '@/lib/config/roles'
 import type { HousingUnit, Resident } from '@/lib/db'
 import {
   db,
@@ -633,7 +634,9 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
                             ? 'end'
                             : undefined
                       }
-                      canWriteCheckIn={canWriteResidents}
+                      canWriteCheckIn={
+                        canWriteResidents && (!staff || deskFor(staff.role).checkInChip)
+                      }
                       canWritePlacement={canWritePlacements}
                     />
                   </div>

@@ -35,6 +35,7 @@ vi.mock('@/lib/constants/labels', async () => ({
     heroNotSeenSuffix: 'Tagen nicht gesehen',
     heroStartCheckIn: 'Check-in starten',
     heroPlaceResidentsSuffix: 'Bewohner platzieren',
+    heroPlaceResidentsTitle: (count: number) => `${count} Bewohner platzieren`,
     heroFreeBedsAvailableSuffix: 'freie Plätze verfügbar',
     actionStartMatching: 'Matching starten',
     heroNoFreeBeds: 'Keine freien Plätze — Wohnungen prüfen',

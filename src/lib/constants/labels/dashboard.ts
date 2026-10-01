@@ -202,6 +202,9 @@ export const DASHBOARD_LABELS = {
     n === 1 ? '1 Beschluss wartet auf Bestätigung' : `${n} Beschlüsse warten auf Bestätigung`,
   heroReviewProposals: 'Jetzt prüfen',
   heroPlaceResidentsSuffix: 'Klient*innen platzieren',
+  /** "1 Klient*innen platzieren" read as a typo; one person is singular. */
+  heroPlaceResidentsTitle: (count: number) =>
+    count === 1 ? '1 Klient*in platzieren' : `${count} Klient*innen platzieren`,
   heroFreeBedsAvailableSuffix: 'freie Plätze verfügbar',
   heroOpenConflictsSuffix: 'offene Konflikte',
   heroMainProblemPrefix: 'Hauptproblem:',

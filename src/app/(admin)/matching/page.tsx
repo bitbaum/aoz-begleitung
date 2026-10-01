@@ -332,7 +332,9 @@ export default async function MatchingPage({ searchParams }: Props) {
             {isUnitMode
               ? MATCHING_LABELS.findMatchingResidents(selectedUnit?.address ?? '')
               : isNewResident
-                ? MATCHING_LABELS.step2SelectUnit(selectedResident?.code ?? '')
+                ? MATCHING_LABELS.step2SelectUnit(
+                    selectedResident ? residentName(selectedResident) : '',
+                  )
                 : MATCHING_LABELS.findOptimalPlacement}
           </p>
           <Link
