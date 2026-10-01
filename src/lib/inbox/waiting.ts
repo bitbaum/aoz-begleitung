@@ -22,8 +22,9 @@
  */
 
 import { and, asc, countDistinct, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
-import { hasPermission, type StaffCapabilities } from '@/lib/auth/role-policy'
+import { hasAllDomainReach, hasPermission, type StaffCapabilities } from '@/lib/auth/role-policy'
 import { defaultIntegrationBoardForRole } from '@/lib/config/integration-boards'
+import { sectionVisible } from '@/lib/config/dashboard'
 import { boardOpportunityKinds, type OpportunityKindId } from '@/lib/config/opportunities'
 import { ownSeat } from '@/lib/client-facts/access'
 import { pendingFactQueue } from '@/lib/client-facts/queue'
@@ -52,8 +53,7 @@ export type WaitingViewer = StaffCapabilities & { id: string }
 export function answerableOpportunityKinds(
   viewer: StaffCapabilities,
 ): readonly OpportunityKindId[] {
-  const board =
-    viewer.scope === 'ALL_DOMAINS' ? 'overview' : defaultIntegrationBoardForRole(viewer.role)
+  const board = hasAllDomainReach(viewer) ? 'overview' : defaultIntegrationBoardForRole(viewer.role)
   return boardOpportunityKinds(board)
 }
 
@@ -74,12 +74,21 @@ export function waitingApplicationsWhere(kinds: readonly OpportunityKindId[]) {
   return and(awaitingAnswerFilter(), inArray(opportunity.kind, [...kinds]))
 }
 
-/** Requests nobody has picked up yet, oldest first. Empty without the verb. */
+/**
+ * Requests nobody has picked up yet, oldest first. Empty without the verb —
+ * unless the caller asks for the READ-ONLY view, which a viewer who may read
+ * the board (Betreuung) gets for every kind: who asked, so it can be raised
+ * with the person, without it becoming that viewer's task.
+ */
 export async function waitingApplications(
   viewer: StaffCapabilities,
+  { includeReadOnly = false }: { includeReadOnly?: boolean } = {},
 ): Promise<WaitingApplication[]> {
-  if (!hasPermission(viewer, 'opportunities:write')) return []
-  const kinds = answerableOpportunityKinds(viewer)
+  const kinds = hasPermission(viewer, 'opportunities:write')
+    ? answerableOpportunityKinds(viewer)
+    : includeReadOnly && hasPermission(viewer, 'opportunities:read')
+      ? boardOpportunityKinds('overview')
+      : []
   if (kinds.length === 0) return []
 
   const rows = await db
@@ -104,8 +113,15 @@ export async function waitingApplications(
   }))
 }
 
+// Every count below asks the viewer's DESK as well as the permission
+// (`sectionVisible`), so the badge counts exactly the queues their dashboard
+// shows — a Betreuerin holds placements:write, but transfer requests are
+// Liegenschaften's desk, and a badge counting them sent her looking for work
+// her Eingang does not list.
+
 async function waitingApplicationCount(viewer: StaffCapabilities): Promise<number> {
   if (!hasPermission(viewer, 'opportunities:write')) return 0
+  if (!sectionVisible(viewer, 'applications')) return 0
   const kinds = answerableOpportunityKinds(viewer)
   if (kinds.length === 0) return 0
   const [row] = await db
@@ -122,7 +138,7 @@ async function waitingApplicationCount(viewer: StaffCapabilities): Promise<numbe
  * load of every message, because this runs on every staff page.
  */
 async function waitingThreadCount(viewer: StaffCapabilities): Promise<number> {
-  if (!hasPermission(viewer, 'messages:read')) return 0
+  if (!sectionVisible(viewer, 'messages')) return 0
   const [row] = await db
     .select({ n: countDistinct(message.threadId) })
     .from(message)
@@ -131,7 +147,7 @@ async function waitingThreadCount(viewer: StaffCapabilities): Promise<number> {
 }
 
 async function pendingTransferCount(viewer: StaffCapabilities): Promise<number> {
-  if (!hasPermission(viewer, 'placements:write')) return 0
+  if (!sectionVisible(viewer, 'transferRequests')) return 0
   const [row] = await db
     .select({ n: sql<number>`count(*)::int` })
     .from(transferRequest)
@@ -140,7 +156,7 @@ async function pendingTransferCount(viewer: StaffCapabilities): Promise<number> 
 }
 
 async function pendingFactCount(viewer: WaitingViewer): Promise<number> {
-  if (!hasPermission(viewer, 'clientFacts:read')) return 0
+  if (!sectionVisible(viewer, 'approvals')) return 0
   const items = await pendingFactQueue({
     userId: viewer.id,
     scope: viewer.scope,

@@ -18,7 +18,17 @@ import type { WaitingApplication } from '@/lib/inbox/waiting'
  * person among its applicants and press there. Taking a request up is the
  * whole job of this row, so it happens on the row.
  */
-export function WaitingApplications({ applications }: { applications: WaitingApplication[] }) {
+export function WaitingApplications({
+  applications,
+  canClaim = true,
+}: {
+  applications: WaitingApplication[]
+  /**
+   * False for a viewer who may read the board but not answer (Betreuung): the
+   * rows still say who asked, without a button that would end in a refusal.
+   */
+  canClaim?: boolean
+}) {
   const [pending, startTransition] = useTransition()
   if (applications.length === 0) return null
 
@@ -34,7 +44,9 @@ export function WaitingApplications({ applications }: { applications: WaitingApp
         </h3>
         <span className="chip-warning ms-auto">{applications.length}</span>
       </div>
-      <p className="mt-1 text-sm text-ui-muted">{L.applicationsHint}</p>
+      <p className="mt-1 text-sm text-ui-muted">
+        {canClaim ? L.applicationsHint : L.applicationsHintReadOnly}
+      </p>
 
       <ul className="mt-3 divide-y divide-ui-border">
         {shown.map((row) => (
@@ -55,16 +67,18 @@ export function WaitingApplications({ applications }: { applications: WaitingApp
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <form action={(formData) => startTransition(() => claimApplication(formData))}>
-                <input type="hidden" name="applicationId" value={row.applicationId} />
-                <button
-                  type="submit"
-                  disabled={pending}
-                  className="btn-secondary min-h-[44px] px-4 text-sm disabled:opacity-60"
-                >
-                  {L.applicationClaim}
-                </button>
-              </form>
+              {canClaim && (
+                <form action={(formData) => startTransition(() => claimApplication(formData))}>
+                  <input type="hidden" name="applicationId" value={row.applicationId} />
+                  <button
+                    type="submit"
+                    disabled={pending}
+                    className="btn-secondary min-h-[44px] px-4 text-sm disabled:opacity-60"
+                  >
+                    {L.applicationClaim}
+                  </button>
+                </form>
+              )}
               <Link
                 href={`/opportunities/${row.opportunityId}`}
                 className="btn-ghost min-h-[44px] px-3 text-sm"

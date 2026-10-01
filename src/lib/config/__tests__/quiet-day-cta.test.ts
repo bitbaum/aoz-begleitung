@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest'
 
 import { fallbackCta } from '@/lib/config/dashboard'
 import { defaultIntegrationBoardForRole } from '@/lib/config/integration-boards'
-import type { StaffCapabilities, StaffRole } from '@/lib/auth/role-policy'
+import {
+  NARROWEST_CAPABILITIES,
+  type StaffCapabilities,
+  type StaffRole,
+} from '@/lib/auth/role-policy'
 
 /**
  * On a quiet day, a specialist is sent to their OWN board.
@@ -75,10 +79,17 @@ describe('everyone else keeps the generic ladder', () => {
     }
   })
 
-  it('gives Liegenschaften something it can actually open', () => {
-    // It holds neither residents:write nor learning:write, so it falls through
-    // to the guaranteed last resort rather than to a page it cannot reach.
+  it('sends Liegenschaften to the housing stock, never to statistics', () => {
+    // It used to fall through the generic ladder to /analytics — a report
+    // about other people's work on the one day the housing manager could
+    // look after the flats. Its desk names its own home.
     const cta = fallbackCta(viewer('LIEGENSCHAFTEN'))
-    expect(cta.labelKey).toBe('actionViewStats')
+    expect(cta.href).toBe('/housing')
+    expect(cta.labelKey).toBe('actionOpenHousing')
+  })
+
+  it('falls back to the generic ladder when the desk home is not permitted', () => {
+    // The expired-session stand-in holds only universal reads.
+    expect(fallbackCta(NARROWEST_CAPABILITIES).labelKey).toBe('actionViewStats')
   })
 })

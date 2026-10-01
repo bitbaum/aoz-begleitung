@@ -1,7 +1,11 @@
 import {
+  ALL_PERMISSIONS,
   ASSIGNABLE_STAFF_ROLES,
+  COMPLAINT_PERMISSIONS,
   NARROWEST_CAPABILITIES,
   SYSTEM_ADMIN_PERMISSIONS,
+  effectiveScope,
+  hasAllDomainReach,
   canRoleAccess,
   hasPermission,
   ROLE_PERMISSIONS,
@@ -239,6 +243,59 @@ describe('role, scope and administration are independent', () => {
     }
     expect(hasPermission(legacyAdmin(), 'housing:write')).toBe(true)
     expect(hasPermission(legacyAdmin(), 'documents:write')).toBe(true)
+  })
+
+  test('system administration holds EVERY permission, on any role', () => {
+    // George administers the product and must be able to open everything he
+    // configures. It used to add only the system and complaint permissions,
+    // so an administrator on a narrow role could configure what they could
+    // not see.
+    for (const role of STAFF_ROLES) {
+      for (const permission of ALL_PERMISSIONS) {
+        expect({
+          role,
+          permission,
+          held: hasPermission(caps(role, 'OWN_DOMAIN', true), permission),
+        }).toEqual({ role, permission, held: true })
+      }
+      // Still not a blank cheque for strings nobody defined.
+      expect(hasPermission(caps(role, 'OWN_DOMAIN', true), 'nonexistent:action')).toBe(false)
+    }
+  })
+
+  test('ALL_PERMISSIONS is every role verb plus system and complaint permissions', () => {
+    for (const role of STAFF_ROLES) {
+      for (const permission of ROLE_PERMISSIONS[role]) {
+        expect(ALL_PERMISSIONS).toContain(permission)
+      }
+    }
+    for (const permission of [...SYSTEM_ADMIN_PERMISSIONS, ...COMPLAINT_PERMISSIONS]) {
+      expect(ALL_PERMISSIONS).toContain(permission)
+    }
+  })
+
+  test('system administration reaches every domain', () => {
+    expect(effectiveScope({ scope: 'OWN_DOMAIN', isSystemAdmin: true })).toBe('ALL_DOMAINS')
+    expect(effectiveScope({ scope: 'OWN_DOMAIN', isSystemAdmin: false })).toBe('OWN_DOMAIN')
+    expect(hasAllDomainReach(caps('JOBCOACH', 'OWN_DOMAIN', true))).toBe(true)
+    expect(hasAllDomainReach(caps('JOBCOACH'))).toBe(false)
+  })
+
+  test('no role, at any scope, holds a system or complaint permission', () => {
+    for (const role of STAFF_ROLES) {
+      for (const permission of [...SYSTEM_ADMIN_PERMISSIONS, ...COMPLAINT_PERMISSIONS]) {
+        expect(hasPermission(caps(role, 'ALL_DOMAINS'), permission)).toBe(false)
+        expect(hasPermission(caps(role), permission)).toBe(false)
+      }
+    }
+  })
+
+  test('Liegenschaften takes in new tenants but does not read their mail or papers', () => {
+    // Intake: the housing manager creates the person and places them.
+    expect(hasPermission(caps('LIEGENSCHAFTEN'), 'residents:write')).toBe(true)
+    expect(hasPermission(caps('LIEGENSCHAFTEN'), 'placements:write')).toBe(true)
+    expect(hasPermission(caps('LIEGENSCHAFTEN'), 'messages:read')).toBe(false)
+    expect(hasPermission(caps('LIEGENSCHAFTEN'), 'clientFacts:read')).toBe(false)
   })
 
   test('a new account may not be given the retired all-in-one role', () => {

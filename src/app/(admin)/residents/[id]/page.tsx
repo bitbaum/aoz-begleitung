@@ -326,7 +326,10 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
 
   // Sections with nothing this viewer may see are not offered at all.
   const visibleDossierTabs = DOSSIER_TABS.filter(
-    (id) => id !== 'documents' || canReadDocuments || Boolean(clientFacts),
+    // `clientFacts` is an object for every signed-in viewer; `anyVisible` is
+    // whether they may read any kind at all. Checking the object offered
+    // Liegenschaften an "Unterlagen" tab with nothing it may open.
+    (id) => id !== 'documents' || canReadDocuments || Boolean(clientFacts?.anyVisible),
   )
   const dossierTab = resolveDossierTab({
     tab: query.tab,

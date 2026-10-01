@@ -5,10 +5,12 @@ import { useState } from 'react'
 import { AlertTriangle, Hand, Home, AlertCircle, Sparkles, ArrowRight, Vote } from 'lucide-react'
 import { URGENCY_BADGE_CLASS, URGENCY_BORDER_CLASS, type Urgency } from '@/lib/config/urgency'
 import { VERY_OVERDUE_THRESHOLD_DAYS } from '@/lib/config/checkin-intervals'
-import { fallbackCta } from '@/lib/config/dashboard'
+import { fallbackCta, heroOrder, type HeroSource } from '@/lib/config/dashboard'
 import type { JobQueueItem } from '@/lib/jobcoach/queue'
+import type { VolunteeringQueueItem } from '@/lib/volunteering/queue'
 import type { WaitingApplication } from '@/lib/inbox/waiting'
 import { JOB_SIGNAL_COPY } from '@/lib/config/job-integration-docs'
+import { VOLUNTEERING_SIGNAL_COPY } from '@/lib/config/volunteering-signals'
 import type { StaffCapabilities } from '@/lib/auth/role-policy'
 import { INCIDENT_TYPE_LABELS_SHORT, DASHBOARD_LABELS, UI_LABELS } from '@/lib/constants/labels'
 import { residentName } from '@/lib/utils/resident-name'
@@ -18,6 +20,7 @@ import type {
   UnplacedResident,
   ProblemUnit,
   ProposalAwaitingStaff,
+  PendingTransferRequest,
 } from './types'
 
 // =============================================================================
@@ -37,17 +40,14 @@ export interface PrimaryActionType {
 // determinePrimaryAction
 // =============================================================================
 
-export function determinePrimaryAction({
-  criticalIncidents,
-  overdueCheckIns,
-  unplacedResidents,
-  freeBeds,
-  problemUnits,
-  proposalsAwaitingStaff,
-  jobQueue,
-  waitingApplications = [],
-  viewer,
-}: {
+/** A queue row from either integration domain. */
+interface CaseloadRow {
+  residentId: string
+  name: string
+  opportunityId: string | null
+}
+
+export interface HeroData {
   criticalIncidents: CriticalIncident[]
   overdueCheckIns: OverdueCheckIn[]
   unplacedResidents: UnplacedResident[]
@@ -55,27 +55,66 @@ export function determinePrimaryAction({
   problemUnits: ProblemUnit[]
   proposalsAwaitingStaff: ProposalAwaitingStaff[]
   jobQueue: JobQueueItem[]
-  /** Requests from the portal nobody has picked up — the Eingang badge's set. */
+  volunteeringQueue?: VolunteeringQueueItem[]
+  /**
+   * Requests from the portal nobody has picked up — ONLY those this viewer
+   * may answer. A read-only list is not work and must not claim the hero.
+   */
   waitingApplications?: WaitingApplication[]
+  waitingThreads?: { residentId: string; name: string; waitingSince: Date }[]
+  overdueFollowUps?: { id: string; subject: string | null; unitCode: string | null }[]
+  expiringFacts?: { name: string; label: string }[]
+  pendingApprovals?: { name: string; summary: string }[]
+  pendingTransfers?: PendingTransferRequest[]
+  openMaintenance?: { id: string; title: string; unitCode: string }[]
   viewer: StaffCapabilities
-}): PrimaryActionType {
-  // Priority 1: Critical incidents
-  if (criticalIncidents.length > 0) {
-    return {
-      type: 'critical',
-      title: `${criticalIncidents.length} ${DASHBOARD_LABELS.heroCriticalIncidentsSuffix}`,
-      description: `${INCIDENT_TYPE_LABELS_SHORT[criticalIncidents[0].type] || criticalIncidents[0].type} in ${criticalIncidents[0].unitCode}`,
-      href: `/incidents/${criticalIncidents[0].id}`,
-      buttonText: DASHBOARD_LABELS.heroActionNow,
-      count: criticalIncidents.length,
-    }
-  }
+}
 
-  // Priority 2: Very overdue check-ins (using config threshold)
-  const veryOverdue = overdueCheckIns.filter(
-    (c) => c.isVeryOverdue || c.daysSinceLastCheckIn > VERY_OVERDUE_THRESHOLD_DAYS + 28,
-  )
-  if (veryOverdue.length > 0) {
+type HeroBuilder = (data: HeroData) => PrimaryActionType | null
+
+/** The row link the caseload tiles use: the thread when there is one. */
+function caseloadHref(row: CaseloadRow): string {
+  return row.opportunityId ? `/opportunities/${row.opportunityId}` : `/residents/${row.residentId}`
+}
+
+function caseloadHero(
+  rows: readonly (CaseloadRow & { signal: string })[],
+  copyFor: (signal: string) => { title: string; action: string },
+): PrimaryActionType | null {
+  if (rows.length === 0) return null
+  const copy = copyFor(rows[0].signal)
+  return {
+    type: 'problem',
+    title: copy.title,
+    description: `${rows[0].name} — ${copy.action}`,
+    href: caseloadHref(rows[0]),
+    buttonText: DASHBOARD_LABELS.heroReview,
+    count: rows.length,
+  }
+}
+
+/**
+ * One builder per hero source. WHICH source wins is the viewer's desk
+ * (`config/roles.ts`) — this file only knows how each one reads.
+ */
+const HERO_BUILDERS: Record<HeroSource, HeroBuilder> = {
+  criticalIncidents: ({ criticalIncidents }) =>
+    criticalIncidents.length === 0
+      ? null
+      : {
+          type: 'critical',
+          title: `${criticalIncidents.length} ${DASHBOARD_LABELS.heroCriticalIncidentsSuffix}`,
+          description: `${INCIDENT_TYPE_LABELS_SHORT[criticalIncidents[0].type] || criticalIncidents[0].type} in ${criticalIncidents[0].unitCode}`,
+          href: `/incidents/${criticalIncidents[0].id}`,
+          buttonText: DASHBOARD_LABELS.heroActionNow,
+          count: criticalIncidents.length,
+        },
+
+  checkInsVeryOverdue: ({ overdueCheckIns }) => {
+    const veryOverdue = overdueCheckIns.filter(
+      (c) => c.isVeryOverdue || c.daysSinceLastCheckIn > VERY_OVERDUE_THRESHOLD_DAYS + 28,
+    )
+    if (veryOverdue.length === 0) return null
     return {
       type: 'checkin',
       title: `${DASHBOARD_LABELS.heroCheckInUrgentPrefix} ${residentName({ code: veryOverdue[0].residentCode, displayName: veryOverdue[0].residentDisplayName })}`,
@@ -84,12 +123,12 @@ export function determinePrimaryAction({
       buttonText: DASHBOARD_LABELS.heroStartCheckIn,
       count: veryOverdue.length,
     }
-  }
+  },
 
-  // Priority 3: Proposals awaiting a staff answer. A whole household voted
-  // and is now blocked on the Betreuung — leaving that hanging teaches
-  // residents that participation goes nowhere.
-  if (proposalsAwaitingStaff.length > 0) {
+  // A whole household voted and is now blocked on the Betreuung — leaving
+  // that hanging teaches residents that participation goes nowhere.
+  proposals: ({ proposalsAwaitingStaff }) => {
+    if (proposalsAwaitingStaff.length === 0) return null
     const top = proposalsAwaitingStaff[0]
     return {
       type: 'proposal',
@@ -99,82 +138,85 @@ export function determinePrimaryAction({
       buttonText: DASHBOARD_LABELS.heroReviewProposals,
       count: proposalsAwaitingStaff.length,
     }
-  }
+  },
 
-  // Priority 4: Unplaced residents with available beds
-  if (unplacedResidents.length > 0 && freeBeds > 0) {
-    return {
-      type: 'place',
-      title: `${unplacedResidents.length} ${DASHBOARD_LABELS.heroPlaceResidentsSuffix}`,
-      description: `${freeBeds} ${DASHBOARD_LABELS.heroFreeBedsAvailableSuffix}`,
-      href: '/matching',
-      buttonText: DASHBOARD_LABELS.actionStartMatching,
-      count: unplacedResidents.length,
-    }
-  }
+  // Unplaced people count as open work whether or not a bed is free, so the
+  // hero must name them either way: with beds it starts matching, without it
+  // sends the reader to the stock. It used to fall through to "Alles
+  // erledigt!" when no bed was free, above a tile listing the same people.
+  matching: ({ unplacedResidents, freeBeds }) => {
+    if (unplacedResidents.length === 0) return null
+    const title = `${unplacedResidents.length} ${DASHBOARD_LABELS.heroPlaceResidentsSuffix}`
+    return freeBeds > 0
+      ? {
+          type: 'place',
+          title,
+          description: `${freeBeds} ${DASHBOARD_LABELS.heroFreeBedsAvailableSuffix}`,
+          href: '/matching',
+          buttonText: DASHBOARD_LABELS.actionStartMatching,
+          count: unplacedResidents.length,
+        }
+      : {
+          type: 'place',
+          title,
+          description: DASHBOARD_LABELS.heroNoFreeBeds,
+          href: '/housing',
+          buttonText: DASHBOARD_LABELS.heroOpenHousing,
+          count: unplacedResidents.length,
+        }
+  },
 
-  // Priority 5: Problem units with unresolved incidents
-  const unitsWithUnresolved = problemUnits.filter((u) => u.unresolvedCount > 0)
-  if (unitsWithUnresolved.length > 0) {
-    const topUnit = unitsWithUnresolved[0]
+  conflictUnits: ({ problemUnits }) => {
+    const unresolved = problemUnits.filter((u) => u.unresolvedCount > 0)
+    if (unresolved.length === 0) return null
+    const topUnit = unresolved[0]
     return {
       type: 'problem',
       title: `${topUnit.code}: ${topUnit.unresolvedCount} ${DASHBOARD_LABELS.heroOpenConflictsSuffix}`,
       description: `${DASHBOARD_LABELS.heroMainProblemPrefix} ${INCIDENT_TYPE_LABELS_SHORT[topUnit.primaryIssue] || topUnit.primaryIssue}`,
       href: `/housing/${topUnit.id}`,
       buttonText: DASHBOARD_LABELS.heroAnalyze,
-      count: unitsWithUnresolved.length,
+      count: unresolved.length,
     }
-  }
+  },
 
-  // Priority 6: Regular overdue check-ins
-  if (overdueCheckIns.length > 0) {
-    return {
-      type: 'checkin',
-      title: `${overdueCheckIns.length} ${DASHBOARD_LABELS.heroCheckInsPendingSuffix}`,
-      description: `${DASHBOARD_LABELS.heroNextPrefix} ${residentName({ code: overdueCheckIns[0].residentCode, displayName: overdueCheckIns[0].residentDisplayName })}`,
-      href: `/residents/${overdueCheckIns[0].residentId}`,
-      buttonText: DASHBOARD_LABELS.heroStartCheckIn,
-      count: overdueCheckIns.length,
-    }
-  }
+  checkIns: ({ overdueCheckIns }) =>
+    overdueCheckIns.length === 0
+      ? null
+      : {
+          type: 'checkin',
+          title: `${overdueCheckIns.length} ${DASHBOARD_LABELS.heroCheckInsPendingSuffix}`,
+          description: `${DASHBOARD_LABELS.heroNextPrefix} ${residentName({ code: overdueCheckIns[0].residentCode, displayName: overdueCheckIns[0].residentDisplayName })}`,
+          href: `/residents/${overdueCheckIns[0].residentId}`,
+          buttonText: DASHBOARD_LABELS.heroStartCheckIn,
+          count: overdueCheckIns.length,
+        },
 
-  // Priority 7: Problem units (all resolved but worth monitoring)
-  if (problemUnits.length > 0) {
-    return {
-      type: 'problem',
-      title: `${problemUnits.length} ${DASHBOARD_LABELS.heroMonitorUnitsSuffix}`,
-      description: `${problemUnits[0].code} ${DASHBOARD_LABELS.heroHadSuffix} ${problemUnits[0].incidentCount} ${DASHBOARD_LABELS.heroIncidentsSuffix}`,
-      href: `/housing/${problemUnits[0].id}`,
-      buttonText: DASHBOARD_LABELS.heroReview,
-      count: problemUnits.length,
-    }
-  }
+  // Problem units whose incidents are all resolved, but worth watching.
+  conflictUnitsMonitor: ({ problemUnits }) =>
+    problemUnits.length === 0
+      ? null
+      : {
+          type: 'problem',
+          title: `${problemUnits.length} ${DASHBOARD_LABELS.heroMonitorUnitsSuffix}`,
+          description: `${problemUnits[0].code} ${DASHBOARD_LABELS.heroHadSuffix} ${problemUnits[0].incidentCount} ${DASHBOARD_LABELS.heroIncidentsSuffix}`,
+          href: `/housing/${problemUnits[0].id}`,
+          buttonText: DASHBOARD_LABELS.heroReview,
+          count: problemUnits.length,
+        },
 
-  // The Job domain's work, LAST among the priorities and before all-clear.
-  //
-  // Last because everything above it is a safety or housing emergency, and a
-  // coaching task must not outrank a critical incident. Before all-clear
-  // because it is still work: without this branch the hero announced "Alles
-  // erledigt!" on the same screen as a header reading "1 Aufgabe wartet auf
-  // Sie" and an open-tasks tile naming the client — three states at once,
-  // which is the contradiction this dashboard has fixed twice before.
-  if (jobQueue.length > 0) {
-    const copy = JOB_SIGNAL_COPY[jobQueue[0].signal]
-    return {
-      type: 'problem',
-      title: copy.title,
-      description: `${jobQueue[0].name} — ${copy.action}`,
-      href: `/residents/${jobQueue[0].residentId}`,
-      buttonText: DASHBOARD_LABELS.heroReview,
-      count: jobQueue.length,
-    }
-  }
+  jobQueue: ({ jobQueue }) =>
+    caseloadHero(jobQueue, (signal) => JOB_SIGNAL_COPY[signal as JobQueueItem['signal']]),
 
-  // A client pressed "Ich habe Interesse" and nobody has answered. Without
-  // this the hero said "Alles erledigt!" directly above the list of people
-  // waiting — the badge said 2, the hero said nothing to do.
-  if (waitingApplications.length > 0) {
+  volunteeringQueue: ({ volunteeringQueue = [] }) =>
+    caseloadHero(
+      volunteeringQueue,
+      (signal) => VOLUNTEERING_SIGNAL_COPY[signal as VolunteeringQueueItem['signal']],
+    ),
+
+  // A client pressed "Ich habe Interesse" and nobody has answered.
+  applications: ({ waitingApplications = [] }) => {
+    if (waitingApplications.length === 0) return null
     const oldest = waitingApplications[0]
     return {
       type: 'problem',
@@ -184,11 +226,103 @@ export function determinePrimaryAction({
       buttonText: DASHBOARD_LABELS.heroReview,
       count: waitingApplications.length,
     }
+  },
+
+  messages: ({ waitingThreads = [] }) =>
+    waitingThreads.length === 0
+      ? null
+      : {
+          type: 'problem',
+          title: DASHBOARD_LABELS.heroMessagesTitle(waitingThreads.length),
+          description: `${waitingThreads[0].name} ${DASHBOARD_LABELS.tileWaitingLongestSuffix}`,
+          href: `/messages/${waitingThreads[0].residentId}`,
+          buttonText: DASHBOARD_LABELS.heroAnswer,
+          count: waitingThreads.length,
+        },
+
+  followUps: ({ overdueFollowUps = [] }) =>
+    overdueFollowUps.length === 0
+      ? null
+      : {
+          type: 'problem',
+          title: DASHBOARD_LABELS.heroFollowUpsTitle(overdueFollowUps.length),
+          description:
+            overdueFollowUps[0].subject ??
+            overdueFollowUps[0].unitCode ??
+            DASHBOARD_LABELS.tileFollowUpsAction,
+          href: `/incidents/${overdueFollowUps[0].id}`,
+          buttonText: DASHBOARD_LABELS.heroReview,
+          count: overdueFollowUps.length,
+        },
+
+  renewals: ({ expiringFacts = [] }) =>
+    expiringFacts.length === 0
+      ? null
+      : {
+          type: 'problem',
+          title: DASHBOARD_LABELS.heroRenewalsTitle(expiringFacts.length),
+          description: `${expiringFacts[0].name} — ${expiringFacts[0].label}`,
+          href: '/approvals',
+          buttonText: DASHBOARD_LABELS.heroReview,
+          count: expiringFacts.length,
+        },
+
+  approvals: ({ pendingApprovals = [] }) =>
+    pendingApprovals.length === 0
+      ? null
+      : {
+          type: 'problem',
+          title: DASHBOARD_LABELS.heroApprovalsTitle(pendingApprovals.length),
+          description: `${pendingApprovals[0].name} — ${pendingApprovals[0].summary}`,
+          href: '/approvals',
+          buttonText: DASHBOARD_LABELS.heroReview,
+          count: pendingApprovals.length,
+        },
+
+  transferRequests: ({ pendingTransfers = [] }) =>
+    pendingTransfers.length === 0
+      ? null
+      : {
+          type: 'place',
+          title: DASHBOARD_LABELS.heroTransfersTitle(pendingTransfers.length),
+          description: `${residentName({ code: pendingTransfers[0].residentCode, displayName: pendingTransfers[0].residentDisplayName })} ${DASHBOARD_LABELS.tileWaitingLongestSuffix}`,
+          href: '/transfer-requests',
+          buttonText: DASHBOARD_LABELS.heroReview,
+          count: pendingTransfers.length,
+        },
+
+  maintenance: ({ openMaintenance = [] }) =>
+    openMaintenance.length === 0
+      ? null
+      : {
+          type: 'problem',
+          title: DASHBOARD_LABELS.heroMaintenanceTitle(openMaintenance.length),
+          description: `${openMaintenance[0].title} · ${openMaintenance[0].unitCode}`,
+          href: `/maintenance/${openMaintenance[0].id}`,
+          buttonText: DASHBOARD_LABELS.heroReview,
+          count: openMaintenance.length,
+        },
+}
+
+/**
+ * The single next action for THIS viewer: the first source in their desk's
+ * hero list (`heroOrder`) that has something, else the all-clear with the
+ * desk's quiet-day button.
+ *
+ * It used to be one global order for every role. A Freiwilligenarbeit
+ * coordinator's volunteering queue was never even passed in, so the hero
+ * said "Alles erledigt!" above open volunteering tiles; and the housing
+ * manager's hero led with check-ins that are Betreuung's work.
+ */
+export function determinePrimaryAction(data: HeroData): PrimaryActionType {
+  for (const source of heroOrder(data.viewer)) {
+    const action = HERO_BUILDERS[source](data)
+    if (action) return action
   }
 
-  // All clear! Offer the first action this role may actually perform —
-  // /residents/new is a 403 for a Jobcoach. @see lib/config/dashboard.ts
-  const cta = fallbackCta(viewer)
+  // All clear! The desk's own home, or the first action this role may
+  // actually perform. @see lib/config/dashboard.ts
+  const cta = fallbackCta(data.viewer)
   return {
     type: 'allclear',
     title: DASHBOARD_LABELS.allClearAllDone,

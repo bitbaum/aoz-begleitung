@@ -24,6 +24,7 @@ import { recordLoginAttempt, clearLoginAttempts } from './rate-limit'
 import {
   canRoleAccess,
   hasPermission,
+  effectiveScope,
   type StaffCapabilities,
   type StaffPermission,
   type StaffRole,
@@ -117,7 +118,8 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     // belongs in that same sentence: revoking someone's reach must take effect
     // on the next request, not at token expiry, which with sliding refresh is
     // indefinitely.
-    scope: row.scope,
+    // Administration reaches every domain. @see effectiveScope
+    scope: effectiveScope(row),
     isSystemAdmin: row.isSystemAdmin,
     siteAccess: row.siteAccess,
     // `?? []` guards a future caller that forgets to select the relation.
@@ -311,7 +313,7 @@ export async function loginByCode(code: string, clientIp: string): Promise<Login
         email: staff.account?.email || '',
         name: staff.name,
         role: staff.role,
-        scope: staff.scope,
+        scope: effectiveScope(staff),
         isSystemAdmin: staff.isSystemAdmin,
         // Always null here, and that is a fact rather than a placeholder: this
         // is the result of somebody typing their OWN code, which is by

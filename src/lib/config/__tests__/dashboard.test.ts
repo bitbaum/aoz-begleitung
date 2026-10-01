@@ -7,6 +7,7 @@
 import {
   DASHBOARD_SECTIONS,
   DASHBOARD_FALLBACK_CTAS,
+  dashboardSections,
   sectionVisible,
   fallbackCta,
   workspaceState,
@@ -22,6 +23,9 @@ import {
 import { DASHBOARD_LABELS } from '@/lib/constants/labels'
 
 const ALL_SECTIONS = Object.keys(DASHBOARD_SECTIONS) as DashboardSection[]
+
+const own = (role: (typeof STAFF_ROLES)[number]) =>
+  ({ role, scope: 'OWN_DOMAIN', isSystemAdmin: false }) as const
 
 function visibleSections(role: (typeof STAFF_ROLES)[number]): DashboardSection[] {
   return ALL_SECTIONS.filter((s) =>
@@ -43,19 +47,20 @@ describe('DASHBOARD_SECTIONS', () => {
     expect(ALL_SECTIONS.filter((s) => sectionVisible(WIDEST_CAPABILITIES, s))).toEqual(ALL_SECTIONS)
   })
 
-  it('BETREUUNG sees the operational sections but not team health', () => {
-    // This is the assertion that used to read `toEqual(ALL_SECTIONS)` for both
-    // roles — and it was true, which was the bug. Leitung and Betreuung
-    // rendered byte-identical dashboards, because every section mapped to an
-    // OPERATIONAL permission and `BETREUUNG: [...OPERATIONAL]`. Leitung's five
-    // extra permissions were all page-level, so nothing on the dashboard could
-    // tell the two apart.
-    // `applications` is absent too, and deliberately: Betreuung READS the
-    // Einsatzplätze board but may not act on it, and a request queue shown to
-    // someone who cannot answer it is a list of things they must watch undone.
-    expect(visibleSections('BETREUUNG')).toEqual(
-      ALL_SECTIONS.filter((section) => section !== 'team' && section !== 'applications'),
-    )
+  it('BETREUUNG sees its desk: everyday life, not the building stock', () => {
+    // It used to see every OPERATIONAL section — free beds, maintenance,
+    // matching, transfers — because it holds those permissions. Holding a
+    // permission is not the same as it being your work; the desk decides.
+    expect(dashboardSections(own('BETREUUNG'))).toEqual([
+      'criticalIncidents',
+      'checkIns',
+      'incidents',
+      'proposals',
+      'messages',
+      'approvals',
+      'applications',
+      'learning',
+    ])
   })
 
   it('administration, not the role, is what adds the team section', () => {
@@ -87,27 +92,44 @@ describe('DASHBOARD_SECTIONS', () => {
     expect(canSeeTeam).toEqual(canManageUsers)
   })
 
-  it('JOBCOACH sees their board and the requests they answer — nothing housing', () => {
-    // `applications`: the residents waiting on a listing of theirs.
-    // `approvals`: the permits of the clients they coach (@see client-facts).
-    expect(visibleSections('JOBCOACH')).toEqual(['learning', 'applications', 'approvals'])
+  it('JOBCOACH sees their caseload, the requests they answer, permits — nothing housing', () => {
+    expect(dashboardSections(own('JOBCOACH'))).toEqual([
+      'caseload',
+      'applications',
+      'approvals',
+      'learning',
+    ])
   })
 
-  it('FREIWILLIGENARBEIT sees learning, events and its requests, nothing housing', () => {
-    expect(visibleSections('FREIWILLIGENARBEIT')).toEqual(['learning', 'events', 'applications'])
+  it('FREIWILLIGENARBEIT sees its caseload, requests, events and learning, nothing housing', () => {
+    expect(dashboardSections(own('FREIWILLIGENARBEIT'))).toEqual([
+      'caseload',
+      'applications',
+      'events',
+      'learning',
+    ])
   })
 
-  it('SOZIALARBEIT sees people/conflict/governance sections but no placement writes', () => {
-    const sections = visibleSections('SOZIALARBEIT')
-    expect(sections).toContain('incidents')
-    expect(sections).toContain('proposals')
-    expect(sections).toContain('learning')
-    expect(sections).toContain('events')
-    expect(sections).toContain('occupancy')
+  it('SOZIALARBEIT leads with deadlines and papers, never placement work', () => {
+    expect(dashboardSections(own('SOZIALARBEIT'))).toEqual([
+      'renewals',
+      'approvals',
+      'messages',
+      'criticalIncidents',
+      'incidents',
+    ])
+  })
+
+  it('LIEGENSCHAFTEN sees the stock and intake — and no check-ins', () => {
+    const sections = dashboardSections(own('LIEGENSCHAFTEN'))
+    expect(sections).toEqual([
+      'matching',
+      'occupancy',
+      'transferRequests',
+      'maintenance',
+      'criticalIncidents',
+    ])
     expect(sections).not.toContain('checkIns')
-    expect(sections).not.toContain('maintenance')
-    expect(sections).not.toContain('matching')
-    expect(sections).not.toContain('transferRequests')
   })
 
   it('every role sees at least one section — nobody gets an empty dashboard', () => {

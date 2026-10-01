@@ -609,3 +609,43 @@ describe('auth guard', () => {
     await expect(placeResident(fd)).rejects.toThrow('Anmeldung erforderlich')
   })
 })
+
+// =============================================================================
+// permission guard
+// =============================================================================
+
+describe('placements:write guard', () => {
+  /**
+   * placeResident took `requireStaffAuth()` alone — a session, not a right —
+   * so any signed-in role could place a person into a flat.
+   */
+  const signedInAs = async (role: 'JOBCOACH' | 'FREIWILLIGENARBEIT' | 'LIEGENSCHAFTEN') => {
+    const { requireStaffAuth: mockRequireStaffAuth } = vi.mocked(await import('@/lib/auth'))
+    mockRequireStaffAuth.mockResolvedValueOnce({
+      id: 'staff-2',
+      email: '',
+      name: 'Someone',
+      role,
+      scope: 'OWN_DOMAIN',
+      isSystemAdmin: false,
+    } as never)
+  }
+
+  it.each(['JOBCOACH', 'FREIWILLIGENARBEIT'] as const)(
+    'refuses %s, which holds no placements:write, before touching the database',
+    async (role) => {
+      await signedInAs(role)
+      await expect(placeResident(makeFormData())).rejects.toThrow(
+        ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS,
+      )
+      expect(mockDb.transaction).not.toHaveBeenCalled()
+    },
+  )
+
+  it('lets Liegenschaften, which places people, through to the transaction', async () => {
+    await signedInAs('LIEGENSCHAFTEN')
+    mockDb.transaction.mockRejectedValueOnce(new Error('reached the transaction'))
+    await expect(placeResident(makeFormData())).rejects.toThrow()
+    expect(mockDb.transaction).toHaveBeenCalled()
+  })
+})

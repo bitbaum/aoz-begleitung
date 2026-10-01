@@ -24,6 +24,8 @@ export const DASHBOARD_LABELS = {
   applicationsTitle: 'Anfragen zu Einsatzplätzen',
   applicationsHint:
     'Klient*innen haben im Portal «Ich habe Interesse» gedrückt. Übernehmen Sie eine Anfrage, dann weiss das Team, dass sich jemand kümmert.',
+  applicationsHintReadOnly:
+    'Klient*innen haben im Portal «Ich habe Interesse» gedrückt. Beantwortet werden die Anfragen von Jobcoaching und Freiwilligenarbeit.',
   applicationInterest: (title: string) => `Interesse an «${title}»`,
   applicationSince: (days: number) =>
     days === 0 ? 'seit heute' : days === 1 ? 'seit gestern' : `seit ${days} Tagen`,
@@ -105,6 +107,9 @@ export const DASHBOARD_LABELS = {
     days === 0 ? 'läuft heute ab' : days === 1 ? 'läuft morgen ab' : `noch ${days} Tage`,
   tileRenewalExpired: (days: number) =>
     days === 1 ? 'seit 1 Tag abgelaufen' : `seit ${days} Tagen abgelaufen`,
+  // Liegenschaften works these one by one, so they are listed, not counted.
+  tileMaintenanceOpen: 'Offene Wartungsaufträge',
+  tileMaintenanceAction: 'Auftrag zuweisen oder abschliessen.',
   tileMessagesWaiting: 'Nachrichten ohne Antwort',
   tileMessagesAction: 'Antworten — die Person wartet auf eine Rückmeldung.',
   tileWaitingSinceDays: (days: number) =>
@@ -184,6 +189,7 @@ export const DASHBOARD_LABELS = {
   actionOpenJobBoard: 'Einsatzplätze öffnen',
   actionOpenVolunteering: 'Freiwilligenarbeit öffnen',
   actionViewStats: 'Statistiken ansehen',
+  actionOpenHousing: 'Wohnungen öffnen',
 
   /** Names what the hero block is, now that it is no longer a coloured slab. */
   heroEyebrow: 'Als Nächstes',
@@ -206,6 +212,26 @@ export const DASHBOARD_LABELS = {
   heroHadSuffix: 'hatte',
   heroIncidentsSuffix: 'Vorfälle',
   heroReview: 'Überprüfen',
+  /**
+   * Hero lines for queues that used to count as open tasks without being able
+   * to claim the hero — so the header said "3 Aufgaben" and the hero said
+   * "Alles erledigt!". Every queue that counts must be able to name itself.
+   */
+  heroNoFreeBeds: 'Keine freien Plätze — Wohnungen prüfen',
+  heroOpenHousing: 'Wohnungen ansehen',
+  heroMessagesTitle: (n: number) =>
+    n === 1 ? '1 Nachricht ohne Antwort' : `${n} Nachrichten ohne Antwort`,
+  heroAnswer: 'Antworten',
+  heroApprovalsTitle: (n: number) =>
+    n === 1 ? '1 Angabe wartet auf Freigabe' : `${n} Angaben warten auf Freigabe`,
+  heroRenewalsTitle: (n: number) =>
+    n === 1 ? '1 Frist läuft demnächst ab' : `${n} Fristen laufen demnächst ab`,
+  heroTransfersTitle: (n: number) =>
+    n === 1 ? '1 Verlegungsanfrage wartet' : `${n} Verlegungsanfragen warten`,
+  heroMaintenanceTitle: (n: number) =>
+    n === 1 ? '1 Wartungsauftrag offen' : `${n} Wartungsaufträge offen`,
+  heroFollowUpsTitle: (n: number) =>
+    n === 1 ? '1 Nachfassen überfällig' : `${n} Nachfassen überfällig`,
 
   alertCriticalAttentionSuffix: 'kritische Vorfälle erfordern sofortige Aufmerksamkeit',
   alertEdit: 'Bearbeiten',

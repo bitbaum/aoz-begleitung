@@ -123,7 +123,7 @@ beforeEach(() => {
   staffTable = [LENA, GONE, SIMON]
   mockCheckRateLimit.mockReturnValue({ allowed: true })
   mockLoginByCode.mockResolvedValue({ success: true, type: 'staff', user: STAFF_USER })
-  mockResidentFindFirst.mockResolvedValue({ id: 'r1', isPlaceholder: true })
+  mockResidentFindFirst.mockResolvedValue({ id: 'r1', account: null })
 })
 
 afterEach(() => {
@@ -272,12 +272,12 @@ describe('the client door', () => {
   })
 
   it('disappears once a real person has claimed it', async () => {
-    mockResidentFindFirst.mockResolvedValue({ id: 'r1', isPlaceholder: false })
+    mockResidentFindFirst.mockResolvedValue({ id: 'r1', account: { id: 'acc-1' } })
     expect((await doors()).map((d) => d.id)).not.toContain('resident')
   })
 
   it('REFUSES the login once claimed, not merely the button', async () => {
-    mockResidentFindFirst.mockResolvedValue({ id: 'r1', isPlaceholder: false })
+    mockResidentFindFirst.mockResolvedValue({ id: 'r1', account: { id: 'acc-1' } })
     const response = await POST(post('resident'))
     expect(response.status).toBe(404)
     expect(mockSetResidentCookie).not.toHaveBeenCalled()
@@ -287,7 +287,7 @@ describe('the client door', () => {
     mockResidentFindFirst.mockResolvedValue(null)
     expect((await doors()).map((d) => d.id)).not.toContain('resident')
     delete process.env.DEMO_RESIDENT_CODE
-    mockResidentFindFirst.mockResolvedValue({ id: 'r1', isPlaceholder: true })
+    mockResidentFindFirst.mockResolvedValue({ id: 'r1', account: null })
     expect((await doors()).map((d) => d.id)).not.toContain('resident')
   })
 })

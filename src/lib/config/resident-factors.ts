@@ -96,6 +96,26 @@ export const RESIDENT_FACTORS: Record<string, CompatibilityFactorDef> = {
     weight: 0,
     rule: 'NONE',
   },
+  displayName: {
+    id: 'displayName',
+    type: 'text',
+    label: 'Vorname',
+    /**
+     * Optional. Staff doing an intake usually know a first name, and a new
+     * client who appears only as "KL-7XQ2…" on every list cannot be found or
+     * greeted. The person can change it in the portal after claiming the
+     * profile; never scored (weight 0, rule NONE).
+     */
+    description: 'Wie die Person genannt werden möchte — kann sie später selbst ändern.',
+    placeholder: 'z.B. Stepan',
+    required: false,
+    intake: 'essential',
+    formSection: 'basic',
+    formOrder: 0,
+    dimension: 'requirements',
+    weight: 0,
+    rule: 'NONE',
+  },
 
   ageRange: {
     id: 'ageRange',

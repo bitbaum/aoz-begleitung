@@ -18,6 +18,7 @@ import { BRAND } from '@/lib/config/brand'
 import { SubmitButton } from '@/components/ui'
 import { PageHeader } from '@/components/ui/Page'
 import { formatDate, formatDateISO } from '@/lib/utils'
+import { deskFor } from '@/lib/config/roles'
 
 export const metadata: Metadata = { title: 'Einstellungen' }
 
@@ -114,6 +115,7 @@ export default async function SettingsPage() {
                   {user.isSystemAdmin ? ` · ${SYSTEM_ADMIN_LABEL}` : ''} ·{' '}
                   {user.account?.email || '—'}
                 </p>
+                <p className="text-xs text-ui-muted">{deskFor(user.role).description}</p>
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-right">

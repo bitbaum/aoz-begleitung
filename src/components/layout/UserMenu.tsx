@@ -14,11 +14,18 @@ interface UserMenuProps {
     email: string
     role: string
   }
+  /** The one line naming this role's work. @see lib/config/roles.ts */
+  deskDescription?: string
   hasPortalAccess?: boolean
   systemLinks?: NavItem[]
 }
 
-export function UserMenu({ user, hasPortalAccess, systemLinks = SYSTEM_LINKS }: UserMenuProps) {
+export function UserMenu({
+  user,
+  deskDescription,
+  hasPortalAccess,
+  systemLinks = SYSTEM_LINKS,
+}: UserMenuProps) {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -67,6 +74,7 @@ export function UserMenu({ user, hasPortalAccess, systemLinks = SYSTEM_LINKS }: 
             <p className="text-sm font-medium text-ui-text">{user.name}</p>
             {user.email && <p className="text-xs text-ui-muted truncate">{user.email}</p>}
             <p className="text-xs text-brand-primary mt-1">{ROLE_LABELS[user.role] || user.role}</p>
+            {deskDescription && <p className="text-xs text-ui-muted mt-1">{deskDescription}</p>}
           </div>
 
           {/* System destinations — SSOT in lib/config/navigation (SYSTEM_LINKS),

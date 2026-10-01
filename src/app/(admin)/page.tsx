@@ -36,7 +36,6 @@ import { buildVolunteeringQueue } from '@/lib/volunteering/queue'
 import { staffInbox } from '@/lib/messaging/queries'
 import { getIncidentsNeedingFollowUp } from '@/lib/actions/incidents'
 import { STAFF_ROLE_CARE_DOMAIN, roleHasCaseload } from '@/lib/config/care'
-import { hasPermission } from '@/lib/auth/role-policy'
 import { mayReadFact } from '@/lib/client-facts/policy'
 import { expiringFacts } from '@/lib/client-facts/renewals'
 import { EMPTY_PLACEHOLDER_SCOPE, isRealRow, loadPlaceholderScope } from '@/lib/analytics/real-data'
@@ -48,6 +47,7 @@ import {
   DISPLAY_LIMITS,
 } from '@/lib/config/thresholds'
 import { sectionVisible, type DashboardSection } from '@/lib/config/dashboard'
+import { caseloadQueueFor, deskFor } from '@/lib/config/roles'
 import { placeableBeds } from '@/lib/config/capacity'
 import { LEARNING_PULSE_WINDOW_DAYS } from '@/lib/config/learning'
 import { getProposalsAwaitingStaff } from '@/lib/governance/queries'
@@ -56,8 +56,8 @@ import { pendingFactQueue } from '@/lib/client-facts/queue'
 import { ownSeat } from '@/lib/client-facts/access'
 import {
   NARROWEST_CAPABILITIES,
+  hasAllDomainReach,
   type StaffCapabilities,
-  type StaffRole,
 } from '@/lib/auth/role-policy'
 
 export const dynamic = 'force-dynamic'
@@ -71,8 +71,13 @@ export default async function AdminDashboard() {
   // default to ADMIN there — showing EVERYTHING to a session that had just
   // ended. The narrowest subject is the safe direction to be wrong in.
   const viewer: StaffCapabilities = user ?? NARROWEST_CAPABILITIES
-  const role: StaffRole = viewer.role
+  // Which sections exist for this viewer is their DESK (config/roles.ts),
+  // floored by permissions — so the page skips every query the desk does not
+  // render, and the component cannot be handed work that is not theirs.
   const show = (section: DashboardSection) => sectionVisible(viewer, section)
+  const reachAll = hasAllDomainReach(viewer)
+  // Which caseload queue this desk works, if any — derived from its board.
+  const caseloadQueue = caseloadQueueFor(viewer.role)
 
   // Which care seat this person works. Derived from the role — the bijection is
   // already SSOT in config/care.ts and must never be restated as a literal.
@@ -106,6 +111,7 @@ export default async function AdminDashboard() {
     proposalsRaw,
     learningRecordsRaw,
     myCaseloadResidentIds,
+    openMaintenanceRaw,
     placeholderScope,
     upcomingEventsCount,
     inboxThreads,
@@ -120,19 +126,23 @@ export default async function AdminDashboard() {
     db.$count(resident),
     // Only used to pick the first setup step, which requires housing:write —
     // a subset of the housing:read this section is gated on.
-    show('occupancy') ? db.$count(housingUnit) : 0,
+    show('occupancy') || show('matching') ? db.$count(housingUnit) : 0,
     show('matching')
       ? db.query.resident.findMany({
           where: inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]),
           columns: { ...RESIDENT_NAME_SELECT, status: true, createdAt: true },
         })
       : [],
-    show('occupancy')
+    // Free beds also decide what the matching hero offers, so they are read
+    // for either section.
+    show('occupancy') || show('matching')
       ? db.query.housingUnit.findMany({
           columns: { totalBeds: true, status: true },
         })
       : [],
-    show('occupancy') ? db.$count(placement, eq(placement.status, 'ACTIVE')) : 0,
+    show('occupancy') || show('matching')
+      ? db.$count(placement, eq(placement.status, 'ACTIVE'))
+      : 0,
     show('checkIns')
       ? db.query.placement.findMany({
           where: eq(placement.status, 'ACTIVE'),
@@ -155,7 +165,7 @@ export default async function AdminDashboard() {
           },
         })
       : [],
-    show('incidents')
+    show('incidents') || show('criticalIncidents')
       ? db.query.incident.findMany({
           where: gte(incident.date, getDateDaysAgo(PROBLEM_DETECTION.recentIncidentsDays)),
           columns: {
@@ -210,10 +220,21 @@ export default async function AdminDashboard() {
       : [],
     // "My clients" across every seat this person holds — not just JOB, because
     // a Freiwilligenarbeit coordinator's learning entries are theirs too.
-    show('learning') && user
+    // Also narrows the renewals tile to the viewer's own clients.
+    (show('learning') || show('renewals')) && user
       ? db.query.careAssignment.findMany({
           where: eq(careAssignment.staffId, user.id),
           columns: { residentId: true },
+        })
+      : [],
+    // Liegenschaften works maintenance one request at a time, so it gets the
+    // list, not only the count. Oldest first: the longest wait leads.
+    show('maintenance')
+      ? db.query.maintenanceRequest.findMany({
+          where: inArray(maintenanceRequest.status, ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'ON_HOLD']),
+          columns: { id: true, title: true, priority: true, createdAt: true },
+          with: { housingUnit: { columns: { code: true } } },
+          orderBy: [asc(maintenanceRequest.createdAt)],
         })
       : [],
     show('learning') ? loadPlaceholderScope() : EMPTY_PLACEHOLDER_SCOPE,
@@ -262,7 +283,7 @@ export default async function AdminDashboard() {
     // things: one is waiting to be assigned, the other runs the buildings and never
     // will be. Asked of the ROLE rather than inferred from the count, because
     // a count cannot tell them apart. @see config/care.ts
-    viewer.scope === 'ALL_DOMAINS' || !roleHasCaseload(viewer.role) || !user
+    reachAll || !roleHasCaseload(viewer.role) || !user
       ? null
       : db.$count(careAssignment, eq(careAssignment.staffId, user.id)),
 
@@ -278,7 +299,7 @@ export default async function AdminDashboard() {
     // `VOLUNTEERING`, so the query returned nothing and that dashboard resolved
     // to "Alles unter Kontrolle" every morning. The fix written for the Jobcoach on
     // 2026-09-02 had been applied to the instance, not the class.
-    show('learning') && user && viewerSeat
+    show('caseload') && caseloadQueue && user && viewerSeat
       ? db.query.careAssignment.findMany({
           where: and(eq(careAssignment.staffId, user.id), eq(careAssignment.role, viewerSeat)),
           columns: {},
@@ -312,7 +333,7 @@ export default async function AdminDashboard() {
     // Every request a resident raised that nobody has taken up, for everyone
     // who may answer it — not only the holder of that resident's seat.
     // @see lib/inbox/waiting.ts
-    show('applications') ? waitingApplications(viewer) : [],
+    show('applications') ? waitingApplications(viewer, { includeReadOnly: true }) : [],
     show('approvals') && user
       ? pendingFactQueue({ userId: user.id, scope: viewer.scope, ownDomain: ownSeat(viewer.role) })
       : [],
@@ -360,7 +381,11 @@ export default async function AdminDashboard() {
    * Jobcoach sees permits and never an insurance, and somebody without
    * `clientFacts:read` sees none of it at all.
    */
-  const expiringRenewals = hasPermission(viewer, 'clientFacts:read')
+  // Narrowed to the viewer's OWN clients unless they reach every domain —
+  // the same rule the approvals queue applies by seat, so the two tiles on
+  // one screen can no longer disagree about whose renewals are whose.
+  const myResidentIds = new Set(myCaseloadResidentIds.map((row) => row.residentId))
+  const expiringRenewals = show('renewals')
     ? (await expiringFacts(new Date()))
         .filter((fact) =>
           mayReadFact(fact.kind, {
@@ -368,6 +393,7 @@ export default async function AdminDashboard() {
             seatsForClient: viewerSeat ? [viewerSeat] : [],
           }),
         )
+        .filter((fact) => reachAll || myResidentIds.has(fact.resident.id))
         .map((fact) => ({
           id: fact.id,
           kind: fact.kind,
@@ -382,9 +408,7 @@ export default async function AdminDashboard() {
   // the same page (rightly) did not show, and the task list repeated it — one
   // person three times, with counts that disagreed. Other threads stay in, so
   // what counts as contact is unchanged.
-  const seatKinds: readonly string[] = boardOpportunityKinds(
-    viewerSeat === 'JOB' ? 'job' : 'volunteering',
-  )
+  const seatKinds: readonly string[] = boardOpportunityKinds(deskFor(viewer.role).integrationBoard)
   const caseloadClients = jobCaseload.map(({ resident }) => ({
     residentId: resident.id,
     name: residentName(resident),
@@ -400,9 +424,9 @@ export default async function AdminDashboard() {
   // questions are not the Jobcoach's — "has anyone answered them, and is anyone doing
   // anything with other people" rather than "have they reached the labour
   // market" — so the rows differ even though the fetch is identical.
-  const jobQueue = viewerSeat === 'JOB' ? buildJobQueue(caseloadClients, now) : []
+  const jobQueue = caseloadQueue === 'job' ? buildJobQueue(caseloadClients, now) : []
   const volunteeringQueue =
-    viewerSeat === 'VOLUNTEERING' ? buildVolunteeringQueue(caseloadClients, now) : []
+    caseloadQueue === 'volunteering' ? buildVolunteeringQueue(caseloadClients, now) : []
 
   // The learning tile, narrowed to what it claims to be about.
   //
@@ -419,10 +443,9 @@ export default async function AdminDashboard() {
   //    viewer with reach over every domain has no single seat, so the honest
   //    denominator for them is the whole real population — the same distinction
   //    `assignedResidentCount` above already draws.
-  const myResidentIds = new Set(myCaseloadResidentIds.map((row) => row.residentId))
   const learningRecords = learningRecordsRaw
     .filter((row) => isRealRow(row, placeholderScope))
-    .filter((row) => viewer.scope === 'ALL_DOMAINS' || myResidentIds.has(row.residentId))
+    .filter((row) => reachAll || myResidentIds.has(row.residentId))
 
   const learningInProgressCount = learningRecords.filter(
     (row) => row.status === 'IN_PROGRESS',
@@ -625,6 +648,13 @@ export default async function AdminDashboard() {
       proposalsAwaitingStaff={proposalsAwaitingStaff}
       conflictFreeDays={conflictFreeDays}
       openMaintenanceCount={openMaintenanceCount}
+      openMaintenance={openMaintenanceRaw.map((row) => ({
+        id: row.id,
+        title: row.title,
+        unitCode: row.housingUnit?.code ?? '—',
+        priority: row.priority,
+        daysOpen: daysSinceCeil(row.createdAt, now),
+      }))}
       learningInProgressCount={learningInProgressCount}
       learningRecentCompletions={learningRecentCompletions}
       upcomingEventsCount={upcomingEventsCount}

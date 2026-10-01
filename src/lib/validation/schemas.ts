@@ -226,6 +226,13 @@ export const ResidentInputSchema = z.object({
    * that should have been the default all along.
    */
   code: z.string().max(50).optional(),
+  /** Optional first name from intake; blank stays null (the code shows). */
+  displayName: z
+    .string()
+    .trim()
+    .max(60)
+    .optional()
+    .transform((value) => (value ? value : null)),
   ageRange: AgeRangeSchema,
   gender: GenderSchema,
   familyStatus: FamilyStatusSchema,

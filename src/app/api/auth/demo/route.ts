@@ -81,7 +81,8 @@ async function offeredDoors(): Promise<OfferedDoor[]> {
   if (residentCode) {
     const residentRow = await db.query.resident.findFirst({
       where: eq(resident.code, residentCode),
-      columns: { id: true, isPlaceholder: true },
+      columns: { id: true },
+      with: { account: { columns: { id: true } } },
     })
     // ⚠️ THE DOOR DIES THE MOMENT THE PROFILE IS CLAIMED, and this is the
     // whole point of the check.
@@ -96,8 +97,11 @@ async function offeredDoors(): Promise<OfferedDoor[]> {
     //
     // Config discipline cannot prevent that, because the event that causes it
     // is a resident registering — something nobody is watching the env var
-    // for. So the guard is in code and reads the same fact the marker does.
-    if (residentRow?.isPlaceholder) {
+    // for. So the guard is in code, and it reads the fact itself: the door is
+    // open only while NO login is linked to the profile. (It used to read
+    // `isPlaceholder`, which ruled out a client staff added through the normal
+    // intake form — the profile the owner wants behind this button.)
+    if (residentRow && !residentRow.account) {
       doors.push({ id: RESIDENT_DOOR, code: residentCode, label: BRAND.clientTerm })
     }
   }

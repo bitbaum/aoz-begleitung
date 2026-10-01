@@ -47,7 +47,7 @@ import { WhoFitsHereCard } from '@/components/housing/WhoFitsHereCard'
 import { calculateApartmentProfile, calculateApartmentFit } from '@/lib/compatibility/aggregate'
 import { toResidentProfile } from '@/lib/compatibility/convert'
 import { getUnitFitConcerns } from '@/lib/compatibility'
-import { requirePermission } from '@/lib/auth'
+import { hasPermission, requirePermission } from '@/lib/auth'
 import { getEntityAuditLog } from '@/lib/audit'
 import { AuditTrail } from '@/components/admin/AuditTrail'
 import type { Resident, CompatibilityAssessment } from '@/lib/db'
@@ -85,7 +85,12 @@ interface Props {
 }
 
 export default async function HousingDetailPage({ params }: Props) {
-  await requirePermission('housing:read')
+  const viewer = await requirePermission('housing:read')
+  // Reading a flat is housing:read; changing it and placing someone into it
+  // are separate verbs, and the buttons follow them rather than offering a
+  // Betreuerin or Sozialarbeiterin an edit that ends at /kein-zugriff.
+  const canEditHousing = hasPermission(viewer, 'housing:write')
+  const canPlace = hasPermission(viewer, 'placements:write')
   const { id } = await params
 
   const unit = await db.query.housingUnit.findFirst({
@@ -270,9 +275,11 @@ export default async function HousingDetailPage({ params }: Props) {
         <div className="flex flex-wrap items-center gap-3">
           <HarmonyBadge status={harmonyStatus} />
           <StatusBadge status={unit.status} />
-          <Link href={`/housing/${unit.id}/edit`} className="btn-outline">
-            {FORM_LABELS.edit}
-          </Link>
+          {canEditHousing && (
+            <Link href={`/housing/${unit.id}/edit`} className="btn-outline">
+              {FORM_LABELS.edit}
+            </Link>
+          )}
         </div>
       </div>
 
@@ -297,14 +304,17 @@ export default async function HousingDetailPage({ params }: Props) {
                 <h2 className="text-lg font-semibold text-ui-text">
                   {HOUSING_DETAIL_LABELS.spotsHeading}
                 </h2>
-                <Link href={`/housing/${unit.id}/spots`} className="btn-outline text-sm">
-                  {HOUSING_DETAIL_LABELS.manageSpots}
-                </Link>
+                {canEditHousing && (
+                  <Link href={`/housing/${unit.id}/spots`} className="btn-outline text-sm">
+                    {HOUSING_DETAIL_LABELS.manageSpots}
+                  </Link>
+                )}
               </div>
               <RoomVisualizationWithPlacement
                 spots={unit.spots as unknown as HousingSpot[]}
                 housingUnitId={unit.id}
                 compatibleResidents={compatibleResidents}
+                canPlace={canPlace}
               />
             </div>
           )}
@@ -317,12 +327,16 @@ export default async function HousingDetailPage({ params }: Props) {
                   {HOUSING_DETAIL_LABELS.residentsHeading}
                 </h2>
                 <div className="flex gap-2">
-                  <Link href={`/housing/${unit.id}/spots`} className="btn-primary text-sm">
-                    {HOUSING_DETAIL_LABELS.defineSpots}
-                  </Link>
-                  <Link href={`/matching?unit=${unit.id}`} className="btn-outline text-sm">
-                    {ACTION_LABELS.placeResident}
-                  </Link>
+                  {canEditHousing && (
+                    <Link href={`/housing/${unit.id}/spots`} className="btn-primary text-sm">
+                      {HOUSING_DETAIL_LABELS.defineSpots}
+                    </Link>
+                  )}
+                  {canPlace && (
+                    <Link href={`/matching?unit=${unit.id}`} className="btn-outline text-sm">
+                      {ACTION_LABELS.placeResident}
+                    </Link>
+                  )}
                 </div>
               </div>
 
@@ -354,8 +368,8 @@ export default async function HousingDetailPage({ params }: Props) {
 
           {unit.placements.length > 1 && <HouseholdFitCard notes={fitNotes} />}
 
-          {/* Who Fits Here - Only show if there's available space */}
-          {hasAvailableSpace && (
+          {/* Who Fits Here - a placement tool: only with space AND the right to place */}
+          {hasAvailableSpace && canPlace && (
             <WhoFitsHereCard
               unitId={unit.id}
               availableSpaces={unit.totalBeds - unit.placements.length}

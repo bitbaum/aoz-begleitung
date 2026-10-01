@@ -37,6 +37,8 @@ vi.mock('@/lib/constants/labels', async () => ({
     heroPlaceResidentsSuffix: 'Bewohner platzieren',
     heroFreeBedsAvailableSuffix: 'freie Plätze verfügbar',
     actionStartMatching: 'Matching starten',
+    heroNoFreeBeds: 'Keine freien Plätze — Wohnungen prüfen',
+    heroOpenHousing: 'Wohnungen ansehen',
     heroOpenConflictsSuffix: 'offene Konflikte',
     heroMainProblemPrefix: 'Hauptproblem:',
     heroAnalyze: 'Analysieren',
@@ -212,14 +214,17 @@ describe('determinePrimaryAction', () => {
     expect(result.href).toBe('/matching')
   })
 
-  it('does NOT return type=place when freeBeds === 0', () => {
+  it('still names unplaced people when no bed is free — and sends to the stock, not matching', () => {
+    // It used to fall through to "Alles erledigt!" here, while the header
+    // counted the same people as open tasks. Every counted queue must be able
+    // to claim the hero.
     const result = determinePrimaryAction({
       ...EMPTY,
       unplacedResidents: [makeResident()],
       freeBeds: 0,
     })
-    // Falls through to later priorities (all clear since no others)
-    expect(result.type).toBe('allclear')
+    expect(result.type).toBe('place')
+    expect(result.href).toBe('/housing')
   })
 
   // Priority 4: problem units with unresolved incidents
@@ -464,5 +469,53 @@ describe('the hero and the header cannot disagree', () => {
 
   it('reports all-clear when the job queue is genuinely empty', () => {
     expect(determinePrimaryAction({ ...EMPTY, jobQueue: [] }).type).toBe('allclear')
+  })
+})
+
+describe('the hero follows the viewer desk', () => {
+  const own = (role: 'FREIWILLIGENARBEIT' | 'LIEGENSCHAFTEN' | 'JOBCOACH') => ({
+    role,
+    scope: 'OWN_DOMAIN' as const,
+    isSystemAdmin: false,
+  })
+
+  it('names the volunteering queue for Freiwilligenarbeit instead of "Alles erledigt!"', () => {
+    // The queue was never passed in at all: the hero said "Alles erledigt!"
+    // above open volunteering tiles.
+    const result = determinePrimaryAction({
+      ...EMPTY,
+      viewer: own('FREIWILLIGENARBEIT'),
+      volunteeringQueue: [
+        {
+          residentId: 'r9',
+          name: 'Samira K',
+          signal: 'NO_ENGAGEMENT',
+          opportunityId: null,
+        },
+      ] as never,
+    })
+    expect(result.type).not.toBe('allclear')
+    expect(result.description).toContain('Samira K')
+    expect(result.href).toBe('/residents/r9')
+  })
+
+  it('never leads Liegenschaften with a check-in — those are Betreuung', () => {
+    const result = determinePrimaryAction({
+      ...EMPTY,
+      viewer: own('LIEGENSCHAFTEN'),
+      overdueCheckIns: [makeCheckIn('c1', 50, true)],
+      unplacedResidents: [makeResident()],
+    })
+    expect(result.type).toBe('place')
+  })
+
+  it('ignores another desk’s queue even when it is handed one', () => {
+    const result = determinePrimaryAction({
+      ...EMPTY,
+      viewer: own('JOBCOACH'),
+      proposalsAwaitingStaff: [makeProposal()],
+    })
+    expect(result.type).toBe('allclear')
+    expect(result.href).toBe('/learning')
   })
 })

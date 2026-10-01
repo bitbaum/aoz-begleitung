@@ -7,6 +7,7 @@ import { logAudit } from '@/lib/audit'
 import { logger } from '@/lib/logger'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { requireStaffAuth } from '@/lib/auth'
+import { hasPermission } from '@/lib/auth/role-policy'
 import type { ReviewTransferRequestInput } from '@/lib/validation/transfer'
 import { RESIDENT_NAME_SELECT } from '@/lib/utils/resident-name'
 
@@ -40,6 +41,11 @@ async function reviewTransferRequest(
   decision: 'APPROVED' | 'DENIED',
 ): Promise<{ success: boolean; error?: string }> {
   const user = await requireStaffAuth()
+  // Deciding where someone lives is placements:write — the same verb the
+  // dashboard queue and the nav item are gated on. It took a session alone.
+  if (!hasPermission(user, 'placements:write')) {
+    return { success: false, error: ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS }
+  }
 
   try {
     // Atomic guard: only PENDING rows are eligible. Prevents two staff members

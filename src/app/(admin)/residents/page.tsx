@@ -381,9 +381,7 @@ export default async function ResidentsListPage({ searchParams }: Props) {
             ...r,
             incidentCount: incidentCountByResident.get(r.id) ?? 0,
           }))}
-          canWrite={
-            viewerRole === 'ADMIN' || viewerRole === 'BETREUUNG' || viewerRole === 'SOZIALARBEIT'
-          }
+          canWrite={can('residents:write')}
         />
       ) : (
         <ClientBoard
