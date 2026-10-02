@@ -2690,3 +2690,44 @@ export const clientPermit = pgTable(
       .onDelete('set null'),
   ],
 )
+
+/**
+ * A saved selection of clients — a NAME on a set of filters, never a list of
+ * people. Membership is resolved on demand from `filters` (validated against
+ * `config/client-filters.ts`), so a group stays current as people move in,
+ * out and between houses, and it can serve as a survey audience without a
+ * stale snapshot of who was in it the day it was saved.
+ *
+ * `restrict` on the creator: staff leave by `active: false`, never by row
+ * deletion, and a group someone else relies on must not vanish with them.
+ */
+export const clientGroup = pgTable(
+  'ClientGroup',
+  {
+    id: text().primaryKey().$defaultFn(createId).notNull(),
+    createdAt: timestamp({ precision: 3, mode: 'date' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp({ precision: 3, mode: 'date' })
+      .$defaultFn(() => new Date())
+      .$onUpdateFn(() => new Date())
+      .notNull(),
+    name: text().notNull(),
+    description: text(),
+    filters: jsonb().notNull(),
+    createdByUserId: text().notNull(),
+  },
+  (table) => [
+    index('ClientGroup_createdByUserId_idx').using(
+      'btree',
+      table.createdByUserId.asc().nullsLast(),
+    ),
+    foreignKey({
+      columns: [table.createdByUserId],
+      foreignColumns: [user.id],
+      name: 'ClientGroup_createdByUserId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('restrict'),
+  ],
+)

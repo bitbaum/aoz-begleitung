@@ -47,15 +47,12 @@ function client(overrides: Partial<ClientBoardItem> & { id: string }): ClientBoa
     incidentCount: 0,
     daysSinceCheckIn: null,
     checkInIntervalDays: 30,
-    isMyClient: false,
     ...overrides,
   }
 }
 
 function board(clients: ClientBoardItem[]) {
-  render(
-    <ClientBoard clients={clients} viewerRole="BETREUUNG" filter="all" baseHref="/residents" />,
-  )
+  render(<ClientBoard clients={clients} viewerRole="BETREUUNG" />)
 }
 
 describe('the default board marks a placeholder', () => {

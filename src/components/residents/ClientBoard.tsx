@@ -10,8 +10,8 @@
  *   FREIWILLIGENARBEIT → engagement status + interest area
  *   ADMIN          → full overview
  *
- * The "Meine / Alle" toggle filters by careAssignment — kept as a URL param
- * so it survives refresh and is shareable.
+ * Filtering lives on the page (config/client-filters.ts) — the board only
+ * renders what it is given.
  *
  * Information hierarchy:
  *   1. WHO (name, code, support level)
@@ -36,7 +36,6 @@ import { GENDER_LABELS_SHORT, RESIDENT_LIST_LABELS, getLabel } from '@/lib/const
 import { SUPPORT_LEVEL_LABELS, CLIENT_BOARD_LABELS } from '@/lib/constants/labels/residents'
 import { CARE_ROLE_LABELS, type CareRoleId } from '@/lib/config/care'
 import { residentInitials, residentName } from '@/lib/utils/resident-name'
-import { EmptyState } from '@/components/ui/Page'
 import type { StaffRole } from '@/lib/auth/role-policy'
 import { deskFor } from '@/lib/config/roles'
 import { STAFF_ROLE_CARE_DOMAIN } from '@/lib/config/care'
@@ -69,16 +68,11 @@ export interface ClientBoardItem {
   incidentCount: number
   daysSinceCheckIn: number | null
   checkInIntervalDays: number
-  isMyClient: boolean
 }
 
 export interface ClientBoardProps {
   clients: ClientBoardItem[]
   viewerRole: StaffRole
-  /** 'mine' | 'all' — controlled by URL param, rendered server-side */
-  filter: 'mine' | 'all'
-  /** href base for filter toggle links */
-  baseHref: string
 }
 
 // ─── Role icon map ─────────────────────────────────────────────────────────
@@ -406,92 +400,17 @@ function ClientCard({ client, viewerRole }: { client: ClientBoardItem; viewerRol
   )
 }
 
-// ─── Filter bar ────────────────────────────────────────────────────────────
-
-function FilterBar({
-  filter,
-  baseHref,
-  myCount,
-  allCount,
-}: {
-  filter: 'mine' | 'all'
-  baseHref: string
-  myCount: number
-  allCount: number
-}) {
-  const chip = (active: boolean) =>
-    `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${
-      active
-        ? 'bg-brand-primary-dark text-ui-on-accent border-brand-primary-dark'
-        : 'bg-ui-surface text-ui-muted border-ui-border hover:border-brand-primary/40 hover:text-ui-text'
-    }`
-
-  const mineHref = `${baseHref}${baseHref.includes('?') ? '&' : '?'}filter=mine`
-  const allHref = `${baseHref}${baseHref.includes('?') ? '&' : '?'}filter=all`
-
-  return (
-    <div
-      className="flex items-center gap-2 flex-wrap"
-      role="group"
-      aria-label="Klient*innen filtern"
-    >
-      <Link
-        href={mineHref}
-        className={chip(filter === 'mine')}
-        aria-current={filter === 'mine' ? 'true' : undefined}
-      >
-        Meine Klient*innen
-        <span className="ml-0.5 inline-flex items-center justify-center rounded-full bg-ui-on-accent/20 px-1.5 text-xs">
-          {myCount}
-        </span>
-      </Link>
-      <Link
-        href={allHref}
-        className={chip(filter === 'all')}
-        aria-current={filter === 'all' ? 'true' : undefined}
-      >
-        Alle
-        <span className="ml-0.5 inline-flex items-center justify-center rounded-full bg-ui-on-accent/20 px-1.5 text-xs">
-          {allCount}
-        </span>
-      </Link>
-    </div>
-  )
-}
-
 // ─── Board root ────────────────────────────────────────────────────────────
 
-export function ClientBoard({ clients, viewerRole, filter, baseHref }: ClientBoardProps) {
-  const myClients = clients.filter((c) => c.isMyClient)
-  const shown = filter === 'mine' ? myClients : clients
-
+export function ClientBoard({ clients, viewerRole }: ClientBoardProps) {
+  // Filtering — including the old "Meine / Alle" toggle, now the Zuständig
+  // filter — happens on the server from `config/client-filters.ts`, for both
+  // layouts. The page renders the empty state, so `clients` is never empty here.
   return (
-    <div className="space-y-4">
-      <FilterBar
-        filter={filter}
-        baseHref={baseHref}
-        myCount={myClients.length}
-        allCount={clients.length}
-      />
-
-      {shown.length === 0 ? (
-        <EmptyState
-          title={
-            filter === 'mine' ? 'Keine Klient*innen zugewiesen' : 'Keine Klient*innen gefunden'
-          }
-          description={
-            filter === 'mine'
-              ? 'Es sind noch keine Klient*innen Ihrer Fürsorge zugewiesen.'
-              : 'Neue Klient*innen werden über den Erfassungsprozess angelegt.'
-          }
-        />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {shown.map((client) => (
-            <ClientCard key={client.id} client={client} viewerRole={viewerRole} />
-          ))}
-        </div>
-      )}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {clients.map((client) => (
+        <ClientCard key={client.id} client={client} viewerRole={viewerRole} />
+      ))}
     </div>
   )
 }

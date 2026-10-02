@@ -804,6 +804,38 @@ EMPTY heading, because the German fallback misses too.
 
 ---
 
+## Client filters & groups
+
+SSOT: `src/lib/config/client-filters.ts`. One declaration per filter on the
+Klient*innen list — id, URL param, German label, kind (`select` ·
+`multiselect` · `toggle`), option source, zod schema, and a pure function
+returning a Drizzle `where` on Resident. The filter bar, the status tabs
+(`stand`, which keeps the old `view` param), URL encoding, saved-group
+validation and group membership all iterate that list: **a new filter is one
+entry there** plus its row in `config/__tests__/client-filters.test.ts`, which
+fails when a filter has no case.
+
+- **A group is a saved FILTER, never a list of people.** `ClientGroup.filters`
+  (jsonb) is validated `strict` against the config, and membership is computed
+  on demand by `resolveGroupMembers(group, viewer)` in
+  `lib/client-groups/resolve.ts` — always current, always inside the viewer's
+  site scope (`residentScopeFilter`). A stored filter the config no longer
+  knows is REFUSED (`InvalidGroupFiltersError`), never dropped: dropping it
+  would silently widen a group, and groups are the audience of the survey
+  module. `seat: 'mine'` resolves to the viewer resolving it.
+- **Page defaults are not group state.** An unfiltered visit lands on `stand:
+  active`, and a caseload holder on `seat: mine` (the old board "Meine / Alle"
+  toggle, now the Zuständig filter, for BOTH layouts; `?filter=` still works).
+  A group stores only what was applied minus neutral values, and its chip
+  link spells out `seat=all` so it never inherits someone's "Meine".
+- **Client facts are never filterable.** Insurance, health contacts and permit
+  must not become a filter or a group — a filter selects people.
+  `never-an-input-to-a-decision.test.ts` scans the config file and
+  `lib/client-groups/`.
+- Any staff member with `residents:read` may use and create groups; only the
+  creator or a system admin may rename or delete (`mayManageClientGroup`).
+  Actions in `lib/actions/client-groups.ts` return `{ error }`.
+
 ## Marketplace: two halves, and no money
 
 SSOT: `src/lib/config/marketplace.ts`. The board carries **goods and services**,

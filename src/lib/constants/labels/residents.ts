@@ -185,6 +185,61 @@ export const CLIENT_BOARD_LABELS = {
   incidentCount: (n: number) => (n === 1 ? '1 Vorfall (30T)' : `${n} Vorfälle (30T)`),
 } as const
 
+/**
+ * The filter bar on the Klient*innen list. Option labels are NOT here — they
+ * are read from the config each filter draws on (factors, statuses, care
+ * seats), so a language or age band is named in exactly one place.
+ */
+export const CLIENT_FILTER_LABELS = {
+  barLabel: 'Klient*innen filtern',
+  toggle: (n: number) => (n === 0 ? 'Filter' : `Filter (${n})`),
+  any: 'Alle',
+  apply: 'Anwenden',
+  unit: 'Wohnung / Haus',
+  language: 'Sprache',
+  stand: 'Stand',
+  ageRange: 'Altersgruppe',
+  seat: 'Zuständig',
+  seatMine: 'Meine Klient*innen',
+  /** A care seat nobody holds — the gap staff most often go looking for. */
+  seatOpen: (role: string) => `Unbesetzt: ${role}`,
+  movedIn: 'Eingezogen',
+  movedInWithin: (days: number) => `In den letzten ${days} Tagen`,
+  awaitingAnswer: 'Offene Anfrage',
+  awaitingAnswerHint: 'Nur mit unbeantworteter Anfrage',
+} as const
+
+export const CLIENT_GROUP_LABELS = {
+  rowLabel: 'Gruppen',
+  memberCount: (n: number) => (n === 1 ? '1 Person' : `${n} Personen`),
+  save: 'Als Gruppe speichern',
+  saveSubmit: 'Gruppe speichern',
+  saveHint:
+    'Eine Gruppe speichert die Filter, nicht die Personen: wer dazugehört, wird bei jedem Öffnen neu bestimmt.',
+  name: 'Name',
+  namePlaceholder: 'z.B. Arabisch sprechend in WIT-458',
+  description: 'Beschreibung (optional)',
+  rename: 'Umbenennen',
+  renameSubmit: 'Speichern',
+  delete: 'Löschen',
+  deleteConfirm: 'Gruppe wirklich löschen? Die Klient*innen selbst bleiben unverändert.',
+  cancel: 'Abbrechen',
+  invalidFilters:
+    'Diese Gruppe enthält Filter, die es nicht mehr gibt. Bitte speichern Sie sie neu.',
+  errors: {
+    nameRequired: 'Bitte geben Sie der Gruppe einen Namen.',
+    nameTooLong: 'Der Name darf höchstens 80 Zeichen lang sein.',
+    descriptionTooLong: 'Die Beschreibung darf höchstens 280 Zeichen lang sein.',
+    noFilters:
+      'Ohne Filter wäre die Gruppe einfach alle Klient*innen. Wählen Sie zuerst mindestens einen Filter.',
+    invalidFilters: 'Diese Filter sind ungültig. Bitte laden Sie die Seite neu.',
+    notFound: 'Diese Gruppe gibt es nicht mehr.',
+    notYours:
+      'Nur die Person, die die Gruppe angelegt hat, oder die Systemadministration kann sie ändern.',
+    saveFailed: 'Die Gruppe konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.',
+  },
+} as const
+
 // Satisfaction
 export const SATISFACTION_EMOJIS = ['😞', '😕', '😐', '🙂', '😊']
 
