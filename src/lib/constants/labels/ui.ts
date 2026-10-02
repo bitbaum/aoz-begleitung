@@ -266,7 +266,10 @@ export const RESIDENT_LIST_LABELS = {
    * number was wrong; the word was.
    */
   viewCurrent: 'Aktuell',
-  unplacedBannerSuffix: 'Klient*innen warten auf Platzierung',
+  unplacedBanner: (count: number) =>
+    count === 1
+      ? '1 Klient*in wartet auf Platzierung'
+      : `${count} Klient*innen warten auf Platzierung`,
   unplacedBannerDesc: 'Starten Sie den Matching-Prozess um passende Unterkünfte zu finden',
   startMatching: 'Matching starten',
   emptyArchived: 'Keine archivierten Klient*innen',

@@ -40,7 +40,7 @@ export function StatCard({ label, value, subtitle, trend = 'neutral', href }: St
 
   const content = (
     <>
-      <p className="eyebrow">{label}</p>
+      <p className="eyebrow hyphens-auto">{label}</p>
       {/* `.metric` sets the number in mono with tabular figures — a row of
           stat cards has to line up, and proportional digits will not. */}
       <p className={`metric mt-3 ${valueColor}`}>{value}</p>

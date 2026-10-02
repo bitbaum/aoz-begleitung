@@ -250,6 +250,21 @@ export default async function ResidentsListPage({ searchParams }: Props) {
     visible: residents.length,
   }
 
+  // The tiles and the header describe the people LISTED, not the whole
+  // organisation: under a filter ("Singapur", 4 people) tiles reading
+  // 13 / 12 / 1 contradicted the list beneath them. The list is unpaginated,
+  // so the rows are a complete count. The matching banner keeps the
+  // organisation-wide number — it is a call to action, not a description.
+  const shown = {
+    total: residents.length,
+    placed: (residents as { placements?: unknown[] }[]).filter(
+      (r) => (r.placements?.length ?? 0) > 0,
+    ).length,
+    unplaced: (residents as { status: string; placements?: unknown[] }[]).filter(
+      (r) => r.status !== 'EXITED' && (r.placements?.length ?? 0) === 0,
+    ).length,
+  }
+
   // Compute check-in status and assemble ClientBoardItem for each resident
   const clientBoardItems: ClientBoardItem[] = (residents as any[]).map((r) => {
     const placement = r.placements?.[0]
@@ -362,7 +377,7 @@ export default async function ResidentsListPage({ searchParams }: Props) {
     <PageShell>
       <PageHeader
         title="Klient*innen"
-        description={`${stats.visible} sichtbar · ${stats.unplaced} ohne Platzierung`}
+        description={`${shown.total} sichtbar · ${shown.unplaced} ohne Platzierung`}
         actions={
           <>
             {can('export:read') && (
@@ -452,7 +467,7 @@ export default async function ResidentsListPage({ searchParams }: Props) {
         <div className="rounded-lg border border-status-warning/30 bg-status-warning/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <p className="font-medium text-ui-text">
-              {stats.unplaced} {RESIDENT_LIST_LABELS.unplacedBannerSuffix}
+              {RESIDENT_LIST_LABELS.unplacedBanner(stats.unplaced)}
             </p>
             <p className="text-sm text-ui-muted">{RESIDENT_LIST_LABELS.unplacedBannerDesc}</p>
           </div>
@@ -465,12 +480,12 @@ export default async function ResidentsListPage({ searchParams }: Props) {
       {/* Three tiles, not four: status ACTIVE means "in care, not yet placed",
           so an "Aktiv" tile showed the same number as "Ohne Platzierung". */}
       <div className="grid grid-cols-3 gap-3">
-        <StatCard label={UI_LABELS.total} value={stats.total} />
-        <StatCard label={RESIDENT_STATUS_LABELS.PLACED} value={stats.placed} />
+        <StatCard label={UI_LABELS.total} value={shown.total} />
+        <StatCard label={RESIDENT_STATUS_LABELS.PLACED} value={shown.placed} />
         <StatCard
           label={RESIDENT_STAT_LABELS.unplaced}
-          value={stats.unplaced}
-          trend={stats.unplaced > 0 ? 'warning' : 'neutral'}
+          value={shown.unplaced}
+          trend={shown.unplaced > 0 ? 'warning' : 'neutral'}
         />
       </div>
 
