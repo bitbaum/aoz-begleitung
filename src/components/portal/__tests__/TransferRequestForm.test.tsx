@@ -4,15 +4,15 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { TransferRequestForm } from '../TransferRequestForm'
 
 const TRANSFER_COPY: Record<string, string> = {
-  'transfer.subtitle': 'Möchtest du in eine andere Unterkunft wechseln?',
-  'transfer.reasonLabel': 'Warum möchtest du verlegt werden?',
+  'transfer.subtitle': 'Möchten Sie in eine andere Unterkunft wechseln?',
+  'transfer.reasonLabel': 'Warum möchten Sie verlegt werden?',
   'transfer.reasonPlaceholder': 'Beschreibe den Grund...',
   'transfer.targetUnitLabel': 'Wunsch-Unterkunft (optional)',
   'transfer.targetUnitPlaceholder': 'Keine Präferenz',
   'transfer.submit': 'Anfrage senden',
   'transfer.submitting': 'Wird gesendet...',
   'transfer.successTitle': 'Anfrage gesendet',
-  'transfer.successMessage': 'Deine Verlegungsanfrage wurde erfolgreich eingereicht.',
+  'transfer.successMessage': 'Ihre Verlegungsanfrage wurde erfolgreich eingereicht.',
   'transfer.successNextStepsTitle': 'Wie geht es weiter?',
   'transfer.successNextStep1': 'Schritt 1',
   'transfer.successNextStep2': 'Schritt 2',
@@ -66,7 +66,7 @@ describe('TransferRequestForm', () => {
   it('renders the form with reason textarea and submit button', () => {
     render(<TransferRequestForm {...DEFAULT_PROPS} />)
 
-    expect(screen.getByLabelText('Warum möchtest du verlegt werden?')).toBeInTheDocument()
+    expect(screen.getByLabelText('Warum möchten Sie verlegt werden?')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Anfrage senden' })).toBeInTheDocument()
   })
 
@@ -104,7 +104,7 @@ describe('TransferRequestForm', () => {
   it('submit button is disabled when reason is fewer than 10 characters', () => {
     render(<TransferRequestForm {...DEFAULT_PROPS} />)
 
-    fireEvent.change(screen.getByLabelText('Warum möchtest du verlegt werden?'), {
+    fireEvent.change(screen.getByLabelText('Warum möchten Sie verlegt werden?'), {
       target: { value: 'Zu kurz' },
     })
 
@@ -114,7 +114,7 @@ describe('TransferRequestForm', () => {
   it('submit button is enabled when reason is at least 10 characters', () => {
     render(<TransferRequestForm {...DEFAULT_PROPS} />)
 
-    fireEvent.change(screen.getByLabelText('Warum möchtest du verlegt werden?'), {
+    fireEvent.change(screen.getByLabelText('Warum möchten Sie verlegt werden?'), {
       target: { value: 'Langer genug Grund' },
     })
 
@@ -125,7 +125,7 @@ describe('TransferRequestForm', () => {
     mockFetchSuccess()
     render(<TransferRequestForm {...DEFAULT_PROPS} />)
 
-    fireEvent.change(screen.getByLabelText('Warum möchtest du verlegt werden?'), {
+    fireEvent.change(screen.getByLabelText('Warum möchten Sie verlegt werden?'), {
       target: { value: 'Ich brauche mehr Ruhe' },
     })
     fireEvent.submit(screen.getByRole('button', { name: 'Anfrage senden' }).closest('form')!)
@@ -138,7 +138,7 @@ describe('TransferRequestForm', () => {
     mockFetchSuccess()
     render(<TransferRequestForm {...DEFAULT_PROPS} />)
 
-    fireEvent.change(screen.getByLabelText('Warum möchtest du verlegt werden?'), {
+    fireEvent.change(screen.getByLabelText('Warum möchten Sie verlegt werden?'), {
       target: { value: 'Ich brauche mehr Ruhe' },
     })
     fireEvent.submit(screen.getByRole('button', { name: 'Anfrage senden' }).closest('form')!)
@@ -146,18 +146,18 @@ describe('TransferRequestForm', () => {
     await waitFor(() => {
       expect(screen.getByText('Anfrage gesendet')).toBeInTheDocument()
       expect(
-        screen.getByText('Deine Verlegungsanfrage wurde erfolgreich eingereicht.'),
+        screen.getByText('Ihre Verlegungsanfrage wurde erfolgreich eingereicht.'),
       ).toBeInTheDocument()
     })
 
-    expect(screen.queryByLabelText('Warum möchtest du verlegt werden?')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Warum möchten Sie verlegt werden?')).not.toBeInTheDocument()
   })
 
   it('shows API error message on failed response', async () => {
     mockFetchApiError('Bereits eine offene Anfrage vorhanden')
     render(<TransferRequestForm {...DEFAULT_PROPS} />)
 
-    fireEvent.change(screen.getByLabelText('Warum möchtest du verlegt werden?'), {
+    fireEvent.change(screen.getByLabelText('Warum möchten Sie verlegt werden?'), {
       target: { value: 'Ich brauche mehr Ruhe' },
     })
     fireEvent.submit(screen.getByRole('button', { name: 'Anfrage senden' }).closest('form')!)
@@ -167,14 +167,14 @@ describe('TransferRequestForm', () => {
     })
 
     // Form stays visible after error
-    expect(screen.getByLabelText('Warum möchtest du verlegt werden?')).toBeInTheDocument()
+    expect(screen.getByLabelText('Warum möchten Sie verlegt werden?')).toBeInTheDocument()
   })
 
   it('shows generic error on network failure', async () => {
     mockFetchNetworkError()
     render(<TransferRequestForm {...DEFAULT_PROPS} />)
 
-    fireEvent.change(screen.getByLabelText('Warum möchtest du verlegt werden?'), {
+    fireEvent.change(screen.getByLabelText('Warum möchten Sie verlegt werden?'), {
       target: { value: 'Ich brauche mehr Ruhe' },
     })
     fireEvent.submit(screen.getByRole('button', { name: 'Anfrage senden' }).closest('form')!)
@@ -191,7 +191,7 @@ describe('TransferRequestForm', () => {
     render(<TransferRequestForm {...DEFAULT_PROPS} />)
 
     const reason = 'Ich brauche mehr Ruhe und Privatsphäre'
-    fireEvent.change(screen.getByLabelText('Warum möchtest du verlegt werden?'), {
+    fireEvent.change(screen.getByLabelText('Warum möchten Sie verlegt werden?'), {
       target: { value: reason },
     })
     fireEvent.submit(screen.getByRole('button', { name: 'Anfrage senden' }).closest('form')!)
@@ -210,7 +210,7 @@ describe('TransferRequestForm', () => {
     mockFetchSuccess()
     render(<TransferRequestForm availableUnits={AVAILABLE_UNITS} />)
 
-    fireEvent.change(screen.getByLabelText('Warum möchtest du verlegt werden?'), {
+    fireEvent.change(screen.getByLabelText('Warum möchten Sie verlegt werden?'), {
       target: { value: 'Wunsch nach Wechsel in ruhigere Unterkunft' },
     })
     fireEvent.change(screen.getByLabelText('Wunsch-Unterkunft (optional)'), {

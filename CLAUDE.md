@@ -37,6 +37,12 @@ matching) stays German. Admins speak Swiss state languages plus English;
 Tigrinya, Arabic, Farsi and the other origin languages stay off the staff
 side. `LanguageSwitcher` / `LocaleProvider` live only under `src/app/portal/`.
 
+**Clients are addressed with Sie (formal) in every locale** — AOZ's register
+(owner decision 2026-10-02): Sie / vous / Вы / Ви, capitalised. Gated by
+`src/lib/i18n/__tests__/formal-register.test.ts` (offered dictionaries, survey
+templates, German client-facing sources). Only the WG self-serve household
+block in `labels/auth.ts` keeps "du", as a listed exception.
+
 ---
 
 ## Why This Matters for AOZ

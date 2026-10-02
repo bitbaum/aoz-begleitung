@@ -436,7 +436,7 @@ describe('ChoreBalanceSummary', () => {
         currentResidentId="me"
       />,
     )
-    expect(screen.getByText('Du')).toBeInTheDocument()
+    expect(screen.getByText('Sie')).toBeInTheDocument()
   })
 
   it('scales bars to the largest IMBALANCE, so an even month reads as even', () => {
