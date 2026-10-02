@@ -20,10 +20,12 @@ describe('catalogue tabs', () => {
   })
 
   it('backs every route the catalogue nav entry claims with a tab', () => {
-    const entry = MEGAMENU_GROUPS.find(
-      (group) => 'href' in group && group.href === '/opportunities',
+    // The listings entry is an item of the catalogue group since the
+    // applications review joined it; it still claims /activities.
+    const entry = MEGAMENU_GROUPS.flatMap((group) => ('items' in group ? group.items : [])).find(
+      (item) => item.href === '/opportunities',
     )
-    const claimed = entry && 'href' in entry ? (entry.activeFor ?? []) : []
+    const claimed = entry?.activeFor ?? []
     const tabs = catalogueTabs({ boardHref, canReadListings: true, canReadActivities: true })
     expect(claimed).toContain('/activities')
     for (const route of claimed) {

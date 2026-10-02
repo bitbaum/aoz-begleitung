@@ -7,16 +7,15 @@ import { getRequestTranslator } from '@/lib/i18n/request'
 import {
   applicationStageLabel,
   opportunityKindLabel,
-  permitRequirementLabel,
+  permitStatementLabel,
 } from '@/lib/i18n/opportunity-labels'
 import { residentOpportunityBoard } from '@/lib/data/opportunities'
 import { expressInterest, withdrawInterest } from '@/lib/actions/opportunities'
 import {
   APPLICATION_STAGE_BADGES,
-  PERMIT_REQUIREMENT_BADGES,
+  permitStatement,
   type ApplicationStageId,
   type OpportunityKindId,
-  type PermitRequirementId,
 } from '@/lib/config/opportunities'
 import { formatDate } from '@/lib/utils/formatting'
 import { residentNextStep } from '@/lib/opportunities/pipeline'
@@ -247,7 +246,9 @@ export default async function PortalOpportunitiesPage(props: Props) {
         ) : (
           <ul className="space-y-3">
             {shown.map((opportunity) => {
-              const permit = opportunity.permitRequirement as PermitRequirementId
+              // Read WITH the kind: a work listing at the NONE default is
+              // "not yet settled", never "Keine Bewilligung nötig".
+              const permit = permitStatement(opportunity.kind, opportunity.permitRequirement)
               const full = opportunity.seatsLeft === 0
 
               return (
@@ -296,8 +297,8 @@ export default async function PortalOpportunitiesPage(props: Props) {
                     {/* Never machine-translated. This sentence is a statement
                         about what the place requires and is hand-translated per
                         locale in the dictionaries. @see lib/opportunities/translation.ts */}
-                    <span className={PERMIT_REQUIREMENT_BADGES[permit]}>
-                      {permitRequirementLabel(t, permit)}
+                    <span className={permit.badge}>
+                      {permitStatementLabel(t, opportunity.kind, opportunity.permitRequirement)}
                     </span>
                   </p>
 

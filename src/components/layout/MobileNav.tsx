@@ -12,6 +12,7 @@ import {
   type MegaMenuGroup,
 } from '@/lib/config/navigation'
 import { NavBadge } from '@/components/layout/NavBadge'
+import { activeItemHref, isRouteActive } from '@/components/layout/AdminHeader'
 import { APP_LABELS, UI_LABELS } from '@/lib/constants/labels'
 import { Logo } from '@/components/ui/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -53,10 +54,7 @@ export function MobileNav({
     openButtonRef.current?.focus()
   }
 
-  const isActive = (href: string) => {
-    if (href === '/') return pathname === '/'
-    return pathname === href || pathname.startsWith(`${href}/`)
-  }
+  const isActive = (href: string) => isRouteActive(pathname, href)
 
   return (
     <>
@@ -123,7 +121,8 @@ export function MobileNav({
                     <MobileNavLink
                       key={item.href}
                       item={{ href: item.href, icon: item.icon, label: item.label }}
-                      active={isActive(item.href)}
+                      // Most specific sibling wins, same rule as the sidebar.
+                      active={activeItemHref(pathname, group.items) === item.href}
                       onClick={handleClose}
                     />
                   ))}

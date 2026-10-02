@@ -39,7 +39,7 @@ const navHrefs: string[] = [
   ...MEGAMENU_GROUPS.flatMap((group) =>
     'href' in group
       ? [group.href, ...(group.activeFor ?? [])]
-      : group.items.map((item) => item.href),
+      : group.items.flatMap((item) => [item.href, ...(item.activeFor ?? [])]),
   ),
   ...SYSTEM_LINKS.map((link) => link.href),
 ]

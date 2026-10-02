@@ -666,6 +666,7 @@ export const en: Dictionary = {
   'opportunities.permitNone': 'No permit needed',
   'opportunities.permitNotifies': 'The organisation registers the placement',
   'opportunities.permitRequired': 'Permit required',
+  'opportunities.permitUnstated': 'Permit route not yet settled',
   'opportunities.stageInterested': 'Interested',
   'opportunities.stageApplied': 'Applied',
   'opportunities.stageInterview': 'Interview',

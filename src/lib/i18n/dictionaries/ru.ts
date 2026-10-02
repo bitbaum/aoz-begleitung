@@ -686,6 +686,7 @@ export const ru: Dictionary = {
   'opportunities.permitNone': 'Разрешение не требуется',
   'opportunities.permitNotifies': 'Организация подаёт уведомление сама',
   'opportunities.permitRequired': 'Требуется разрешение',
+  'opportunities.permitUnstated': 'Порядок получения разрешения ещё не определён',
   'opportunities.stageInterested': 'Интерес',
   'opportunities.stageApplied': 'Заявка подана',
   'opportunities.stageInterview': 'Собеседование',

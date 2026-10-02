@@ -682,6 +682,7 @@ export const fr: Dictionary = {
   'opportunities.permitNone': 'Aucune autorisation nécessaire',
   'opportunities.permitNotifies': 'L’organisation effectue l’annonce',
   'opportunities.permitRequired': 'Autorisation requise',
+  'opportunities.permitUnstated': 'Procédure d’autorisation pas encore définie',
   'opportunities.stageInterested': 'Intéressé·e',
   'opportunities.stageApplied': 'Candidature déposée',
   'opportunities.stageInterview': 'Entretien',

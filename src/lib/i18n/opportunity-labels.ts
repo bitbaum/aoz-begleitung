@@ -15,10 +15,12 @@
 
 import type { MessageKey } from './dictionaries/de'
 import type { Translator } from './index'
-import type {
-  ApplicationStageId,
-  OpportunityKindId,
-  PermitRequirementId,
+import {
+  permitStatementId,
+  type ApplicationStageId,
+  type OpportunityKindId,
+  type PermitRequirementId,
+  type PermitStatementId,
 } from '@/lib/config/opportunities'
 
 const KIND_KEYS: Record<OpportunityKindId, MessageKey> = {
@@ -50,6 +52,21 @@ export function opportunityKindLabel(t: Translator, kind: OpportunityKindId): st
 
 export function permitRequirementLabel(t: Translator, permit: PermitRequirementId): string {
   return t(PERMIT_KEYS[permit])
+}
+
+const PERMIT_STATEMENT_KEYS: Record<PermitStatementId, MessageKey> = {
+  ...PERMIT_KEYS,
+  UNSTATED: 'opportunities.permitUnstated',
+}
+
+/**
+ * What the listing says about authorisation, read with its kind — the portal
+ * twin of `permitStatement`. Render THIS, never `permitRequirementLabel` on a
+ * listing: a work listing at the `NONE` default must not tell a resident
+ * "Keine Bewilligung nötig".
+ */
+export function permitStatementLabel(t: Translator, kind: string, permit: string): string {
+  return t(PERMIT_STATEMENT_KEYS[permitStatementId(kind, permit)])
 }
 
 export function applicationStageLabel(t: Translator, stage: ApplicationStageId): string {

@@ -5,7 +5,14 @@ import { redirect } from 'next/navigation'
 import { and, eq, isNull } from 'drizzle-orm'
 import { requirePermission } from '@/lib/auth'
 import { getResidentCookie } from '@/lib/portal-auth'
-import { isFull } from '@/lib/opportunities/pipeline'
+import {
+  availableTransitions,
+  evidenceForStartedApplication,
+  isFull,
+  mayAttachPeople,
+  stageChangeRefusal,
+} from '@/lib/opportunities/pipeline'
+import { OPPORTUNITIES_ADMIN_LABELS as ADMIN_LABELS } from '@/lib/constants/labels/opportunities'
 import { logAudit } from '@/lib/audit'
 import { logger } from '@/lib/logger'
 import {
@@ -25,8 +32,13 @@ import {
   ValidationError,
   validateFormData,
 } from '@/lib/validation'
-import { evidenceForStartedApplication } from '@/lib/opportunities/pipeline'
-import { permitRequirementIsStated, type OpportunityStatusId } from '@/lib/config/opportunities'
+import {
+  APPLICATION_STAGE_ACTION_LABELS,
+  APPLICATION_STAGE_LABELS,
+  APPLICATIONS_REVIEW_PATH,
+  permitRequirementIsStated,
+  type OpportunityStatusId,
+} from '@/lib/config/opportunities'
 import {
   localesNeedingTranslation,
   type ListingTranslations,
@@ -36,6 +48,7 @@ import type { LocaleId } from '@/lib/i18n/locales'
 
 function revalidateOpportunity(opportunityId?: string) {
   revalidatePath('/opportunities')
+  revalidatePath(APPLICATIONS_REVIEW_PATH)
   revalidatePath('/learning')
   if (opportunityId) {
     revalidatePath(`/opportunities/${opportunityId}`)
@@ -306,9 +319,42 @@ export async function archiveOpportunity(opportunityId: string): Promise<void> {
   await setStatus(opportunityId, 'ARCHIVED')
 }
 
-export async function addApplicant(formData: FormData): Promise<void> {
+/**
+ * What an applicant control gets back. Same contract as `OpportunityFormState`
+ * and for the same reason: a refusal here ("not published yet", "that step
+ * does not follow this one") is a sentence the coach must read and act on, and
+ * a thrown one is replaced by the error boundary's shrug.
+ */
+export type ApplicationActionState = OpportunityFormState
+
+/**
+ * Put a person forward for a listing.
+ *
+ * Refused unless the listing is PUBLISHED. Observed live on 2026-10-01: a
+ * client was attached to a DRAFT job — one whose permit route nobody had
+ * settled — and moved along it as if it were on offer.
+ */
+export async function addApplicant(
+  _previous: ApplicationActionState,
+  formData: FormData,
+): Promise<ApplicationActionState> {
   const user = await requirePermission('opportunities:write')
-  const data = validateFormData(ApplicationCreateSchema, formData)
+
+  let data
+  try {
+    data = validateFormData(ApplicationCreateSchema, formData)
+  } catch (error) {
+    return toFormState(error, ADMIN_LABELS.refusals.attachFailed)
+  }
+
+  const listing = await db.query.opportunity.findFirst({
+    where: eq(opportunityTable.id, data.opportunityId),
+    columns: { status: true },
+  })
+  if (!listing) return { error: ADMIN_LABELS.refusals.listingNotFound }
+  if (!mayAttachPeople(listing.status)) {
+    return { error: ADMIN_LABELS.refusals.attachNotPublished }
+  }
 
   try {
     await db.insert(opportunityApplication).values({
@@ -330,14 +376,19 @@ export async function addApplicant(formData: FormData): Promise<void> {
       changes: { residentId: data.residentId, stage: 'INTERESTED' },
     })
   } catch (error) {
-    logger.errorWithCause('Failed to add applicant', error, {
-      opportunityId: data.opportunityId,
-      residentId: data.residentId,
-    })
-    throw new Error('Person konnte nicht zugeordnet werden')
+    // Already attached — a second tab, a double press. That IS the state the
+    // coach asked for, so reporting a failure would be a lie.
+    if (!isUniqueViolation(error)) {
+      logger.errorWithCause('Failed to add applicant', error, {
+        opportunityId: data.opportunityId,
+        residentId: data.residentId,
+      })
+      return { error: ADMIN_LABELS.refusals.attachFailed }
+    }
   }
 
   revalidateOpportunity(data.opportunityId)
+  return {}
 }
 
 /**
@@ -384,20 +435,57 @@ export async function claimApplication(formData: FormData): Promise<void> {
 /**
  * Move one thread along, and keep the evidence in step with it.
  *
+ * Only along `APPLICATION_TRANSITIONS`, and only forward on a PUBLISHED
+ * listing (`stageChangeRefusal`). Both refusals are RETURNED — the control
+ * stays on screen with the reason beside it.
+ *
  * Everything happens in ONE transaction. A LearningRecord written without its
  * back-link would be an orphan certificate that reappears on every later stage
  * change — the resident's dossier would slowly fill with duplicates of one
  * afternoon's work, and nothing would report an error.
  */
-export async function changeApplicationStage(formData: FormData): Promise<void> {
+export async function changeApplicationStage(
+  _previous: ApplicationActionState,
+  formData: FormData,
+): Promise<ApplicationActionState> {
   const user = await requirePermission('opportunities:write')
-  const { applicationId, stage, hours } = validateFormData(ApplicationStageChangeSchema, formData)
+
+  let parsed
+  try {
+    parsed = validateFormData(ApplicationStageChangeSchema, formData)
+  } catch (error) {
+    return toFormState(error, ADMIN_LABELS.refusals.stageChangeFailed)
+  }
+  const { applicationId, stage, hours } = parsed
 
   const application = await db.query.opportunityApplication.findFirst({
     where: eq(opportunityApplication.id, applicationId),
     with: { opportunity: true },
   })
-  if (!application) throw new Error('Bewerbung nicht gefunden')
+  if (!application) return { error: ADMIN_LABELS.refusals.applicationNotFound }
+
+  // A double press, or a second tab that already did it: the thread is where
+  // the coach wanted it, which is not an error worth a sentence.
+  if (application.stage === stage) return {}
+
+  // (`db.query`'s relation typing collapses to an untyped fallback for this
+  // schema; at runtime `.opportunity` is one row.)
+  const listing = application.opportunity as unknown as Opportunity
+  const refusal = stageChangeRefusal(listing.status, application.stage, stage)
+  if (refusal === 'ILLEGAL_TRANSITION') {
+    return {
+      error: ADMIN_LABELS.refusals.illegalTransition(
+        APPLICATION_STAGE_LABELS[application.stage],
+        APPLICATION_STAGE_LABELS[stage],
+        availableTransitions(listing.status, application.stage).map(
+          (next) => APPLICATION_STAGE_ACTION_LABELS[next],
+        ),
+      ),
+    }
+  }
+  if (refusal === 'LISTING_NOT_PUBLISHED') {
+    return { error: ADMIN_LABELS.refusals.listingNotPublished }
+  }
 
   const now = new Date()
 
@@ -414,12 +502,7 @@ export async function changeApplicationStage(formData: FormData): Promise<void> 
           .insert(learningRecord)
           .values({
             residentId: application.residentId,
-            // (`db.query`'s relation typing collapses to an untyped fallback
-            // for this schema; at runtime `.opportunity` is one row.)
-            ...evidenceForStartedApplication(
-              application.opportunity as unknown as Opportunity,
-              now,
-            ),
+            ...evidenceForStartedApplication(listing, now),
           })
           .returning({ id: learningRecord.id })
         learningRecordId = record.id
@@ -458,10 +541,11 @@ export async function changeApplicationStage(formData: FormData): Promise<void> 
     })
   } catch (error) {
     logger.errorWithCause('Failed to change application stage', error, { applicationId, stage })
-    throw new Error('Stand konnte nicht geändert werden')
+    return { error: ADMIN_LABELS.refusals.stageChangeFailed }
   }
 
   revalidateOpportunity(application.opportunityId)
+  return {}
 }
 
 /* ------------------------------------------------------------------ *
@@ -516,7 +600,7 @@ async function recordInterest(opportunityId: string, residentId: string): Promis
   // A DRAFT is a listing staff are still writing and an ARCHIVED one is over.
   // Neither is on the board, so arriving here means a stale page or a guessed
   // id — either way, nobody gets attached to a place that is not on offer.
-  if (!opportunity || opportunity.status !== 'PUBLISHED') return 'error=unavailable'
+  if (!opportunity || !mayAttachPeople(opportunity.status)) return 'error=unavailable'
   if (
     isFull(
       opportunity,

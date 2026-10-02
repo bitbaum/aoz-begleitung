@@ -121,6 +121,43 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
   supportedBy: 'Begleitet von',
   supportedByNobody: 'Niemand zugewiesen',
   hoursOnEnd: 'Geleistete Stunden (optional)',
+  noNextStep: 'Abgeschlossen — kein weiterer Schritt.',
+  windDownOnly: 'Platz nicht veröffentlicht — nur noch abschliessen oder absagen.',
+  // A person is only ever put forward onto a place that is on offer.
+  // @see mayAttachPeople in lib/opportunities/pipeline.ts
+  attachNeedsPublish: 'Erst veröffentlichen, dann Personen zuordnen.',
+  attachArchived: 'Dieser Platz ist archiviert. Es können keine Personen mehr zugeordnet werden.',
+
+  // What a refused save says. RETURNED to the form, never thrown — a throw
+  // reaches the error boundary and says "Etwas ist schiefgelaufen" instead.
+  refusals: {
+    attachNotPublished:
+      'Personen können nur einem veröffentlichten Einsatzplatz zugeordnet werden. Erst veröffentlichen, dann Personen zuordnen.',
+    listingNotPublished:
+      'Dieser Einsatzplatz ist nicht veröffentlicht. Bestehende Bewerbungen können nur noch abgeschlossen oder abgesagt werden.',
+    illegalTransition: (from: string, to: string, options: readonly string[]) =>
+      options.length > 0
+        ? `Von «${from}» geht es nicht direkt zu «${to}». Möglich ist: ${options.join(', ')}.`
+        : `«${from}» ist abgeschlossen — es gibt keinen weiteren Schritt.`,
+    applicationNotFound: 'Bewerbung nicht gefunden. Laden Sie die Seite neu.',
+    listingNotFound: 'Einsatzplatz nicht gefunden. Laden Sie die Seite neu.',
+    stageChangeFailed: 'Der Stand konnte nicht geändert werden. Bitte versuchen Sie es erneut.',
+    attachFailed: 'Die Person konnte nicht zugeordnet werden. Bitte versuchen Sie es erneut.',
+  },
+
+  // The review page — every application on this board, by stage.
+  reviewTitle: 'Bewerbungen',
+  reviewDescription:
+    'Alle Bewerbungen und Anfragen in Ihrem Bereich, nach Stand geordnet. Wer auf eine Antwort wartet, steht zuoberst.',
+  reviewListingFilter: 'Einsatzplatz',
+  reviewAllListings: 'Alle Einsatzplätze',
+  reviewEmpty: 'In diesem Bereich gibt es noch keine Bewerbungen.',
+  reviewEmptyFiltered: 'Auf diesem Einsatzplatz gibt es noch keine Bewerbungen.',
+  reviewSince: (days: number) =>
+    days <= 0 ? 'seit heute' : `seit ${days} ${days === 1 ? 'Tag' : 'Tagen'}`,
+  reviewClaim: 'Übernehmen',
+  reviewClosedHint: 'Abgeschlossene Bewerbungen',
+  reviewOpenListing: 'Alle Bewerbungen auf diesem Platz',
   evidenceCreated: 'Nachweis erstellt',
   evidenceHint: 'Beim Start entsteht automatisch ein Eintrag in «Lernen & Beruf».',
   openResident: 'Zum Dossier',

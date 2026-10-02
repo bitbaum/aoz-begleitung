@@ -96,6 +96,9 @@ export type ApplicationStageId = (typeof APPLICATION_STAGES)[number]
  */
 export const OPPORTUNITY_AREA_NAME = 'Einsatzplätze'
 
+/** Every application on a board, by stage — the one place they are reviewed. */
+export const APPLICATIONS_REVIEW_PATH = '/opportunities/applications'
+
 export const OPPORTUNITY_KIND_LABELS: Record<OpportunityKindId, string> = {
   VOLUNTEERING: 'Freiwilligenarbeit',
   COMMUNITY_SERVICE: 'Gemeinnütziger Einsatz',
@@ -135,7 +138,10 @@ export const PERMIT_REQUIREMENT_LABELS: Record<PermitRequirementId, string> = {
 }
 
 export const PERMIT_REQUIREMENT_HINTS: Record<PermitRequirementId, string> = {
-  NONE: 'Unbezahlte Freiwilligenarbeit — offen für alle.',
+  // Only ever true of an unpaid kind — `permitStatement` never shows this
+  // line on work. It said "Freiwilligenarbeit", which a gemeinnütziger
+  // Einsatz is not.
+  NONE: 'Unbezahlter Einsatz — offen für alle.',
   EMPLOYER_NOTIFIES: 'Die Organisation meldet den Einsatz selbst an.',
   PERMIT_REQUIRED: 'Vorher mit der Sozialarbeit klären, ob das möglich ist.',
 }
@@ -146,6 +152,66 @@ export const PERMIT_REQUIREMENT_BADGES: Record<PermitRequirementId, string> = {
   PERMIT_REQUIRED: 'chip-warning',
 }
 
+/**
+ * What a listing SAYS about authorisation — the stored value read together
+ * with the kind. SSOT for every surface that renders it (staff list, staff
+ * detail, portal).
+ *
+ * ## The bug this exists to end
+ *
+ * Observed live on 2026-10-01: a paid job saved as a draft with
+ * `permitRequirement` at its `NONE` default rendered «Keine Bewilligung nötig»
+ * AND «Unbezahlte Freiwilligenarbeit — offen für alle.» on the staff detail
+ * page — a legal claim and a factual falsehood about a CHF 70'000 position.
+ * The publish gate (`permitRequirementIsStated`) kept it off the board, but
+ * every surface rendered the raw enum, so the gate's own reason for existing
+ * was printed on the page it guards.
+ *
+ * So `NONE` on a work kind is not "no permit needed"; it is UNSTATED — nobody
+ * has said which route applies yet — and it says so, as a warning.
+ */
+export const PERMIT_STATEMENT_IDS = [...PERMIT_REQUIREMENTS, 'UNSTATED'] as const
+export type PermitStatementId = (typeof PERMIT_STATEMENT_IDS)[number]
+
+export const PERMIT_UNSTATED_LABEL = 'Bewilligungsweg noch nicht festgelegt'
+export const PERMIT_UNSTATED_HINT =
+  'Vor dem Veröffentlichen klären — im Zweifel mit der Sozialarbeit. Bis dahin bleibt der Eintrag ein Entwurf.'
+
+export interface PermitStatement {
+  id: PermitStatementId
+  label: string
+  hint: string
+  /** A `chip-*` class. */
+  badge: string
+  /** True when someone has to act before this listing may go live. */
+  needsAction: boolean
+}
+
+export function permitStatementId(kind: string, permitRequirement: string): PermitStatementId {
+  if (!permitRequirementIsStated(kind, permitRequirement)) return 'UNSTATED'
+  return permitRequirement as PermitRequirementId
+}
+
+export function permitStatement(kind: string, permitRequirement: string): PermitStatement {
+  const id = permitStatementId(kind, permitRequirement)
+  if (id === 'UNSTATED') {
+    return {
+      id,
+      label: PERMIT_UNSTATED_LABEL,
+      hint: PERMIT_UNSTATED_HINT,
+      badge: 'chip-warning',
+      needsAction: true,
+    }
+  }
+  return {
+    id,
+    label: PERMIT_REQUIREMENT_LABELS[id],
+    hint: PERMIT_REQUIREMENT_HINTS[id],
+    badge: PERMIT_REQUIREMENT_BADGES[id],
+    needsAction: false,
+  }
+}
+
 export const APPLICATION_STAGE_LABELS: Record<ApplicationStageId, string> = {
   INTERESTED: 'Interessiert',
   APPLIED: 'Beworben',
@@ -154,6 +220,23 @@ export const APPLICATION_STAGE_LABELS: Record<ApplicationStageId, string> = {
   STARTED: 'Gestartet',
   ENDED: 'Beendet',
   DECLINED: 'Abgesagt',
+}
+
+/**
+ * The button that MOVES a thread into each stage — a verb phrase for what
+ * happened, where `APPLICATION_STAGE_LABELS` names the state. INTERESTED is
+ * absent because nothing moves into it: it is where every thread begins.
+ * Which buttons a row shows is `availableTransitions` in pipeline.ts.
+ */
+export type StageTransitionTargetId = Exclude<ApplicationStageId, 'INTERESTED'>
+
+export const APPLICATION_STAGE_ACTION_LABELS: Record<StageTransitionTargetId, string> = {
+  APPLIED: 'Bewerbung eingereicht',
+  INTERVIEW: 'Gespräch vereinbart',
+  ACCEPTED: 'Zusage',
+  STARTED: 'Gestartet',
+  ENDED: 'Abgeschlossen',
+  DECLINED: 'Absage',
 }
 
 export const APPLICATION_STAGE_BADGES: Record<ApplicationStageId, string> = {
