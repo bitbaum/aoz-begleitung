@@ -237,6 +237,20 @@ const CLIENT_FACTS_READ = 'clientFacts:read'
  */
 const GOVERNANCE_CONFIRM = 'governance:confirm'
 
+/**
+ * Anonymous surveys to clients (AOZ Wohnen+ "Leben in der AOZ Wohnung").
+ *
+ * `surveys:read` sees AGGREGATES only — no permission in this product shows a
+ * single response, because no table holds one that points at a person. That
+ * is why reading results is not sensitive in the way `messages:read` is.
+ * `surveys:write` creates, sends and closes: sending reaches many residents at
+ * once, so it stays with the two roles whose work is the person's wellbeing
+ * at home. Neither is part of OPERATIONAL, so LIEGENSCHAFTEN — which builds
+ * nothing on OPERATIONAL anyway — and the integration roles hold neither.
+ */
+const SURVEYS_READ = 'surveys:read'
+const SURVEYS_WRITE = 'surveys:write'
+
 export const ROLE_PERMISSIONS = {
   // Legacy. Equivalent to BETREUUNG; what made it special now lives in `scope`
   // and `isSystemAdmin`, which the migration set on every existing ADMIN row.
@@ -249,8 +263,17 @@ export const ROLE_PERMISSIONS = {
     MESSAGES_READ,
     CLIENT_FACTS_READ,
     GOVERNANCE_CONFIRM,
+    SURVEYS_READ,
+    SURVEYS_WRITE,
   ],
-  BETREUUNG: [...OPERATIONAL, MESSAGES_READ, CLIENT_FACTS_READ, GOVERNANCE_CONFIRM],
+  BETREUUNG: [
+    ...OPERATIONAL,
+    MESSAGES_READ,
+    CLIENT_FACTS_READ,
+    GOVERNANCE_CONFIRM,
+    SURVEYS_READ,
+    SURVEYS_WRITE,
+  ],
   SOZIALARBEIT: [
     'dashboard:read',
     'residents:read',
@@ -274,6 +297,8 @@ export const ROLE_PERMISSIONS = {
     MESSAGES_READ,
     CLIENT_FACTS_READ,
     GOVERNANCE_CONFIRM,
+    SURVEYS_READ,
+    SURVEYS_WRITE,
   ],
   JOBCOACH: [
     'dashboard:read',

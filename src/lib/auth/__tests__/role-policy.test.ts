@@ -89,7 +89,9 @@ describe('role policy smoke checks', () => {
     // right — so any staff member could confirm a house decision or archive an
     // AOZ rule. The dashboard queue for it rode on `housing:read`, which
     // quietly handed it to LIEGENSCHAFTEN the day that role was added.
-    expect(ROLE_PERMISSIONS.ADMIN).toHaveLength(28)
+    //
+    // 30 since `surveys:read` / `surveys:write` (anonymous client surveys).
+    expect(ROLE_PERMISSIONS.ADMIN).toHaveLength(30)
     expect(ROLE_PERMISSIONS.ADMIN).toContain('governance:confirm')
     expect(ROLE_PERMISSIONS.ADMIN).toContain('clientFacts:read')
     expect(ROLE_PERMISSIONS.ADMIN).toContain('messages:read')

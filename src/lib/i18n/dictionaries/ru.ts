@@ -747,4 +747,26 @@ export const ru: Dictionary = {
   'documents.renewalDue': 'Скоро истекает',
   'documents.renewalExpired': 'Срок истёк',
   'documents.renewalNone': 'Дата не указана',
+
+  'survey.cardTitle': 'Короткий опрос',
+  'survey.cardAction': 'К опросу',
+  'survey.anonymous':
+    'Твои ответы анонимны. Никто не узнает, что ты ответил (ответила). Ты можешь ответить на телефоне или на компьютере.',
+  'survey.anonymousDetail':
+    'Мы сохраняем твои ответы без твоего имени и без твоего кода. Сотрудники видят только общие результаты нескольких людей.',
+  'survey.textHint': 'Ты можешь писать на своём языке.',
+  'survey.otherPlaceholder': 'Что именно?',
+  'survey.submit': 'Отправить ответы',
+  'survey.sending': 'Отправка …',
+  'survey.thanksTitle': 'Спасибо!',
+  'survey.thanksBody': 'Твои ответы получены. Они сохранены без твоего имени.',
+  'survey.backHome': 'К обзору',
+  'survey.unavailable': 'Этот опрос уже закрыт.',
+  'survey.error.empty': 'Пожалуйста, ответь хотя бы на один вопрос.',
+  'survey.error.alreadyAnswered': 'Ты уже ответил (ответила) на этот опрос. Спасибо!',
+  'survey.error.closed': 'Этот опрос закрыт.',
+  'survey.error.notInvited': 'Этот опрос для тебя недоступен.',
+  'survey.error.invalid': 'Что-то не так с ответами. Пожалуйста, обнови страницу.',
+  'survey.error.failed': 'Не получилось. Пожалуйста, попробуй ещё раз.',
+  'survey.error.signedOut': 'Пожалуйста, войди снова.',
 }
