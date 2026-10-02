@@ -343,9 +343,10 @@ export default async function ResidentsListPage({ searchParams }: Props) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Three tiles, not four: status ACTIVE means "in care, not yet placed",
+          so an "Aktiv" tile showed the same number as "Ohne Platzierung". */}
+      <div className="grid grid-cols-3 gap-3">
         <StatCard label={UI_LABELS.total} value={stats.total} />
-        <StatCard label={UI_LABELS.active} value={stats.active} />
         <StatCard label={RESIDENT_STATUS_LABELS.PLACED} value={stats.placed} />
         <StatCard
           label={RESIDENT_STAT_LABELS.unplaced}
