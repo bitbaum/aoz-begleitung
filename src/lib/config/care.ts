@@ -292,7 +292,7 @@ export const CARE_LABELS = {
   attributes: 'Für die Arbeit',
   appointments: 'Termine',
   appointmentsEmpty: 'Keine Termine.',
-  domainEmpty: 'Noch leer',
+  domainEmpty: 'Noch nichts erfasst — öffnen, um Termine und Notizen einzutragen',
   appointmentAdd: 'Termin setzen',
   appointmentTitle: 'Titel',
   appointmentWhen: 'Beginn',
