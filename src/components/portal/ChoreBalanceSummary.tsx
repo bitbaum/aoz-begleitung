@@ -66,7 +66,7 @@ export function ChoreBalanceSummary({ balances, currentResidentId }: ChoreBalanc
                     <span className="text-sm font-medium text-ui-text truncate">
                       {residentName(entry)}
                       {entry.residentId === currentResidentId && (
-                        <span className="eyebrow ms-2">Du</span>
+                        <span className="eyebrow ms-2">Sie</span>
                       )}
                     </span>
                     <span

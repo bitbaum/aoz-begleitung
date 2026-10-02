@@ -281,8 +281,8 @@ export const CARE_LABELS = {
    */
   workspaceSubtitle: (domains: readonly CareRoleId[]): string =>
     `${domains.map((domain) => CARE_ROLE_LABELS[domain]).join(' · ')} — Termine und was für die Arbeit nützt.`,
-  portalTitle: 'Dein Team',
-  portalSubtitle: 'Die Menschen, die für dich zuständig sind.',
+  portalTitle: 'Ihr Team',
+  portalSubtitle: 'Die Menschen, die für Sie zuständig sind.',
   empty: 'Noch niemand zugewiesen.',
   portalEmpty: 'Noch niemand zugewiesen. Die Betreuung trägt das Team ein.',
   assign: 'Zuweisen',
@@ -308,7 +308,7 @@ export const CARE_LABELS = {
   // attached to it.
   checkInLegend: 'Wie geht es der Person zurzeit?',
   checkInHint:
-    'Optional — nur erfassen, wenn ihr im Termin darüber gesprochen habt. Keine Einschätzung ins Blaue.',
+    'Optional — nur erfassen, wenn Sie im Termin darüber gesprochen haben. Keine Einschätzung ins Blaue.',
   checkInConcerns: 'Was beschäftigt sie?',
   checkInNotAsked: 'Nicht besprochen',
   completeSubmit: 'Termin abschliessen',

@@ -97,7 +97,7 @@ export function NewProposalForm({
 
       <div>
         <label htmlFor="proposal-type" className="label">
-          Was möchtest du vorschlagen?
+          Was möchten Sie vorschlagen?
         </label>
         <select
           id="proposal-type"
@@ -134,7 +134,7 @@ export function NewProposalForm({
           </select>
           {openTopics.length === 0 && (
             <p className="mt-1 text-sm text-ui-muted">
-              Zu allen offenen Themen gibt es bereits eine Hausregel. Du kannst eine bestehende
+              Zu allen offenen Themen gibt es bereits eine Hausregel. Sie können eine bestehende
               Hausregel ändern.
             </p>
           )}
@@ -187,7 +187,7 @@ export function NewProposalForm({
 
       <div>
         <label htmlFor="proposal-body" className="label">
-          Dein Vorschlag
+          Ihr Vorschlag
         </label>
         <textarea
           id="proposal-body"
@@ -198,7 +198,7 @@ export function NewProposalForm({
           maxLength={2000}
           rows={4}
           className="input w-full"
-          placeholder="Beschreibe möglichst konkret, was gelten soll — wer macht was, ab wann?"
+          placeholder="Beschreiben Sie möglichst konkret, was gelten soll — wer macht was, ab wann?"
         />
       </div>
 

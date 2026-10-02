@@ -58,7 +58,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     kind: 'VOLUNTEERING',
     title: 'Mittagstisch im Quartiertreff',
     description:
-      'Zweimal pro Woche kochen und servieren wir ein günstiges Mittagessen für das Quartier. Du hilfst beim Vorbereiten, Schöpfen und Aufräumen. Deutsch ist keine Voraussetzung — es wird viel gezeigt statt erklärt.',
+      'Zweimal pro Woche kochen und servieren wir ein günstiges Mittagessen für das Quartier. Sie helfen beim Vorbereiten, Schöpfen und Aufräumen. Deutsch ist keine Voraussetzung — es wird viel gezeigt statt erklärt.',
     organisation: 'Quartierverein Beispielquartier (erfunden)',
     location: 'Beispielstrasse 405, 8000 Zürich',
     schedule: 'Di + Do, 10–14 Uhr',
@@ -101,7 +101,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     germanLevel: 'A2',
     permitRequirement: 'EMPLOYER_NOTIFIES',
     requirementNote:
-      'Die Stadtgärtnerei meldet den Einsatz selbst an. Wir brauchen nur deinen Namen.',
+      'Die Stadtgärtnerei meldet den Einsatz selbst an. Wir brauchen nur Ihren Namen.',
     contactName: 'Lea Keller',
     contactPhone: '000 000 00 03',
     stages: ['INTERVIEW', 'APPLIED', 'ENDED'],
@@ -110,7 +110,7 @@ const TEMPLATES: readonly OpportunityTemplate[] = [
     kind: 'VOLUNTEERING',
     title: 'Deutsch-Café: Gastgeber*in',
     description:
-      'Beim wöchentlichen Deutsch-Café Tische decken, Gäste begrüssen und mit Neuen ins Gespräch kommen. Ideal, wenn du selbst Deutsch übst — du redest zwei Stunden am Stück.',
+      'Beim wöchentlichen Deutsch-Café Tische decken, Gäste begrüssen und mit Neuen ins Gespräch kommen. Ideal, wenn Sie selbst Deutsch üben — Sie reden zwei Stunden am Stück.',
     organisation: 'Nachbarschaftshilfe Beispiel (erfunden)',
     location: 'Zürich Riesbach',
     schedule: 'Mi, 14–17 Uhr',

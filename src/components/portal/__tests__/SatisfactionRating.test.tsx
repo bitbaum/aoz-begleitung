@@ -16,7 +16,7 @@ vi.mock('@/lib/constants', async () => ({
     day: 'Tag',
     days: 'Tagen',
     ratings: { bad: 'Schlecht', okay: 'Okay', great: 'Super' },
-    commentPrompt: 'Möchtest du uns mehr erzählen?',
+    commentPrompt: 'Möchten Sie uns mehr erzählen?',
     optional: '(optional)',
     commentPlaceholder: 'Was können wir verbessern?',
     submitting: 'Wird gesendet...',
@@ -95,13 +95,13 @@ describe('SatisfactionRating', () => {
 
   it('does not show concerns field before any rating is selected', () => {
     render(<SatisfactionRating />)
-    expect(screen.queryByText('Möchtest du uns mehr erzählen?')).not.toBeInTheDocument()
+    expect(screen.queryByText('Möchten Sie uns mehr erzählen?')).not.toBeInTheDocument()
   })
 
   it('shows concerns field when rating 1 is selected', () => {
     render(<SatisfactionRating />)
     fireEvent.click(screen.getByRole('button', { name: 'Sehr unzufrieden' }))
-    expect(screen.getByText('Möchtest du uns mehr erzählen?')).toBeInTheDocument()
+    expect(screen.getByText('Möchten Sie uns mehr erzählen?')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Absenden' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ohne Kommentar absenden' })).toBeInTheDocument()
   })
@@ -109,13 +109,13 @@ describe('SatisfactionRating', () => {
   it('shows concerns field when rating 2 is selected', () => {
     render(<SatisfactionRating />)
     fireEvent.click(screen.getByRole('button', { name: 'Unzufrieden' }))
-    expect(screen.getByText('Möchtest du uns mehr erzählen?')).toBeInTheDocument()
+    expect(screen.getByText('Möchten Sie uns mehr erzählen?')).toBeInTheDocument()
   })
 
   it('does not show concerns field for rating 3', () => {
     render(<SatisfactionRating />)
     fireEvent.click(screen.getByRole('button', { name: 'Neutral' }))
-    expect(screen.queryByText('Möchtest du uns mehr erzählen?')).not.toBeInTheDocument()
+    expect(screen.queryByText('Möchten Sie uns mehr erzählen?')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Feedback absenden' })).toBeInTheDocument()
   })
 
@@ -123,7 +123,7 @@ describe('SatisfactionRating', () => {
     render(<SatisfactionRating />)
     fireEvent.click(screen.getByRole('button', { name: 'Sehr zufrieden' }))
     expect(screen.getByRole('button', { name: 'Feedback absenden' })).toBeInTheDocument()
-    expect(screen.queryByText('Möchtest du uns mehr erzählen?')).not.toBeInTheDocument()
+    expect(screen.queryByText('Möchten Sie uns mehr erzählen?')).not.toBeInTheDocument()
   })
 
   // ── Submission ──────────────────────────────────────────────────────────
@@ -136,7 +136,7 @@ describe('SatisfactionRating', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Feedback absenden' }))
 
     await waitFor(() => {
-      expect(screen.getByText('Danke für dein Feedback!')).toBeInTheDocument()
+      expect(screen.getByText('Danke für Ihr Feedback!')).toBeInTheDocument()
     })
     expect(screen.queryByText(de['satisfaction.title'])).not.toBeInTheDocument()
   })
@@ -152,7 +152,7 @@ describe('SatisfactionRating', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Absenden' }))
 
     await waitFor(() => {
-      expect(screen.getByText('Danke für dein Feedback!')).toBeInTheDocument()
+      expect(screen.getByText('Danke für Ihr Feedback!')).toBeInTheDocument()
     })
   })
 
@@ -179,7 +179,7 @@ describe('SatisfactionRating', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ohne Kommentar absenden' }))
 
     await waitFor(() => {
-      expect(screen.getByText('Danke für dein Feedback!')).toBeInTheDocument()
+      expect(screen.getByText('Danke für Ihr Feedback!')).toBeInTheDocument()
     })
     expect(screen.queryByText(de['satisfaction.concernsForwarded'])).not.toBeInTheDocument()
   })

@@ -66,7 +66,7 @@ export const createProposalSchema = z
   .object({
     type: z.enum(['ADD_RULE', 'AMEND_RULE', 'REPEAL_RULE', 'HOUSE_DECISION']),
     title: z.string().min(3, 'Titel ist zu kurz').max(120),
-    body: z.string().min(10, 'Bitte beschreibe deinen Vorschlag').max(2000),
+    body: z.string().min(10, 'Bitte beschreiben Sie Ihren Vorschlag').max(2000),
     category: z.enum(RULE_CATEGORIES),
     /** Required for ADD_RULE — the AOZ topic the house rule would live under. */
     parentOrgRuleId: z.string().min(1).optional(),
@@ -74,11 +74,11 @@ export const createProposalSchema = z
     targetRuleId: z.string().min(1).optional(),
   })
   .refine((data) => data.type !== 'ADD_RULE' || !!data.parentOrgRuleId, {
-    message: `Bitte wähle das ${BRAND.orgName}-Thema, zu dem die Hausregel gehört`,
+    message: `Bitte wählen Sie das ${BRAND.orgName}-Thema, zu dem die Hausregel gehört`,
     path: ['parentOrgRuleId'],
   })
   .refine((data) => !['AMEND_RULE', 'REPEAL_RULE'].includes(data.type) || !!data.targetRuleId, {
-    message: 'Bitte wähle die Hausregel, die geändert werden soll',
+    message: 'Bitte wählen Sie die Hausregel, die geändert werden soll',
     path: ['targetRuleId'],
   })
 
@@ -90,7 +90,7 @@ export const castVoteSchema = z
   })
   .refine((data) => data.choice !== 'BLOCK' || (data.reason?.trim().length ?? 0) >= 5, {
     // A veto that says nothing cannot be mediated, only resented.
-    message: 'Bitte begründe dein Veto in einem Satz',
+    message: 'Bitte begründen Sie Ihr Veto in einem Satz',
     path: ['reason'],
   })
 

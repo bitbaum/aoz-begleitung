@@ -127,8 +127,8 @@ export const OPPORTUNITY_STATUS_BADGES: Record<OpportunityStatusId, string> = {
 
 /**
  * Written as a statement about the PLACE, in the second person the resident
- * will eventually read. "Du brauchst keine Bewilligung" is a fact about this
- * opportunity; "du hast keine Bewilligung" would be a fact about the person,
+ * will eventually read. "Sie brauchen keine Bewilligung" is a fact about this
+ * opportunity; "Sie haben keine Bewilligung" would be a fact about the person,
  * and this product does not know that and must not learn it.
  */
 export const PERMIT_REQUIREMENT_LABELS: Record<PermitRequirementId, string> = {

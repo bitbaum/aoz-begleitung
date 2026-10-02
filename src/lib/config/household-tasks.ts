@@ -203,9 +203,9 @@ export const CHORE_LABELS = {
   nav: 'Aufgaben',
   pages: {
     list: 'Haushaltsaufgaben',
-    listSubtitle: 'Gemeinsame Aufgaben für eure Wohnung',
+    listSubtitle: 'Gemeinsame Aufgaben für Ihre Wohnung',
     create: 'Neue Aufgabe',
-    createSubtitle: 'Erstelle eine Aufgabe für die Wohnung',
+    createSubtitle: 'Erstellen Sie eine Aufgabe für die Wohnung',
     detail: 'Aufgabe',
   },
   filter: {
@@ -249,10 +249,10 @@ export const CHORE_LABELS = {
   },
   complete: {
     title: 'Aufgabe erledigt',
-    checklistTitle: 'Was hast du gemacht?',
+    checklistTitle: 'Was haben Sie gemacht?',
     checklistHint: 'Hake ab, was erledigt ist. Nicht alles muss angekreuzt sein.',
     notes: 'Notizen (optional)',
-    notesPlaceholder: 'Was hast du gemacht?',
+    notesPlaceholder: 'Was haben Sie gemacht?',
     duration: 'Dauer in Minuten (optional)',
     durationHint: 'Zählt für den Aufgaben-Saldo. Ohne Angabe gilt die geschätzte Dauer.',
   },
@@ -262,7 +262,7 @@ export const CHORE_LABELS = {
     broadcast: 'Alle fragen',
     broadcastDesc: 'Anfrage an alle Mitbewohner senden',
     message: 'Nachricht (optional)',
-    messagePlaceholder: 'z.B. Könntest du das heute machen?',
+    messagePlaceholder: 'z.B. Könnten Sie das heute machen?',
     submit: 'Anfrage senden',
     submitting: 'Wird gesendet...',
   },
@@ -275,11 +275,11 @@ export const CHORE_LABELS = {
   },
   complaint: {
     title: 'Problem mit Aufgabe melden',
-    description: 'Beschreibe das Problem',
+    description: 'Beschreiben Sie das Problem',
     descriptionPlaceholder: 'z.B. Mitbewohner macht nie sauber...',
     submit: 'Problem melden',
     submitting: 'Wird gemeldet...',
-    note: 'Deine Meldung wird an die Hausverwaltung weitergeleitet.',
+    note: 'Ihre Meldung wird an die Hausverwaltung weitergeleitet.',
   },
   balance: {
     title: 'Aufgaben-Saldo',
@@ -307,7 +307,7 @@ export const CHORE_LABELS = {
     checklistHint: 'Vereinbart im Haus. Ändern geht über einen Vorschlag.',
     noChecklist: 'Für diese Aufgabe ist noch nicht vereinbart, was dazugehört.',
     turn: 'Diesmal dran',
-    turnYou: 'Du bist dran',
+    turnYou: 'Sie sind dran',
     turnHint: 'Wer dran ist, ist eine Voreinstellung — erledigen darf sie jede und jeder.',
     turnSwap: 'Tauschen',
     schedule: 'Zeitplan',
@@ -330,11 +330,11 @@ export const CHORE_LABELS = {
   errors: {
     generic: 'Ein Fehler ist aufgetreten. Bitte erneut versuchen.',
     notFound: 'Aufgabe nicht gefunden.',
-    noPlacement: 'Du hast noch keine Unterkunft zugewiesen bekommen.',
+    noPlacement: 'Sie haben noch keine Unterkunft zugewiesen bekommen.',
   },
   empty: {
     title: 'Noch keine Aufgaben',
-    message: 'Erstelle die erste Aufgabe für eure Wohnung.',
+    message: 'Erstellen Sie die erste Aufgabe für Ihre Wohnung.',
   },
   sections: {
     urgentNow: 'Jetzt wichtig',

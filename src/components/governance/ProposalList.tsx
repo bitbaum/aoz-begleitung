@@ -60,7 +60,7 @@ export function ProposalList({ proposals }: { proposals: ProposalView[] }) {
   if (proposals.length === 0) {
     return (
       <p className="rounded-md bg-ui-subtle p-4 text-sm text-ui-muted">
-        Zurzeit steht nichts zur Abstimmung. Du kannst jederzeit selbst etwas vorschlagen.
+        Zurzeit steht nichts zur Abstimmung. Sie können jederzeit selbst etwas vorschlagen.
       </p>
     )
   }
@@ -89,7 +89,7 @@ function ProposalCard({ proposal }: { proposal: ProposalView }) {
     // A veto has to say why — an unexplained one cannot be mediated, only resented.
     if (choice === 'BLOCK' && reason.trim().length < 5) {
       setShowVetoReason(true)
-      setError('Bitte schreib in einem Satz, warum du damit nicht leben kannst.')
+      setError('Bitte schreiben Sie in einem Satz, warum Sie damit nicht leben können.')
       return
     }
 
@@ -185,7 +185,7 @@ function ProposalCard({ proposal }: { proposal: ProposalView }) {
           {(showVetoReason || proposal.myVote === 'BLOCK') && (
             <div className="mt-3">
               <label htmlFor={`veto-${proposal.id}`} className="label">
-                Warum kannst du damit nicht leben?
+                Warum können Sie damit nicht leben?
               </label>
               <textarea
                 id={`veto-${proposal.id}`}
@@ -200,7 +200,7 @@ function ProposalCard({ proposal }: { proposal: ProposalView }) {
 
           {proposal.myVote && (
             <p className="mt-3 text-sm text-ui-muted">
-              Deine Stimme: <strong>{VOTE_CHOICE_LABELS[proposal.myVote]}</strong>. Du kannst sie
+              Ihre Stimme: <strong>{VOTE_CHOICE_LABELS[proposal.myVote]}</strong>. Sie können sie
               ändern, solange die Abstimmung läuft.
             </p>
           )}

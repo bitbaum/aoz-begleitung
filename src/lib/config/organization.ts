@@ -66,7 +66,7 @@ export const ORG_CONTACT_CHANNELS: readonly ContactChannel[] = [
     icon: '📍',
     label: 'Aushang in der Wohnliegenschaft',
     value: 'Alle Kontaktdaten',
-    sublabel: 'Jederzeit am Aushang in deinem Haus zu finden',
+    sublabel: 'Jederzeit am Aushang in Ihrem Haus zu finden',
   },
 ]
 

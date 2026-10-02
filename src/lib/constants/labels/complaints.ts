@@ -36,24 +36,24 @@ export const COMPLAINT_LABELS = {
   navLabel: 'Beschwerde',
   title: 'Beschwerde über die Betreuung',
   intro:
-    'Wenn du mit der Betreuung, der Unterkunft oder einer Entscheidung nicht einverstanden bist, kannst du das hier sagen. Eine Beschwerde hat keine Folgen für deinen Platz.',
+    'Wenn Sie mit der Betreuung, der Unterkunft oder einer Entscheidung nicht einverstanden sind, können Sie das hier sagen. Eine Beschwerde hat keine Folgen für Ihren Platz.',
   /**
    * Says who does NOT read it. That is the fact that makes the channel usable:
    * a complaint read by the person it is about is not a complaint.
    */
   whoReads:
-    'Deine Beschwerde geht an die zuständige Stelle — nicht an die Betreuungspersonen in deiner Unterkunft.',
+    'Ihre Beschwerde geht an die zuständige Stelle — nicht an die Betreuungspersonen in Ihrer Unterkunft.',
   subjectLabel: 'Worum geht es?',
   bodyLabel: 'Was ist passiert?',
-  bodyPlaceholder: 'Beschreibe, was vorgefallen ist. Wann, wo, und wer beteiligt war.',
+  bodyPlaceholder: 'Beschreiben Sie, was vorgefallen ist. Wann, wo, und wer beteiligt war.',
   anonymousLabel: 'Anonym einreichen',
   /** The trade-off, stated where the choice is made rather than buried. */
   anonymousHint:
-    'Anonym heisst: dein Name steht nicht dabei. Wir können dir dann aber nicht antworten, und die Beschwerde erscheint nicht unter "Deine Meldungen".',
+    'Anonym heisst: Ihr Name steht nicht dabei. Wir können Ihnen dann aber nicht antworten, und die Beschwerde erscheint nicht unter "Ihre Meldungen".',
   submit: 'Beschwerde einreichen',
-  tooShort: 'Bitte beschreibe kurz, worum es geht (mindestens 10 Zeichen).',
-  sent: 'Deine Beschwerde ist eingegangen. Du siehst die Antwort unter "Deine Meldungen".',
-  sentAnonymous: 'Deine anonyme Beschwerde ist eingegangen.',
+  tooShort: 'Bitte beschreiben Sie kurz, worum es geht (mindestens 10 Zeichen).',
+  sent: 'Ihre Beschwerde ist eingegangen. Sie sehen die Antwort unter "Ihre Meldungen".',
+  sentAnonymous: 'Ihre anonyme Beschwerde ist eingegangen.',
   /** How it reads in the resident's merged report list. */
   reportTitle: 'Beschwerde',
 

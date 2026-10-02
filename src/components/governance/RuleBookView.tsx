@@ -147,7 +147,7 @@ export function RuleBookView({
 function UnreadMarker() {
   return (
     <p className="mt-2 text-sm font-medium text-status-warning-text">
-      Neu für dich — bitte lesen und bestätigen
+      Neu für Sie — bitte lesen und bestätigen
     </p>
   )
 }

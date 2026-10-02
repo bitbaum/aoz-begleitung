@@ -17,7 +17,7 @@ vi.mock('@/lib/config/household-tasks', async () => ({
     complete: {
       title: 'Aufgabe erledigt',
       notes: 'Notizen (optional)',
-      notesPlaceholder: 'Was hast du gemacht?',
+      notesPlaceholder: 'Was haben Sie gemacht?',
       duration: 'Dauer in Minuten (optional)',
     },
     request: {
@@ -26,7 +26,7 @@ vi.mock('@/lib/config/household-tasks', async () => ({
       broadcast: 'Alle fragen',
       broadcastDesc: 'Anfrage an alle Mitbewohner senden',
       message: 'Nachricht (optional)',
-      messagePlaceholder: 'z.B. Könntest du das heute machen?',
+      messagePlaceholder: 'z.B. Könnten Sie das heute machen?',
       submit: 'Anfrage senden',
       submitting: 'Wird gesendet...',
     },
@@ -43,7 +43,7 @@ vi.mock('@/lib/config/household-tasks', async () => ({
       descriptionPlaceholder: 'z.B. Mitbewohner macht nie sauber...',
       submit: 'Problem melden',
       submitting: 'Wird gemeldet...',
-      note: 'Deine Meldung wird an die Hausverwaltung weitergeleitet.',
+      note: 'Ihre Meldung wird an die Hausverwaltung weitergeleitet.',
     },
     success: {
       completed: 'Aufgabe als erledigt markiert!',
@@ -141,7 +141,7 @@ describe('ChoreActions', () => {
     fireEvent.click(screen.getByRole('button', { name: /Problem melden/i }))
     expect(screen.getByText('Problem mit Aufgabe melden')).toBeInTheDocument()
     expect(
-      screen.getByText('Deine Meldung wird an die Hausverwaltung weitergeleitet.'),
+      screen.getByText('Ihre Meldung wird an die Hausverwaltung weitergeleitet.'),
     ).toBeInTheDocument()
   })
 
@@ -188,7 +188,7 @@ describe('ChoreActions', () => {
     render(<ChoreActions taskId={TASK_ID} roommates={[]} />)
 
     fireEvent.click(screen.getByRole('button', { name: /Erledigt/i }))
-    fireEvent.change(screen.getByPlaceholderText('Was hast du gemacht?'), {
+    fireEvent.change(screen.getByPlaceholderText('Was haben Sie gemacht?'), {
       target: { value: 'Sehr gründlich geputzt' },
     })
     fireEvent.submit(screen.getByRole('button', { name: 'Erledigt!' }).closest('form')!)

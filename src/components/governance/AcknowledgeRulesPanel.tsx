@@ -48,12 +48,12 @@ export function AcknowledgeRulesPanel({ rules }: { rules: OutstandingRule[] }) {
     >
       <h2 id="ack-heading" className="font-semibold text-ui-text">
         {rules.length === 1
-          ? 'Eine Regel ist neu für dich'
-          : `${rules.length} Regeln sind neu für dich`}
+          ? 'Eine Regel ist neu für Sie'
+          : `${rules.length} Regeln sind neu für Sie`}
       </h2>
       <p className="mt-1 text-sm text-ui-muted">
-        Bitte lies sie durch und bestätige. So weiss jede und jeder im Haus, was gilt — das
-        verhindert die meisten Missverständnisse.
+        Bitte lesen Sie sie durch und bestätigen Sie. So weiss jede und jeder im Haus, was gilt —
+        das verhindert die meisten Missverständnisse.
       </p>
 
       <ul className="mt-4 space-y-2">

@@ -120,7 +120,7 @@ export const ERROR_MESSAGES = {
 
   // ─── Transfer requests ─────────────────────────────────────────
   TRANSFER_REQUEST_NOT_FOUND: 'Verlegungsanfrage nicht gefunden',
-  TRANSFER_REQUEST_ALREADY_PENDING: 'Du hast bereits eine offene Verlegungsanfrage',
+  TRANSFER_REQUEST_ALREADY_PENDING: 'Sie haben bereits eine offene Verlegungsanfrage',
   TRANSFER_REQUEST_NO_PLACEMENT: 'Keine aktive Platzierung vorhanden',
   TRANSFER_REQUEST_CREATE_ERROR: 'Fehler beim Erstellen der Verlegungsanfrage',
   TRANSFER_REQUEST_REVIEW_ERROR: 'Fehler beim Bearbeiten der Verlegungsanfrage',
@@ -148,12 +148,12 @@ export const ERROR_MESSAGES = {
   PROPOSAL_NOT_VOTING: 'Die Abstimmung hat noch nicht begonnen',
   PROPOSAL_ALREADY_DECIDED: 'Dieser Vorschlag wurde bereits entschieden',
   PROPOSAL_STAFF_ONLY:
-    'Über dieses Thema wird nicht abgestimmt — es schützt Einzelne. Die Betreuung nimmt dein Anliegen entgegen.',
+    'Über dieses Thema wird nicht abgestimmt — es schützt Einzelne. Die Betreuung nimmt Ihr Anliegen entgegen.',
   VOTE_SAVE_ERROR: 'Stimme konnte nicht gespeichert werden',
-  VOTE_REASON_REQUIRED: 'Bitte begründe dein Veto, damit darüber gesprochen werden kann',
+  VOTE_REASON_REQUIRED: 'Bitte begründen Sie Ihr Veto, damit darüber gesprochen werden kann',
   VOTE_NOT_ELIGIBLE: 'Nur Bewohnende dieses Hauses können abstimmen',
   UNIT_TOO_SMALL_FOR_VOTE:
-    'In diesem Haus wohnen zu wenige Personen für eine Abstimmung. Die Betreuung legt die Hausregeln gemeinsam mit euch fest.',
+    'In diesem Haus wohnen zu wenige Personen für eine Abstimmung. Die Betreuung legt die Hausregeln gemeinsam mit Ihnen fest.',
 
   // ─── Conflict resolution ───────────────────────────────────────
   AGREEMENT_NOT_FOUND: 'Abmachung nicht gefunden',
@@ -168,7 +168,7 @@ export const ERROR_MESSAGES = {
   EXPENSE_DELETE_FORBIDDEN: 'Nur wer die Ausgabe bezahlt oder erfasst hat, kann sie löschen',
   EXPENSE_MEMBER_INVALID: 'Alle Beteiligten müssen aktuell in dieser Wohnung wohnen',
   SETTLEMENT_CREATE_ERROR: 'Zahlung konnte nicht gespeichert werden',
-  SETTLEMENT_SELF: 'Du kannst keine Zahlung an dich selbst erfassen',
+  SETTLEMENT_SELF: 'Sie können keine Zahlung an sich selbst erfassen',
 
   // ─── Resident profile / apartment profile ──────────────────────
   PROFILE_UPDATE_ERROR: 'Profil konnte nicht gespeichert werden',

@@ -1,5 +1,5 @@
 /**
- * "Deine Meldungen" — one list of everything a resident reported, pure.
+ * "Ihre Meldungen" — one list of everything a resident reported, pure.
  *
  * A resident does not know, and should not have to know, that a conflict is
  * worked on the incident ladder while a broken tap is worked on the maintenance

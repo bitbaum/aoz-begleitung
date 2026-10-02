@@ -56,7 +56,7 @@ export function ComplaintForm({ labels }: { labels: ComplaintFormLabels }) {
     }
 
     // The confirmation differs by branch: an anonymous complaint must not
-    // promise an answer under "Deine Meldungen", because it will never appear
+    // promise an answer under "Ihre Meldungen", because it will never appear
     // there and nobody can write back to it.
     setState('sent')
     setMessage(anonymous ? labels.sentAnonymous : labels.sent)
