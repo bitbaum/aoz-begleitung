@@ -1,21 +1,21 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { requirePermission } from '@/lib/auth'
 import { hasPermission } from '@/lib/auth/role-policy'
-import { addApplicant } from '@/lib/actions'
 import { ButtonLink } from '@/components/ui/Button'
 import { PageHeader, PageShell, SectionHeader } from '@/components/ui/Page'
 import { ApplicantPipeline } from '@/components/opportunities/ApplicantPipeline'
+import { AddApplicantForm } from '@/components/opportunities/AddApplicantForm'
 import {
+  APPLICATIONS_REVIEW_PATH,
   OPPORTUNITY_KIND_LABELS,
   OPPORTUNITY_STATUS_BADGES,
   OPPORTUNITY_STATUS_LABELS,
-  PERMIT_REQUIREMENT_BADGES,
-  PERMIT_REQUIREMENT_HINTS,
-  PERMIT_REQUIREMENT_LABELS,
+  permitStatement,
 } from '@/lib/config/opportunities'
 import { getOpportunityDetail, residentsAvailableFor } from '@/lib/data/opportunities'
-import { openSeats } from '@/lib/opportunities/pipeline'
+import { mayAttachPeople, openSeats } from '@/lib/opportunities/pipeline'
 import { residentName } from '@/lib/utils/resident-name'
 import { OPPORTUNITIES_ADMIN_LABELS as L } from '@/lib/constants'
 
@@ -53,9 +53,13 @@ export default async function OpportunityDetailPage({ params }: Props) {
   const opportunity = await getOpportunityDetail(id)
   if (!opportunity) notFound()
 
-  const available = canWrite ? await residentsAvailableFor(id) : []
+  const available =
+    canWrite && mayAttachPeople(opportunity.status) ? await residentsAvailableFor(id) : []
   const stages = opportunity.applications.map((a) => a.stage)
   const free = openSeats(opportunity, stages)
+  // Read WITH the kind: a paid job at the NONE default is "not yet settled",
+  // never «Keine Bewilligung nötig» or «Unbezahlter Einsatz».
+  const permit = permitStatement(opportunity.kind, opportunity.permitRequirement)
 
   return (
     <PageShell>
@@ -104,17 +108,15 @@ export default async function OpportunityDetailPage({ params }: Props) {
       <section className="card">
         <SectionHeader title={L.sectionRequirements} description={L.requirementsHint} />
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <span className={`chip ${PERMIT_REQUIREMENT_BADGES[opportunity.permitRequirement]}`}>
-            {PERMIT_REQUIREMENT_LABELS[opportunity.permitRequirement]}
-          </span>
+          <span className={`chip ${permit.badge}`}>{permit.label}</span>
           <span className="chip chip-neutral">
             {opportunity.germanLevel
               ? `${L.germanLevel} ${opportunity.germanLevel}`
               : L.germanLevelAny}
           </span>
         </div>
-        <p className="mt-3 text-sm text-ui-muted">
-          {PERMIT_REQUIREMENT_HINTS[opportunity.permitRequirement]}
+        <p className={`mt-3 text-sm ${permit.needsAction ? 'alert-warning' : 'text-ui-muted'}`}>
+          {permit.hint}
         </p>
         {opportunity.requirementNote ? (
           <p className="mt-2 text-sm text-ui-text">{opportunity.requirementNote}</p>
@@ -137,44 +139,52 @@ export default async function OpportunityDetailPage({ params }: Props) {
       ) : null}
 
       <section className="card">
-        <SectionHeader title={L.sectionApplicants} description={L.evidenceHint} />
+        <SectionHeader
+          title={L.sectionApplicants}
+          description={L.evidenceHint}
+          actions={
+            opportunity.applications.length > 0 ? (
+              <Link
+                href={`${APPLICATIONS_REVIEW_PATH}?board=overview&listing=${id}`}
+                className="inline-flex min-h-[44px] items-center text-sm text-brand-primary hover:underline"
+              >
+                {L.reviewOpenListing}
+              </Link>
+            ) : undefined
+          }
+        />
         <div className="mt-4">
-          <ApplicantPipeline applications={opportunity.applications} canWrite={canWrite} />
+          <ApplicantPipeline
+            applications={opportunity.applications}
+            canWrite={canWrite}
+            listingStatus={opportunity.status}
+          />
         </div>
 
         {canWrite ? (
           <div className="mt-6 border-t border-ui-border pt-5">
             <h3 className="text-sm font-semibold text-ui-text">{L.addApplicant}</h3>
-            <p className="mt-1 text-sm text-ui-muted">{L.addApplicantHint}</p>
-
-            {available.length === 0 ? (
-              <p className="mt-3 text-sm text-ui-muted">{L.addApplicantEmpty}</p>
+            {/* Only a published place takes people. A draft may not even have
+                its permit route settled; the action refuses it as well. */}
+            {!mayAttachPeople(opportunity.status) ? (
+              <p className="mt-1 text-sm text-ui-muted">
+                {opportunity.status === 'DRAFT' ? L.attachNeedsPublish : L.attachArchived}
+              </p>
             ) : (
-              <form action={addApplicant} className="mt-3 flex flex-wrap items-end gap-3">
-                <input type="hidden" name="opportunityId" value={id} />
-                <label className="block space-y-1.5">
-                  <span className="block text-xs font-medium text-ui-text">{L.addApplicant}</span>
-                  <select name="residentId" required className="input">
-                    {available.map((resident) => (
-                      <option key={resident.id} value={resident.id}>
-                        {residentName(resident)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="block flex-1 space-y-1.5 min-w-[12rem]">
-                  <span className="block text-xs font-medium text-ui-text">{L.applicantNote}</span>
-                  <input
-                    name="note"
-                    maxLength={500}
-                    placeholder={L.applicantNotePlaceholder}
-                    className="input"
+              <>
+                <p className="mt-1 text-sm text-ui-muted">{L.addApplicantHint}</p>
+                {available.length === 0 ? (
+                  <p className="mt-3 text-sm text-ui-muted">{L.addApplicantEmpty}</p>
+                ) : (
+                  <AddApplicantForm
+                    opportunityId={id}
+                    people={available.map((resident) => ({
+                      id: resident.id,
+                      name: residentName(resident),
+                    }))}
                   />
-                </label>
-                <button type="submit" className="btn-primary min-h-[44px]">
-                  {L.save}
-                </button>
-              </form>
+                )}
+              </>
             )}
           </div>
         ) : null}

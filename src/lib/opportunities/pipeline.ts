@@ -20,6 +20,8 @@ import type {
   ApplicationStageId,
   OpportunityKindId,
   OpportunityRecord,
+  OpportunityStatusId,
+  StageTransitionTargetId,
 } from '@/lib/config/opportunities'
 
 /**
@@ -72,6 +74,91 @@ export function nextPipelineStage(stage: ApplicationStageId): ApplicationStageId
   const position = pipelinePosition(stage)
   if (position < 0) return null
   return APPLICATION_PIPELINE[position + 1] ?? null
+}
+
+/**
+ * Where a thread may go from each stage. SSOT for every stage change — the
+ * server action refuses anything not listed here, and every button the staff
+ * UI offers is derived from it, so the two cannot disagree.
+ *
+ * ## Why a table and not "any stage to any stage"
+ *
+ * The stage control used to be a free <select> over all seven stages. Observed
+ * live on 2026-10-01: a client was attached to a DRAFT job listing and set
+ * straight to ENDED — "Beendet · Nachweis erstellt" — for work that never
+ * started. STARTED and ENDED are not labels: STARTED mints a LearningRecord,
+ * which the client's dossier and every integration KPI read as evidence. A
+ * jump that skips the steps produces evidence nobody earned.
+ *
+ * - DECLINED is reachable from every open stage before STARTED, and from
+ *   nowhere after: once someone has started, the engagement ENDS (and the
+ *   hours are asked for) — calling that a refusal would erase the work.
+ * - APPLIED may go straight to ACCEPTED: plenty of places say yes without an
+ *   interview, and forcing a fake "Gespräch" would make that stage a lie.
+ * - ENDED and DECLINED are terminal. A mistake there is corrected by a person,
+ *   in the audit trail, not by a button that walks evidence backwards.
+ */
+export const APPLICATION_TRANSITIONS: Record<
+  ApplicationStageId,
+  readonly StageTransitionTargetId[]
+> = {
+  INTERESTED: ['APPLIED', 'DECLINED'],
+  APPLIED: ['INTERVIEW', 'ACCEPTED', 'DECLINED'],
+  INTERVIEW: ['ACCEPTED', 'DECLINED'],
+  ACCEPTED: ['STARTED', 'DECLINED'],
+  STARTED: ['ENDED'],
+  ENDED: [],
+  DECLINED: [],
+}
+
+export function canTransition(from: ApplicationStageId, to: ApplicationStageId): boolean {
+  return (APPLICATION_TRANSITIONS[from] as readonly ApplicationStageId[]).includes(to)
+}
+
+/**
+ * Moves that wind a thread DOWN — the only moves left once a listing is not
+ * published. Somebody who started before the listing was archived must still
+ * be able to finish (and have their hours recorded), and a person attached to
+ * a draft by mistake must be able to be let go. Nothing moves FORWARD on a
+ * listing that is not on offer.
+ */
+export const WIND_DOWN_STAGES = [
+  'ENDED',
+  'DECLINED',
+] as const satisfies readonly ApplicationStageId[]
+
+/** Why a stage change is refused. Mapped to German in the admin labels. */
+export type StageChangeRefusal = 'LISTING_NOT_PUBLISHED' | 'ILLEGAL_TRANSITION'
+
+export function stageChangeRefusal(
+  listingStatus: OpportunityStatusId,
+  from: ApplicationStageId,
+  to: ApplicationStageId,
+): StageChangeRefusal | null {
+  if (!canTransition(from, to)) return 'ILLEGAL_TRANSITION'
+  if (listingStatus !== 'PUBLISHED' && !(WIND_DOWN_STAGES as readonly string[]).includes(to)) {
+    return 'LISTING_NOT_PUBLISHED'
+  }
+  return null
+}
+
+/** The next steps a coach is offered, in table order — never a refused one. */
+export function availableTransitions(
+  listingStatus: OpportunityStatusId,
+  from: ApplicationStageId,
+): StageTransitionTargetId[] {
+  return APPLICATION_TRANSITIONS[from].filter(
+    (to) => stageChangeRefusal(listingStatus, from, to) === null,
+  )
+}
+
+/**
+ * A person may be put forward — by staff or by themselves — only onto a place
+ * that is actually on offer. A DRAFT is still being written (its permit route
+ * may not even be settled); an ARCHIVED one is over.
+ */
+export function mayAttachPeople(listingStatus: OpportunityStatusId): boolean {
+  return listingStatus === 'PUBLISHED'
 }
 
 /** Counts against a listing's seats: someone holding a place, or already in it. */

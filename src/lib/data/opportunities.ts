@@ -199,6 +199,53 @@ export async function residentsAvailableFor(opportunityId: string) {
   })
 }
 
+/**
+ * Every application on one board's listings — the review page's rows.
+ *
+ * Scoped by the LISTING's kind (an application has no kind of its own), so a
+ * Jobcoach reviews the job half and the Freiwilligenarbeit coordinator the
+ * volunteering half, exactly as each board shows them. The listing comes along
+ * with its status, because what a row may do next depends on it.
+ */
+export async function listApplicationsForReview(filters: {
+  kinds: readonly OpportunityKindId[]
+  opportunityId?: string
+}) {
+  // An empty kinds list would compile to invalid SQL, and means "nothing".
+  if (filters.kinds.length === 0) return []
+  return db.query.opportunityApplication.findMany({
+    where: and(
+      inArray(
+        opportunityApplication.opportunityId,
+        db
+          .select({ id: opportunity.id })
+          .from(opportunity)
+          .where(inArray(opportunity.kind, [...filters.kinds])),
+      ),
+      filters.opportunityId
+        ? eq(opportunityApplication.opportunityId, filters.opportunityId)
+        : undefined,
+    ),
+    with: {
+      ...APPLICATION_INCLUDE,
+      opportunity: { columns: { id: true, title: true, status: true, organisation: true } },
+    },
+    orderBy: [desc(opportunityApplication.stageChangedAt)],
+  })
+}
+
+/** The listings a review can be narrowed to — id and title, nothing else. */
+export async function listingsForReview(kinds: readonly OpportunityKindId[]) {
+  if (kinds.length === 0) return []
+  return db.query.opportunity.findMany({
+    where: inArray(opportunity.kind, [...kinds]),
+    columns: { id: true, title: true, status: true },
+    orderBy: [asc(opportunity.title)],
+  })
+}
+
+export type ReviewApplicationRow = Awaited<ReturnType<typeof listApplicationsForReview>>[number]
+
 export async function getApplication(id: string) {
   const row = await db.query.opportunityApplication.findFirst({
     where: eq(opportunityApplication.id, id),

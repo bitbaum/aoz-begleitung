@@ -22,8 +22,8 @@
  */
 
 import { and, asc, countDistinct, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
-import { hasAllDomainReach, hasPermission, type StaffCapabilities } from '@/lib/auth/role-policy'
-import { defaultIntegrationBoardForRole } from '@/lib/config/integration-boards'
+import { hasPermission, type StaffCapabilities } from '@/lib/auth/role-policy'
+import { defaultIntegrationBoardForViewer } from '@/lib/config/integration-boards'
 import { sectionVisible } from '@/lib/config/dashboard'
 import { boardOpportunityKinds, type OpportunityKindId } from '@/lib/config/opportunities'
 import { ownSeat } from '@/lib/client-facts/access'
@@ -53,8 +53,7 @@ export type WaitingViewer = StaffCapabilities & { id: string }
 export function answerableOpportunityKinds(
   viewer: StaffCapabilities,
 ): readonly OpportunityKindId[] {
-  const board = hasAllDomainReach(viewer) ? 'overview' : defaultIntegrationBoardForRole(viewer.role)
-  return boardOpportunityKinds(board)
+  return boardOpportunityKinds(defaultIntegrationBoardForViewer(viewer))
 }
 
 export interface WaitingApplication {

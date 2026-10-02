@@ -319,6 +319,7 @@ export const de = {
   'opportunities.permitNone': 'Keine Bewilligung nötig',
   'opportunities.permitNotifies': 'Meldeverfahren durch die Organisation',
   'opportunities.permitRequired': 'Bewilligung erforderlich',
+  'opportunities.permitUnstated': 'Bewilligungsweg noch nicht festgelegt',
   'opportunities.stageInterested': 'Interessiert',
   'opportunities.stageApplied': 'Beworben',
   'opportunities.stageInterview': 'Gespräch',

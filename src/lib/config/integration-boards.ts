@@ -15,7 +15,7 @@
  * default costs nothing to the one person who wants the other half.
  */
 
-import type { StaffRole } from '@/lib/auth/role-policy'
+import { hasAllDomainReach, type StaffCapabilities, type StaffRole } from '@/lib/auth/role-policy'
 import { deskFor } from '@/lib/config/roles'
 
 export const INTEGRATION_BOARD_IDS = ['overview', 'job', 'volunteering'] as const
@@ -35,6 +35,25 @@ export function isIntegrationBoardId(value: string): value is IntegrationBoardId
  */
 export function defaultIntegrationBoardForRole(role: StaffRole): IntegrationBoardId {
   return deskFor(role).integrationBoard
+}
+
+/**
+ * The board a VIEWER works, not just their role: ALL_DOMAINS (and so system
+ * administration) reaches every listing and answers every request, so it opens
+ * on `overview`. Used where the page is about work to be done on the board —
+ * the Eingang's requests and the applications review — so the two can never
+ * disagree about whose requests are whose.
+ */
+export function defaultIntegrationBoardForViewer(viewer: StaffCapabilities): IntegrationBoardId {
+  return hasAllDomainReach(viewer) ? 'overview' : defaultIntegrationBoardForRole(viewer.role)
+}
+
+/** `resolveIntegrationBoard`, defaulting by the viewer's reach. */
+export function resolveViewerIntegrationBoard(
+  boardParam: string,
+  viewer: StaffCapabilities,
+): IntegrationBoardId {
+  return isIntegrationBoardId(boardParam) ? boardParam : defaultIntegrationBoardForViewer(viewer)
 }
 
 /**

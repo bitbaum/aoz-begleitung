@@ -657,6 +657,7 @@ export const ar: Dictionary = {
   'opportunities.permitNone': 'لا حاجة إلى تصريح',
   'opportunities.permitNotifies': 'المنظمة تقوم بالإبلاغ بنفسها',
   'opportunities.permitRequired': 'التصريح مطلوب',
+  'opportunities.permitUnstated': 'لم يُحدَّد مسار التصريح بعد',
   'opportunities.stageInterested': 'مهتم',
   'opportunities.stageApplied': 'تم التقديم',
   'opportunities.stageInterview': 'مقابلة',

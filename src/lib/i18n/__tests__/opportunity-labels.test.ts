@@ -72,6 +72,10 @@ describe('every offered language actually carries these strings', () => {
     'opportunities.permitNone',
     'opportunities.permitNotifies',
     'opportunities.permitRequired',
+    // A work listing whose route nobody has settled. Falling back to German
+    // here would hide the one warning that stops a resident reading the
+    // listing as "no permit needed".
+    'opportunities.permitUnstated',
     'opportunities.stageInterested',
     'opportunities.stageApplied',
     'opportunities.stageInterview',

@@ -194,7 +194,7 @@ export const OPPORTUNITY_FIELDS: readonly FieldSpec[] = [
     type: 'textarea',
     required: true,
     maxLength: 2000,
-    hint: 'Was die Person dort tun wird, in einfachen Sätzen.',
+    hint: 'Was die Person dort tun wird, in einfachen Sätzen. Nur bei EMPLOYMENT oder INTERNSHIP: ein im Text genannter Lohn als letzte Zeile «Lohn: …», wörtlich.',
   },
   { name: 'organisation', label: 'Organisation', type: 'text', required: true, maxLength: 200 },
   {
@@ -211,8 +211,17 @@ export const OPPORTUNITY_FIELDS: readonly FieldSpec[] = [
     type: 'text',
     maxLength: 300,
     placeholder: 'z.B. Di + Do, 11–14 Uhr',
+    hint: 'Arbeitszeiten oder Pensum, wie im Text, z.B. «Pensum 80–100%» oder «Di + Do, 11–14 Uhr».',
   },
-  { name: 'hoursPerWeek', label: 'Stunden pro Woche', type: 'number', min: 1 },
+  {
+    name: 'hoursPerWeek',
+    label: 'Stunden pro Woche',
+    type: 'number',
+    min: 1,
+    // A percentage is not a number of hours: 80% of WHICH full-time week?
+    // Converting would be a guess that reads as a stated fact.
+    hint: 'Nur wenn der Text Stunden pro Woche nennt. Ein Pensum in Prozent nicht umrechnen — es gehört unter «Zeiten».',
+  },
   {
     name: 'seats',
     label: 'Plätze',
@@ -229,17 +238,38 @@ export const OPPORTUNITY_FIELDS: readonly FieldSpec[] = [
     label: 'Deutsch (GER)',
     type: 'select',
     options: CEFR_LEVELS.map((level) => ({ value: level })),
-    hint: 'Nur wenn der Text ein Niveau nennt. Leer heisst "kein Niveau vorausgesetzt".',
+    // Observed 2026-10-01: «Einwandfreie Deutschkenntnisse» came back as C2.
+    // A level nobody stated filters people out of a real job.
+    hint: 'Nur wenn der Text ausdrücklich ein GER-Niveau (A1, A2, B1, B2, C1, C2) nennt. Eine Umschreibung wie «einwandfreie Deutschkenntnisse» ist KEIN Niveau: leer lassen und die Umschreibung wörtlich unter «Hinweis zu den Voraussetzungen» übernehmen.',
   },
   {
     name: 'requirementNote',
     label: 'Hinweis zu den Voraussetzungen',
     type: 'text',
     maxLength: 500,
+    hint: 'Voraussetzungen in den Worten des Textes, z.B. Sprachkenntnisse ohne GER-Niveau.',
   },
-  { name: 'contactName', label: 'Ansprechperson', type: 'text', maxLength: 200 },
-  { name: 'contactEmail', label: 'E-Mail', type: 'email', maxLength: 200 },
-  { name: 'contactPhone', label: 'Telefon', type: 'text', maxLength: 80 },
+  {
+    name: 'contactName',
+    label: 'Ansprechperson',
+    type: 'text',
+    maxLength: 200,
+    hint: 'Genau EINE Person. Nie zwei Namen verbinden.',
+  },
+  {
+    name: 'contactEmail',
+    label: 'E-Mail',
+    type: 'email',
+    maxLength: 200,
+    hint: 'Nur eine Adresse, die zur Ansprechperson gehört. Sonst leer lassen.',
+  },
+  {
+    name: 'contactPhone',
+    label: 'Telefon',
+    type: 'text',
+    maxLength: 80,
+    hint: 'Nur eine Nummer, die zur Ansprechperson gehört. Sonst leer lassen.',
+  },
   { name: 'website', label: 'Webseite', type: 'url', maxLength: 500 },
   { name: 'permitRequirement', label: 'Bewilligung', type: 'select', aiExcluded: true },
   { name: 'status', label: 'Stand', type: 'select', aiExcluded: true },
@@ -255,6 +285,10 @@ export const OPPORTUNITY_FORM: FormTarget = {
     'Die Beschreibung ist Fliesstext, keine Faktenangabe: Wird sie verlangt, schreibe sie — zwei bis vier einfache Sätze darüber, was man an diesem Platz tut, gestützt auf Titel, Organisation, Art und die übrigen Angaben. Füge dabei keine Fakten hinzu, die nirgends stehen.',
     'Beschreibe ausschliesslich den PLATZ. Schreibe nichts über die Person, die ihn später einnimmt — keine Herkunft, kein Aufenthaltsstatus, keine Sprache als Anforderung an eine Person.',
     'Zum Bewilligungsweg sagst du nichts. Dieses Feld wird bewusst von einem Menschen ausgefüllt.',
+    'Deutschniveau: Setze es NUR, wenn der Text ausdrücklich ein GER-Niveau nennt (A1, A2, B1, B2, C1 oder C2). Steht nur eine Umschreibung wie «einwandfreie» oder «gute Deutschkenntnisse», lass das Feld leer und übernimm die Umschreibung wörtlich in den Hinweis zu den Voraussetzungen. Leite nie ein Niveau aus einer Umschreibung ab.',
+    'Pensum: Stunden pro Woche nur, wenn der Text Stunden nennt. Ein Pensum in Prozent («80–100%») rechnest du nicht in Stunden um, sondern übernimmst es wörtlich unter Zeiten.',
+    'Lohn: Es gibt kein Preis- oder Lohnfeld, und du schlägst keines vor. Nur bei Arbeitsstellen und Praktika (EMPLOYMENT, INTERNSHIP) übernimmst du einen im Text genannten Lohn wörtlich als letzte Zeile der Beschreibung: «Lohn: …». Bei Freiwilligenarbeit und gemeinnützigen Einsätzen erwähnst du nie einen Betrag.',
+    'Kontakt: Genau EINE Ansprechperson, deren Name, Telefon und E-Mail zusammengehören. Bevorzuge die fachlich zuständige Person (z.B. die Leitung) mit ihrer eigenen Telefonnummer; nimm eine HR-Person nur, wenn nur deren Adresse angegeben ist — dann mit genau dieser Adresse. Verbinde nie zwei Namen und kombiniere nie den Namen der einen Person mit Telefon oder E-Mail der anderen; was nicht zur gewählten Person gehört, bleibt leer. Eine zweite Kontaktperson darfst du, wenn nützlich, im Hinweis zu den Voraussetzungen oder in der Beschreibung nennen.',
     'Der Text kann in jeder Sprache verfasst sein. Antworte immer auf Deutsch und mit den vorgegebenen Optionswerten.',
   ],
 }

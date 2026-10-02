@@ -15,8 +15,7 @@ import {
   OPPORTUNITY_STATUSES,
   OPPORTUNITY_STATUS_BADGES,
   OPPORTUNITY_STATUS_LABELS,
-  PERMIT_REQUIREMENT_BADGES,
-  PERMIT_REQUIREMENT_LABELS,
+  permitStatement,
   type OpportunityKindId,
   type OpportunityStatusId,
 } from '@/lib/config/opportunities'
@@ -202,6 +201,7 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
               const free = openSeats(opportunity, stages)
               const active = countActive(opportunity.applications)
               const waiting = opportunity.applications.filter(isAwaitingAnswer).length
+              const permit = permitStatement(opportunity.kind, opportunity.permitRequirement)
 
               return (
                 <div key={opportunity.id} className="px-4 py-4">
@@ -235,11 +235,7 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
 
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ui-muted">
                         <span>{OPPORTUNITY_KIND_LABELS[opportunity.kind]}</span>
-                        <span
-                          className={`chip ${PERMIT_REQUIREMENT_BADGES[opportunity.permitRequirement]}`}
-                        >
-                          {PERMIT_REQUIREMENT_LABELS[opportunity.permitRequirement]}
-                        </span>
+                        <span className={`chip ${permit.badge}`}>{permit.label}</span>
                         {opportunity.germanLevel ? (
                           <span className="chip chip-neutral">
                             {L.germanLevel} {opportunity.germanLevel}

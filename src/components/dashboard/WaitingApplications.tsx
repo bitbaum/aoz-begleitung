@@ -6,6 +6,7 @@ import { Handshake } from 'lucide-react'
 import { claimApplication } from '@/lib/actions/opportunities'
 import { DASHBOARD_LABELS as L } from '@/lib/constants/labels'
 import { DISPLAY_LIMITS } from '@/lib/config/thresholds'
+import { APPLICATIONS_REVIEW_PATH } from '@/lib/config/opportunities'
 import { daysSinceCeil } from '@/lib/utils'
 import type { WaitingApplication } from '@/lib/inbox/waiting'
 
@@ -39,8 +40,15 @@ export function WaitingApplications({
     <section className="card" aria-labelledby="waiting-applications-title">
       <div className="flex items-center gap-2">
         <Handshake className="w-5 h-5 text-brand-primary" aria-hidden="true" />
+        {/* The heading leads to the one place every application is reviewed,
+            so "and the rest?" is a click rather than a listing-by-listing hunt. */}
         <h3 id="waiting-applications-title" className="text-base font-semibold text-ui-text">
-          {L.applicationsTitle}
+          <Link
+            href={APPLICATIONS_REVIEW_PATH}
+            className="inline-flex min-h-[44px] items-center hover:text-brand-primary hover:underline"
+          >
+            {L.applicationsTitle}
+          </Link>
         </h3>
         <span className="chip-warning ms-auto">{applications.length}</span>
       </div>
@@ -91,7 +99,7 @@ export function WaitingApplications({
       </ul>
       {hidden > 0 && (
         <p className="mt-3 text-sm">
-          <Link href="/opportunities" className="text-brand-primary hover:underline">
+          <Link href={APPLICATIONS_REVIEW_PATH} className="text-brand-primary hover:underline">
             {L.applicationsMore(hidden)}
           </Link>
         </p>

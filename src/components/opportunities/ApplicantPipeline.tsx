@@ -1,126 +1,37 @@
 /**
- * Who is on this listing, and the one control each of them needs.
+ * Who is on this listing, and the next steps each of them can take.
  *
- * Progressive disclosure on purpose: the primary button is the SINGLE natural
- * next step, and the seven-way selector lives behind a `<details>` for
- * corrections. A coach moving somebody along should not have to re-read the
- * whole pipeline to do the obvious thing.
- *
- * Ending an engagement is the exception and is rendered inline with its hours
- * field, because the total is only knowable at that moment — behind a
- * disclosure it would simply never be filled in, and volunteering records
- * without hours are the ones nobody can use later.
- *
- * No client JS: `<details>` and plain forms, so every control works on the
- * phone a coach actually carries.
+ * The controls are `ApplicationStageControls`: buttons derived from the
+ * transition table, never a free choice of stage. The seven-way selector that
+ * used to live here behind a `<details>` "for corrections" was how a client on
+ * a DRAFT listing went straight to «Beendet · Nachweis erstellt».
  */
 
 import Link from 'next/link'
-import { changeApplicationStage } from '@/lib/actions'
 import {
   APPLICATION_STAGE_BADGES,
   APPLICATION_STAGE_LABELS,
-  APPLICATION_STAGES,
-  type ApplicationStageId,
+  type OpportunityStatusId,
 } from '@/lib/config/opportunities'
-import { isTerminalStage, nextPipelineStage } from '@/lib/opportunities/pipeline'
 import { isAwaitingAnswer } from '@/lib/jobcoach/queue'
 import { residentName } from '@/lib/utils/resident-name'
+import { daysSince } from '@/lib/opportunities/review'
 import { OPPORTUNITIES_ADMIN_LABELS as L } from '@/lib/constants'
 import type { ApplicationRow } from '@/lib/data/opportunities'
+import { ApplicationStageControls } from './ApplicationStageControls'
 
 function formatDate(value: Date): string {
   return new Intl.DateTimeFormat('de-CH', { dateStyle: 'medium' }).format(value)
 }
 
-/** Whole days a thread has been open. Only ever shown for unanswered ones. */
-function daysSince(value: Date): number {
-  return Math.floor((Date.now() - value.getTime()) / (1000 * 60 * 60 * 24))
-}
-
-function StageSelector({ application }: { application: ApplicationRow }) {
-  return (
-    <details className="mt-3">
-      {/* A disclosure toggle is a tap target like any other — 44px, not the
-          20px a bare <summary> line gives you. */}
-      <summary className="flex min-h-[44px] cursor-pointer items-center text-sm text-ui-muted hover:text-ui-text">
-        {L.changeStage}
-      </summary>
-      <form action={changeApplicationStage} className="mt-3 flex flex-wrap items-end gap-3">
-        <input type="hidden" name="applicationId" value={application.id} />
-        <label className="block space-y-1.5">
-          <span className="block text-xs font-medium text-ui-text">{L.changeStage}</span>
-          <select name="stage" defaultValue={application.stage} className="input">
-            {APPLICATION_STAGES.map((stage) => (
-              <option key={stage} value={stage}>
-                {APPLICATION_STAGE_LABELS[stage]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block space-y-1.5">
-          <span className="block text-xs font-medium text-ui-text">{L.hoursOnEnd}</span>
-          <input name="hours" type="number" min={1} className="input" />
-        </label>
-        <button type="submit" className="btn-outline min-h-[44px]">
-          {L.save}
-        </button>
-      </form>
-    </details>
-  )
-}
-
-function ApplicantControls({ application }: { application: ApplicationRow }) {
-  const stage = application.stage as ApplicationStageId
-  if (isTerminalStage(stage)) return <StageSelector application={application} />
-
-  const next = nextPipelineStage(stage)
-
-  return (
-    <>
-      <div className="mt-3 flex flex-wrap items-end gap-3">
-        {stage === 'STARTED' ? (
-          // Inline, with hours: this is the only moment the total is known.
-          <form action={changeApplicationStage} className="flex flex-wrap items-end gap-3">
-            <input type="hidden" name="applicationId" value={application.id} />
-            <input type="hidden" name="stage" value="ENDED" />
-            <label className="block space-y-1.5">
-              <span className="block text-xs font-medium text-ui-text">{L.hoursOnEnd}</span>
-              <input name="hours" type="number" min={1} className="input w-32" />
-            </label>
-            <button type="submit" className="btn-outline min-h-[44px]">
-              {L.advanceTo} {APPLICATION_STAGE_LABELS.ENDED}
-            </button>
-          </form>
-        ) : next ? (
-          <form action={changeApplicationStage}>
-            <input type="hidden" name="applicationId" value={application.id} />
-            <input type="hidden" name="stage" value={next} />
-            <button type="submit" className="btn-primary min-h-[44px]">
-              {L.advanceTo} {APPLICATION_STAGE_LABELS[next]}
-            </button>
-          </form>
-        ) : null}
-
-        <form action={changeApplicationStage}>
-          <input type="hidden" name="applicationId" value={application.id} />
-          <input type="hidden" name="stage" value="DECLINED" />
-          <button type="submit" className="btn-ghost min-h-[44px]">
-            {L.decline}
-          </button>
-        </form>
-      </div>
-      <StageSelector application={application} />
-    </>
-  )
-}
-
 export function ApplicantPipeline({
   applications,
   canWrite,
+  listingStatus,
 }: {
   applications: readonly ApplicationRow[]
   canWrite: boolean
+  listingStatus: OpportunityStatusId
 }) {
   if (applications.length === 0) {
     return <p className="text-sm text-ui-muted">{L.applicantsEmpty}</p>
@@ -169,7 +80,13 @@ export function ApplicantPipeline({
             <p className="mt-2 text-sm text-ui-text">{application.note}</p>
           ) : null}
 
-          {canWrite ? <ApplicantControls application={application} /> : null}
+          {canWrite ? (
+            <ApplicationStageControls
+              applicationId={application.id}
+              stage={application.stage}
+              listingStatus={listingStatus}
+            />
+          ) : null}
         </li>
       ))}
     </ul>

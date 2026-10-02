@@ -674,6 +674,7 @@ export const uk: Dictionary = {
   'opportunities.permitNone': 'Дозвіл не потрібен',
   'opportunities.permitNotifies': 'Організація сама подає повідомлення',
   'opportunities.permitRequired': 'Потрібен дозвіл',
+  'opportunities.permitUnstated': 'Порядок отримання дозволу ще не визначено',
   'opportunities.stageInterested': 'Зацікавлення',
   'opportunities.stageApplied': 'Заявку подано',
   'opportunities.stageInterview': 'Співбесіда',

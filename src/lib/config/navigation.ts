@@ -3,6 +3,7 @@
  */
 
 import { LEARNING_AREA_NAME } from './learning'
+import { APPLICATIONS_REVIEW_PATH } from './opportunities'
 
 import {
   Home,
@@ -135,6 +136,8 @@ export interface MegaMenuDropdownItem {
   desc: string
   permission?: StaffPermission
   feature?: keyof BrandFeatures
+  /** Other routes this item stands for, so it stays highlighted there. */
+  activeFor?: readonly string[]
 }
 
 export type MegaMenuGroup =
@@ -242,12 +245,31 @@ export const MEGAMENU_GROUPS: MegaMenuGroup[] = [
   // their own routes — an activity has no applicants and no seats — but share
   // one tab strip (config/catalogue.ts) and this one entry, which stays
   // highlighted on both.
+  //
+  // A group since 2026-10-01, because the catalogue grew a second question:
+  // "where does everybody stand?". Review used to be scattered over the
+  // Eingang and every listing's «Wer ist unterwegs»; «Bewerbungen» is the one
+  // place it happens. Named for what each item IS — the places, and the
+  // applications to them.
   {
-    href: '/opportunities',
-    icon: 'opportunities',
     label: CATALOGUE_LABEL,
-    permission: 'opportunities:read',
-    activeFor: ['/activities'],
+    items: [
+      {
+        href: '/opportunities',
+        icon: 'opportunities',
+        label: 'Alle Einsatzplätze',
+        desc: 'Stellen, Praktika, Freiwilligenarbeit & Aktivitäten',
+        permission: 'opportunities:read',
+        activeFor: ['/activities'],
+      },
+      {
+        href: APPLICATIONS_REVIEW_PATH,
+        icon: 'clipboard',
+        label: 'Bewerbungen',
+        desc: 'Wer wartet, wer ist unterwegs',
+        permission: 'opportunities:read',
+      },
+    ],
   },
   {
     // The roof: units, the placement decision, moves and repairs. Matching
@@ -378,7 +400,15 @@ export function visibleMegaMenuGroups(viewer: StaffCapabilities): MegaMenuGroup[
     // same boundary it had inside the group.
     if (items.length === 1) {
       const [only] = items
-      return [{ label: only.label, href: only.href, icon: only.icon, permission: only.permission }]
+      return [
+        {
+          label: only.label,
+          href: only.href,
+          icon: only.icon,
+          permission: only.permission,
+          ...(only.activeFor ? { activeFor: only.activeFor } : {}),
+        },
+      ]
     }
 
     return [{ ...group, items }]

@@ -10,7 +10,7 @@ import {
   type MegaMenuDropdownItem,
   type MegaMenuGroup,
 } from '@/lib/config/navigation'
-import { isRouteActive } from '@/components/layout/AdminHeader'
+import { activeItemHref, isRouteActive } from '@/components/layout/AdminHeader'
 import { NavBadge } from '@/components/layout/NavBadge'
 
 /**
@@ -82,7 +82,8 @@ function SidebarGroup({
   items: MegaMenuDropdownItem[]
   pathname: string
 }) {
-  const containsCurrent = items.some((item) => isRouteActive(pathname, item.href))
+  const current = activeItemHref(pathname, items)
+  const containsCurrent = current !== null
   const [open, setOpen] = useState(containsCurrent)
 
   // Navigating into a closed group must open it, or the sidebar would show the
@@ -113,7 +114,7 @@ function SidebarGroup({
               href={item.href}
               icon={item.icon}
               label={item.label}
-              active={isRouteActive(pathname, item.href)}
+              active={item.href === current}
             />
           </li>
         ))}

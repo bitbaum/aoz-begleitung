@@ -23,3 +23,26 @@ export function isRouteActive(pathname: string, href: string): boolean {
   if (href === '/') return pathname === '/'
   return pathname === href || pathname.startsWith(`${href}/`)
 }
+
+/**
+ * The ONE item of a group that is current, or null.
+ *
+ * Prefix matching alone lights up two siblings when one route nests inside
+ * another: on `/opportunities/applications`, «Alle Einsatzplätze»
+ * (`/opportunities`) matches too. The most specific match wins, so a group
+ * never reports two current pages. `activeFor` routes count as the item's own.
+ */
+export function activeItemHref(
+  pathname: string,
+  items: readonly { href: string; activeFor?: readonly string[] }[],
+): string | null {
+  let best: { href: string; length: number } | null = null
+  for (const item of items) {
+    for (const route of [item.href, ...(item.activeFor ?? [])]) {
+      if (isRouteActive(pathname, route) && (!best || route.length > best.length)) {
+        best = { href: item.href, length: route.length }
+      }
+    }
+  }
+  return best?.href ?? null
+}
