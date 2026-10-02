@@ -48,6 +48,10 @@ export type AuditEntity =
   // A saved filter over the client list — a view, audited because it can
   // become the audience of a message to many people.
   | 'CLIENT_GROUP'
+  // A survey as STAFF act on it: created, opened (with a COUNT of invitations,
+  // never the list), closed. A client's answer is never audited — "resident X
+  // answered survey Y" is exactly the record the survey promises not to keep.
+  | 'SURVEY'
 
 interface AuditLogEntry {
   action: AuditAction

@@ -718,4 +718,26 @@ export const ar: Dictionary = {
   'documents.renewalDue': 'ينتهي قريباً',
   'documents.renewalExpired': 'منتهي الصلاحية',
   'documents.renewalNone': 'لم يُسجَّل تاريخ',
+
+  'survey.cardTitle': 'استبيان قصير',
+  'survey.cardAction': 'إلى الاستبيان',
+  'survey.anonymous':
+    'إجاباتك مجهولة الهوية. لن يعرف أحد بماذا أجبت. يمكنك الإجابة على الهاتف أو على الكمبيوتر.',
+  'survey.anonymousDetail':
+    'نحفظ إجاباتك بدون اسمك وبدون رمزك. يرى الموظفون فقط نتائج عدة أشخاص معاً.',
+  'survey.textHint': 'يمكنك الكتابة بلغتك.',
+  'survey.otherPlaceholder': 'ما هو بالضبط؟',
+  'survey.submit': 'إرسال الإجابات',
+  'survey.sending': 'جارٍ الإرسال …',
+  'survey.thanksTitle': 'شكراً!',
+  'survey.thanksBody': 'وصلت إجاباتك. إنها محفوظة بدون اسمك.',
+  'survey.backHome': 'العودة إلى النظرة العامة',
+  'survey.unavailable': 'هذا الاستبيان لم يعد مفتوحاً.',
+  'survey.error.empty': 'يرجى الإجابة على سؤال واحد على الأقل.',
+  'survey.error.alreadyAnswered': 'لقد أجبت على هذا الاستبيان من قبل. شكراً!',
+  'survey.error.closed': 'هذا الاستبيان مغلق.',
+  'survey.error.notInvited': 'هذا الاستبيان غير متاح لك.',
+  'survey.error.invalid': 'هناك خطأ في الإجابات. يرجى إعادة تحميل الصفحة.',
+  'survey.error.failed': 'لم ينجح ذلك. يرجى المحاولة مرة أخرى.',
+  'survey.error.signedOut': 'يرجى تسجيل الدخول مرة أخرى.',
 }

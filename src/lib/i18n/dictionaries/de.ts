@@ -788,6 +788,29 @@ export const de = {
   'documents.renewalDue': 'Läuft bald ab',
   'documents.renewalExpired': 'Abgelaufen',
   'documents.renewalNone': 'Kein Datum hinterlegt',
+
+  // Anonymous surveys. The promise is the Wohnen+ questionnaire's own words.
+  'survey.cardTitle': 'Eine kurze Umfrage',
+  'survey.cardAction': 'Zur Umfrage',
+  'survey.anonymous':
+    'Deine Antworten sind anonym. Niemand erfährt, was du geantwortet hast. Du kannst auf dem Handy oder am Computer antworten.',
+  'survey.anonymousDetail':
+    'Wir speichern deine Antworten ohne deinen Namen und ohne deinen Code. Die Betreuung sieht nur Ergebnisse von mehreren Personen zusammen.',
+  'survey.textHint': 'Du kannst in deiner Sprache schreiben.',
+  'survey.otherPlaceholder': 'Was genau?',
+  'survey.submit': 'Antworten senden',
+  'survey.sending': 'Wird gesendet …',
+  'survey.thanksTitle': 'Danke!',
+  'survey.thanksBody': 'Deine Antworten sind angekommen. Sie sind ohne deinen Namen gespeichert.',
+  'survey.backHome': 'Zur Übersicht',
+  'survey.unavailable': 'Diese Umfrage ist nicht mehr offen.',
+  'survey.error.empty': 'Bitte beantworte mindestens eine Frage.',
+  'survey.error.alreadyAnswered': 'Du hast diese Umfrage schon beantwortet. Danke!',
+  'survey.error.closed': 'Diese Umfrage ist geschlossen.',
+  'survey.error.notInvited': 'Diese Umfrage ist für dich nicht verfügbar.',
+  'survey.error.invalid': 'Etwas stimmt mit den Antworten nicht. Bitte lade die Seite neu.',
+  'survey.error.failed': 'Das hat nicht geklappt. Bitte versuche es noch einmal.',
+  'survey.error.signedOut': 'Bitte melde dich wieder an.',
 } as const
 
 /** The key set every dictionary is measured against. */

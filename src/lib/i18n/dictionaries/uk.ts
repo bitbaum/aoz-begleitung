@@ -735,4 +735,26 @@ export const uk: Dictionary = {
   'documents.renewalDue': 'Скоро закінчується',
   'documents.renewalExpired': 'Термін минув',
   'documents.renewalNone': 'Дату не вказано',
+
+  'survey.cardTitle': 'Коротке опитування',
+  'survey.cardAction': 'До опитування',
+  'survey.anonymous':
+    'Твої відповіді анонімні. Ніхто не дізнається, що ти відповів (відповіла). Ти можеш відповісти на телефоні або на комп’ютері.',
+  'survey.anonymousDetail':
+    'Ми зберігаємо твої відповіді без твого імені та без твого коду. Працівники бачать лише спільні результати кількох людей.',
+  'survey.textHint': 'Ти можеш писати своєю мовою.',
+  'survey.otherPlaceholder': 'Що саме?',
+  'survey.submit': 'Надіслати відповіді',
+  'survey.sending': 'Надсилання …',
+  'survey.thanksTitle': 'Дякуємо!',
+  'survey.thanksBody': 'Твої відповіді отримано. Вони збережені без твого імені.',
+  'survey.backHome': 'До огляду',
+  'survey.unavailable': 'Це опитування вже закрите.',
+  'survey.error.empty': 'Будь ласка, дай відповідь хоча б на одне питання.',
+  'survey.error.alreadyAnswered': 'Ти вже відповів (відповіла) на це опитування. Дякуємо!',
+  'survey.error.closed': 'Це опитування закрите.',
+  'survey.error.notInvited': 'Це опитування для тебе недоступне.',
+  'survey.error.invalid': 'Щось не так із відповідями. Будь ласка, онови сторінку.',
+  'survey.error.failed': 'Не вдалося. Будь ласка, спробуй ще раз.',
+  'survey.error.signedOut': 'Будь ласка, увійди знову.',
 }

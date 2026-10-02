@@ -48,6 +48,8 @@ export const PERMISSION_DESCRIPTIONS: Record<StaffPermission, string> = {
   // Answering the household, not reading its rules — the rule book itself stays
   // on housing:read so the person who runs the building can read it.
   'governance:confirm': 'Anträge der Häuser beantworten und den Regelkatalog pflegen',
+  'surveys:read': 'Ergebnisse anonymer Umfragen zusammengefasst einsehen',
+  'surveys:write': 'Anonyme Umfragen erstellen, an Klient*innen senden und schliessen',
   'documents:read': 'Lebenslauf, Zeugnisse und Referenzen einsehen',
   'documents:write': 'Lebenslauf, Zeugnisse und Referenzen hinzufügen und entfernen',
   'users:manage': 'Benutzer*innen und Einstellungen verwalten',

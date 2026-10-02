@@ -28,6 +28,7 @@ import {
   index,
   text,
   timestamp,
+  date,
   doublePrecision,
   jsonb,
   integer,
@@ -2729,5 +2730,119 @@ export const clientGroup = pgTable(
     })
       .onUpdate('cascade')
       .onDelete('restrict'),
+  ],
+)
+
+// =============================================================================
+// SURVEYS — anonymous by construction
+// =============================================================================
+//
+// Three tables, and the anonymity lives in what the third one CANNOT hold.
+//
+//   Survey            what is asked (questions snapshotted as JSON).
+//   SurveyInvitation  who was asked and whether they have answered — so the
+//                     portal can show the survey and refuse a second answer.
+//                     It holds NO answer time: a timestamp here could be lined
+//                     up against a response.
+//   SurveyResponse    what was answered. NO residentId, NO invitationId, NO
+//                     userId, NO IP, and a DATE without a time. Nothing in the
+//                     row points back at a person, so no page, export or future
+//                     join can attribute it — "Niemand erfährt, was Sie
+//                     geantwortet haben" is kept by the schema, not by
+//                     discipline. `surveys/__tests__/schema-anonymity.test.ts`.
+
+export const surveyStatus = pgEnum('SurveyStatus', ['DRAFT', 'OPEN', 'CLOSED'])
+
+export const survey = pgTable(
+  'Survey',
+  {
+    id: text().primaryKey().$defaultFn(createId).notNull(),
+    createdAt: timestamp({ precision: 3, mode: 'date' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp({ precision: 3, mode: 'date' })
+      .$defaultFn(() => new Date())
+      .$onUpdateFn(() => new Date())
+      .notNull(),
+    /** The config template the questions came from — its translated title and intro. */
+    templateId: text().notNull(),
+    title: text().notNull(),
+    intro: text(),
+    /** Snapshot of the template's questions, validated by `surveyQuestionsSchema`. */
+    questions: jsonb().notNull(),
+    status: surveyStatus().default('DRAFT').notNull(),
+    /** k: below this many responses no result is shown at all. */
+    minResponses: integer().default(5).notNull(),
+    createdByUserId: text().notNull(),
+    openedAt: timestamp({ precision: 3, mode: 'date' }),
+    closedAt: timestamp({ precision: 3, mode: 'date' }),
+  },
+  (table) => [
+    index('Survey_status_idx').using('btree', table.status.asc().nullsLast()),
+    foreignKey({
+      columns: [table.createdByUserId],
+      foreignColumns: [user.id],
+      name: 'Survey_createdByUserId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('restrict'),
+  ],
+)
+
+export const surveyInvitation = pgTable(
+  'SurveyInvitation',
+  {
+    id: text().primaryKey().$defaultFn(createId).notNull(),
+    surveyId: text().notNull(),
+    residentId: text().notNull(),
+    invitedAt: timestamp({ precision: 3, mode: 'date' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    /** Flipped in the same transaction that writes the response. Never a time. */
+    answered: boolean().default(false).notNull(),
+  },
+  (table) => [
+    uniqueIndex('SurveyInvitation_surveyId_residentId_key').using(
+      'btree',
+      table.surveyId.asc().nullsLast(),
+      table.residentId.asc().nullsLast(),
+    ),
+    index('SurveyInvitation_residentId_idx').using('btree', table.residentId.asc().nullsLast()),
+    foreignKey({
+      columns: [table.surveyId],
+      foreignColumns: [survey.id],
+      name: 'SurveyInvitation_surveyId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('cascade'),
+    foreignKey({
+      columns: [table.residentId],
+      foreignColumns: [resident.id],
+      name: 'SurveyInvitation_residentId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('restrict'),
+  ],
+)
+
+export const surveyResponse = pgTable(
+  'SurveyResponse',
+  {
+    id: text().primaryKey().$defaultFn(createId).notNull(),
+    surveyId: text().notNull(),
+    /** Validated against the survey's questions at submit time. */
+    answers: jsonb().notNull(),
+    /** The day only — never a time that could be matched to a session or a log line. */
+    submittedOn: date({ mode: 'string' }).notNull(),
+  },
+  (table) => [
+    index('SurveyResponse_surveyId_idx').using('btree', table.surveyId.asc().nullsLast()),
+    foreignKey({
+      columns: [table.surveyId],
+      foreignColumns: [survey.id],
+      name: 'SurveyResponse_surveyId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('cascade'),
   ],
 )

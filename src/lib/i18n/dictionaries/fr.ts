@@ -743,4 +743,26 @@ export const fr: Dictionary = {
   'documents.renewalDue': 'Expire bientôt',
   'documents.renewalExpired': 'Expiré',
   'documents.renewalNone': 'Aucune date enregistrée',
+
+  'survey.cardTitle': 'Un court questionnaire',
+  'survey.cardAction': 'Aller au questionnaire',
+  'survey.anonymous':
+    'Tes réponses sont anonymes. Personne ne saura ce que tu as répondu. Tu peux répondre sur ton téléphone ou sur un ordinateur.',
+  'survey.anonymousDetail':
+    'Nous enregistrons tes réponses sans ton nom et sans ton code. L’équipe voit seulement les résultats de plusieurs personnes ensemble.',
+  'survey.textHint': 'Tu peux écrire dans ta langue.',
+  'survey.otherPlaceholder': 'Quoi exactement ?',
+  'survey.submit': 'Envoyer les réponses',
+  'survey.sending': 'Envoi en cours …',
+  'survey.thanksTitle': 'Merci !',
+  'survey.thanksBody': 'Tes réponses sont arrivées. Elles sont enregistrées sans ton nom.',
+  'survey.backHome': 'Retour à l’aperçu',
+  'survey.unavailable': 'Ce questionnaire n’est plus ouvert.',
+  'survey.error.empty': 'Réponds au moins à une question, s’il te plaît.',
+  'survey.error.alreadyAnswered': 'Tu as déjà répondu à ce questionnaire. Merci !',
+  'survey.error.closed': 'Ce questionnaire est fermé.',
+  'survey.error.notInvited': 'Ce questionnaire n’est pas disponible pour toi.',
+  'survey.error.invalid': 'Quelque chose ne va pas avec les réponses. Recharge la page.',
+  'survey.error.failed': 'Cela n’a pas marché. Réessaie, s’il te plaît.',
+  'survey.error.signedOut': 'Reconnecte-toi, s’il te plaît.',
 }

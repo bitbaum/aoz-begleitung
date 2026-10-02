@@ -49,6 +49,11 @@ const FORBIDDEN_DIRS = [
   // audience — "who holds permit F" must never be a filter or a group.
   'src/lib/config/client-filters.ts',
   'src/lib/client-groups',
+  // A survey asks people about themselves and is sent to a selection of
+  // them. A client fact must be neither a question nor an audience.
+  'src/lib/surveys',
+  'src/lib/config/survey-templates.ts',
+  'src/lib/actions/surveys.ts',
 ] as const
 
 function filesUnder(dir: string): string[] {

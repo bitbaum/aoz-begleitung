@@ -34,6 +34,7 @@ import {
   HandHeart,
   Handshake,
   Inbox,
+  ListChecks,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { BRAND, isAozSurface, type BrandFeatures } from '@/lib/config/brand'
@@ -73,6 +74,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   event: CalendarClock,
   volunteer: HandHeart,
   opportunities: Handshake,
+  survey: ListChecks,
 }
 
 export interface NavItem {
@@ -235,6 +237,15 @@ export const MEGAMENU_GROUPS: MegaMenuGroup[] = [
         label: LEARNING_AREA_NAME,
         desc: 'Kurse, Sprachtests & Nachweise pro Person',
         permission: 'learning:read',
+      },
+      // Anonymous surveys TO clients — about the people, so filed with them.
+      // Audiences are the saved groups from "Alle Klient*innen".
+      {
+        href: '/surveys',
+        icon: 'survey',
+        label: 'Umfragen',
+        desc: 'Anonyme Umfragen an Klient*innen',
+        permission: 'surveys:read',
       },
     ],
   },

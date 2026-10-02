@@ -43,12 +43,15 @@ import { CareTeamCard } from '@/components/residents/CareTeamCard'
 import { PortalAppointmentsCard } from '@/components/portal/PortalAppointmentsCard'
 import { PortalPillarDirectory } from '@/components/portal/PortalPillarDirectory'
 import Link from 'next/link'
+import { listPendingSurveys } from '@/lib/surveys/invitations'
+import { surveyTextsForClient } from '@/lib/surveys/display'
+import { PortalSurveyCard } from '@/components/portal/PortalSurveyCard'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ResidentPortal() {
   const residentCode = await requireResidentCookie('/login')
-  const { t } = await getRequestTranslator()
+  const { t, locale } = await getRequestTranslator()
 
   const resident = await db.query.resident.findFirst({
     where: eq(residentTable.code, residentCode),
@@ -143,6 +146,7 @@ export default async function ResidentPortal() {
     careSeats,
     upcomingAppointments,
     myMarketplacePosts,
+    pendingSurveys,
   ] = await Promise.all([
     currentPlacement
       ? db.query.householdTask.findMany({
@@ -191,6 +195,7 @@ export default async function ResidentPortal() {
     getCareTeam(resident.id),
     listUpcomingResidentAppointments(resident.id),
     listMyMarketplacePosts(),
+    listPendingSurveys(resident.id),
   ])
 
   return (
@@ -207,6 +212,15 @@ export default async function ResidentPortal() {
           <ResidentAvatar resident={resident} photoVersion={resident.photo?.updatedAt} />
         </Link>
       </div>
+
+      {/* An open anonymous survey — first, because it closes. Gone once answered. */}
+      <PortalSurveyCard
+        t={t}
+        surveys={pendingSurveys.map((survey) => ({
+          id: survey.id,
+          title: surveyTextsForClient(survey, locale).title,
+        }))}
+      />
 
       {/* Satisfaction Check-In - Prominent Position */}
       {currentPlacement && (

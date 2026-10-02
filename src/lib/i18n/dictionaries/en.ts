@@ -728,4 +728,26 @@ export const en: Dictionary = {
   'documents.renewalDue': 'Expires soon',
   'documents.renewalExpired': 'Expired',
   'documents.renewalNone': 'No date saved',
+
+  'survey.cardTitle': 'A short survey',
+  'survey.cardAction': 'Go to the survey',
+  'survey.anonymous':
+    'Your answers are anonymous. Nobody finds out what you answered. You can answer on your phone or on a computer.',
+  'survey.anonymousDetail':
+    'We save your answers without your name and without your code. Staff only see results from several people together.',
+  'survey.textHint': 'You can write in your own language.',
+  'survey.otherPlaceholder': 'What exactly?',
+  'survey.submit': 'Send answers',
+  'survey.sending': 'Sending …',
+  'survey.thanksTitle': 'Thank you!',
+  'survey.thanksBody': 'Your answers have arrived. They are saved without your name.',
+  'survey.backHome': 'Back to overview',
+  'survey.unavailable': 'This survey is no longer open.',
+  'survey.error.empty': 'Please answer at least one question.',
+  'survey.error.alreadyAnswered': 'You have already answered this survey. Thank you!',
+  'survey.error.closed': 'This survey is closed.',
+  'survey.error.notInvited': 'This survey is not available for you.',
+  'survey.error.invalid': 'Something is wrong with the answers. Please reload the page.',
+  'survey.error.failed': 'That did not work. Please try again.',
+  'survey.error.signedOut': 'Please sign in again.',
 }

@@ -64,6 +64,13 @@
       "when": 1790944360667,
       "tag": "0008_client_groups",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790948325480,
+      "tag": "0009_surveys",
+      "breakpoints": true
     }
   ]
 }

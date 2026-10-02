@@ -836,6 +836,45 @@ fails when a filter has no case.
   creator or a system admin may rename or delete (`mayManageClientGroup`).
   Actions in `lib/actions/client-groups.ts` return `{ error }`.
 
+## Surveys (anonymous by construction)
+
+Origin: AOZ's project **Wohnen+** sent residents an anonymous SurveyMonkey
+questionnaire, "Leben in der AOZ Wohnung", promising «Niemand erfährt, was Sie
+geantwortet haben». This is that, inside the product. Staff (`surveys:write`:
+BETREUUNG, SOZIALARBEIT, sysadmin) create a survey from a template
+(`config/survey-templates.ts`, questions in every offered portal locale), send
+it, close it; `surveys:read` sees aggregates only. Nav: Klient*innen › Umfragen.
+
+- **Three tables, and the promise lives in the third.** `Survey` (questions
+  snapshotted as JSON), `SurveyInvitation` (who was asked + an `answered`
+  boolean — **no answer time**, which could be lined up against a response),
+  `SurveyResponse` (`surveyId`, `answers`, `submittedOn` as a DATE — **no
+  residentId, invitationId, userId, IP or timestamp**). Nothing in a response
+  points at a person, so no page, export or future join can attribute it.
+  `surveys/__tests__/schema-anonymity.test.ts` pins the column sets exactly.
+- **One write path.** `surveys/submit.ts` inserts the response and flips the
+  invitation in one transaction (guarded `answered = false`, so a second
+  answer is refused). No audit entry, no log line with the resident; the
+  portal action logs a failure by error NAME only (driver messages carry
+  query params). `anonymity-boundary.test.ts`: any file that reads responses
+  names no client or invitation, and no export/API route/page touches them.
+- **The k rule.** Below `minResponses` (default 5, never below 3 —
+  `effectiveMinResponses`) results return `x von k` and nothing else: no
+  counts, no free text. Free text is sorted alphabetically, so order says
+  nothing about who or when. No per-response view, no raw export.
+- **Audience = a saved group resolved AS THE SENDER** (`resolveGroupMembers(
+  group, viewer)`) or chosen individuals, both through the sender's site scope;
+  placeholders and EXITED clients are never invited. Audit entries carry the
+  COUNT invited, never the list.
+- Template text names the organisation as `{org}`, filled from
+  `BRAND.orgName` by `localize()` — the org-name gate forbids a literal.
+- Client facts are never a question or an audience: the survey module, its
+  template and actions are in `never-an-input-to-a-decision.test.ts`.
+- **Results only after the survey is CLOSED** (`summarizeSurvey` returns
+  `still-open` with the count until then). Past k, comparing results before
+  and after one more answer would reveal that answer — the k rule protects a
+  snapshot, not a sequence of snapshots. Pinned by `results.test.ts`.
+
 ## Marketplace: two halves, and no money
 
 SSOT: `src/lib/config/marketplace.ts`. The board carries **goods and services**,
