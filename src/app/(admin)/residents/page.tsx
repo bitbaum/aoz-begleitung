@@ -1,6 +1,14 @@
 import type { Metadata } from 'next'
-import { db, escapeLike, resident, placement, incident, satisfactionCheckIn } from '@/lib/db'
-import { eq, and, or, gte, inArray, notInArray, isNotNull, ilike, desc, count } from 'drizzle-orm'
+import {
+  db,
+  escapeLike,
+  resident,
+  placement,
+  incident,
+  satisfactionCheckIn,
+  clientGroup,
+} from '@/lib/db'
+import { eq, and, or, gte, notInArray, isNotNull, ilike, desc, asc, count } from 'drizzle-orm'
 import {
   EMPTY_STATE_LABELS,
   RESIDENT_LIST_LABELS,
@@ -33,19 +41,56 @@ import {
 } from '@/lib/auth/role-policy'
 import { getMyResidentIds } from '@/lib/actions/care'
 import { STAFF_ROLE_CARE_DOMAIN } from '@/lib/config/care'
+import {
+  activeClientFilterCount,
+  clientFilter,
+  clientFilterDefaults,
+  clientFiltersFor,
+  clientFilterWhere,
+  effectiveClientFilters,
+  encodeClientFilters,
+  encodedClientFilterValue,
+  parseClientFilterParams,
+  savableClientFilters,
+  type ClientFilterState,
+} from '@/lib/config/client-filters'
+import { loadClientFilterOptionSources } from '@/lib/client-groups/options'
+import {
+  groupMembersWhere,
+  mayManageClientGroup,
+  parseGroupFilters,
+} from '@/lib/client-groups/resolve'
+import { ClientFilterBar, type FilterControl } from '@/components/residents/ClientFilterBar'
+import {
+  ClientGroupChips,
+  ManageClientGroup,
+  SaveClientGroup,
+  type ClientGroupChip,
+} from '@/components/residents/ClientGroups'
 
 export const dynamic = 'force-dynamic'
 
 interface Props {
-  searchParams: Promise<{ view?: string; q?: string; layout?: string; filter?: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+function single(value: string | string[] | undefined): string {
+  return (Array.isArray(value) ? value[0] : value)?.trim() ?? ''
 }
 
 export default async function ResidentsListPage({ searchParams }: Props) {
   const params = await searchParams
-  const view = params.view || 'active'
-  const q = params.q?.trim() || ''
-  const layout = params.layout || 'board'
-  const filterParam = params.filter === 'all' ? 'all' : params.filter === 'mine' ? 'mine' : null
+  const q = single(params.q)
+  const layout = single(params.layout) || 'board'
+  const groupParam = single(params.group)
+  // `?filter=mine|all` was the board's old "Meine / Alle" toggle; it is the
+  // Zuständig filter now, and old links keep working.
+  const legacySeat = single(params.filter)
+  const fromUrl = parseClientFilterParams(
+    params.seat === undefined && (legacySeat === 'mine' || legacySeat === 'all')
+      ? { ...params, seat: legacySeat }
+      : params,
+  )
 
   await requirePermission('residents:read')
 
@@ -77,13 +122,18 @@ export default async function ResidentsListPage({ searchParams }: Props) {
   // with sites.
   const siteFilter = currentUser ? residentScopeFilter(currentUser) : null
 
+  // Whether "Meine Klient*innen" means anything for this viewer decides the
+  // Zuständig default — asked before the list query, because it shapes it.
+  const myResidentIds = currentUser ? await getMyResidentIds(currentUser.id) : []
+  const viewerHasCaseload = myResidentIds.length > 0
+  const defaults = clientFilterDefaults({ viewerHasCaseload })
+  const filters = effectiveClientFilters(fromUrl, defaults)
+  const standDef = clientFilter('stand')
+  const stand = filters.stand ?? 'active'
+
   const residentsWhere = and(
     siteFilter ?? undefined,
-    view === 'active'
-      ? inArray(resident.status, ['ACTIVE', 'PLACED'])
-      : view === 'archived'
-        ? eq(resident.status, 'EXITED')
-        : undefined,
+    clientFilterWhere(filters, { viewerId: currentUser?.id ?? '', now }),
     q
       ? or(
           ilike(resident.code, `%${escapeLike(q)}%`),
@@ -92,8 +142,8 @@ export default async function ResidentsListPage({ searchParams }: Props) {
       : undefined,
   )
 
-  const [residents, statusGroups, unplacedCount, myResidentIds, incidentGroups] = await Promise.all(
-    [
+  const [residents, statusGroups, unplacedCount, incidentGroups, optionSources, groupRows] =
+    await Promise.all([
       db.query.resident.findMany({
         where: residentsWhere,
         columns: {
@@ -157,8 +207,6 @@ export default async function ResidentsListPage({ searchParams }: Props) {
           ),
         ),
       ),
-      // "My clients" — IDs where this user is a care worker
-      currentUser ? getMyResidentIds(currentUser.id) : Promise.resolve([]),
       // Recent interpersonal incidents per subject (was Prisma's filtered
       // `_count.incidentsAsSubject` select — the query API has no filtered
       // relation count, so it is one grouped query joined in application code)
@@ -173,8 +221,18 @@ export default async function ResidentsListPage({ searchParams }: Props) {
           ),
         )
         .groupBy(incident.subjectId),
-    ],
-  )
+      loadClientFilterOptionSources(currentUser, viewerHasCaseload),
+      db
+        .select({
+          id: clientGroup.id,
+          name: clientGroup.name,
+          description: clientGroup.description,
+          filters: clientGroup.filters,
+          createdByUserId: clientGroup.createdByUserId,
+        })
+        .from(clientGroup)
+        .orderBy(asc(clientGroup.name)),
+    ])
 
   const incidentCountByResident = new Map(incidentGroups.map((g) => [g.subjectId, g.count]))
 
@@ -191,14 +249,6 @@ export default async function ResidentsListPage({ searchParams }: Props) {
     unplaced: unplacedCount,
     visible: residents.length,
   }
-
-  const myResidentIdSet = new Set(myResidentIds)
-
-  // Default to "Meine Klient*innen" only when the viewer actually has an
-  // assigned caseload. A Leitung/admin with no assignments used to land on an
-  // empty "Keine Klient*innen zugewiesen" board while 24 real clients sat one
-  // click away behind "Alle" — an empty page as the default view of a full list.
-  const filter: 'mine' | 'all' = filterParam ?? (myResidentIdSet.size > 0 ? 'mine' : 'all')
 
   // Compute check-in status and assemble ClientBoardItem for each resident
   const clientBoardItems: ClientBoardItem[] = (residents as any[]).map((r) => {
@@ -237,7 +287,6 @@ export default async function ResidentsListPage({ searchParams }: Props) {
       incidentCount: incidentCountByResident.get(r.id) ?? 0,
       daysSinceCheckIn,
       checkInIntervalDays: intervalDays,
-      isMyClient: myResidentIdSet.has(r.id),
     }
   })
 
@@ -252,10 +301,62 @@ export default async function ResidentsListPage({ searchParams }: Props) {
     return bUnhoused - aUnhoused
   })
 
-  // Build URL base for filter toggle (preserves view + layout + q)
-  const filterBase = `/residents?view=${view}&layout=${layout}${q ? `&q=${encodeURIComponent(q)}` : ''}`
+  // ── URLs: every link is a filter state encoded against the page defaults,
+  // so a filtered list is a shareable link and a clean one stays clean.
+  const hrefFor = (state: ClientFilterState, extra: Record<string, string> = {}) => {
+    const search = encodeClientFilters(state, defaults)
+    for (const [key, value] of Object.entries(extra)) if (value) search.set(key, value)
+    const query = search.toString()
+    return query ? `/residents?${query}` : '/residents'
+  }
+  const layoutExtra: Record<string, string> = layout === 'list' ? { layout: 'list' } : {}
+  const currentHref = hrefFor(filters, { ...layoutExtra, q })
+  const resetHref = hrefFor({ ...defaults, stand }, { ...layoutExtra, q })
+  // Everyone in the current tab: the way out of an empty filtered list.
+  const everyoneHref = hrefFor({ stand, seat: 'all' }, layoutExtra)
+  const activeCount = activeClientFilterCount(filters, defaults)
 
-  const layoutParam = layout === 'list' ? '&layout=list' : ''
+  const filterControls: FilterControl[] = clientFiltersFor('bar').map((def) => ({
+    id: def.id,
+    param: def.param,
+    label: def.label,
+    kind: def.kind,
+    options: def.options(optionSources),
+    value: encodedClientFilterValue(def, filters),
+    neutral: def.neutral === undefined ? null : String(def.neutral),
+  }))
+
+  const standCounts: Record<string, number> = {
+    active: stats.active + stats.placed,
+    placed: stats.placed,
+    unplaced: stats.unplaced,
+    archived: stats.archived,
+    all: stats.total,
+  }
+
+  // ── Saved groups: one chip each, the count resolved now, for this viewer
+  const groupChips: ClientGroupChip[] = await Promise.all(
+    groupRows.map(async (row) => {
+      const parsed = parseGroupFilters(row.filters)
+      const memberCount =
+        parsed.success && currentUser
+          ? await db.$count(resident, groupMembersWhere(parsed.data, currentUser, now))
+          : null
+      return {
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        href: parsed.success
+          ? hrefFor(parsed.data, { ...layoutExtra, group: row.id })
+          : '/residents',
+        memberCount,
+        active: row.id === groupParam,
+        manageable: currentUser ? mayManageClientGroup(currentUser, row) : false,
+      }
+    }),
+  )
+  const openGroup = groupChips.find((g) => g.active) ?? null
+  const hasFilteredOut = q !== '' || activeCount > 0 || filters.seat === 'mine'
 
   return (
     <PageShell>
@@ -278,7 +379,9 @@ export default async function ResidentsListPage({ searchParams }: Props) {
 
       <Toolbar>
         <form method="GET" action="/residents" className="flex-1 flex items-center gap-2">
-          <input type="hidden" name="view" value={view} />
+          {[...encodeClientFilters(filters, defaults)].map(([key, value]) => (
+            <input key={key} type="hidden" name={key} value={value} />
+          ))}
           {layout === 'list' && <input type="hidden" name="layout" value="list" />}
           <input
             type="search"
@@ -291,7 +394,7 @@ export default async function ResidentsListPage({ searchParams }: Props) {
         </form>
         <div className="flex items-center gap-1 shrink-0">
           <Link
-            href={`/residents?view=${view}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+            href={hrefFor(filters, { q })}
             className={`p-2 rounded-md transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${layout !== 'list' ? 'bg-brand-primary/10 text-brand-primary' : 'text-ui-muted hover:bg-ui-subtle'}`}
             title="Kartenansicht"
             aria-label="Kartenansicht"
@@ -299,7 +402,7 @@ export default async function ResidentsListPage({ searchParams }: Props) {
             <LayoutGrid className="w-4 h-4" />
           </Link>
           <Link
-            href={`/residents?view=${view}&layout=list${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+            href={hrefFor(filters, { layout: 'list', q })}
             className={`p-2 rounded-md transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${layout === 'list' ? 'bg-brand-primary/10 text-brand-primary' : 'text-ui-muted hover:bg-ui-subtle'}`}
             title="Listenansicht"
             aria-label="Listenansicht"
@@ -308,28 +411,44 @@ export default async function ResidentsListPage({ searchParams }: Props) {
           </Link>
         </div>
         <TabLinkGroup label={UI_LABELS.filterNav}>
-          <TabLink
-            href={`/residents?view=active${layoutParam}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
-            label={RESIDENT_LIST_LABELS.viewCurrent}
-            count={stats.active + stats.placed}
-            active={view === 'active'}
-          />
-          <TabLink
-            href={`/residents?view=archived${layoutParam}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
-            label={UI_LABELS.archived}
-            count={stats.archived}
-            active={view === 'archived'}
-          />
-          <TabLink
-            href={`/residents?view=all${layoutParam}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
-            label={UI_LABELS.all}
-            count={stats.total}
-            active={view === 'all'}
-          />
+          {standDef.options(optionSources).map((option) => (
+            <TabLink
+              key={option.value}
+              href={hrefFor(
+                { ...filters, stand: option.value as typeof stand },
+                { ...layoutExtra, q },
+              )}
+              label={option.label}
+              count={standCounts[option.value]}
+              active={stand === option.value}
+            />
+          ))}
         </TabLinkGroup>
       </Toolbar>
 
-      {can('placements:write') && view !== 'archived' && stats.unplaced > 0 && (
+      <ClientFilterBar
+        action="/residents"
+        controls={filterControls}
+        carry={{
+          [standDef.param]: encodeClientFilters({ stand }, defaults).get(standDef.param) ?? '',
+          layout: layout === 'list' ? 'list' : '',
+          q,
+        }}
+        activeCount={activeCount}
+        resetHref={resetHref}
+      >
+        {activeCount > 0 && !openGroup && (
+          <SaveClientGroup
+            filtersJson={JSON.stringify(savableClientFilters(filters))}
+            currentHref={currentHref}
+          />
+        )}
+      </ClientFilterBar>
+
+      <ClientGroupChips groups={groupChips} />
+      {openGroup?.manageable && <ManageClientGroup group={openGroup} afterDeleteHref={resetHref} />}
+
+      {can('placements:write') && stand !== 'archived' && stats.unplaced > 0 && (
         <div className="rounded-lg border border-status-warning/30 bg-status-warning/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <p className="font-medium text-ui-text">
@@ -362,16 +481,18 @@ export default async function ResidentsListPage({ searchParams }: Props) {
           title={
             q
               ? `${RESIDENT_LIST_LABELS.emptyFiltered} («${q}»)`
-              : view === 'archived'
-                ? RESIDENT_LIST_LABELS.emptyArchived
-                : EMPTY_STATE_LABELS.noResidents
+              : hasFilteredOut
+                ? RESIDENT_LIST_LABELS.emptyFiltered
+                : stand === 'archived'
+                  ? RESIDENT_LIST_LABELS.emptyArchived
+                  : EMPTY_STATE_LABELS.noResidents
           }
           action={
-            q ? (
-              <ButtonLink href={`/residents?view=${view}`} variant="outline">
+            hasFilteredOut ? (
+              <ButtonLink href={everyoneHref} variant="outline">
                 {RESIDENT_LIST_LABELS.filterReset}
               </ButtonLink>
-            ) : view !== 'archived' && can('residents:write') ? (
+            ) : stand !== 'archived' && can('residents:write') ? (
               <ButtonLink href="/residents/new">{RESIDENT_LIST_LABELS.emptyFirst}</ButtonLink>
             ) : null
           }
@@ -385,12 +506,7 @@ export default async function ResidentsListPage({ searchParams }: Props) {
           canWrite={can('residents:write')}
         />
       ) : (
-        <ClientBoard
-          clients={sortedBoardItems}
-          viewerRole={viewerRole}
-          filter={filter}
-          baseHref={filterBase}
-        />
+        <ClientBoard clients={sortedBoardItems} viewerRole={viewerRole} />
       )}
     </PageShell>
   )

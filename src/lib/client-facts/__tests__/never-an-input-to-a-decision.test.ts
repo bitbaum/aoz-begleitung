@@ -37,8 +37,19 @@ const FACT_SQL_NAMES = ['ClientInsurance', 'ClientHealthContact', 'ClientPermit'
  * compatibility → decides who lives with whom
  * analytics     → the numbers the pilot is judged on
  * export        → a spreadsheet leaves the product and stops being governed
+ * client-filters, client-groups → select people, and become survey audiences
+ *
+ * An entry may be a directory or a single file.
  */
-const FORBIDDEN_DIRS = ['src/lib/compatibility', 'src/lib/analytics', 'src/lib/export'] as const
+const FORBIDDEN_DIRS = [
+  'src/lib/compatibility',
+  'src/lib/analytics',
+  'src/lib/export',
+  // A staff filter SELECTS people, and a saved group becomes a survey
+  // audience — "who holds permit F" must never be a filter or a group.
+  'src/lib/config/client-filters.ts',
+  'src/lib/client-groups',
+] as const
 
 function filesUnder(dir: string): string[] {
   const absolute = join(ROOT, dir)
@@ -54,7 +65,9 @@ function filesUnder(dir: string): string[] {
       }
     }
   }
-  if (statSync(absolute).isDirectory()) walk(absolute)
+  const stat = statSync(absolute)
+  if (stat.isDirectory()) walk(absolute)
+  else if (stat.isFile()) found.push(absolute)
   return found
 }
 

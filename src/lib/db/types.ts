@@ -25,6 +25,7 @@ export type HousingUnit = typeof s.housingUnit.$inferSelect
 export type HouseholdTask = typeof s.householdTask.$inferSelect
 export type SatisfactionCheckIn = typeof s.satisfactionCheckIn.$inferSelect
 export type User = typeof s.user.$inferSelect
+export type ClientGroup = typeof s.clientGroup.$inferSelect
 export type StaffUnit = typeof s.staffUnit.$inferSelect
 export type TaskRequest = typeof s.taskRequest.$inferSelect
 export type TransferRequest = typeof s.transferRequest.$inferSelect

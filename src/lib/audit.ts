@@ -45,6 +45,9 @@ export type AuditEntity =
   | 'CLIENT_INSURANCE'
   | 'CLIENT_HEALTH_CONTACT'
   | 'CLIENT_PERMIT'
+  // A saved filter over the client list — a view, audited because it can
+  // become the audience of a message to many people.
+  | 'CLIENT_GROUP'
 
 interface AuditLogEntry {
   action: AuditAction

@@ -57,6 +57,13 @@
       "when": 1790352961239,
       "tag": "0007_no_religion_or_origin_proxies",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790944360667,
+      "tag": "0008_client_groups",
+      "breakpoints": true
     }
   ]
 }
