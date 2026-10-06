@@ -41,6 +41,7 @@ import {
 } from '@/lib/auth/role-policy'
 import { getMyResidentIds } from '@/lib/actions/care'
 import { STAFF_ROLE_CARE_DOMAIN } from '@/lib/config/care'
+import { IN_CARE_RESIDENT_STATUSES, placementStand } from '@/lib/config/resident-status'
 import {
   activeClientFilterCount,
   clientFilter,
@@ -51,7 +52,9 @@ import {
   encodeClientFilters,
   encodedClientFilterValue,
   parseClientFilterParams,
+  placedClientsWhere,
   savableClientFilters,
+  unplacedClientsWhere,
   type ClientFilterState,
 } from '@/lib/config/client-filters'
 import { loadClientFilterOptionSources } from '@/lib/client-groups/options'
@@ -142,97 +145,97 @@ export default async function ResidentsListPage({ searchParams }: Props) {
       : undefined,
   )
 
-  const [residents, statusGroups, unplacedCount, incidentGroups, optionSources, groupRows] =
-    await Promise.all([
-      db.query.resident.findMany({
-        where: residentsWhere,
-        columns: {
-          ...RESIDENT_NAME_SELECT,
-          ageRange: true,
-          gender: true,
-          status: true,
-          supportLevel: true,
-          languages: true,
-          createdAt: true,
-          // Selected EXPLICITLY, and the compiler is not the reason it is
-          // here: drizzle's relational result types are degraded by the
-          // schema's circular table references, so omitting this column type
-          // -checks cleanly and then renders `undefined` — falsy — hiding the
-          // "Platzhalter" marker on every seeded row while looking perfectly
-          // healthy. Same shape as the under-selection bug that printed a
-          // client's code instead of their name.
-          isPlaceholder: true,
-        },
-        with: {
-          placements: {
-            where: eq(placement.status, 'ACTIVE'),
-            columns: { startDate: true },
-            with: {
-              housingUnit: { columns: { code: true } },
-              checkIns: {
-                orderBy: [desc(satisfactionCheckIn.createdAt)],
-                limit: 1,
-                columns: { createdAt: true },
-              },
+  const [
+    residents,
+    statusGroups,
+    placedCount,
+    unplacedCount,
+    incidentGroups,
+    optionSources,
+    groupRows,
+  ] = await Promise.all([
+    db.query.resident.findMany({
+      where: residentsWhere,
+      columns: {
+        ...RESIDENT_NAME_SELECT,
+        ageRange: true,
+        gender: true,
+        status: true,
+        supportLevel: true,
+        languages: true,
+        createdAt: true,
+        // Selected EXPLICITLY, and the compiler is not the reason it is
+        // here: drizzle's relational result types are degraded by the
+        // schema's circular table references, so omitting this column type
+        // -checks cleanly and then renders `undefined` — falsy — hiding the
+        // "Platzhalter" marker on every seeded row while looking perfectly
+        // healthy. Same shape as the under-selection bug that printed a
+        // client's code instead of their name.
+        isPlaceholder: true,
+      },
+      with: {
+        placements: {
+          where: eq(placement.status, 'ACTIVE'),
+          columns: { startDate: true },
+          with: {
+            housingUnit: { columns: { code: true } },
+            checkIns: {
+              orderBy: [desc(satisfactionCheckIn.createdAt)],
+              limit: 1,
+              columns: { createdAt: true },
             },
           },
-          careAssignments: {
-            columns: { role: true },
-            with: {
-              staff: { columns: { name: true } },
-            },
-          },
-          careAttributes: {
-            columns: { key: true, value: true, domain: true },
+        },
+        careAssignments: {
+          columns: { role: true },
+          with: {
+            staff: { columns: { name: true } },
           },
         },
-        orderBy: [desc(resident.createdAt)],
-      }),
-      // Aggregate tab counts by status (single query instead of fetching all rows)
-      db
-        .select({ status: resident.status, count: count() })
-        .from(resident)
-        .groupBy(resident.status),
-      // Count of ACTIVE residents with no active placement (separate query)
-      db.$count(
-        resident,
+        careAttributes: {
+          columns: { key: true, value: true, domain: true },
+        },
+      },
+      orderBy: [desc(resident.createdAt)],
+    }),
+    // Aggregate tab counts by status (single query instead of fetching all
+    // rows), inside the viewer's sites like the list itself.
+    db
+      .select({ status: resident.status, count: count() })
+      .from(resident)
+      .where(siteFilter ?? undefined)
+      .groupBy(resident.status),
+    // Placed / unplaced come from the PLACEMENT, not the status flag — the
+    // same definition the tabs filter by and the tiles count rows by.
+    // @see placementStand in config/resident-status.ts
+    db.$count(resident, and(siteFilter ?? undefined, placedClientsWhere())),
+    db.$count(resident, and(siteFilter ?? undefined, unplacedClientsWhere())),
+    // Recent interpersonal incidents per subject (was Prisma's filtered
+    // `_count.incidentsAsSubject` select — the query API has no filtered
+    // relation count, so it is one grouped query joined in application code)
+    db
+      .select({ subjectId: incident.subjectId, count: count() })
+      .from(incident)
+      .where(
         and(
-          eq(resident.status, 'ACTIVE'),
-          notInArray(
-            resident.id,
-            db
-              .select({ residentId: placement.residentId })
-              .from(placement)
-              .where(eq(placement.status, 'ACTIVE')),
-          ),
+          isNotNull(incident.subjectId),
+          gte(incident.date, getDateDaysAgo(30)),
+          eq(incident.category, 'INTERPERSONAL'),
         ),
-      ),
-      // Recent interpersonal incidents per subject (was Prisma's filtered
-      // `_count.incidentsAsSubject` select — the query API has no filtered
-      // relation count, so it is one grouped query joined in application code)
-      db
-        .select({ subjectId: incident.subjectId, count: count() })
-        .from(incident)
-        .where(
-          and(
-            isNotNull(incident.subjectId),
-            gte(incident.date, getDateDaysAgo(30)),
-            eq(incident.category, 'INTERPERSONAL'),
-          ),
-        )
-        .groupBy(incident.subjectId),
-      loadClientFilterOptionSources(currentUser, viewerHasCaseload),
-      db
-        .select({
-          id: clientGroup.id,
-          name: clientGroup.name,
-          description: clientGroup.description,
-          filters: clientGroup.filters,
-          createdByUserId: clientGroup.createdByUserId,
-        })
-        .from(clientGroup)
-        .orderBy(asc(clientGroup.name)),
-    ])
+      )
+      .groupBy(incident.subjectId),
+    loadClientFilterOptionSources(currentUser, viewerHasCaseload),
+    db
+      .select({
+        id: clientGroup.id,
+        name: clientGroup.name,
+        description: clientGroup.description,
+        filters: clientGroup.filters,
+        createdByUserId: clientGroup.createdByUserId,
+      })
+      .from(clientGroup)
+      .orderBy(asc(clientGroup.name)),
+  ])
 
   const incidentCountByResident = new Map(incidentGroups.map((g) => [g.subjectId, g.count]))
 
@@ -243,8 +246,8 @@ export default async function ResidentsListPage({ searchParams }: Props) {
 
   const stats = {
     total: statusGroups.reduce((sum, g) => sum + g.count, 0),
-    active: statusCounts.ACTIVE ?? 0,
-    placed: statusCounts.PLACED ?? 0,
+    inCare: IN_CARE_RESIDENT_STATUSES.reduce((sum, status) => sum + (statusCounts[status] ?? 0), 0),
+    placed: placedCount,
     archived: statusCounts.EXITED ?? 0,
     unplaced: unplacedCount,
     visible: residents.length,
@@ -257,12 +260,8 @@ export default async function ResidentsListPage({ searchParams }: Props) {
   // organisation-wide number — it is a call to action, not a description.
   const shown = {
     total: residents.length,
-    placed: (residents as { placements?: unknown[] }[]).filter(
-      (r) => (r.placements?.length ?? 0) > 0,
-    ).length,
-    unplaced: (residents as { status: string; placements?: unknown[] }[]).filter(
-      (r) => r.status !== 'EXITED' && (r.placements?.length ?? 0) === 0,
-    ).length,
+    placed: residents.filter((r) => placementStand(r) === 'placed').length,
+    unplaced: residents.filter((r) => placementStand(r) === 'unplaced').length,
   }
 
   // Compute check-in status and assemble ClientBoardItem for each resident
@@ -342,7 +341,7 @@ export default async function ResidentsListPage({ searchParams }: Props) {
   }))
 
   const standCounts: Record<string, number> = {
-    active: stats.active + stats.placed,
+    active: stats.inCare,
     placed: stats.placed,
     unplaced: stats.unplaced,
     archived: stats.archived,
@@ -410,7 +409,7 @@ export default async function ResidentsListPage({ searchParams }: Props) {
         <div className="flex items-center gap-1 shrink-0">
           <Link
             href={hrefFor(filters, { q })}
-            className={`p-2 rounded-md transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${layout !== 'list' ? 'bg-brand-primary/10 text-brand-primary' : 'text-ui-muted hover:bg-ui-subtle'}`}
+            className={`btn-icon ${layout !== 'list' ? 'bg-brand-primary/10 text-brand-primary' : ''}`}
             title="Kartenansicht"
             aria-label="Kartenansicht"
           >
@@ -418,7 +417,7 @@ export default async function ResidentsListPage({ searchParams }: Props) {
           </Link>
           <Link
             href={hrefFor(filters, { layout: 'list', q })}
-            className={`p-2 rounded-md transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center ${layout === 'list' ? 'bg-brand-primary/10 text-brand-primary' : 'text-ui-muted hover:bg-ui-subtle'}`}
+            className={`btn-icon ${layout === 'list' ? 'bg-brand-primary/10 text-brand-primary' : ''}`}
             title="Listenansicht"
             aria-label="Listenansicht"
           >

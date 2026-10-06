@@ -16,13 +16,16 @@ import {
 } from '@/lib/config/opportunities'
 import { getOpportunityDetail, residentsAvailableFor } from '@/lib/data/opportunities'
 import { mayAttachPeople, openSeats } from '@/lib/opportunities/pipeline'
-import { residentName } from '@/lib/utils/resident-name'
+import { publishOpportunityFromDetail } from '@/lib/actions/opportunities'
+import { residentOptionLabel } from '@/lib/utils/resident-name'
 import { OPPORTUNITIES_ADMIN_LABELS as L } from '@/lib/constants'
 
 export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ id: string }>
+  /** A refused publish comes back here with the gate's own words. */
+  searchParams: Promise<{ error?: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -45,10 +48,11 @@ function Detail({ label, value }: { label: string; value: string | null | undefi
   )
 }
 
-export default async function OpportunityDetailPage({ params }: Props) {
+export default async function OpportunityDetailPage({ params, searchParams }: Props) {
   const staff = await requirePermission('opportunities:read')
   const canWrite = hasPermission(staff, 'opportunities:write')
   const { id } = await params
+  const { error } = await searchParams
 
   const opportunity = await getOpportunityDetail(id)
   if (!opportunity) notFound()
@@ -71,12 +75,30 @@ export default async function OpportunityDetailPage({ params }: Props) {
         backLabel={L.detailBack}
         actions={
           canWrite ? (
-            <ButtonLink href={`/opportunities/${id}/edit`} variant="outline">
-              {L.edit}
-            </ButtonLink>
+            <>
+              <ButtonLink href={`/opportunities/${id}/edit`} variant="outline">
+                {L.edit}
+              </ButtonLink>
+              {/* A draft could only be published from /edit, while this page
+                  told the coach «Erst veröffentlichen». Same action, same
+                  work-permit gate; a refusal returns here as `?error=`. */}
+              {opportunity.status === 'DRAFT' ? (
+                <form action={publishOpportunityFromDetail.bind(null, id)}>
+                  <button type="submit" className="btn-secondary">
+                    {L.publish}
+                  </button>
+                </form>
+              ) : null}
+            </>
           ) : undefined
         }
       />
+
+      {error ? (
+        <p className="alert-error" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-2">
         <span className={`badge ${OPPORTUNITY_STATUS_BADGES[opportunity.status]}`}>
@@ -180,7 +202,7 @@ export default async function OpportunityDetailPage({ params }: Props) {
                     opportunityId={id}
                     people={available.map((resident) => ({
                       id: resident.id,
-                      name: residentName(resident),
+                      name: residentOptionLabel(resident),
                     }))}
                   />
                 )}

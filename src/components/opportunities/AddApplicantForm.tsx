@@ -15,7 +15,7 @@ import { OPPORTUNITIES_ADMIN_LABELS as L } from '@/lib/constants/labels/opportun
 
 interface Props {
   opportunityId: string
-  /** Already resolved through `residentName()` on the server. */
+  /** Already resolved through `residentOptionLabel()` on the server. */
   people: readonly { id: string; name: string }[]
 }
 
@@ -30,7 +30,13 @@ export function AddApplicantForm({ opportunityId, people }: Props) {
         <input type="hidden" name="opportunityId" value={opportunityId} />
         <label className="block w-full space-y-1.5 sm:w-auto">
           <span className="block text-xs font-medium text-ui-text">{L.addApplicant}</span>
-          <select name="residentId" required className="input">
+          {/* Starts EMPTY: with no empty option the browser pre-selects the
+              first name, and one press of «Speichern» attached Alex by
+              accident (live 2026-10-02). The action refuses a blank too. */}
+          <select name="residentId" required defaultValue="" className="input">
+            <option value="" disabled>
+              {L.choosePersonOption}
+            </option>
             {people.map((person) => (
               <option key={person.id} value={person.id}>
                 {person.name}

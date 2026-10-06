@@ -98,7 +98,13 @@ export function daysBetween(from: Date | string, to: Date | string | number = Da
 
 /**
  * Days since `from` rounded up (today = 1, yesterday = 1, 24h+1s ago = 2).
- * Use for "Tag X seit Beginn" / age-of-record style displays.
+ * Use for "Tag X seit Beginn" / age-of-record style displays and for overdue
+ * maths, where a part-day already counts.
+ *
+ * NEVER feed it into "seit heute / seit gestern" copy: anything under 24 hours
+ * is 1 here, so a request made five minutes ago read "seit gestern" on the
+ * dashboard while the review page said "seit heute". Since-phrasing reads
+ * `calendarDaysSince`.
  */
 export function daysSinceCeil(
   from: Date | string,
@@ -149,6 +155,25 @@ export function getZurichParts(date: Date | string): { year: number; month: numb
     else if (p.type === 'day') day = parseInt(p.value, 10)
   }
   return { year, month, day }
+}
+
+/**
+ * Calendar days between two instants as a person in Zurich counts them:
+ * 0 = today, 1 = yesterday, regardless of how many hours that is. Never
+ * negative. THE helper for "seit heute / seit gestern / seit N Tagen" — a
+ * 24-hour count says "heute" at 23:00 about something from 01:00 the day
+ * before, and a ceiling says "gestern" about something from five minutes ago.
+ */
+export function calendarDaysSince(
+  from: Date | string,
+  to: Date | string | number = Date.now(),
+): number {
+  const a = getZurichParts(from)
+  const b = getZurichParts(new Date(to))
+  const diff = Math.round(
+    (Date.UTC(b.year, b.month - 1, b.day) - Date.UTC(a.year, a.month - 1, a.day)) / MS_PER_DAY,
+  )
+  return Math.max(0, diff)
 }
 
 /** Month key for grouping (`YYYY-MM`) in Europe/Zurich. */

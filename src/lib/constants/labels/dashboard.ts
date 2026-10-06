@@ -3,6 +3,7 @@
  */
 
 import { LEARNING_AREA_NAME, LEARNING_PULSE_WINDOW_DAYS } from '@/lib/config/learning'
+import { sinceDaysPhrase } from './helpers'
 
 export const DASHBOARD_LABELS = {
   greetingMorning: 'Guten Morgen',
@@ -27,8 +28,7 @@ export const DASHBOARD_LABELS = {
   applicationsHintReadOnly:
     'Klient*innen haben im Portal «Ich habe Interesse» gedrückt. Beantwortet werden die Anfragen von Jobcoaching und Freiwilligenarbeit.',
   applicationInterest: (title: string) => `Interesse an «${title}»`,
-  applicationSince: (days: number) =>
-    days === 0 ? 'seit heute' : days === 1 ? 'seit gestern' : `seit ${days} Tagen`,
+  applicationSince: sinceDaysPhrase,
   applicationClaim: 'Übernehmen',
   applicationOpen: 'Ansehen',
   applicationsMore: (count: number) => `+ ${count} weitere`,
@@ -112,8 +112,7 @@ export const DASHBOARD_LABELS = {
   tileMaintenanceAction: 'Auftrag zuweisen oder abschliessen.',
   tileMessagesWaiting: 'Nachrichten ohne Antwort',
   tileMessagesAction: 'Antworten — die Person wartet auf eine Rückmeldung.',
-  tileWaitingSinceDays: (days: number) =>
-    days === 0 ? 'seit heute' : days === 1 ? 'seit gestern' : `seit ${days} Tagen`,
+  tileWaitingSinceDays: sinceDaysPhrase,
   tileSincePrefix: 'Seit',
   tileIncidents: 'Vorfälle',
 

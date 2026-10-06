@@ -30,6 +30,7 @@ import { redirect } from 'next/navigation'
 import {
   createOpportunity,
   publishOpportunity,
+  publishOpportunityFromDetail,
   publishOpportunityFromEdit,
 } from '@/lib/actions/opportunities'
 import { whereParts as mockWhereParts } from '@/test-utils/drizzle-where'
@@ -223,6 +224,21 @@ describe('the refusal has to reach the person who has to act on it', () => {
 
     const target = vi.mocked(redirect).mock.calls[0][0] as string
     expect(target).toContain('/opportunities/opp-1/edit?error=')
+    expect(decodeURIComponent(target)).toMatch(/Bewilligungsweg/)
+  })
+
+  it('sends the refusal back to the DETAIL page when pressed there', async () => {
+    // The draft detail page now carries the button too; its refusal must
+    // land beside it, not on a form the coach never opened.
+    mockOpportunityFindFirst.mockResolvedValue({
+      kind: 'EMPLOYMENT',
+      permitRequirement: 'NONE',
+    })
+
+    await publishOpportunityFromDetail('opp-1')
+
+    const target = vi.mocked(redirect).mock.calls[0][0] as string
+    expect(target).toMatch(/^\/opportunities\/opp-1\?error=/)
     expect(decodeURIComponent(target)).toMatch(/Bewilligungsweg/)
   })
 

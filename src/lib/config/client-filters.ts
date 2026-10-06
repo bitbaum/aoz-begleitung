@@ -123,6 +123,25 @@ function withActivePlacement(condition?: SQL): SQL {
   )
 }
 
+/**
+ * In care AND holding an active placement — the SQL twin of
+ * `placementStand() === 'placed'`. @see config/resident-status.ts
+ */
+export function placedClientsWhere(): SQL {
+  return and(inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]), withActivePlacement()) as SQL
+}
+
+/** In care and WITHOUT an active placement, whatever the status flag says. */
+export function unplacedClientsWhere(): SQL {
+  return and(
+    inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES]),
+    notInArray(
+      resident.id,
+      qb.select({ id: placement.residentId }).from(placement).where(eq(placement.status, 'ACTIVE')),
+    ),
+  ) as SQL
+}
+
 /** The option list of an enum/multi factor; empty for any other kind. */
 function factorChoices(factorId: 'languages' | 'ageRange'): {
   options: readonly string[]
@@ -169,20 +188,12 @@ const stand = defineFilter({
     switch (value) {
       case 'active':
         return inArray(resident.status, [...IN_CARE_RESIDENT_STATUSES])
+      // Decided by the placement, not the status flag — the same rule as the
+      // tiles, header and banner. @see placementStand in config/resident-status.ts
       case 'placed':
-        return eq(resident.status, 'PLACED')
+        return placedClientsWhere()
       case 'unplaced':
-        // Same definition as the "Unplatziert" tile: in care, no active placement.
-        return and(
-          eq(resident.status, 'ACTIVE'),
-          notInArray(
-            resident.id,
-            qb
-              .select({ id: placement.residentId })
-              .from(placement)
-              .where(eq(placement.status, 'ACTIVE')),
-          ),
-        )
+        return unplacedClientsWhere()
       case 'archived':
         return eq(resident.status, 'EXITED')
       case 'all':

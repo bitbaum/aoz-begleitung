@@ -119,7 +119,12 @@ export const STAFF_DESKS: Record<StaffRole, StaffDesk> = {
   JOBCOACH: {
     description: 'Arbeit & Ausbildung: Stellen, Bewerbungen, Kurse, Bewilligungen.',
     sections: ['caseload', 'applications', 'approvals', 'learning'],
-    hero: ['jobQueue', 'applications', 'approvals'],
+    // An unanswered «Ich habe Interesse» leads, in caseload or not: a person
+    // asked, and the clock is theirs. `applications` holds EVERY request on
+    // this desk's listings; the caseload queue only the clients on this seat,
+    // so a request from someone nobody holds would otherwise sit behind
+    // "Noch kein Arbeitsmarktkontakt" for a client who asked for nothing.
+    hero: ['applications', 'jobQueue', 'approvals'],
     dossierTab: 'integration',
     integrationBoard: 'job',
     // "Lernen & Beruf" names the Jobcoach's domain — learning AND work.
@@ -129,7 +134,8 @@ export const STAFF_DESKS: Record<StaffRole, StaffDesk> = {
   FREIWILLIGENARBEIT: {
     description: 'Freiwilligenarbeit & Gemeinschaft: Einsätze, Anfragen, Anlässe.',
     sections: ['caseload', 'applications', 'events', 'learning'],
-    hero: ['volunteeringQueue', 'applications'],
+    // Same rule as the Jobcoach: a waiting request leads. @see JOBCOACH.hero
+    hero: ['applications', 'volunteeringQueue'],
     dossierTab: 'integration',
     integrationBoard: 'volunteering',
     quietDay: {

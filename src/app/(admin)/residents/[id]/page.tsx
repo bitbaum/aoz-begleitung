@@ -67,8 +67,10 @@ import {
 } from '@/lib/actions/care'
 import { writableCareDomains } from '@/lib/config/care'
 import { listResidentDocuments } from '@/lib/actions/documents'
-import { listApplicationsForResident } from '@/lib/data/opportunities'
+import { listApplicationsForResident, proposableOpportunitiesFor } from '@/lib/data/opportunities'
+import { IN_CARE_RESIDENT_STATUSES } from '@/lib/config/resident-status'
 import { ResidentThreadsCard } from '@/components/opportunities/ResidentThreadsCard'
+import { answerableOpportunityKinds } from '@/lib/inbox/waiting'
 
 export async function generateMetadata({
   params,
@@ -104,6 +106,8 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
   const canReadDocuments = staff ? hasPermission(staff, 'documents:read') : false
   const canWriteDocuments = staff ? hasPermission(staff, 'documents:write') : false
   const canReadOpportunities = staff ? hasPermission(staff, 'opportunities:read') : false
+  // «Platz vorschlagen» — the same verb as «Person zuordnen» on a listing.
+  const canWriteOpportunities = staff ? hasPermission(staff, 'opportunities:write') : false
 
   // resident and availableUnits are independent — fetch in parallel
   const [
@@ -117,6 +121,7 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
     opportunityThreads,
     residentHistory,
     clientFacts,
+    proposablePlaces,
   ] = await Promise.all([
     db.query.resident.findFirst({
       where: eq(residentTable.id, id),
@@ -193,6 +198,11 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
       ? seatsForClient(staff.id, id).then((seats) =>
           clientFactsForDossier(id, { scope: staff.scope, seatsForClient: seats }),
         )
+      : Promise.resolve(null),
+    // Places this viewer could propose: published, on their half of the
+    // domain (the same kinds their Eingang answers), not yet attached.
+    staff && canWriteOpportunities
+      ? proposableOpportunitiesFor(id, answerableOpportunityKinds(staff))
       : Promise.resolve(null),
   ])
 
@@ -498,7 +508,18 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
               {/* Directly above the evidence, because that is where the evidence
               comes from: a thread reaching STARTED mints the LearningRecord
               below it. @see lib/opportunities/pipeline.ts */}
-              {canReadOpportunities && <ResidentThreadsCard threads={opportunityThreads} />}
+              {canReadOpportunities && (
+                <ResidentThreadsCard
+                  threads={opportunityThreads}
+                  propose={
+                    // Only somebody still in care is put forward for a place.
+                    proposablePlaces &&
+                    (IN_CARE_RESIDENT_STATUSES as readonly string[]).includes(resident.status)
+                      ? { residentId: resident.id, places: proposablePlaces }
+                      : null
+                  }
+                />
+              )}
 
               <LearningRecordsCard
                 residentId={resident.id}

@@ -77,11 +77,15 @@ describe('resolveGroupMembers', () => {
     const ids = await resolveGroupMembers({ id: 'g1', filters: { stand: 'placed' } }, TWO_HOUSES)
     expect(ids).toEqual(['r1', 'r2'])
     // The site scope reached the query, not only the filters.
+    // `stand: placed` = in care (ACTIVE, PLACED) AND an ACTIVE placement —
+    // the placement decides, not the status flag. @see placementStand
     expect(compile(mockWhere.mock.calls[0][0] as SQL)!.params).toEqual([
       'ACTIVE',
       'unit-a',
       'unit-b',
+      'ACTIVE',
       'PLACED',
+      'ACTIVE',
     ])
   })
 

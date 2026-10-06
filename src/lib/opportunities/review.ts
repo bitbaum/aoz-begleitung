@@ -12,6 +12,7 @@
  * is waiting. Same rule the Eingang and the job queue already follow.
  */
 
+import { calendarDaysSince } from '@/lib/utils/formatting'
 import { APPLICATION_STAGE_LABELS, type ApplicationStageId } from '@/lib/config/opportunities'
 import { isAwaitingAnswer, type CareApplicationInput } from '@/lib/care/queue'
 import { OPPORTUNITIES_ADMIN_LABELS as L } from '@/lib/constants/labels/opportunities'
@@ -76,7 +77,10 @@ export function groupApplicationsForReview<T extends ReviewableRow>(
   })
 }
 
-/** Whole days since a moment; never negative. */
+/**
+ * Calendar days since a moment (Europe/Zurich); never negative. Feeds the
+ * "seit heute / seit gestern" copy, so it must agree with the dashboard.
+ */
 export function daysSince(value: Date, now: Date = new Date()): number {
-  return Math.max(0, Math.floor((now.getTime() - value.getTime()) / 86_400_000))
+  return calendarDaysSince(value, now)
 }

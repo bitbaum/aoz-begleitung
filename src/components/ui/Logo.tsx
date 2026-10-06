@@ -65,7 +65,9 @@ export function Logo({ size = 'md', showTagline = false, href, className = '' }:
     return (
       <Link
         href={href}
-        className={`inline-flex transition-opacity hover:opacity-70 ${className}`}
+        // The linked wordmark is a tap target (home), so it holds the 44px
+        // floor itself — it measured 24px in the staff header.
+        className={`inline-flex min-h-[44px] items-center transition-opacity hover:opacity-70 ${className}`}
         aria-label={APP_LABELS.name}
       >
         <LogoMark size={size} showTagline={showTagline} />

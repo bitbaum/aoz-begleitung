@@ -7,6 +7,7 @@
 
 import { OPPORTUNITY_AREA_NAME } from '@/lib/config/opportunities'
 import type { IntegrationBoardId } from '@/lib/config/integration-boards'
+import { sinceDaysPhrase } from './helpers'
 
 export const OPPORTUNITIES_ADMIN_LABELS = {
   pageTitle: OPPORTUNITY_AREA_NAME,
@@ -33,8 +34,7 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
   // own vocabulary rather than a shade of "offen": every other thread on this
   // board is waiting on a process, this one is waiting on a person.
   awaitingAnswer: 'Wartet auf Antwort',
-  awaitingSince: (days: number) =>
-    days <= 0 ? 'seit heute' : `seit ${days} ${days === 1 ? 'Tag' : 'Tagen'}`,
+  awaitingSince: sinceDaysPhrase,
   awaitingHint:
     'Diese Person hat sich selbst gemeldet. Bis jemand antwortet, gilt das nicht als Arbeitsmarktkontakt — und die Meldung bleibt in der Aufgabenliste.',
   selfReported: 'Selbst gemeldet',
@@ -43,6 +43,13 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
   // A client's own threads, on their dossier
   residentThreadsTitle: 'Einsätze & Bewerbungen',
   residentThreadsEmpty: 'Noch nichts — weder zugeordnet noch selbst gemeldet.',
+  // Propose a place from the dossier — the same staff-attached thread as
+  // «Person zuordnen» on a listing, started from the person instead.
+  proposePlace: 'Platz vorschlagen',
+  proposePlaceHint:
+    'Ein veröffentlichter Einsatzplatz, dem diese Person noch nicht zugeordnet ist.',
+  proposePlaceOption: 'Einsatzplatz wählen …',
+  proposePlaceNone: 'Kein weiterer veröffentlichter Einsatzplatz in Ihrem Bereich.',
   openListing: 'Zum Platz',
 
   // The two halves of the domain. "Freiwilligenarbeit" is deliberately the SAME
@@ -111,6 +118,9 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
   addApplicant: 'Person zuordnen',
   addApplicantHint: 'Wer hat Interesse an diesem Platz?',
   addApplicantEmpty: 'Alle betreuten Personen sind diesem Platz bereits zugeordnet.',
+  // The empty first option of the picker. A select with no empty option
+  // submits whoever sorts first — that attached Alex by accident, live.
+  choosePersonOption: 'Person wählen …',
   applicantsEmpty: 'Noch niemand zugeordnet.',
   applicantNote: 'Notiz',
   applicantNotePlaceholder: 'Kurz: was ist der nächste Schritt?',
@@ -143,6 +153,8 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
     listingNotFound: 'Einsatzplatz nicht gefunden. Laden Sie die Seite neu.',
     stageChangeFailed: 'Der Stand konnte nicht geändert werden. Bitte versuchen Sie es erneut.',
     attachFailed: 'Die Person konnte nicht zugeordnet werden. Bitte versuchen Sie es erneut.',
+    choosePerson: 'Bitte wählen Sie eine Person aus.',
+    choosePlace: 'Bitte wählen Sie einen Einsatzplatz aus.',
   },
 
   // The review page — every application on this board, by stage.
@@ -153,8 +165,7 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
   reviewAllListings: 'Alle Einsatzplätze',
   reviewEmpty: 'In diesem Bereich gibt es noch keine Bewerbungen.',
   reviewEmptyFiltered: 'Auf diesem Einsatzplatz gibt es noch keine Bewerbungen.',
-  reviewSince: (days: number) =>
-    days <= 0 ? 'seit heute' : `seit ${days} ${days === 1 ? 'Tag' : 'Tagen'}`,
+  reviewSince: sinceDaysPhrase,
   reviewClaim: 'Übernehmen',
   reviewClosedHint: 'Abgeschlossene Bewerbungen',
   reviewOpenListing: 'Alle Bewerbungen auf diesem Platz',

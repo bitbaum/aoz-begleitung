@@ -6,6 +6,8 @@
  * these helpers — never `resident.displayName || resident.code` inline.
  */
 
+import { RESIDENT_LIST_LABELS } from '@/lib/constants/labels/ui'
+
 /**
  * `displayName` is REQUIRED, deliberately — `null` is how you say "no name",
  * and that is different from not having asked for it.
@@ -36,6 +38,17 @@ export const RESIDENT_NAME_SELECT = {
 
 export function residentName(resident: NamedResident): string {
   return resident.displayName?.trim() || resident.code
+}
+
+/**
+ * A person as an `<option>` in a staff picker. An option cannot hold a chip,
+ * so the «Platzhalter» marker the lists show goes into the text — without it
+ * "Amir" in a dropdown reads exactly like a real client, and a coach puts a
+ * profile nobody has claimed forward for a job.
+ */
+export function residentOptionLabel(resident: NamedResident & { isPlaceholder: boolean }): string {
+  const name = residentName(resident)
+  return resident.isPlaceholder ? `${name} · ${RESIDENT_LIST_LABELS.placeholder}` : name
 }
 
 /** Short text for the initials avatar: first letters of the name, or the code tail. */

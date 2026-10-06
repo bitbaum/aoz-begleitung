@@ -7,13 +7,15 @@ import { AI_DISCLOSURE_COPY, AI_DISCLOSURE_HREF } from '@/lib/config/ai-disclosu
  */
 export function AiBadge() {
   return (
+    // The LINK is the 44px hit area and the chip only its visible part: the
+    // chip alone measured 20px tall, a tap target nobody could reliably hit.
     <Link
       href={AI_DISCLOSURE_HREF}
       target="_blank"
       title={AI_DISCLOSURE_COPY.badgeTitle}
-      className="chip-info no-underline hover:opacity-80"
+      className="inline-flex min-h-[44px] items-center no-underline hover:opacity-80"
     >
-      {AI_DISCLOSURE_COPY.badge}
+      <span className="chip-info">{AI_DISCLOSURE_COPY.badge}</span>
     </Link>
   )
 }

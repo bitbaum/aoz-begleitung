@@ -6,6 +6,14 @@
 
 import Link from 'next/link'
 
+/**
+ * One tab item, for all three tab components. It was written out three times
+ * at `min-h-[40px]` — under the 44px floor on every filter row in the staff
+ * UI (measured on /residents). One definition, so the floor is one edit.
+ */
+const TAB_ITEM =
+  'rounded-md px-3 py-2 text-xs sm:text-sm font-medium transition-colors min-h-[44px] inline-flex items-center whitespace-nowrap'
+
 interface Tab {
   id: string
   label: string
@@ -32,16 +40,24 @@ export function Tabs({ tabs, activeTab, onChange }: TabsProps) {
           aria-selected={activeTab === tab.id}
           id={`tab-${tab.id}`}
           aria-controls={`tabpanel-${tab.id}`}
-          className={`rounded-md px-3 py-2 text-xs sm:text-sm font-medium transition-colors min-h-[40px] inline-flex items-center whitespace-nowrap ${
+          className={`${TAB_ITEM} ${
             activeTab === tab.id
               ? 'bg-ui-text text-ui-inverse'
               : 'text-ui-muted hover:bg-ui-subtle hover:text-ui-text'
           }`}
         >
-          {tab.label}
-          {tab.count !== undefined && (
-            <span className="ml-2 text-xs bg-ui-subtle px-2 py-0.5 rounded-md">{tab.count}</span>
-          )}
+          {/* One inline run, so the space between label and count survives:
+              inside the flex item a whitespace-only text node is dropped and
+              innerText read "Platziert12". */}
+          <span>
+            {tab.label}
+            {tab.count !== undefined && (
+              <>
+                {' '}
+                <span className="text-xs bg-ui-subtle px-2 py-0.5 rounded-md">{tab.count}</span>
+              </>
+            )}
+          </span>
         </button>
       ))}
     </div>
@@ -60,7 +76,7 @@ export function TabButton({ children, active = false, onClick }: TabButtonProps)
       onClick={onClick}
       role="tab"
       aria-selected={active}
-      className={`rounded-md px-3 py-2 text-xs sm:text-sm font-medium transition-colors min-h-[40px] inline-flex items-center whitespace-nowrap ${
+      className={`${TAB_ITEM} ${
         active
           ? 'bg-ui-text text-ui-inverse'
           : 'text-ui-muted hover:bg-ui-subtle hover:text-ui-text'
@@ -134,20 +150,26 @@ export function TabLink({ href, label, count, active = false }: TabLinkProps) {
     <Link
       href={href}
       aria-current={active ? 'page' : undefined}
-      className={`rounded-md px-3 py-2 text-xs sm:text-sm font-medium transition-colors min-h-[40px] inline-flex items-center whitespace-nowrap ${
+      className={`${TAB_ITEM} ${
         active
           ? 'bg-ui-text text-ui-inverse'
           : 'text-ui-muted hover:bg-ui-subtle hover:text-ui-text'
       }`}
     >
-      {label}
-      {count !== undefined && (
-        <span
-          className={`ml-2 rounded-md px-2 py-0.5 text-xs ${active ? 'bg-ui-inverse/10' : 'bg-ui-subtle'}`}
-        >
-          {count}
-        </span>
-      )}
+      {/* One inline run with a literal space — see Tabs above. */}
+      <span>
+        {label}
+        {count !== undefined && (
+          <>
+            {' '}
+            <span
+              className={`rounded-md px-2 py-0.5 text-xs ${active ? 'bg-ui-inverse/10' : 'bg-ui-subtle'}`}
+            >
+              {count}
+            </span>
+          </>
+        )}
+      </span>
     </Link>
   )
 }

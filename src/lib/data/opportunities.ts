@@ -194,7 +194,8 @@ export async function residentsAvailableFor(opportunityId: string) {
       // there is nothing to exclude.
       ...(attachedIds.length ? [notInArray(resident.id, attachedIds)] : []),
     ),
-    columns: RESIDENT_NAME_SELECT,
+    // `isPlaceholder` so the picker can mark a profile nobody has claimed.
+    columns: { ...RESIDENT_NAME_SELECT, isPlaceholder: true },
     orderBy: [asc(resident.displayName), asc(resident.code)],
   })
 }
@@ -231,6 +232,32 @@ export async function listApplicationsForReview(filters: {
       opportunity: { columns: { id: true, title: true, status: true, organisation: true } },
     },
     orderBy: [desc(opportunityApplication.stageChangedAt)],
+  })
+}
+
+/**
+ * The places a coach may propose to ONE person from their dossier: published
+ * (the only status `addApplicant` accepts), on the viewer's half of the
+ * domain, and not already in a thread with this person.
+ */
+export async function proposableOpportunitiesFor(
+  residentId: string,
+  kinds: readonly OpportunityKindId[],
+) {
+  if (kinds.length === 0) return []
+  const attached = await db.query.opportunityApplication.findMany({
+    where: eq(opportunityApplication.residentId, residentId),
+    columns: { opportunityId: true },
+  })
+  const attachedIds = attached.map((row) => row.opportunityId)
+  return db.query.opportunity.findMany({
+    where: and(
+      eq(opportunity.status, 'PUBLISHED'),
+      inArray(opportunity.kind, [...kinds]),
+      ...(attachedIds.length ? [notInArray(opportunity.id, attachedIds)] : []),
+    ),
+    columns: { id: true, title: true, organisation: true },
+    orderBy: [asc(opportunity.title)],
   })
 }
 

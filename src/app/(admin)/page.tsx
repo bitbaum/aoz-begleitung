@@ -38,7 +38,12 @@ import { getIncidentsNeedingFollowUp } from '@/lib/actions/incidents'
 import { STAFF_ROLE_CARE_DOMAIN, roleHasCaseload } from '@/lib/config/care'
 import { mayReadFact } from '@/lib/client-facts/policy'
 import { expiringFacts } from '@/lib/client-facts/renewals'
-import { EMPTY_PLACEHOLDER_SCOPE, isRealRow, loadPlaceholderScope } from '@/lib/analytics/real-data'
+import {
+  EMPTY_PLACEHOLDER_SCOPE,
+  isRealRow,
+  loadPlaceholderScope,
+  servedRows,
+} from '@/lib/analytics/real-data'
 import { RESIDENT_NAME_SELECT, residentName } from '@/lib/utils/resident-name'
 import { getCheckInInterval, VERY_OVERDUE_THRESHOLD_DAYS } from '@/lib/config/checkin-intervals'
 import {
@@ -237,7 +242,11 @@ export default async function AdminDashboard() {
           orderBy: [asc(maintenanceRequest.createdAt)],
         })
       : [],
-    show('learning') ? loadPlaceholderScope() : EMPTY_PLACEHOLDER_SCOPE,
+    // Every queue below leaves placeholders out (nobody is serving them), so
+    // the scope is needed wherever a queue of people is built.
+    show('learning') || show('checkIns') || show('caseload')
+      ? loadPlaceholderScope()
+      : EMPTY_PLACEHOLDER_SCOPE,
     show('events')
       ? db.$count(
           houseEvent,
@@ -409,16 +418,18 @@ export default async function AdminDashboard() {
   // person three times, with counts that disagreed. Other threads stay in, so
   // what counts as contact is unchanged.
   const seatKinds: readonly string[] = boardOpportunityKinds(deskFor(viewer.role).integrationBoard)
-  const caseloadClients = jobCaseload.map(({ resident }) => ({
-    residentId: resident.id,
-    name: residentName(resident),
-    createdAt: resident.createdAt,
-    learningRecords: resident.learningRecords,
-    applications: resident.opportunityApplications.filter(
-      (application) =>
-        !isAwaitingAnswer(application) || seatKinds.includes(application.opportunity.kind),
-    ),
-  }))
+  const caseloadClients = servedRows(jobCaseload, (row) => row.resident.id, placeholderScope).map(
+    ({ resident }) => ({
+      residentId: resident.id,
+      name: residentName(resident),
+      createdAt: resident.createdAt,
+      learningRecords: resident.learningRecords,
+      applications: resident.opportunityApplications.filter(
+        (application) =>
+          !isAwaitingAnswer(application) || seatKinds.includes(application.opportunity.kind),
+      ),
+    }),
+  )
 
   // One caseload, the signals of whichever domain the viewer works. The Freiwilligenarbeit coordinator's
   // questions are not the Jobcoach's — "has anyone answered them, and is anyone doing
@@ -466,8 +477,11 @@ export default async function AdminDashboard() {
   // Overdue Check-ins (using config intervals)
   // =============================================================================
 
-  // Calculate check-in status for all placements
-  const checkInStatuses = placements.map((p) => {
+  // Calculate check-in status for every placement somebody is serving. A
+  // placeholder's flat is real, but nobody lives behind the profile yet, so a
+  // check-in with them is not a task. @see lib/analytics/real-data.ts
+  const servedPlacements = servedRows(placements, (p) => p.resident.id, placeholderScope)
+  const checkInStatuses = servedPlacements.map((p) => {
     const supportLevel = p.resident.supportLevel || 'STANDARD'
     const intervalDays = getCheckInInterval(supportLevel)
     const lastCheckIn = p.checkIns?.[0]
@@ -503,7 +517,7 @@ export default async function AdminDashboard() {
     .filter((p) => p.isDueSoon)
     .sort((a, b) => a.daysUntilDue - b.daysUntilDue)
 
-  const totalPlacements = placements.length
+  const totalPlacements = servedPlacements.length
 
   // =============================================================================
   // Unplaced Residents
