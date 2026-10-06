@@ -133,7 +133,13 @@ export default async function ResidentDetailPage({ params, searchParams }: Props
           },
           orderBy: [desc(placement.startDate)],
         },
-        learningRecords: { orderBy: [desc(learningRecord.updatedAt)] },
+        learningRecords: {
+          orderBy: [desc(learningRecord.updatedAt)],
+          with: {
+            recordedByUser: { columns: { role: true } },
+            fromApplication: { columns: { id: true } },
+          },
+        },
         incidentsAsSubject: {
           with: {
             housingUnit: true,

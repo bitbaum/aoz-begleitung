@@ -349,6 +349,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
   checkInsCollected: many(satisfactionCheckIn, { relationName: 'CheckInCollectedBy' }),
   documentsUploaded: many(residentDocument, { relationName: 'DocumentUploadedBy' }),
   complaintsAnswered: many(complaint, { relationName: 'ComplaintRespondedBy' }),
+  learningRecordsEntered: many(learningRecord, { relationName: 'LearningRecordedBy' }),
   account: one(account),
   unitAccess: many(staffUnit),
 }))
@@ -630,6 +631,11 @@ export const learningRecordRelations = relations(learningRecord, ({ one }) => ({
   resident: one(resident, {
     fields: [learningRecord.residentId],
     references: [resident.id],
+  }),
+  recordedByUser: one(user, {
+    fields: [learningRecord.recordedByUserId],
+    references: [user.id],
+    relationName: 'LearningRecordedBy',
   }),
   fromApplication: one(opportunityApplication),
 }))

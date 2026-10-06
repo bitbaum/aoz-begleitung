@@ -54,6 +54,16 @@ describe('PortalNav', () => {
     )
   })
 
+  it('gives every header link a 44px hit area — the brand link was 24px high', () => {
+    renderNav()
+    openAccount()
+    const short = screen
+      .getAllByRole('link')
+      .filter((link) => !(link.getAttribute('class') ?? '').includes('min-h-[44px]'))
+      .map((link) => link.textContent)
+    expect(short).toEqual([])
+  })
+
   it('keeps destinations out of the header — they live in the sidebar and tabs', () => {
     renderNav()
     const hrefs = screen.getAllByRole('link').map((link) => link.getAttribute('href'))

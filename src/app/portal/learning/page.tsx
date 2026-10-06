@@ -4,18 +4,26 @@ import { redirect } from 'next/navigation'
 import { requireResidentCookie } from '@/lib/portal-auth'
 import { PageHeader, EmptyState } from '@/components/ui/Page'
 import { LearningForm } from '@/components/residents/LearningForm'
-import { createOwnLearningRecord, listResidentLearningEvidence } from '@/lib/actions/learning'
+import { LearningRecordActions } from '@/components/residents/LearningRecordActions'
+import {
+  createOwnLearningRecord,
+  deleteOwnLearningRecord,
+  listResidentLearningEvidence,
+  updateOwnLearningRecord,
+} from '@/lib/actions/learning'
 import { getRequestTranslator } from '@/lib/i18n/request'
 import { listActivities } from '@/lib/data/activities'
-import {
-  LEARNING_KIND_LABELS,
-  LEARNING_LABELS,
-  LEARNING_STATUS_LABELS,
-  isAchievementRecord,
-  type LearningKindId,
-  type LearningStatusId,
-} from '@/lib/config/learning'
+import { isAchievementRecord, mayChangeLearningRecord } from '@/lib/config/learning'
 import { activityCostLabel } from '@/lib/i18n/activity-labels'
+import {
+  learningActionCopy,
+  learningAttributionForClient,
+  learningFormCopy,
+  learningKindLabel,
+  learningStatusLabel,
+} from '@/lib/i18n/learning-labels'
+import type { Translator } from '@/lib/i18n'
+import type { LearningRecord } from '@/lib/db'
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getRequestTranslator()
@@ -23,9 +31,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export const dynamic = 'force-dynamic'
 
+type PortalLearningRecord = LearningRecord & { recordedByUser?: { role: string } | null }
+
 export default async function PortalLearningPage() {
   await requireResidentCookie('/portal')
-  const { t } = await getRequestTranslator()
+  const { t, locale } = await getRequestTranslator()
   const [resident, languageOffers] = await Promise.all([
     listResidentLearningEvidence(),
     listActivities({
@@ -37,13 +47,28 @@ export default async function PortalLearningPage() {
   ])
   if (!resident) redirect('/portal')
 
-  const achievements = resident.learningRecords.filter(isAchievementRecord)
-  const inProgress = resident.learningRecords.filter((record) => record.status === 'IN_PROGRESS')
-  const selfLogged = resident.learningRecords.filter(
-    (record) => record.recordedBy === 'RESIDENT' && !isAchievementRecord(record),
-  )
-  const staffAssigned = resident.learningRecords.filter(
-    (record) => record.recordedBy === 'STAFF' && !isAchievementRecord(record),
+  const records = resident.learningRecords as PortalLearningRecord[]
+  const formCopy = learningFormCopy(t, locale)
+  const actionCopy = learningActionCopy(t)
+
+  // Four disjoint lists: a record appears exactly once, so editing it in one
+  // place cannot leave a stale twin further down the page.
+  const achievements = records.filter(isAchievementRecord)
+  const rest = records.filter((record) => !isAchievementRecord(record))
+  const inProgress = rest.filter((record) => record.status === 'IN_PROGRESS')
+  const settled = rest.filter((record) => record.status !== 'IN_PROGRESS')
+  const fromTeam = settled.filter((record) => record.recordedBy === 'STAFF')
+  const fromYou = settled.filter((record) => record.recordedBy === 'RESIDENT')
+
+  const item = (record: PortalLearningRecord) => (
+    <RecordItem
+      key={record.id}
+      record={record}
+      residentId={resident.id}
+      t={t}
+      formCopy={formCopy}
+      actionCopy={actionCopy}
+    />
   )
 
   return (
@@ -67,84 +92,37 @@ export default async function PortalLearningPage() {
                 href="#learning-evidence"
                 className="btn-outline min-h-[44px] inline-flex items-center"
               >
-                {LEARNING_LABELS.add}
+                {t('learning.add')}
               </Link>
             }
           />
         ) : (
-          <ul className="space-y-3">
-            {achievements.map((record) => (
-              <li key={record.id} className="card">
-                <p className="font-medium text-ui-text">{record.title}</p>
-                <p className="text-sm text-ui-muted">
-                  {LEARNING_KIND_LABELS[record.kind as LearningKindId]}
-                  {record.cefrLevel ? ` · ${record.languageCode || ''} ${record.cefrLevel}` : ''}
-                  {record.hours != null ? ` · ${record.hours} ${t('learning.hours')}` : ''}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <ul className="space-y-3">{achievements.map(item)}</ul>
         )}
       </section>
 
       {inProgress.length > 0 && (
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-ui-text mb-3">{t('learning.inProgress')}</h2>
-          <ul className="space-y-3">
-            {inProgress.map((record) => (
-              <li key={record.id} className="card">
-                <p className="font-medium text-ui-text">{record.title}</p>
-                <p className="text-sm text-ui-muted">
-                  {LEARNING_KIND_LABELS[record.kind as LearningKindId]}
-                  {' · '}
-                  {LEARNING_STATUS_LABELS[record.status as LearningStatusId]}
-                  {record.hours != null ? ` · ${record.hours} ${t('learning.hours')}` : ''}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <ul className="space-y-3">{inProgress.map(item)}</ul>
         </section>
       )}
 
       <section className="mb-8">
-        <h2 className="text-lg font-semibold text-ui-text mb-3">{LEARNING_LABELS.assignedToYou}</h2>
-        {staffAssigned.length === 0 ? (
-          <p className="text-sm text-ui-muted">{t('learning.offersEmpty')}</p>
+        <h2 className="text-lg font-semibold text-ui-text mb-3">{t('learning.fromTeam')}</h2>
+        {fromTeam.length === 0 ? (
+          <p className="text-sm text-ui-muted">{t('learning.fromTeamEmpty')}</p>
         ) : (
-          <ul className="space-y-3">
-            {staffAssigned.slice(0, 6).map((record) => (
-              <li key={record.id} className="card">
-                <p className="font-medium text-ui-text">{record.title}</p>
-                <p className="text-sm text-ui-muted">
-                  {LEARNING_KIND_LABELS[record.kind as LearningKindId]}
-                  {' · '}
-                  {LEARNING_STATUS_LABELS[record.status as LearningStatusId]}
-                  {record.provider ? ` · ${record.provider}` : ''}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <ul className="space-y-3">{fromTeam.map(item)}</ul>
         )}
       </section>
 
       <section className="mb-8">
-        <h2 className="text-lg font-semibold text-ui-text mb-3">{LEARNING_LABELS.selfLogged}</h2>
-        {selfLogged.length === 0 ? (
-          <p className="text-sm text-ui-muted">{LEARNING_LABELS.empty}</p>
+        <h2 className="text-lg font-semibold text-ui-text mb-3">{t('learning.fromYou')}</h2>
+        {fromYou.length === 0 ? (
+          <p className="text-sm text-ui-muted">{t('learning.fromYouEmpty')}</p>
         ) : (
-          <ul className="space-y-3">
-            {selfLogged.slice(0, 6).map((record) => (
-              <li key={record.id} className="card">
-                <p className="font-medium text-ui-text">{record.title}</p>
-                <p className="text-sm text-ui-muted">
-                  {LEARNING_KIND_LABELS[record.kind as LearningKindId]}
-                  {' · '}
-                  {LEARNING_STATUS_LABELS[record.status as LearningStatusId]}
-                  {record.hours != null ? ` · ${record.hours} ${t('learning.hours')}` : ''}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <ul className="space-y-3">{fromYou.map(item)}</ul>
         )}
       </section>
 
@@ -188,15 +166,59 @@ export default async function PortalLearningPage() {
       </section>
 
       <div className="card" id="learning-evidence">
-        <h2 className="text-lg font-semibold text-ui-text mb-1">{LEARNING_LABELS.evidenceTitle}</h2>
-        <p className="text-sm text-ui-muted mb-4">{LEARNING_LABELS.evidenceSubtitle}</p>
+        <h2 className="text-lg font-semibold text-ui-text mb-1">{t('learning.evidenceTitle')}</h2>
+        <p className="text-sm text-ui-muted mb-4">{t('learning.evidenceSubtitle')}</p>
         <LearningForm
           action={createOwnLearningRecord}
+          copy={formCopy}
           audience="resident"
           successMessage={t('learning.evidenceSaved')}
-          errorMessage={t('learning.evidenceSaveError')}
         />
       </div>
     </div>
+  )
+}
+
+function RecordItem({
+  record,
+  residentId,
+  t,
+  formCopy,
+  actionCopy,
+}: {
+  record: PortalLearningRecord
+  residentId: string
+  t: Translator
+  formCopy: ReturnType<typeof learningFormCopy>
+  actionCopy: ReturnType<typeof learningActionCopy>
+}) {
+  // Only what the client entered themselves; the server asks the same question.
+  const mayChange = mayChangeLearningRecord({ kind: 'resident', residentId }, record)
+
+  return (
+    <li className="card">
+      <p className="font-medium text-ui-text">{record.title}</p>
+      <p className="text-sm text-ui-muted">
+        {learningKindLabel(t, record.kind)}
+        {record.cefrLevel ? ` · ${record.languageCode || ''} ${record.cefrLevel}` : ''}
+        {' · '}
+        {learningStatusLabel(t, record.status)}
+        {record.hours != null ? ` · ${record.hours} ${t('learning.hours')}` : ''}
+        {record.provider ? ` · ${record.provider}` : ''}
+      </p>
+      <p className="text-xs text-ui-muted mt-1">
+        {learningAttributionForClient(t, record, record.recordedByUser)}
+      </p>
+      {mayChange ? (
+        <LearningRecordActions
+          record={record}
+          formCopy={formCopy}
+          copy={actionCopy}
+          audience="resident"
+          updateAction={updateOwnLearningRecord}
+          deleteAction={deleteOwnLearningRecord}
+        />
+      ) : null}
+    </li>
   )
 }

@@ -23,6 +23,7 @@ import type {
   OpportunityStatusId,
   StageTransitionTargetId,
 } from '@/lib/config/opportunities'
+import type { LearningCategoryId } from '@/lib/config/learning'
 
 /**
  * The forward path. DECLINED is deliberately NOT in it: a refusal is not a
@@ -43,8 +44,21 @@ export const TERMINAL_STAGES = [
   'DECLINED',
 ] as const satisfies readonly ApplicationStageId[]
 
-/** The learning category every opportunity-generated record is filed under. */
-export const OPPORTUNITY_EVIDENCE_CATEGORY = 'community'
+/**
+ * Which learning category the evidence of each kind of place is filed under.
+ *
+ * This was one constant, `'community'`, for every kind — so a job the Jobcoach
+ * placed someone in landed in the client's dossier as «Gemeinschaft», beside
+ * the Mittagstisch. Work is vocational evidence; volunteering and community
+ * service are community evidence. Keyed by the kind union, so a new kind
+ * fails to compile here until somebody decides where its evidence belongs.
+ */
+export const OPPORTUNITY_EVIDENCE_CATEGORY: Record<OpportunityKindId, LearningCategoryId> = {
+  EMPLOYMENT: 'vocational',
+  INTERNSHIP: 'vocational',
+  VOLUNTEERING: 'community',
+  COMMUNITY_SERVICE: 'community',
+}
 
 export function isTerminalStage(stage: ApplicationStageId): boolean {
   return (TERMINAL_STAGES as readonly string[]).includes(stage)
@@ -167,20 +181,117 @@ export function occupiesSeat(stage: ApplicationStageId): boolean {
 }
 
 /**
- * What a resident should do about their own thread, in four states.
- *
- * Four rather than one per stage, because seven near-identical sentences are
- * noise: what actually differs is whether the next move is theirs, ours, or
- * nobody's. A stage badge alone answers "where is this" and not "what do I do",
- * and "what do I do" is the only question somebody opens this page with.
+ * The client's answer to a staff proposal. Stored as text on the application
+ * (`residentAnswer`); null until they answer, and never set on a row they
+ * raised themselves.
  */
-export type ResidentNextStep = 'WAITING_ON_STAFF' | 'YOURS_TO_ATTEND' | 'FINISHED' | 'NOT_THIS_TIME'
+export const CLIENT_ANSWERS = ['ACCEPTED', 'DECLINED'] as const
+export type ClientAnswerId = (typeof CLIENT_ANSWERS)[number]
 
-export function residentNextStep(stage: ApplicationStageId): ResidentNextStep {
-  if (stage === 'DECLINED') return 'NOT_THIS_TIME'
+export function parseClientAnswer(value: string | null | undefined): ClientAnswerId | null {
+  return (CLIENT_ANSWERS as readonly string[]).includes(value ?? '')
+    ? (value as ClientAnswerId)
+    : null
+}
+
+/** The fields of an application that decide what its client is told. */
+export interface ClientThreadState {
+  stage: ApplicationStageId
+  createdBy: 'RESIDENT' | 'STAFF'
+  residentAnswer?: string | null
+}
+
+/**
+ * A proposal from the team that the client has not answered yet.
+ *
+ * When staff attach someone («Person zuordnen») the row is INTERESTED — the
+ * same stage a client's own «Ich habe Interesse» writes. Shown to the client
+ * by stage alone, it read «Interessiert — Ihr Team schaut sich das an»: the
+ * portal told them they had asked for something they had never seen. The
+ * provenance decides it: a STAFF row at INTERESTED with no answer is the
+ * team's suggestion, and the next move is the client's.
+ *
+ * Deliberately NOT the same as `isAwaitingAnswer` (care/queue.ts). That is a
+ * CLIENT request waiting for STAFF; this is a STAFF proposal waiting for the
+ * client. They point in opposite directions and must never be merged.
+ */
+export function clientAnswerPending(application: ClientThreadState): boolean {
+  return (
+    application.createdBy === 'STAFF' &&
+    application.stage === 'INTERESTED' &&
+    parseClientAnswer(application.residentAnswer) === null
+  )
+}
+
+/** Where the client's answer moves the thread. Accepting keeps the stage. */
+export function stageAfterClientAnswer(answer: ClientAnswerId): ApplicationStageId {
+  return answer === 'DECLINED' ? 'DECLINED' : 'INTERESTED'
+}
+
+/**
+ * What a resident should do about their own thread.
+ *
+ * One state per thing that differs for the reader, not one per stage: whether
+ * the next move is theirs, ours or nobody's, and — once they hold a place —
+ * whether it has started. ACCEPTED and STARTED used to share one sentence
+ * («Unten steht, wo und ab wann»), which promised a start date to somebody
+ * already working there, and to somebody whose listing never stated one.
+ */
+export type ResidentNextStep =
+  | 'PROPOSED_TO_YOU'
+  | 'WAITING_ON_STAFF'
+  | 'YOURS_TO_ATTEND'
+  | 'UNDER_WAY'
+  | 'FINISHED'
+  | 'NOT_THIS_TIME'
+  | 'YOU_DECLINED'
+
+export function residentNextStep(application: ClientThreadState): ResidentNextStep {
+  const { stage } = application
+  if (stage === 'DECLINED') {
+    return parseClientAnswer(application.residentAnswer) === 'DECLINED'
+      ? 'YOU_DECLINED'
+      : 'NOT_THIS_TIME'
+  }
   if (stage === 'ENDED') return 'FINISHED'
-  if (occupiesSeat(stage)) return 'YOURS_TO_ATTEND'
+  if (stage === 'STARTED') return 'UNDER_WAY'
+  if (stage === 'ACCEPTED') return 'YOURS_TO_ATTEND'
+  if (clientAnswerPending(application)) return 'PROPOSED_TO_YOU'
   return 'WAITING_ON_STAFF'
+}
+
+/**
+ * Why the client's «Offene Plätze» list is empty, or null when it is not.
+ *
+ * The open list leaves out places the client is already attached to (those
+ * sit above, under «Ihre Einsätze»). So an empty list can mean two different
+ * things, and the old copy said only the first: «Gerade ist kein Platz
+ * ausgeschrieben» — to a client looking at a published listing two
+ * centimetres higher, their own thread.
+ */
+export type OpenBoardEmpty = 'NONE_PUBLISHED' | 'ALL_YOURS'
+
+export function openBoardEmptyState(
+  openCount: number,
+  publishedTotal: number,
+): OpenBoardEmpty | null {
+  if (openCount > 0) return null
+  return publishedTotal > 0 ? 'ALL_YOURS' : 'NONE_PUBLISHED'
+}
+
+/**
+ * What the contact box says under the address, per state — or null where the
+ * box is not shown at all (`maySeeContact`). «Melden Sie sich vor dem ersten
+ * Tag» used to be printed under every visible contact, including one for an
+ * engagement that had ENDED.
+ */
+export type ResidentContactHint = 'BEFORE_START' | 'DURING' | 'REFERENCE'
+
+export function residentContactHint(stage: ApplicationStageId): ResidentContactHint | null {
+  if (!maySeeContact(stage)) return null
+  if (stage === 'ACCEPTED') return 'BEFORE_START'
+  if (stage === 'STARTED') return 'DURING'
+  return 'REFERENCE'
 }
 
 /**
@@ -234,9 +345,10 @@ export interface GeneratedEvidence {
   title: string
   status: 'IN_PROGRESS'
   provider: string
-  category: typeof OPPORTUNITY_EVIDENCE_CATEGORY
+  category: LearningCategoryId
   startedAt: Date
   recordedBy: 'STAFF'
+  recordedByUserId: string | null
 }
 
 /**
@@ -255,14 +367,17 @@ export interface GeneratedEvidence {
 export function evidenceForStartedApplication(
   opportunity: Pick<OpportunityRecord, 'kind' | 'title' | 'organisation'>,
   startedAt: Date,
+  /** Whoever moved the thread to STARTED — the record names their role. */
+  recordedByUserId: string | null = null,
 ): GeneratedEvidence {
   return {
     kind: opportunity.kind,
     title: opportunity.title,
     status: 'IN_PROGRESS',
     provider: opportunity.organisation,
-    category: OPPORTUNITY_EVIDENCE_CATEGORY,
+    category: OPPORTUNITY_EVIDENCE_CATEGORY[opportunity.kind],
     startedAt,
     recordedBy: 'STAFF',
+    recordedByUserId,
   }
 }
