@@ -840,8 +840,10 @@ export const de = {
   'learning.enteredByRole': 'Eingetragen von:',
   'learning.add': 'Eintrag hinzufügen',
   'learning.evidenceTitle': 'Nachweis erfassen',
-  'learning.evidenceSubtitle': 'Dokumentieren Sie, was Sie machen: Kurse, Sprachtests, Freiwilligenarbeit oder andere Schritte, die Ihre Integration zeigen.',
-  'learning.evidenceHelp': 'Tragen Sie nur Dinge ein, die wirklich stattgefunden haben oder geplant sind. Das hilft Ihnen und Ihrem Team beim nächsten Schritt.',
+  'learning.evidenceSubtitle':
+    'Dokumentieren Sie, was Sie machen: Kurse, Sprachtests, Freiwilligenarbeit oder andere Schritte, die Ihre Integration zeigen.',
+  'learning.evidenceHelp':
+    'Tragen Sie nur Dinge ein, die wirklich stattgefunden haben oder geplant sind. Das hilft Ihnen und Ihrem Team beim nächsten Schritt.',
   'learning.formKind': 'Art',
   'learning.formStatus': 'Stand',
   'learning.formTitle': 'Bezeichnung',
@@ -856,7 +858,8 @@ export const de = {
   'learning.formStartedAt': 'Beginn',
   'learning.formCompletedAt': 'Abschluss',
   'learning.formNotes': 'Notizen',
-  'learning.formNotesHint': 'Keine Diagnosen, keine Verfahrensdetails — nur was für Wohnen oder Arbeit nützt.',
+  'learning.formNotesHint':
+    'Keine Diagnosen, keine Verfahrensdetails — nur was für Wohnen oder Arbeit nützt.',
   'learning.formSave': 'Speichern',
   'learning.formSaving': 'Wird gespeichert …',
   'learning.formCancel': 'Abbrechen',
@@ -875,15 +878,22 @@ export const de = {
   'opportunities.proposalAccept': 'Ich bin interessiert',
   'opportunities.proposalDecline': 'Kein Interesse',
   'opportunities.okProposalAccepted': 'Danke — Ihr Team meldet sich bei Ihnen.',
-  'opportunities.okProposalDeclined': 'Notiert. Ihr Team weiss jetzt, dass dieser Platz nicht passt.',
-  'opportunities.nextAttendUndated': 'Der Platz gehört Ihnen. Ihr Team sagt Ihnen, ab wann es losgeht.',
+  'opportunities.okProposalDeclined':
+    'Notiert. Ihr Team weiss jetzt, dass dieser Platz nicht passt.',
+  'opportunities.nextAttendUndated':
+    'Der Platz gehört Ihnen. Ihr Team sagt Ihnen, ab wann es losgeht.',
   'opportunities.nextUnderWay': 'Sie sind dabei. Bei Fragen hilft Ihnen Ihr Team.',
   'opportunities.nextYouDeclined': 'Sie haben diesen Vorschlag abgelehnt.',
-  'opportunities.contactHintDuring': 'Bei Fragen zum Einsatz können Sie sich an diese Person wenden.',
-  'opportunities.contactHintReference': 'Wenn Sie eine Referenz brauchen, können Sie sich an diese Person wenden.',
+  'opportunities.contactHintDuring':
+    'Bei Fragen zum Einsatz können Sie sich an diese Person wenden.',
+  'opportunities.contactHintReference':
+    'Wenn Sie eine Referenz brauchen, können Sie sich an diese Person wenden.',
   'opportunities.openAllYours': 'Alle ausgeschriebenen Plätze stehen oben bei Ihren Einsätzen.',
   'events.cancelledNotice': 'Diese Veranstaltung wurde abgesagt.',
 
+  'events.cancelConfirmTitle': 'Veranstaltung absagen?',
+  'events.cancelConfirm': 'Wer zugesagt hat, sieht die Veranstaltung danach als «Abgesagt».',
+  'events.keep': 'Nicht absagen',
 } as const
 
 /** The key set every dictionary is measured against. */

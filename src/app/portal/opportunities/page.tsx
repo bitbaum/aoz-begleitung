@@ -6,11 +6,14 @@ import { PageHeader, EmptyState } from '@/components/ui/Page'
 import { getRequestTranslator } from '@/lib/i18n/request'
 import {
   applicationStageLabel,
+  openBoardEmptyKey,
   opportunityKindLabel,
   permitStatementLabel,
+  residentContactHintKey,
+  residentNextStepKey,
 } from '@/lib/i18n/opportunity-labels'
 import { residentOpportunityBoard } from '@/lib/data/opportunities'
-import { expressInterest, withdrawInterest } from '@/lib/actions/opportunities'
+import { answerProposal, expressInterest, withdrawInterest } from '@/lib/actions/opportunities'
 import {
   APPLICATION_STAGE_BADGES,
   permitStatement,
@@ -18,7 +21,11 @@ import {
   type OpportunityKindId,
 } from '@/lib/config/opportunities'
 import { formatDate } from '@/lib/utils/formatting'
-import { residentNextStep } from '@/lib/opportunities/pipeline'
+import {
+  openBoardEmptyState,
+  residentContactHint,
+  residentNextStep,
+} from '@/lib/opportunities/pipeline'
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getRequestTranslator()
@@ -34,14 +41,8 @@ type Props = {
 const OK_KEYS = {
   interest: 'opportunities.okInterest',
   withdrawn: 'opportunities.okWithdrawn',
-} as const
-
-/** The four things that can be true of a thread of your own, as one sentence. */
-const NEXT_STEP_KEYS = {
-  WAITING_ON_STAFF: 'opportunities.nextWaiting',
-  YOURS_TO_ATTEND: 'opportunities.nextAttend',
-  FINISHED: 'opportunities.nextFinished',
-  NOT_THIS_TIME: 'opportunities.nextDeclined',
+  proposalAccepted: 'opportunities.okProposalAccepted',
+  proposalDeclined: 'opportunities.okProposalDeclined',
 } as const
 
 const ERROR_KEYS = {
@@ -59,7 +60,7 @@ export default async function PortalOpportunitiesPage(props: Props) {
   // The translator first, because the board is resolved INTO this reader's
   // language server-side — the payload carries one language, not six.
   const { t, locale } = await getRequestTranslator()
-  const [{ mine, open }, params] = await Promise.all([
+  const [{ mine, open, publishedTotal }, params] = await Promise.all([
     residentOpportunityBoard(resident.id, locale),
     searchParams,
   ])
@@ -110,6 +111,12 @@ export default async function PortalOpportunitiesPage(props: Props) {
           <ul className="space-y-3">
             {mine.map((application) => {
               const stage = application.stage as ApplicationStageId
+              // What this person should do now — read with WHO raised the
+              // thread, so a proposal from the team is not shown as the
+              // client's own interest. @see lib/opportunities/pipeline.ts
+              const step = residentNextStep(application)
+              const proposed = step === 'PROPOSED_TO_YOU'
+              const contactHint = residentContactHint(stage)
               // Offered only where the server will actually allow it: your own
               // interest, untouched. Anything further along is a conversation
               // that has started, and a button that quietly failed would be
@@ -125,9 +132,13 @@ export default async function PortalOpportunitiesPage(props: Props) {
                 <li key={application.id} className="card">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <p className="font-medium text-ui-text">{listing.title}</p>
-                    <span className={APPLICATION_STAGE_BADGES[stage]}>
-                      {applicationStageLabel(t, stage)}
-                    </span>
+                    {proposed ? (
+                      <span className="badge-info">{t('opportunities.proposalBadge')}</span>
+                    ) : (
+                      <span className={APPLICATION_STAGE_BADGES[stage]}>
+                        {applicationStageLabel(t, stage)}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-ui-muted mt-1">
                     {listing.organisation}
@@ -142,8 +153,20 @@ export default async function PortalOpportunitiesPage(props: Props) {
                       it does not say what this person should do about it, and
                       that is the only question they opened the page with. */}
                   <p className="text-sm text-ui-text mt-2">
-                    {t(NEXT_STEP_KEYS[residentNextStep(stage)])}
+                    {t(residentNextStepKey(step, Boolean(listing.startsAt)))}
                   </p>
+
+                  {proposed ? (
+                    <form action={answerProposal} className="mt-3 flex flex-wrap gap-2">
+                      <input type="hidden" name="applicationId" value={application.id} />
+                      <button type="submit" name="answer" value="ACCEPTED" className="btn-primary">
+                        {t('opportunities.proposalAccept')}
+                      </button>
+                      <button type="submit" name="answer" value="DECLINED" className="btn-outline">
+                        {t('opportunities.proposalDecline')}
+                      </button>
+                    </form>
+                  ) : null}
 
                   {/* The practical facts. All of these were already loaded and
                       none of them was rendered, so somebody who had been
@@ -182,7 +205,11 @@ export default async function PortalOpportunitiesPage(props: Props) {
                     <div className="mt-3 rounded-lg border border-ui-border bg-ui-subtle p-3">
                       <p className="eyebrow">{t('opportunities.contactTitle')}</p>
                       <p className="mt-1 text-sm text-ui-text">{contact}</p>
-                      <p className="mt-1 text-xs text-ui-muted">{t('opportunities.contactHint')}</p>
+                      {contactHint ? (
+                        <p className="mt-1 text-xs text-ui-muted">
+                          {t(residentContactHintKey(contactHint))}
+                        </p>
+                      ) : null}
                     </div>
                   ) : null}
 
@@ -242,7 +269,13 @@ export default async function PortalOpportunitiesPage(props: Props) {
           </Link>
         </nav>
         {open.length === 0 ? (
-          <EmptyState title={t('opportunities.openEmpty')} />
+          <EmptyState
+            title={t(
+              openBoardEmptyKey(
+                openBoardEmptyState(open.length, publishedTotal) ?? 'NONE_PUBLISHED',
+              ),
+            )}
+          />
         ) : (
           <ul className="space-y-3">
             {shown.map((opportunity) => {

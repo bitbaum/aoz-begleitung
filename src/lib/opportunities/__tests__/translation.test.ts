@@ -14,6 +14,7 @@ const german: TranslatableListing = {
   title: 'Mittagstisch im Quartiertreff',
   description: 'Mithilfe beim Kochen und Servieren, jeweils dienstags und donnerstags.',
   requirementNote: 'Bitte pünktlich sein.',
+  schedule: 'dienstags und donnerstags, 11–14 Uhr',
 }
 
 const arabic = (hash: string): ListingTranslations => ({
@@ -21,6 +22,7 @@ const arabic = (hash: string): ListingTranslations => ({
     title: 'مائدة الغداء في مركز الحي',
     description: 'المساعدة في الطبخ والتقديم، أيام الثلاثاء والخميس.',
     requirementNote: 'يرجى الحضور في الوقت المحدد.',
+    schedule: 'الثلاثاء والخميس، 11–14',
     sourceHash: hash,
   },
 })
@@ -99,8 +101,25 @@ describe('what a reader gets', () => {
 })
 
 describe('what is translated, and what must never be', () => {
-  it('covers exactly the three strings a coach writes', () => {
-    expect([...TRANSLATABLE_FIELDS]).toEqual(['title', 'description', 'requirementNote'])
+  it('covers exactly the strings a coach writes — «Zeiten» included', () => {
+    expect([...TRANSLATABLE_FIELDS]).toEqual([
+      'title',
+      'description',
+      'requirementNote',
+      'schedule',
+    ])
+  })
+
+  it('shows the translated schedule, and drops it with the rest when the German changes', () => {
+    // «Zeiten» was the one coach-written line still German on an Arabic card.
+    const stored = arabic(sourceHashOf(german))
+    expect(readableListing(german, stored, 'ar').schedule).toBe('الثلاثاء والخميس، 11–14')
+
+    const moved = { ...german, schedule: 'mittwochs, 11–14 Uhr' }
+    expect(readableListing(moved, stored, 'ar')).toMatchObject({
+      schedule: 'mittwochs, 11–14 Uhr',
+      machineTranslated: false,
+    })
   })
 
   it('never includes the permit sentence', () => {

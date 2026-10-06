@@ -4,7 +4,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
-import { NAV_ICONS, portalAccountItems, portalTabItems } from '@/lib/config/navigation'
+import {
+  NAV_ICONS,
+  navBadgeCount,
+  portalAccountItems,
+  portalSidebarItems,
+  portalTabItems,
+  type PortalNavBadges,
+} from '@/lib/config/navigation'
 import { UI_LABELS } from '@/lib/constants/labels'
 import { isPortalPathActive, portalNavMessageKey } from '@/lib/utils/portal-nav'
 import { useT } from '@/lib/i18n/LocaleProvider'
@@ -14,7 +21,13 @@ import { PortalNavAccordion } from './PortalSidebar'
  * The portal's mobile navigation: four pinned destinations plus a sheet of
  * collapsible groups. Language and account live in the header, not here.
  */
-export function PortalTabBar({ messageUnreadCount = 0 }: { messageUnreadCount?: number }) {
+export function PortalTabBar({
+  badges = {},
+  placed = false,
+}: {
+  badges?: PortalNavBadges
+  placed?: boolean
+}) {
   const [moreOpen, setMoreOpen] = useState(false)
   const t = useT()
   const pathname = usePathname()
@@ -47,13 +60,15 @@ export function PortalTabBar({ messageUnreadCount = 0 }: { messageUnreadCount?: 
     openButtonRef.current?.focus()
   }
 
-  const tabItems = portalTabItems()
+  const tabItems = portalTabItems({ placed })
   const MoreIcon = NAV_ICONS.more
   const onTabPage = tabItems.some((item) => isPortalPathActive(pathname, item.href))
   const onAccountPage = portalAccountItems().some((item) => isPortalPathActive(pathname, item.href))
   const moreActive = moreOpen || (!onTabPage && !onAccountPage)
-  const showMoreUnread =
-    messageUnreadCount > 0 && !tabItems.some((item) => item.labelKey === 'messages')
+  // Whatever is waiting behind «Mehr» — the tab items carry their own count.
+  const moreCount = portalSidebarItems({ placed })
+    .filter((item) => !tabItems.some((tab) => tab.href === item.href))
+    .reduce((sum, item) => sum + navBadgeCount(item, badges), 0)
 
   return (
     <>
@@ -81,7 +96,7 @@ export function PortalTabBar({ messageUnreadCount = 0 }: { messageUnreadCount?: 
         </div>
 
         <div className="px-3 py-3">
-          <PortalNavAccordion pathname={pathname} messageUnreadCount={messageUnreadCount} />
+          <PortalNavAccordion pathname={pathname} badges={badges} placed={placed} />
         </div>
       </div>
 
@@ -96,7 +111,14 @@ export function PortalTabBar({ messageUnreadCount = 0 }: { messageUnreadCount?: 
               className={active ? 'tab-item-active' : 'tab-item'}
               aria-current={active ? 'page' : undefined}
             >
-              <Icon className="w-5 h-5" aria-hidden="true" />
+              <span className="relative inline-flex">
+                <Icon className="w-5 h-5" aria-hidden="true" />
+                {navBadgeCount(item, badges) > 0 && (
+                  <span className="absolute -right-2 -top-2 inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-status-warning px-1 text-[10px] font-semibold text-status-warning-text">
+                    {navBadgeCount(item, badges)}
+                  </span>
+                )}
+              </span>
               <span>{t(portalNavMessageKey(item))}</span>
             </Link>
           )
@@ -111,9 +133,9 @@ export function PortalTabBar({ messageUnreadCount = 0 }: { messageUnreadCount?: 
         >
           <span className="relative inline-flex">
             <MoreIcon className="w-5 h-5" aria-hidden="true" />
-            {showMoreUnread && (
+            {moreCount > 0 && (
               <span className="absolute -right-2 -top-2 inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-status-warning px-1 text-[10px] font-semibold text-status-warning-text">
-                {messageUnreadCount}
+                {moreCount}
               </span>
             )}
           </span>

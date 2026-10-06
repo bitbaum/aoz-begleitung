@@ -83,6 +83,7 @@ async function refreshTranslations(opportunityId: string): Promise<void> {
         title: true,
         description: true,
         requirementNote: true,
+        schedule: true,
         translations: true,
       },
     })

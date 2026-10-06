@@ -767,8 +767,10 @@ export const ar: Dictionary = {
   'learning.enteredByRole': 'أدخله:',
   'learning.add': 'إضافة إدخال',
   'learning.evidenceTitle': 'تسجيل إثبات',
-  'learning.evidenceSubtitle': 'سجّل ما تقوم به: دورات، اختبارات لغة، عمل تطوعي أو خطوات أخرى تُظهر اندماجك.',
-  'learning.evidenceHelp': 'أدخل فقط ما حدث فعلًا أو ما هو مخطط له. هذا يساعدك ويساعد فريقك في الخطوة التالية.',
+  'learning.evidenceSubtitle':
+    'سجّل ما تقوم به: دورات، اختبارات لغة، عمل تطوعي أو خطوات أخرى تُظهر اندماجك.',
+  'learning.evidenceHelp':
+    'أدخل فقط ما حدث فعلًا أو ما هو مخطط له. هذا يساعدك ويساعد فريقك في الخطوة التالية.',
   'learning.formKind': 'النوع',
   'learning.formStatus': 'الحالة',
   'learning.formTitle': 'الاسم',
@@ -811,4 +813,7 @@ export const ar: Dictionary = {
   'opportunities.openAllYours': 'كل الأماكن المعلنة موجودة أعلاه ضمن أماكنك.',
   'events.cancelledNotice': 'أُلغيت هذه الفعالية.',
 
+  'events.cancelConfirmTitle': 'إلغاء هذه الفعالية؟',
+  'events.cancelConfirm': 'سيرى كل من أكّد حضوره أن الفعالية أُلغيت.',
+  'events.keep': 'لا تُلغِ',
 }

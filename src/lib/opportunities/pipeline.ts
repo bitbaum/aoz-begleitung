@@ -223,6 +223,19 @@ export function clientAnswerPending(application: ClientThreadState): boolean {
   )
 }
 
+/**
+ * What staff see of a proposal: still open, accepted, or declined by the
+ * client — null for a thread that was never a proposal.
+ */
+export type ProposalState = 'PENDING' | 'ACCEPTED' | 'DECLINED'
+
+export function proposalState(application: ClientThreadState): ProposalState | null {
+  if (application.createdBy !== 'STAFF') return null
+  const answer = parseClientAnswer(application.residentAnswer)
+  if (answer) return answer
+  return application.stage === 'INTERESTED' ? 'PENDING' : null
+}
+
 /** Where the client's answer moves the thread. Accepting keeps the stage. */
 export function stageAfterClientAnswer(answer: ClientAnswerId): ApplicationStageId {
   return answer === 'DECLINED' ? 'DECLINED' : 'INTERESTED'

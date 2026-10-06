@@ -777,8 +777,10 @@ export const en: Dictionary = {
   'learning.enteredByRole': 'Entered by:',
   'learning.add': 'Add an entry',
   'learning.evidenceTitle': 'Record a step',
-  'learning.evidenceSubtitle': 'Record what you are doing: courses, language tests, volunteering or other steps that show your integration.',
-  'learning.evidenceHelp': 'Only enter things that really happened or are planned. That helps you and your team with the next step.',
+  'learning.evidenceSubtitle':
+    'Record what you are doing: courses, language tests, volunteering or other steps that show your integration.',
+  'learning.evidenceHelp':
+    'Only enter things that really happened or are planned. That helps you and your team with the next step.',
   'learning.formKind': 'Type',
   'learning.formStatus': 'Status',
   'learning.formTitle': 'Name',
@@ -793,7 +795,8 @@ export const en: Dictionary = {
   'learning.formStartedAt': 'Start',
   'learning.formCompletedAt': 'Completion',
   'learning.formNotes': 'Notes',
-  'learning.formNotesHint': 'No diagnoses, no details of your asylum procedure — only what helps with housing or work.',
+  'learning.formNotesHint':
+    'No diagnoses, no details of your asylum procedure — only what helps with housing or work.',
   'learning.formSave': 'Save',
   'learning.formSaving': 'Saving …',
   'learning.formCancel': 'Cancel',
@@ -816,9 +819,14 @@ export const en: Dictionary = {
   'opportunities.nextAttendUndated': 'The place is yours. Your team will tell you when it starts.',
   'opportunities.nextUnderWay': 'You are taking part. Your team can help with any questions.',
   'opportunities.nextYouDeclined': 'You declined this suggestion.',
-  'opportunities.contactHintDuring': 'For questions about the placement, you can contact this person.',
+  'opportunities.contactHintDuring':
+    'For questions about the placement, you can contact this person.',
   'opportunities.contactHintReference': 'If you need a reference, you can contact this person.',
-  'opportunities.openAllYours': 'Every advertised place is already listed above under your placements.',
+  'opportunities.openAllYours':
+    'Every advertised place is already listed above under your placements.',
   'events.cancelledNotice': 'This event has been cancelled.',
 
+  'events.cancelConfirmTitle': 'Cancel this event?',
+  'events.cancelConfirm': 'Everyone who said they are coming will see the event as cancelled.',
+  'events.keep': 'Keep it',
 }

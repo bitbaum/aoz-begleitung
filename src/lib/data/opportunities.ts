@@ -347,6 +347,7 @@ function localise<T extends TranslatableListing & { translations?: unknown }>(
     title: readable.title,
     description: readable.description,
     requirementNote: readable.requirementNote,
+    schedule: readable.schedule,
     machineTranslated: readable.machineTranslated,
     original: readable.machineTranslated
       ? { title: listing.title, description: listing.description }

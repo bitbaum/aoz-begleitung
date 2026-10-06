@@ -259,10 +259,7 @@ export const LEARNING_LABELS = {
 
 /** Why a learning record was refused. Mapped to words per audience. */
 export type LearningRecordProblem =
-  | 'TITLE_OR_KIND'
-  | 'LANGUAGE_REQUIRED'
-  | 'LEVEL_REQUIRED'
-  | 'DATES'
+  'TITLE_OR_KIND' | 'LANGUAGE_REQUIRED' | 'LEVEL_REQUIRED' | 'DATES'
 
 export interface LearningRecordDraft {
   kind: string | null
@@ -311,8 +308,7 @@ export const LEARNING_RECORD_PROBLEM_LABELS: Record<LearningRecordProblem, strin
 // =============================================================================
 
 export type LearningRecordActor =
-  | { kind: 'staff'; mayWriteLearning: boolean }
-  | { kind: 'resident'; residentId: string }
+  { kind: 'staff'; mayWriteLearning: boolean } | { kind: 'resident'; residentId: string }
 
 export interface LearningRecordOwnership {
   residentId: string

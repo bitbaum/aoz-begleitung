@@ -34,8 +34,7 @@ import type { LearningKind, LearningStatus, ResidentOrStaff } from '@/lib/db'
  * `problem` lets the portal put the reason into the reader's language.
  */
 export type LearningActionResult =
-  | { success: true }
-  | { success: false; error: string; problem?: LearningRecordProblem }
+  { success: true } | { success: false; error: string; problem?: LearningRecordProblem }
 
 function parseDate(value: FormDataEntryValue | null): Date | null {
   if (!value || typeof value !== 'string' || value.trim() === '') return null
@@ -321,19 +320,28 @@ export async function deleteOwnLearningRecord(formData: FormData): Promise<Learn
   return { success: true }
 }
 
-// Residents with no German language test on file (Prisma's `learningRecords: { none: … }`)
+/**
+ * Clients with no German language test on file — a TASK list («Kein
+ * Deutsch-Test erfasst»), so it names only people somebody serves. A
+ * placeholder profile has nobody behind it to test; filtering it out here, in
+ * the query, means the `limit` counts real people and no page has to remember
+ * to filter afterwards. @see lib/analytics/real-data.ts
+ */
 function missingGermanTestFilter() {
-  return notInArray(
-    resident.id,
-    db
-      .select({ id: learningRecord.residentId })
-      .from(learningRecord)
-      .where(
-        and(
-          eq(learningRecord.kind, GERMAN_TEST_KIND),
-          eq(learningRecord.languageCode, GERMAN_LANGUAGE_CODE),
+  return and(
+    eq(resident.isPlaceholder, false),
+    notInArray(
+      resident.id,
+      db
+        .select({ id: learningRecord.residentId })
+        .from(learningRecord)
+        .where(
+          and(
+            eq(learningRecord.kind, GERMAN_TEST_KIND),
+            eq(learningRecord.languageCode, GERMAN_LANGUAGE_CODE),
+          ),
         ),
-      ),
+    ),
   )
 }
 

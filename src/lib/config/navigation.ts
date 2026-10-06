@@ -503,6 +503,28 @@ export interface PortalNavItem {
   aozTab?: 1 | 2 | 3 | 4
   group: PortalNavGroup
   requiresFeature?: keyof BrandFeatures
+  /**
+   * Hidden for a client who already holds a place. `/portal/housing` is a
+   * browser for finding one, and it redirects a placed client straight back
+   * to the overview — a menu item that only bounces is a dead end. The page
+   * keeps its own guard; this only keeps the menu honest.
+   */
+  onlyUnplaced?: boolean
+}
+
+/** What the portal nav needs to know about the reader. Absent = not placed. */
+export interface PortalNavContext {
+  placed?: boolean
+}
+
+/**
+ * Counts shown beside nav items, keyed by the item's label key — unread
+ * messages, proposals from the team waiting for an answer.
+ */
+export type PortalNavBadges = Partial<Record<PortalNavItem['labelKey'], number>>
+
+export function navBadgeCount(item: PortalNavItem, badges: PortalNavBadges): number {
+  return badges[item.labelKey] ?? 0
 }
 
 /**
@@ -559,7 +581,13 @@ export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
     group: 'living',
     requiresFeature: 'householdMoney',
   },
-  { href: '/portal/housing', labelKey: 'housing', icon: 'house-plus', group: 'living' },
+  {
+    href: '/portal/housing',
+    labelKey: 'housing',
+    icon: 'house-plus',
+    group: 'living',
+    onlyUnplaced: true,
+  },
   { href: '/portal/transfer', labelKey: 'transfer', icon: 'transfer', group: 'living' },
   // Gemeinschaft — the people I live with. A noun, so losing `decisions` to a
   // brand flag leaves the heading true instead of leaving it a broken promise.
@@ -643,14 +671,16 @@ const AOZ_PRIMARY_HREFS = new Set([
   '/portal/transfer',
 ])
 
-export function visiblePortalNavItems(): PortalNavItem[] {
+export function visiblePortalNavItems(context: PortalNavContext = {}): PortalNavItem[] {
   return PORTAL_NAV_ITEMS.filter(
-    (item) => !item.requiresFeature || BRAND.features[item.requiresFeature],
+    (item) =>
+      (!item.requiresFeature || BRAND.features[item.requiresFeature]) &&
+      !(item.onlyUnplaced && context.placed),
   )
 }
 
-export function portalTabItems(): PortalNavItem[] {
-  const items = visiblePortalNavItems()
+export function portalTabItems(context: PortalNavContext = {}): PortalNavItem[] {
+  const items = visiblePortalNavItems(context)
   if (isAozSurface()) {
     return items
       .filter((item) => item.aozTab !== undefined)
@@ -659,8 +689,8 @@ export function portalTabItems(): PortalNavItem[] {
   return items.filter((item) => item.tab !== undefined).sort((a, b) => (a.tab ?? 0) - (b.tab ?? 0))
 }
 
-export function portalPrimaryItems(): PortalNavItem[] {
-  const items = visiblePortalNavItems()
+export function portalPrimaryItems(context: PortalNavContext = {}): PortalNavItem[] {
+  const items = visiblePortalNavItems(context)
   if (isAozSurface()) {
     return items.filter((item) => AOZ_PRIMARY_HREFS.has(item.href))
   }
@@ -672,10 +702,10 @@ export const PORTAL_TAB_ITEMS: PortalNavItem[] = PORTAL_NAV_ITEMS.filter(
   (item) => item.tab !== undefined,
 ).sort((a, b) => (a.tab ?? 0) - (b.tab ?? 0))
 
-export function portalSidebarItems(): PortalNavItem[] {
-  return visiblePortalNavItems().filter((item) => PORTAL_SIDEBAR_GROUPS.includes(item.group))
+export function portalSidebarItems(context: PortalNavContext = {}): PortalNavItem[] {
+  return visiblePortalNavItems(context).filter((item) => PORTAL_SIDEBAR_GROUPS.includes(item.group))
 }
 
-export function portalAccountItems(): PortalNavItem[] {
-  return visiblePortalNavItems().filter((item) => item.group === 'account')
+export function portalAccountItems(context: PortalNavContext = {}): PortalNavItem[] {
+  return visiblePortalNavItems(context).filter((item) => item.group === 'account')
 }

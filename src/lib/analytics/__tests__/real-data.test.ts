@@ -47,7 +47,9 @@ describe('work queues are about people somebody is serving', () => {
 
   it.each([
     ['src/app/(admin)/page.tsx', ['servedRows(placements', 'servedRows(jobCaseload']],
-    ['src/app/(admin)/learning/page.tsx', ['servedRows(learningBoard.missingGerman']],
+    // «Kein Deutsch-Test erfasst»: excluded in the QUERY, so the row limit
+    // counts real people rather than being spent on placeholders first.
+    ['src/lib/actions/learning.ts', ['eq(resident.isPlaceholder, false)']],
   ])('%s builds its queues from served rows only', (file, calls) => {
     // The queries live in pages and a shared action; a pure predicate cannot
     // see whether a page USES it, so the wiring is pinned here.

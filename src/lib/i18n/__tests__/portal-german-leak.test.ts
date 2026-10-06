@@ -37,7 +37,6 @@ const KNOWN_LEAKS: readonly string[] = [
   'src/components/portal/CreateChoreForm.tsx',
   'src/components/portal/PortalPendingChores.tsx',
 
-  'src/app/portal/learning/page.tsx',
   'src/app/portal/page.tsx',
   'src/app/portal/preferences/PreferencesForm.tsx',
   'src/app/portal/transfer/page.tsx',

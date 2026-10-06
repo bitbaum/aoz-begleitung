@@ -64,8 +64,8 @@ const PROBLEM_KEYS: Record<LearningRecordProblem, MessageKey> = {
 }
 
 function mapKeys<K extends string>(t: Translator, keys: Record<K, MessageKey>): Record<K, string> {
-  return Object.fromEntries(Object.entries(keys).map(([id, key]) => [id, t(key as MessageKey)]))
-    as Record<K, string>
+  const entries = Object.entries(keys).map(([id, key]) => [id, t(key as MessageKey)])
+  return Object.fromEntries(entries) as Record<K, string>
 }
 
 export function learningKindLabel(t: Translator, kind: string): string {

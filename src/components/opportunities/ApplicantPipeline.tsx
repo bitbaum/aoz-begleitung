@@ -16,9 +16,16 @@ import {
 import { isAwaitingAnswer } from '@/lib/jobcoach/queue'
 import { residentName } from '@/lib/utils/resident-name'
 import { daysSince } from '@/lib/opportunities/review'
+import { proposalState, type ProposalState } from '@/lib/opportunities/pipeline'
 import { OPPORTUNITIES_ADMIN_LABELS as L } from '@/lib/constants'
 import type { ApplicationRow } from '@/lib/data/opportunities'
 import { ApplicationStageControls } from './ApplicationStageControls'
+
+const PROPOSAL_CHIPS: Record<ProposalState, { className: string; label: string }> = {
+  PENDING: { className: 'chip chip-info', label: L.proposalPending },
+  ACCEPTED: { className: 'chip chip-success', label: L.proposalAccepted },
+  DECLINED: { className: 'chip chip-neutral', label: L.proposalDeclined },
+}
 
 function formatDate(value: Date): string {
   return new Intl.DateTimeFormat('de-CH', { dateStyle: 'medium' }).format(value)
@@ -63,6 +70,14 @@ export function ApplicantPipeline({
             {application.learningRecord ? (
               <span className="chip chip-success">{L.evidenceCreated}</span>
             ) : null}
+            {(() => {
+              const proposal = proposalState(application)
+              return proposal ? (
+                <span className={PROPOSAL_CHIPS[proposal].className}>
+                  {PROPOSAL_CHIPS[proposal].label}
+                </span>
+              ) : null
+            })()}
             {isAwaitingAnswer(application) ? (
               <span className="chip chip-warning">
                 {L.awaitingAnswer} {L.awaitingSince(daysSince(application.createdAt))}

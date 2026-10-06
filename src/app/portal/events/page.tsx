@@ -3,6 +3,7 @@ import { requireResidentCookie, getPortalAuth } from '@/lib/portal-auth'
 import { getRequestTranslator } from '@/lib/i18n/request'
 import { EmptyState, PageHeader, PageShell, SectionHeader } from '@/components/ui/Page'
 import { EventCreateForm } from '@/components/portal/EventCreateForm'
+import { ConfirmEventAction } from '@/components/events/ConfirmEventAction'
 import { formatZurichDateTime } from '@/lib/utils/local-time'
 import {
   HOUSE_EVENT_CATEGORY_LABEL_KEYS,
@@ -33,11 +34,6 @@ async function submitRsvp(formData: FormData): Promise<void> {
   await rsvpToEvent(formData)
 }
 
-async function submitCancelEvent(formData: FormData): Promise<void> {
-  'use server'
-  await cancelEvent(formData)
-}
-
 export default async function PortalEventsPage() {
   await requireResidentCookie('/login')
   const { t } = await getRequestTranslator()
@@ -64,6 +60,12 @@ export default async function PortalEventsPage() {
             <span className="badge badge-ended">{t('events.cancelled')}</span>
           ) : null}
         </div>
+
+        {event.status === 'CANCELLED' ? (
+          <p className="alert-warning mt-2 text-sm" role="status">
+            {t('events.cancelledNotice')}
+          </p>
+        ) : null}
 
         <p className="mt-1 text-sm text-ui-muted">{event.description}</p>
 
@@ -107,12 +109,20 @@ export default async function PortalEventsPage() {
               </form>
             ))}
             {isCreator ? (
-              <form action={submitCancelEvent}>
-                <input type="hidden" name="id" value={event.id} />
-                <button type="submit" className="btn-ghost min-h-[44px] px-4">
-                  {t('events.cancel')}
-                </button>
-              </form>
+              <ConfirmEventAction
+                eventId={event.id}
+                action={cancelEvent}
+                copy={{
+                  trigger: t('events.cancel'),
+                  title: t('events.cancelConfirmTitle'),
+                  message: t('events.cancelConfirm'),
+                  confirm: t('events.cancel'),
+                  cancel: t('events.keep'),
+                  processing: t('learning.formSaving'),
+                  failed: t('opportunities.errorFailed'),
+                }}
+                buttonClassName="btn-ghost min-h-[44px] px-4"
+              />
             ) : null}
           </div>
         ) : null}
