@@ -5,17 +5,31 @@ import {
   LEARNING_KIND_LABELS,
   LEARNING_LABELS,
   LEARNING_STATUS_LABELS,
+  STAFF_LEARNING_ACTION_COPY,
+  STAFF_LEARNING_FORM_COPY,
+  learningAttribution,
   type LearningCategoryId,
   type LearningKindId,
   type LearningStatusId,
 } from '@/lib/config/learning'
+import { ROLE_LABELS } from '@/lib/constants/labels'
 import { LearningForm } from './LearningForm'
-import { createLearningRecordForResident } from '@/lib/actions/learning'
+import { LearningRecordActions } from './LearningRecordActions'
+import {
+  createLearningRecordForResident,
+  deleteLearningRecord,
+  updateLearningRecord,
+} from '@/lib/actions/learning'
 import { formatDate } from '@/lib/utils'
+
+export type DossierLearningRecord = LearningRecord & {
+  recordedByUser?: { role: string } | null
+  fromApplication?: { id: string } | null
+}
 
 interface Props {
   residentId: string
-  records: LearningRecord[]
+  records: DossierLearningRecord[]
   canWrite: boolean
 }
 
@@ -59,10 +73,19 @@ export function LearningRecordsCard({ residentId, records, canWrite }: Props) {
                 </p>
               )}
               <p className="text-xs text-ui-muted mt-1">
-                {record.recordedBy === 'RESIDENT'
-                  ? LEARNING_LABELS.recordedByResident
-                  : LEARNING_LABELS.recordedByStaff}
+                {learningAttribution(record, record.recordedByUser, ROLE_LABELS)}
+                {record.fromApplication ? ` · ${LEARNING_LABELS.generatedFromOpportunity}` : ''}
               </p>
+              {canWrite ? (
+                <LearningRecordActions
+                  record={record}
+                  formCopy={STAFF_LEARNING_FORM_COPY}
+                  copy={STAFF_LEARNING_ACTION_COPY}
+                  audience="staff"
+                  updateAction={updateLearningRecord}
+                  deleteAction={deleteLearningRecord}
+                />
+              ) : null}
             </li>
           ))}
         </ul>
@@ -76,8 +99,10 @@ export function LearningRecordsCard({ residentId, records, canWrite }: Props) {
           <div className="mt-4">
             <LearningForm
               action={createLearningRecordForResident}
+              copy={STAFF_LEARNING_FORM_COPY}
               residentId={residentId}
               audience="staff"
+              successMessage={LEARNING_LABELS.updated}
             />
           </div>
         </details>

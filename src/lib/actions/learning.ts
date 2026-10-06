@@ -4,22 +4,38 @@ import { IN_CARE_RESIDENT_STATUSES } from '@/lib/config/resident-status'
 import { revalidatePath } from 'next/cache'
 import { db, learningRecord, resident, careAssignment, placement, escapeLike } from '@/lib/db'
 import { and, asc, count, desc, eq, ilike, inArray, notInArray, or, sql } from 'drizzle-orm'
-import { requirePermission } from '@/lib/auth'
+import { getCurrentUser, hasPermission, requirePermission } from '@/lib/auth'
 import { getResidentCookie } from '@/lib/portal-auth'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
+import { logAudit } from '@/lib/audit'
+import { logger } from '@/lib/logger'
+import { idSchema } from '@/lib/validation/schemas'
 import {
   boardKinds,
   CEFR_LEVELS,
   LEARNING_CATEGORIES,
   LEARNING_KINDS,
+  LEARNING_RECORD_PROBLEM_LABELS,
   LEARNING_STATUSES,
   GERMAN_TEST_KIND,
   GERMAN_LANGUAGE_CODE,
+  learningRecordProblem,
+  mayChangeLearningRecord,
+  type LearningRecordActor,
+  type LearningRecordProblem,
 } from '@/lib/config/learning'
 import type { IntegrationBoardId } from '@/lib/config/integration-boards'
 import type { LearningKind, LearningStatus, ResidentOrStaff } from '@/lib/db'
 
-const INVALID_RECORD_MESSAGE = 'Art und Bezeichnung sind erforderlich'
+/**
+ * What every learning action answers. A refusal is RETURNED with the reason —
+ * a thrown error reaches the error boundary, which says «Etwas ist
+ * schiefgelaufen» and unmounts the form with everything typed into it.
+ * `problem` lets the portal put the reason into the reader's language.
+ */
+export type LearningActionResult =
+  | { success: true }
+  | { success: false; error: string; problem?: LearningRecordProblem }
 
 function parseDate(value: FormDataEntryValue | null): Date | null {
   if (!value || typeof value !== 'string' || value.trim() === '') return null
@@ -39,13 +55,11 @@ function parseStatus(value: FormDataEntryValue | null): LearningStatus {
   return 'PLANNED'
 }
 
-function parseRecord(formData: FormData) {
-  const kind = parseKind(formData.get('kind'))
-  const title = String(formData.get('title') || '').trim()
-  if (!kind || title.length < 2) {
-    throw new Error(INVALID_RECORD_MESSAGE)
-  }
+type ParsedRecord =
+  | { ok: true; data: ReturnType<typeof recordFields> & { kind: LearningKind } }
+  | { ok: false; problem: LearningRecordProblem }
 
+function recordFields(formData: FormData) {
   const categoryRaw = String(formData.get('category') || '')
   const category = (LEARNING_CATEGORIES as readonly string[]).includes(categoryRaw)
     ? categoryRaw
@@ -56,74 +70,254 @@ function parseRecord(formData: FormData) {
 
   const hoursRaw = formData.get('hours')
   const hours = hoursRaw && String(hoursRaw).trim() !== '' ? Number(hoursRaw) : null
-  const startedAt = parseDate(formData.get('startedAt'))
-  const completedAt = parseDate(formData.get('completedAt'))
-
-  if (startedAt && completedAt && completedAt < startedAt) {
-    throw new Error(ERROR_MESSAGES.INVALID_INPUT_DATA)
-  }
+  const kind = parseKind(formData.get('kind'))
 
   return {
-    kind,
-    title,
+    title: String(formData.get('title') || '').trim(),
     status: parseStatus(formData.get('status')),
+    // Language and level only mean something on a language test. Carrying a
+    // stale level over from a kind switch would file a course as «DE B1».
     languageCode:
-      String(formData.get('languageCode') || '')
-        .trim()
-        .toUpperCase() || null,
-    cefrLevel,
+      kind === 'LANGUAGE_TEST'
+        ? String(formData.get('languageCode') || '')
+            .trim()
+            .toUpperCase() || null
+        : null,
+    cefrLevel: kind === 'LANGUAGE_TEST' ? cefrLevel : null,
     provider: String(formData.get('provider') || '').trim() || null,
     category,
     hours: hours !== null && Number.isFinite(hours) && hours >= 0 ? Math.round(hours) : null,
-    startedAt,
-    completedAt,
+    startedAt: parseDate(formData.get('startedAt')),
+    completedAt: parseDate(formData.get('completedAt')),
     notes: String(formData.get('notes') || '').trim() || null,
   }
 }
 
-export async function createLearningRecordForResident(formData: FormData): Promise<void> {
-  const user = await requirePermission('learning:write')
-  const residentId = String(formData.get('residentId') || '')
-  if (!residentId) throw new Error(ERROR_MESSAGES.RESIDENT_NOT_FOUND)
-
-  const data = parseRecord(formData)
-  await db
-    .insert(learningRecord)
-    .values({ ...data, residentId, recordedBy: 'STAFF' as ResidentOrStaff })
-
-  revalidatePath(`/residents/${residentId}`)
-  revalidatePath('/learning')
-  void user
+function parseRecord(formData: FormData): ParsedRecord {
+  const kind = parseKind(formData.get('kind'))
+  const fields = recordFields(formData)
+  const problem = learningRecordProblem({ kind, ...fields })
+  if (problem || !kind) return { ok: false, problem: problem ?? 'TITLE_OR_KIND' }
+  return { ok: true, data: { ...fields, kind } }
 }
 
-export async function createOwnLearningRecord(
-  formData: FormData,
-): Promise<{ success: boolean; error?: string }> {
-  const code = await getResidentCookie()
-  if (!code) return { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED }
+function refused(problem: LearningRecordProblem): LearningActionResult {
+  return { success: false, error: LEARNING_RECORD_PROBLEM_LABELS[problem], problem }
+}
 
-  const residentRow = await db.query.resident.findFirst({
-    where: eq(resident.code, code),
-    columns: { id: true },
-  })
-  if (!residentRow) return { success: false, error: ERROR_MESSAGES.RESIDENT_NOT_FOUND }
+function parseRecordId(formData: FormData): string | null {
+  const parsed = idSchema.safeParse(formData.get('id'))
+  return parsed.success ? parsed.data : null
+}
+
+function revalidateLearning(residentId: string) {
+  revalidatePath(`/residents/${residentId}`)
+  revalidatePath('/learning')
+  revalidatePath('/portal/learning')
+}
+
+/** The acting staff member, if they may write learning — else the refusal. */
+async function staffWriter() {
+  const user = await getCurrentUser()
+  if (!user) return { user: null, error: ERROR_MESSAGES.NOT_AUTHENTICATED } as const
+  if (!hasPermission(user, 'learning:write')) {
+    return { user: null, error: ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS } as const
+  }
+  return { user, error: null } as const
+}
+
+async function actingResident() {
+  const code = await getResidentCookie()
+  if (!code) return null
+  return (
+    (await db.query.resident.findFirst({
+      where: eq(resident.code, code),
+      columns: { id: true },
+    })) ?? null
+  )
+}
+
+async function loadOwnership(id: string) {
+  return (
+    (await db.query.learningRecord.findFirst({
+      where: eq(learningRecord.id, id),
+      columns: { id: true, residentId: true, recordedBy: true },
+    })) ?? null
+  )
+}
+
+export async function createLearningRecordForResident(
+  formData: FormData,
+): Promise<LearningActionResult> {
+  const { user, error } = await staffWriter()
+  if (!user) return { success: false, error }
+  const residentParsed = idSchema.safeParse(formData.get('residentId'))
+  if (!residentParsed.success) return { success: false, error: ERROR_MESSAGES.RESIDENT_NOT_FOUND }
+  const residentId = residentParsed.data
+
+  const parsed = parseRecord(formData)
+  if (!parsed.ok) return refused(parsed.problem)
 
   try {
-    const data = parseRecord(formData)
-    await db
+    const [created] = await db
       .insert(learningRecord)
-      .values({ ...data, residentId: residentRow.id, recordedBy: 'RESIDENT' })
-  } catch (error) {
-    if (error instanceof Error && error.message === INVALID_RECORD_MESSAGE) {
-      return { success: false, error: ERROR_MESSAGES.INVALID_INPUT_DATA }
-    }
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : ERROR_MESSAGES.SAVE_ERROR,
-    }
+      .values({
+        ...parsed.data,
+        residentId,
+        recordedBy: 'STAFF' as ResidentOrStaff,
+        recordedByUserId: user.id,
+      })
+      .returning({ id: learningRecord.id })
+    await logAudit({
+      action: 'CREATE',
+      entity: 'LEARNING_RECORD',
+      entityId: created.id,
+      userId: user.id,
+      changes: { residentId, kind: parsed.data.kind },
+    })
+  } catch (cause) {
+    logger.errorWithCause('Failed to create learning record', cause, { residentId })
+    return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
   }
 
-  revalidatePath('/portal/learning')
+  revalidateLearning(residentId)
+  return { success: true }
+}
+
+/**
+ * Staff correct a record — any record, including the client's own and the
+ * evidence a STARTED thread generated. Audited, because a level or an hours
+ * total is read by the KPIs and the dossier, and "who changed this" must have
+ * an answer.
+ */
+export async function updateLearningRecord(formData: FormData): Promise<LearningActionResult> {
+  const { user, error } = await staffWriter()
+  if (!user) return { success: false, error }
+  const id = parseRecordId(formData)
+  const existing = id ? await loadOwnership(id) : null
+  if (!id || !existing) return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
+
+  const actor: LearningRecordActor = { kind: 'staff', mayWriteLearning: true }
+  if (!mayChangeLearningRecord(actor, existing)) {
+    return { success: false, error: ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS }
+  }
+
+  const parsed = parseRecord(formData)
+  if (!parsed.ok) return refused(parsed.problem)
+
+  try {
+    await db.update(learningRecord).set(parsed.data).where(eq(learningRecord.id, id))
+    await logAudit({
+      action: 'UPDATE',
+      entity: 'LEARNING_RECORD',
+      entityId: id,
+      userId: user.id,
+      changes: { residentId: existing.residentId, ...parsed.data },
+    })
+  } catch (cause) {
+    logger.errorWithCause('Failed to update learning record', cause, { id })
+    return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
+  }
+
+  revalidateLearning(existing.residentId)
+  return { success: true }
+}
+
+/**
+ * Staff remove a record. Evidence generated from an opportunity may be removed
+ * too — the application keeps its stage, and its `learningRecordId` falls to
+ * null through the foreign key, so a later ENDED does not resurrect it.
+ */
+export async function deleteLearningRecord(formData: FormData): Promise<LearningActionResult> {
+  const { user, error } = await staffWriter()
+  if (!user) return { success: false, error }
+  const id = parseRecordId(formData)
+  const existing = id ? await loadOwnership(id) : null
+  if (!id || !existing) return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
+
+  try {
+    await db.delete(learningRecord).where(eq(learningRecord.id, id))
+    await logAudit({
+      action: 'DELETE',
+      entity: 'LEARNING_RECORD',
+      entityId: id,
+      userId: user.id,
+      changes: { residentId: existing.residentId, recordedBy: existing.recordedBy },
+    })
+  } catch (cause) {
+    logger.errorWithCause('Failed to delete learning record', cause, { id })
+    return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
+  }
+
+  revalidateLearning(existing.residentId)
+  return { success: true }
+}
+
+export async function createOwnLearningRecord(formData: FormData): Promise<LearningActionResult> {
+  const residentRow = await actingResident()
+  if (!residentRow) return { success: false, error: ERROR_MESSAGES.NOT_AUTHENTICATED }
+
+  const parsed = parseRecord(formData)
+  if (!parsed.ok) return refused(parsed.problem)
+
+  try {
+    await db
+      .insert(learningRecord)
+      .values({ ...parsed.data, residentId: residentRow.id, recordedBy: 'RESIDENT' })
+  } catch (cause) {
+    logger.errorWithCause('Failed to create own learning record', cause)
+    return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
+  }
+
+  revalidateLearning(residentRow.id)
+  return { success: true }
+}
+
+/**
+ * A client corrects or removes what THEY entered — and only that. A record the
+ * team filed gets the same answer as one that does not exist, so a guessed id
+ * reveals nothing.
+ */
+async function ownRecordFor(formData: FormData) {
+  const residentRow = await actingResident()
+  if (!residentRow) return null
+  const id = parseRecordId(formData)
+  const existing = id ? await loadOwnership(id) : null
+  if (!existing) return null
+  const actor: LearningRecordActor = { kind: 'resident', residentId: residentRow.id }
+  return mayChangeLearningRecord(actor, existing) ? existing : null
+}
+
+export async function updateOwnLearningRecord(formData: FormData): Promise<LearningActionResult> {
+  const existing = await ownRecordFor(formData)
+  if (!existing) return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
+
+  const parsed = parseRecord(formData)
+  if (!parsed.ok) return refused(parsed.problem)
+
+  try {
+    await db.update(learningRecord).set(parsed.data).where(eq(learningRecord.id, existing.id))
+  } catch (cause) {
+    logger.errorWithCause('Failed to update own learning record', cause)
+    return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
+  }
+
+  revalidateLearning(existing.residentId)
+  return { success: true }
+}
+
+export async function deleteOwnLearningRecord(formData: FormData): Promise<LearningActionResult> {
+  const existing = await ownRecordFor(formData)
+  if (!existing) return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
+
+  try {
+    await db.delete(learningRecord).where(eq(learningRecord.id, existing.id))
+  } catch (cause) {
+    logger.errorWithCause('Failed to delete own learning record', cause)
+    return { success: false, error: ERROR_MESSAGES.SAVE_ERROR }
+  }
+
+  revalidateLearning(existing.residentId)
   return { success: true }
 }
 
@@ -231,6 +425,8 @@ export async function listLearningBoard(filters: LearningBoardFilters) {
     db.query.learningRecord.findMany({
       where: recordWhere,
       with: {
+        recordedByUser: { columns: { role: true } },
+        fromApplication: { columns: { id: true } },
         resident: {
           columns: {
             id: true,
@@ -310,7 +506,12 @@ export async function listResidentLearningEvidence() {
       where: eq(resident.code, code),
       columns: { id: true },
       with: {
-        learningRecords: { orderBy: [desc(learningRecord.updatedAt)] },
+        learningRecords: {
+          orderBy: [desc(learningRecord.updatedAt)],
+          // The role only — the portal names WHICH part of the team entered
+          // something, never the colleague's name.
+          with: { recordedByUser: { columns: { role: true } } },
+        },
       },
     })) ?? null
   )

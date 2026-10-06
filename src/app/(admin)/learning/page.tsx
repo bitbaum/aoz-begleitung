@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { requirePermission } from '@/lib/auth'
+import { hasPermission, requirePermission } from '@/lib/auth'
 import { listLearningBoard } from '@/lib/actions/learning'
 import { PageHeader, Toolbar } from '@/components/ui/Page'
 import { StatCard } from '@/components/ui/Card'
@@ -260,6 +260,7 @@ export default async function LearningQueuePage({ searchParams }: Props) {
           </p>
         </div>
         <IntegrationBoard
+          canWrite={hasPermission(staff, 'learning:write')}
           records={records}
           emptyLabel={mine !== '0' ? LEARNING_LABELS.noMine : LEARNING_LABELS.noResults}
           emptyAction={

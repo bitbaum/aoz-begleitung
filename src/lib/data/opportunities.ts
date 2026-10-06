@@ -32,6 +32,27 @@ const APPLICATION_INCLUDE = {
  * same three clauses expressed where the database can filter on them, and
  * `awaiting-answer-agrees.test.ts` holds the two to each other.
  */
+/**
+ * The SQL form of `clientAnswerPending` — a STAFF proposal still at INTERESTED
+ * that the client has not answered. The opposite direction to
+ * `awaitingAnswerFilter`: here the next move is the CLIENT's.
+ */
+export function clientAnswerPendingFilter() {
+  return and(
+    eq(opportunityApplication.createdBy, 'STAFF'),
+    eq(opportunityApplication.stage, 'INTERESTED'),
+    isNull(opportunityApplication.residentAnswer),
+  )
+}
+
+/** How many proposals from the team this client has not answered. Drives the portal badge. */
+export async function pendingProposalCount(residentId: string): Promise<number> {
+  return db.$count(
+    opportunityApplication,
+    and(eq(opportunityApplication.residentId, residentId), clientAnswerPendingFilter()),
+  )
+}
+
 export function awaitingAnswerFilter() {
   return and(
     eq(opportunityApplication.createdBy, 'RESIDENT'),
@@ -351,7 +372,10 @@ export async function residentOpportunityBoard(residentId: string, locale: strin
       localise(listing, locale),
     )
 
-  return { mine: myThreads, open }
+  // How many places are on offer at all, including the ones this client is
+  // already attached to. An empty «Offene Plätze» list must not say «kein
+  // Platz ausgeschrieben» when the only listing is the client's own thread.
+  return { mine: myThreads, open, publishedTotal: published.length }
 }
 
 export type ResidentOpportunityBoard = Awaited<ReturnType<typeof residentOpportunityBoard>>

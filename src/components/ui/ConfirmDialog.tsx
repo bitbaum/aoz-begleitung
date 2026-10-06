@@ -11,6 +11,8 @@ interface ConfirmDialogProps {
   onConfirm: () => Promise<void> | void
   children: React.ReactNode
   variant?: 'primary' | 'danger'
+  /** Shown on the confirm button while it runs. Defaults to the German staff word. */
+  processingLabel?: string
 }
 
 export function ConfirmDialog({
@@ -21,6 +23,7 @@ export function ConfirmDialog({
   onConfirm,
   children,
   variant = 'primary',
+  processingLabel = UI_LABELS.processing,
 }: ConfirmDialogProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -121,7 +124,7 @@ export function ConfirmDialog({
                     : 'btn-primary'
                 }
               >
-                {isPending ? UI_LABELS.processing : confirmLabel}
+                {isPending ? processingLabel : confirmLabel}
               </button>
             </div>
           </div>

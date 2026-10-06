@@ -1878,6 +1878,13 @@ export const learningRecord = pgTable(
     completedAt: timestamp({ precision: 3, mode: 'date' }),
     notes: text(),
     recordedBy: residentOrStaff().notNull(),
+    /**
+     * The member of staff who entered a STAFF record. Null for the client's
+     * own entries and for rows written before 0010. It is what lets a record
+     * say WHO on the team filed it (Jobcoach, Freiwilligenarbeit, …) instead
+     * of crediting every staff entry to "die Betreuung".
+     */
+    recordedByUserId: text(),
   },
   (table) => [
     index('LearningRecord_languageCode_cefrLevel_idx').using(
@@ -1898,6 +1905,13 @@ export const learningRecord = pgTable(
     })
       .onUpdate('cascade')
       .onDelete('cascade'),
+    foreignKey({
+      columns: [table.recordedByUserId],
+      foreignColumns: [user.id],
+      name: 'LearningRecord_recordedByUserId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('set null'),
   ],
 )
 
@@ -2292,6 +2306,14 @@ export const opportunityApplication = pgTable(
     createdBy: residentOrStaff().notNull(),
     supportedByUserId: text(),
     learningRecordId: text(),
+    /**
+     * The client's answer to a STAFF proposal: 'ACCEPTED' | 'DECLINED', or
+     * null while they have not answered. Always null on a row the client
+     * raised themselves — their own interest needs no answer from them.
+     * @see clientAnswerPending in lib/opportunities/pipeline.ts
+     */
+    residentAnswer: text(),
+    residentAnsweredAt: timestamp({ precision: 3, mode: 'date' }),
   },
   (table) => [
     uniqueIndex('OpportunityApplication_learningRecordId_key').using(

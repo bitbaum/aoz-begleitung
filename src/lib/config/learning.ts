@@ -231,9 +231,221 @@ export const LEARNING_LABELS = {
   save: 'Speichern',
   saving: 'Wird gespeichert...',
   recordedByResident: 'Selbst eingetragen',
-  recordedByStaff: 'Von der Betreuung eingetragen',
+  // Never a domain name here: a job the Jobcoach recorded was credited to «die
+  // Betreuung». The role comes from the person who entered it — see
+  // `learningAttribution`.
+  recordedByTeam: 'Vom Team eingetragen',
+  chooseLanguage: 'Sprache wählen',
+  chooseLevel: 'Niveau wählen',
+  edit: 'Bearbeiten',
+  delete: 'Löschen',
+  deleteConfirmTitle: 'Eintrag löschen?',
+  deleteConfirm:
+    'Der Eintrag verschwindet aus dem Dossier und aus «Lernen & Beruf». Das lässt sich nicht rückgängig machen.',
+  cancelEdit: 'Abbrechen',
+  updated: 'Eintrag gespeichert.',
+  deleted: 'Eintrag gelöscht.',
+  generatedFromOpportunity: 'Aus einem Einsatzplatz erstellt',
   germanMissing: 'Kein Deutsch-Test erfasst',
   planned: 'Geplant',
   inProgress: 'Laufend',
   noGermanHint: 'Jobcoach: hier fehlt oft der nächste Deutschkurs.',
 } as const
+
+// =============================================================================
+// Validation — one rule set for staff and client, so the two forms cannot
+// accept different things.
+// =============================================================================
+
+/** Why a learning record was refused. Mapped to words per audience. */
+export type LearningRecordProblem =
+  | 'TITLE_OR_KIND'
+  | 'LANGUAGE_REQUIRED'
+  | 'LEVEL_REQUIRED'
+  | 'DATES'
+
+export interface LearningRecordDraft {
+  kind: string | null
+  title: string
+  languageCode: string | null
+  cefrLevel: string | null
+  startedAt: Date | null
+  completedAt: Date | null
+}
+
+/**
+ * A language test needs an explicitly chosen language AND level.
+ *
+ * The level select used to open on «A1» with no blank option, so every
+ * language test saved through it said «DE A1» — whether or not anyone chose
+ * A1. That is a fact about a person's German, written by a default, and it is
+ * the number the Jobcoach board and the German-level KPI read. The form now
+ * opens blank and the server refuses a test without a level: «nicht
+ * angegeben» is not a level, and a test whose result nobody knows is not yet
+ * worth recording as one.
+ */
+export function learningRecordProblem(draft: LearningRecordDraft): LearningRecordProblem | null {
+  if (!draft.kind || !(LEARNING_KINDS as readonly string[]).includes(draft.kind)) {
+    return 'TITLE_OR_KIND'
+  }
+  if (draft.title.trim().length < 2) return 'TITLE_OR_KIND'
+  if (draft.kind === 'LANGUAGE_TEST') {
+    if (!draft.languageCode) return 'LANGUAGE_REQUIRED'
+    if (!draft.cefrLevel || !(CEFR_LEVELS as readonly string[]).includes(draft.cefrLevel)) {
+      return 'LEVEL_REQUIRED'
+    }
+  }
+  if (draft.startedAt && draft.completedAt && draft.completedAt < draft.startedAt) return 'DATES'
+  return null
+}
+
+export const LEARNING_RECORD_PROBLEM_LABELS: Record<LearningRecordProblem, string> = {
+  TITLE_OR_KIND: 'Art und Bezeichnung sind erforderlich.',
+  LANGUAGE_REQUIRED: 'Bitte wählen Sie die Sprache des Tests.',
+  LEVEL_REQUIRED: 'Bitte wählen Sie das Niveau des Tests.',
+  DATES: 'Der Abschluss liegt vor dem Beginn.',
+}
+
+// =============================================================================
+// Who may change a record
+// =============================================================================
+
+export type LearningRecordActor =
+  | { kind: 'staff'; mayWriteLearning: boolean }
+  | { kind: 'resident'; residentId: string }
+
+export interface LearningRecordOwnership {
+  residentId: string
+  recordedBy: 'RESIDENT' | 'STAFF'
+}
+
+/**
+ * Edit and delete follow one rule, for both.
+ *
+ * - Staff who may write learning may change ANY record — their own, a
+ *   colleague's, the client's, and the evidence the pipeline generated when a
+ *   thread reached STARTED (a coach who moved the wrong person must be able to
+ *   take the certificate back).
+ * - A client may change only what they entered THEMSELVES. A record the team
+ *   filed is the team's statement; the client can ask about it, not rewrite it.
+ */
+export function mayChangeLearningRecord(
+  actor: LearningRecordActor,
+  record: LearningRecordOwnership,
+): boolean {
+  if (actor.kind === 'staff') return actor.mayWriteLearning
+  return record.residentId === actor.residentId && record.recordedBy === 'RESIDENT'
+}
+
+// =============================================================================
+// Attribution — who on the team entered it
+// =============================================================================
+
+/**
+ * The staff-side line under a record: «Selbst eingetragen», or the ROLE of the
+ * member of staff who entered it. Rows older than `recordedByUserId` (and rows
+ * whose author left) have no role to name, and say «Vom Team» rather than
+ * guess one.
+ */
+export function learningAttribution(
+  record: { recordedBy: 'RESIDENT' | 'STAFF' },
+  author: { role: string } | null | undefined,
+  roleLabels: Record<string, string>,
+): string {
+  if (record.recordedBy === 'RESIDENT') return LEARNING_LABELS.recordedByResident
+  const role = author ? roleLabels[author.role] : undefined
+  return role ? `${LEARNING_LABELS.recordedByTeam} · ${role}` : LEARNING_LABELS.recordedByTeam
+}
+
+// =============================================================================
+// Form copy — the form is shared by staff (German) and the portal (translated)
+// =============================================================================
+
+/**
+ * Every word the learning form renders. The form takes this as a prop and
+ * imports no labels itself, so the portal can hand it the reader's language:
+ * it used to render this whole form — options included — in German inside an
+ * Arabic page.
+ */
+export interface LearningFormCopy {
+  kind: string
+  status: string
+  titleField: string
+  titlePlaceholder: string
+  language: string
+  chooseLanguage: string
+  cefr: string
+  chooseLevel: string
+  provider: string
+  providerPlaceholder: string
+  category: string
+  hours: string
+  startedAt: string
+  completedAt: string
+  notes: string
+  notesHint: string
+  save: string
+  saving: string
+  saveError: string
+  evidenceHelp: string
+  cancel: string
+  kindLabels: Record<LearningKindId, string>
+  statusLabels: Record<LearningStatusId, string>
+  categoryLabels: Record<LearningCategoryId, string>
+  languageLabels: Record<string, string>
+  problems: Record<LearningRecordProblem, string>
+}
+
+export const STAFF_LEARNING_FORM_COPY: LearningFormCopy = {
+  kind: LEARNING_LABELS.kind,
+  status: LEARNING_LABELS.status,
+  titleField: LEARNING_LABELS.titleField,
+  titlePlaceholder: LEARNING_LABELS.titlePlaceholder,
+  language: LEARNING_LABELS.language,
+  chooseLanguage: LEARNING_LABELS.chooseLanguage,
+  cefr: LEARNING_LABELS.cefr,
+  chooseLevel: LEARNING_LABELS.chooseLevel,
+  provider: LEARNING_LABELS.provider,
+  providerPlaceholder: LEARNING_LABELS.providerPlaceholder,
+  category: LEARNING_LABELS.category,
+  hours: LEARNING_LABELS.hours,
+  startedAt: LEARNING_LABELS.startedAt,
+  completedAt: LEARNING_LABELS.completedAt,
+  notes: LEARNING_LABELS.notes,
+  notesHint: LEARNING_LABELS.notesHint,
+  save: LEARNING_LABELS.save,
+  saving: LEARNING_LABELS.saving,
+  saveError: LEARNING_LABELS.saveError,
+  evidenceHelp: LEARNING_LABELS.evidenceHelp,
+  cancel: LEARNING_LABELS.cancelEdit,
+  kindLabels: LEARNING_KIND_LABELS,
+  statusLabels: LEARNING_STATUS_LABELS,
+  categoryLabels: LEARNING_CATEGORY_LABELS,
+  languageLabels: Object.fromEntries(LEARNING_LANGUAGE_OPTIONS.map((l) => [l.code, l.label])),
+  problems: LEARNING_RECORD_PROBLEM_LABELS,
+}
+
+/** The words around the form: edit, delete and its confirmation. */
+export interface LearningRecordActionCopy {
+  edit: string
+  delete: string
+  deleteConfirmTitle: string
+  deleteConfirm: string
+  cancel: string
+  updated: string
+  deleted: string
+  saving: string
+  deleteFailed: string
+}
+
+export const STAFF_LEARNING_ACTION_COPY: LearningRecordActionCopy = {
+  edit: LEARNING_LABELS.edit,
+  delete: LEARNING_LABELS.delete,
+  deleteConfirmTitle: LEARNING_LABELS.deleteConfirmTitle,
+  deleteConfirm: LEARNING_LABELS.deleteConfirm,
+  cancel: LEARNING_LABELS.cancelEdit,
+  updated: LEARNING_LABELS.updated,
+  deleted: LEARNING_LABELS.deleted,
+  saving: LEARNING_LABELS.saving,
+  deleteFailed: LEARNING_LABELS.saveError,
+}
