@@ -7,7 +7,7 @@ import { claimApplication } from '@/lib/actions/opportunities'
 import { DASHBOARD_LABELS as L } from '@/lib/constants/labels'
 import { DISPLAY_LIMITS } from '@/lib/config/thresholds'
 import { APPLICATIONS_REVIEW_PATH } from '@/lib/config/opportunities'
-import { daysSinceCeil } from '@/lib/utils'
+import { calendarDaysSince } from '@/lib/utils'
 import type { WaitingApplication } from '@/lib/inbox/waiting'
 
 /**
@@ -71,7 +71,7 @@ export function WaitingApplications({
               </Link>
               <p className="text-sm text-ui-muted truncate">
                 {L.applicationInterest(row.opportunityTitle)} ·{' '}
-                {L.applicationSince(daysSinceCeil(row.since))}
+                {L.applicationSince(calendarDaysSince(row.since))}
               </p>
             </div>
             <div className="flex items-center gap-2">

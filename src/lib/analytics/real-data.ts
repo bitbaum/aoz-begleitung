@@ -57,6 +57,24 @@ export function excludesPlaceholders<T extends MaybePlaceholderRow>(
 }
 
 /**
+ * The same rule for WORK QUEUES, for rows that carry the person one level
+ * down (a placement's `resident.id`, a care assignment's resident).
+ *
+ * A queue is a list of people somebody should go and see. A placeholder has
+ * nobody behind it, so a task about one sends a Betreuerin to knock on a door
+ * nobody has moved in behind — live 2026-10-02, «Check-ins diese Woche» named
+ * three placeholders and «Kein Deutsch-Test erfasst» four. Every staff queue
+ * builds from the rows this returns.
+ */
+export function servedRows<T>(
+  rows: readonly T[],
+  residentIdOf: (row: T) => string | null | undefined,
+  scope: PlaceholderScope,
+): T[] {
+  return rows.filter((row) => isRealRow({ residentId: residentIdOf(row) }, scope))
+}
+
+/**
  * Load the placeholder ids once per analytics request.
  *
  * Selects ids and the flag only — nothing here reaches a UI.

@@ -107,13 +107,16 @@ export async function GET(request: Request) {
     const activePlacements = await db.query.placement.findMany({
       where: eq(placement.status, 'ACTIVE'),
       with: {
-        resident: { columns: { code: true, supportLevel: true } },
+        resident: { columns: { code: true, supportLevel: true, isPlaceholder: true } },
         checkIns: { orderBy: [desc(satisfactionCheckIn.createdAt)], limit: 1 },
       },
       limit: 1000,
     })
 
     const overdueResidents = activePlacements
+      // A placeholder has nobody behind it to check in with — same rule as
+      // the dashboard queue. @see lib/analytics/real-data.ts servedRows
+      .filter((p) => !p.resident.isPlaceholder)
       .map((p) => {
         const lastCheckIn = p.checkIns[0]?.createdAt || p.startDate
         const daysSince = daysBetween(lastCheckIn)

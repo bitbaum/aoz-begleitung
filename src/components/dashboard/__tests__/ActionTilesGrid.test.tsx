@@ -118,4 +118,11 @@ describe('ActionTile', () => {
     render(<ActionTile {...BASE} items={[]} />)
     expect(screen.getByRole('heading', { name: 'Check-ins durchführen' })).toBeInTheDocument()
   })
+
+  it("keeps a row's name and its detail two words (textContent, not a margin)", () => {
+    // Live 2026-10-02: "Ihor51 Tage", "AmirIn 4 Tagen", "GeorgyBewerbung…".
+    render(<ActionTile {...BASE} />)
+    const row = screen.getByRole('link', { name: /RES-001 10 Tage/ })
+    expect(row.textContent).toContain('RES-001 10 Tage')
+  })
 })

@@ -444,6 +444,14 @@
    position, it does not decorate. */
 }
 
+/* A text link that is a tap target in its own right — a name in a list, a
+   wordmark. 44px tall without padding, so it keeps its place in the line of
+   text around it. The inline pattern it names was written out by hand ~50
+   times; new sites use this. */
+@utility tap-target {
+  @apply inline-flex min-h-[44px] items-center;
+}
+
 @utility nav-item {
   @apply inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium
          text-ui-muted hover:text-ui-text hover:bg-ui-subtle

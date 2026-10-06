@@ -128,9 +128,16 @@ export function MissionKPISection({ kpis, baseline }: Props) {
           unit={MISSION_KPI_LABELS.daysUnit}
           baselineValue={null}
         />
-        <div className={`rounded-lg border p-4 sm:col-span-2 lg:col-span-1 ${trendStyle.bg}`}>
+        {/* min-w-0 + hyphenation: «Verschlechterung» at text-2xl is wider than
+            a fifth of the row at 1280px, and as one unbreakable word it pushed
+            the grid — and the whole page — 6px past the viewport. */}
+        <div
+          className={`min-w-0 rounded-lg border p-4 sm:col-span-2 lg:col-span-1 ${trendStyle.bg}`}
+        >
           <p className="text-sm text-ui-muted mb-1">{MISSION_KPI_LABELS.conflictTrend}</p>
-          <p className={`text-2xl font-bold ${trendStyle.text}`}>{trendStyle.label}</p>
+          <p className={`text-2xl font-bold break-words hyphens-auto ${trendStyle.text}`}>
+            {trendStyle.label}
+          </p>
           <p className="text-xs text-ui-muted mt-2">{kpis.trendDetail}</p>
         </div>
       </div>
@@ -208,12 +215,15 @@ function KPICard({
   const isAchieved = progressPct !== null && progressPct >= 100
 
   return (
-    <div className="rounded-lg border border-ui-border bg-ui-surface p-4">
+    <div className="min-w-0 rounded-lg border border-ui-border bg-ui-surface p-4">
       <p className="text-sm text-ui-muted mb-1">{label}</p>
       <p className="text-2xl font-bold text-ui-text">
         {value !== null ? value : '—'}
         {value !== null && unit && (
-          <span className="text-sm font-normal text-ui-muted ml-1">{unit}</span>
+          <>
+            {' '}
+            <span className="text-sm font-normal text-ui-muted">{unit}</span>
+          </>
         )}
       </p>
       {value === null && nudgeHref && (

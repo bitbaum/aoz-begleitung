@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requirePermission } from '@/lib/auth'
 import { listLearningBoard } from '@/lib/actions/learning'
+import { loadPlaceholderScope, servedRows } from '@/lib/analytics/real-data'
 import { PageHeader, Toolbar } from '@/components/ui/Page'
 import { StatCard } from '@/components/ui/Card'
 import { IntegrationBoard } from '@/components/learning/IntegrationBoard'
@@ -83,14 +84,21 @@ export default async function LearningQueuePage({ searchParams }: Props) {
     category !== 'ALL' ||
     mine !== mineDefault
 
-  const { records, missingGerman, stats } = await listLearningBoard({
-    board,
-    status,
-    query,
-    mineOnly: mine !== '0',
-    recordedBy: source,
-    category,
-  })
+  const [learningBoard, placeholderScope] = await Promise.all([
+    listLearningBoard({
+      board,
+      status,
+      query,
+      mineOnly: mine !== '0',
+      recordedBy: source,
+      category,
+    }),
+    loadPlaceholderScope(),
+  ])
+  const { records, stats } = learningBoard
+  // «Kein Deutsch-Test erfasst» is a task list: a placeholder has nobody
+  // behind it to test. @see lib/analytics/real-data.ts servedRows
+  const missingGerman = servedRows(learningBoard.missingGerman, (r) => r.id, placeholderScope)
 
   const queryBits = new URLSearchParams()
   if (status !== 'ALL') queryBits.set('status', status)
@@ -225,7 +233,7 @@ export default async function LearningQueuePage({ searchParams }: Props) {
                 <div className="min-w-0">
                   <Link
                     href={`/residents/${resident.id}`}
-                    className="font-medium text-ui-text hover:underline"
+                    className="tap-target font-medium text-ui-text hover:underline"
                   >
                     {residentName(resident)}
                   </Link>

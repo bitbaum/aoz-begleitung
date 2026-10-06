@@ -126,3 +126,25 @@ test.describe('Public pages on a phone', () => {
     await expect(nav.getByRole('link', { name: 'Deutsch' })).toHaveAttribute('href', '/willkommen')
   })
 })
+
+/**
+ * Desktop overflows too. Live 2026-10-02 /analytics scrolled 6px sideways at
+ * 1280: the conflict-trend tile set «Verschlechterung» at text-2xl in a fifth
+ * of the row, one unbreakable word wider than its grid track. Reproduced
+ * locally on the E2E seed, which reports that trend.
+ */
+test.describe('staff pages at desktop width', () => {
+  test.use({ viewport: { width: 1280, height: 900 } })
+
+  for (const path of ['/analytics', '/residents?seat=all', '/learning?board=job']) {
+    test(`${path} does not scroll sideways at 1280px`, async ({ page }) => {
+      await page.goto(path)
+      await page.waitForLoadState('networkidle')
+      const { doc, viewport } = await page.evaluate(() => ({
+        doc: document.documentElement.scrollWidth,
+        viewport: window.innerWidth,
+      }))
+      expect({ path, overflowPx: Math.max(0, doc - viewport - 1) }).toEqual({ path, overflowPx: 0 })
+    })
+  }
+})

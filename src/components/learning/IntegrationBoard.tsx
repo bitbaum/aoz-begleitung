@@ -77,12 +77,12 @@ export function IntegrationBoard({ records, emptyLabel, emptyAction }: Integrati
                 <p className="text-sm text-ui-muted mt-1">
                   <Link
                     href={`/residents/${record.resident.id}`}
-                    className="font-medium hover:underline text-ui-text"
+                    className="tap-target font-medium hover:underline text-ui-text"
                   >
                     {residentName(record.resident)}
-                  </Link>
+                  </Link>{' '}
                   {/* resident-code-intentional — staff often identify dossiers by login code */}
-                  <span className="ml-2 font-mono text-xs">{record.resident.code}</span>
+                  <span className="ml-1 font-mono text-xs">{record.resident.code}</span>
                   {unitCode ? ` · ${unitCode}` : ` · ${LEARNING_LABELS.unitUnknown}`}
                 </p>
               </div>

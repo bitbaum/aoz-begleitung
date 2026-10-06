@@ -19,8 +19,10 @@
  * move one thread from. The link goes there instead.
  */
 
+import { calendarDaysSince } from '@/lib/utils'
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
+import { ProposePlaceForm } from '@/components/opportunities/ProposePlaceForm'
 import {
   APPLICATION_STAGE_BADGES,
   APPLICATION_STAGE_LABELS,
@@ -48,11 +50,19 @@ export interface ResidentThreadRow {
   }
 }
 
-function daysSince(from: Date, now: Date): number {
-  return Math.floor((now.getTime() - from.getTime()) / (1000 * 60 * 60 * 24))
+interface ResidentThreadsCardProps {
+  threads: readonly ResidentThreadRow[]
+  /**
+   * «Platz vorschlagen»: the places this viewer may propose, or null when they
+   * may not write (`opportunities:write`) — then the card stays read-only.
+   */
+  propose?: {
+    residentId: string
+    places: readonly { id: string; title: string; organisation: string }[]
+  } | null
 }
 
-export function ResidentThreadsCard({ threads }: { threads: readonly ResidentThreadRow[] }) {
+export function ResidentThreadsCard({ threads, propose = null }: ResidentThreadsCardProps) {
   const now = new Date()
 
   // Unanswered first. This card is read by someone who arrived from a tile
@@ -89,7 +99,7 @@ export function ResidentThreadsCard({ threads }: { threads: readonly ResidentThr
                 {waiting ? (
                   <p className="alert-warning mt-3 text-sm">
                     <span className="font-medium">
-                      {L.awaitingAnswer} {L.awaitingSince(daysSince(thread.createdAt, now))}
+                      {L.awaitingAnswer} {L.awaitingSince(calendarDaysSince(thread.createdAt, now))}
                     </span>{' '}
                     — {L.awaitingHint}
                   </p>
@@ -108,6 +118,10 @@ export function ResidentThreadsCard({ threads }: { threads: readonly ResidentThr
           })}
         </ul>
       )}
+
+      {propose ? (
+        <ProposePlaceForm residentId={propose.residentId} places={propose.places} />
+      ) : null}
     </Card>
   )
 }

@@ -20,7 +20,7 @@ import {
   DASHBOARD_LABELS,
   MAINTENANCE_PRIORITY_LABELS,
 } from '@/lib/constants/labels'
-import { daysSinceCeil } from '@/lib/utils'
+import { calendarDaysSince } from '@/lib/utils'
 import { residentName } from '@/lib/utils/resident-name'
 import { HeroAction, CriticalAlertBanner, determinePrimaryAction } from './PrimaryActionHero'
 import { QuickStat } from './QuickStatsRow'
@@ -157,7 +157,7 @@ function daysWord(count: number): string {
 }
 
 function formatDaysAgo(date: Date): string {
-  const days = daysSinceCeil(date)
+  const days = calendarDaysSince(date)
   if (days === 0) return DASHBOARD_LABELS.today
   if (days === 1) return DASHBOARD_LABELS.yesterday
   return `${days} ${DASHBOARD_LABELS.daysAgo}`
@@ -526,7 +526,7 @@ export function ActionDashboard(props: ActionDashboardProps) {
           urgency={urgencyForOpenCount(waitingThreads.length)}
           items={waitingThreads.slice(0, DISPLAY_LIMITS.dashboardItems).map((thread) => ({
             label: thread.name,
-            sublabel: DASHBOARD_LABELS.tileWaitingSinceDays(daysSinceCeil(thread.waitingSince)),
+            sublabel: DASHBOARD_LABELS.tileWaitingSinceDays(calendarDaysSince(thread.waitingSince)),
             href: `/messages/${thread.residentId}`,
           }))}
           allHref="/messages"

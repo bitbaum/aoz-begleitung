@@ -113,6 +113,24 @@ describe('addApplicant', () => {
     },
   )
 
+  it.each([
+    ['residentId', { opportunityId: 'opp-1', residentId: '' }, L.refusals.choosePerson],
+    ['opportunityId', { opportunityId: '', residentId: 'res-1' }, L.refusals.choosePlace],
+  ] as const)(
+    'returns, never throws, when %s was left unchosen',
+    async (field, entries, message) => {
+      // The picker starts empty on purpose; a blank must name the field rather
+      // than reach the error boundary or attach whoever sorted first.
+      mockOpportunityFindFirst.mockResolvedValue({ status: 'PUBLISHED' })
+
+      const state = await addApplicant({}, form({ ...entries, note: '' }))
+
+      expect(state.error).toBe(message)
+      expect(state.fieldErrors?.[field]).toEqual([message])
+      expect(mockInsert).not.toHaveBeenCalled()
+    },
+  )
+
   it('attaches a person to a published listing', async () => {
     mockOpportunityFindFirst.mockResolvedValue({ status: 'PUBLISHED' })
 

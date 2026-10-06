@@ -97,14 +97,27 @@ describe('what each desk is FOR', () => {
     expect(dashboardSections(own('LIEGENSCHAFTEN'))).toContain('maintenance')
   })
 
-  it('leads Freiwilligenarbeit with its own volunteering queue', () => {
-    expect(heroOrder(own('FREIWILLIGENARBEIT'))[0]).toBe('volunteeringQueue')
+  it('leads Freiwilligenarbeit with waiting requests, then its own volunteering queue', () => {
+    expect(heroOrder(own('FREIWILLIGENARBEIT')).slice(0, 2)).toEqual([
+      'applications',
+      'volunteeringQueue',
+    ])
     expect(caseloadQueueFor('FREIWILLIGENARBEIT')).toBe('volunteering')
   })
 
-  it('leads the Jobcoach with the job queue', () => {
-    expect(heroOrder(own('JOBCOACH'))[0]).toBe('jobQueue')
+  it('leads the Jobcoach with waiting requests, then the job queue', () => {
+    expect(heroOrder(own('JOBCOACH')).slice(0, 2)).toEqual(['applications', 'jobQueue'])
     expect(caseloadQueueFor('JOBCOACH')).toBe('job')
+  })
+
+  it('ranks an unanswered request above everything on every integration desk', () => {
+    // "The clock is theirs": a person asked. The caseload queue holds only the
+    // clients on this seat, so a requester nobody holds reaches the hero
+    // through `applications` alone — ranked lower, they lost it to a client
+    // who had asked for nothing (live 2026-10-02, Stepan vs Georgy).
+    for (const role of STAFF_ROLES.filter((r) => caseloadQueueFor(r) !== null)) {
+      expect({ role, first: heroOrder(own(role))[0] }).toEqual({ role, first: 'applications' })
+    }
   })
 
   it('leads Sozialarbeit with deadlines, after safety', () => {
@@ -138,7 +151,7 @@ describe('reach over every domain', () => {
   it('gives system administration every section, whatever its stored scope', () => {
     const admin: StaffCapabilities = { role: 'JOBCOACH', scope: 'OWN_DOMAIN', isSystemAdmin: true }
     expect([...dashboardSections(admin)].sort()).toEqual(Object.keys(DASHBOARD_SECTIONS).sort())
-    expect(heroOrder(admin)[0]).toBe('jobQueue')
+    expect(heroOrder(admin)[0]).toBe('applications')
     expect([...heroOrder(admin)].sort()).toEqual(Object.keys(HERO_SOURCES).sort())
   })
 })

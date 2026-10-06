@@ -218,6 +218,24 @@ describe('overdue check-in reminders', () => {
     expect(mockNotifyStaff).toHaveBeenCalled()
   })
 
+  test('never reminds staff about a placeholder nobody is serving', async () => {
+    // Live 2026-10-02: placeholder profiles sat in every check-in queue.
+    mockNotifyStaff.mockResolvedValue(true)
+    const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+    mockPlacementFindMany.mockResolvedValue([
+      {
+        startDate: new Date('2026-01-01'),
+        resident: { code: 'KL-AMIR', supportLevel: 'INTENSIVE', isPlaceholder: true },
+        checkIns: [{ createdAt: tenDaysAgo }],
+      },
+    ])
+
+    const res = await GET(createCronRequest(`Bearer ${CRON_SECRET}`))
+    const body = await res.json()
+
+    expect(body.checkIns).toBe(0)
+  })
+
   test('does not flag INTENSIVE resident within threshold (<=7 days)', async () => {
     mockNotifyStaff.mockResolvedValue(true)
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)

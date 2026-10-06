@@ -66,10 +66,17 @@ export function AiFormBar({
       form={form}
       // Before the title: whoever types into this box is told first that it is
       // AI, in test mode, and where to read what is sent. @see config/ai-disclosure
+      //
+      // The trailing literal space keeps the badge and the title two phrases:
+      // the package renders `[icon, title]` inside one <h2>, and a margin
+      // alone read "KI · TESTBETRIEBAus einem Inserat ausfüllen" to copy,
+      // search and screen readers. (Belongs upstream in ai-forms too.)
       icon={
-        <span className="me-2 align-middle">
-          <AiBadge />
-        </span>
+        <>
+          <span className="me-1 align-middle">
+            <AiBadge />
+          </span>{' '}
+        </>
       }
       suggestAfterFill={suggestAfterFill}
       classNames={CLASS_NAMES}

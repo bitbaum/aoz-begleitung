@@ -49,6 +49,8 @@ vi.mock('@/lib/constants/labels', async () => ({
     heroHadSuffix: 'hatte',
     heroIncidentsSuffix: 'Vorfälle',
     heroReview: 'Überprüfen',
+    heroRequestsTitle: (n: number) => `${n} Anfragen warten auf eine Antwort`,
+    heroRequestInterestIn: 'Interesse an',
     heroProposalsTitle: (n: number) =>
       n === 1 ? '1 Beschluss wartet auf Bestätigung' : `${n} Beschlüsse warten auf Bestätigung`,
     heroReviewProposals: 'Jetzt prüfen',
@@ -519,4 +521,56 @@ describe('the hero follows the viewer desk', () => {
     expect(result.type).toBe('allclear')
     expect(result.href).toBe('/learning')
   })
+
+  /**
+   * Live, 2026-10-02: Stepan pressed «Ich habe Interesse». The Jobcoach and
+   * Freiwilligenarbeit dashboards counted it under "Wartet auf eine Antwort",
+   * while «Als Nächstes» named Georgy for "Noch kein Arbeitsmarktkontakt" —
+   * because Stepan is on nobody's seat, so he reached the hero only through
+   * `applications`, which the desks ranked BELOW their caseload queue.
+   */
+  it.each([
+    [
+      'JOBCOACH',
+      {
+        jobQueue: [
+          {
+            residentId: 'g1',
+            name: 'Georgy',
+            signal: 'NO_LABOUR_MARKET_CONTACT',
+            opportunityId: null,
+          },
+        ],
+      },
+    ],
+    [
+      'FREIWILLIGENARBEIT',
+      {
+        volunteeringQueue: [
+          { residentId: 'g1', name: 'Georgy', signal: 'NO_ENGAGEMENT', opportunityId: null },
+        ],
+      },
+    ],
+  ] as const)(
+    'leads %s with a request nobody has answered, ahead of the caseload',
+    (role, queue) => {
+      const result = determinePrimaryAction({
+        ...EMPTY,
+        ...(queue as object),
+        viewer: own(role),
+        waitingApplications: [
+          {
+            applicationId: 'a1',
+            opportunityId: 'o1',
+            opportunityTitle: 'Velowerkstatt',
+            residentId: 's1',
+            name: 'Stepan',
+            since: new Date(),
+          },
+        ],
+      })
+      expect(result.description).toContain('Stepan')
+      expect(result.href).toBe('/opportunities/o1')
+    },
+  )
 })

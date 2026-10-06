@@ -49,14 +49,22 @@ interface Case {
 const CASES: Record<ClientFilterId, Case[]> = {
   stand: [
     { value: 'active', sql: ['"Resident"."status" in ($1, $2)'], params: ['ACTIVE', 'PLACED'] },
-    { value: 'placed', sql: ['"Resident"."status" = $1'], params: ['PLACED'] },
+    // Placed or not is the PLACEMENT's fact; the status only says "in care".
+    {
+      value: 'placed',
+      sql: [
+        '"Resident"."status" in ($1, $2)',
+        '"Resident"."id" in (select "residentId" from "Placement"',
+      ],
+      params: ['ACTIVE', 'PLACED', 'ACTIVE'],
+    },
     {
       value: 'unplaced',
       sql: [
-        '"Resident"."status" = $1',
+        '"Resident"."status" in ($1, $2)',
         '"Resident"."id" not in (select "residentId" from "Placement"',
       ],
-      params: ['ACTIVE', 'ACTIVE'],
+      params: ['ACTIVE', 'PLACED', 'ACTIVE'],
     },
     { value: 'archived', sql: ['"Resident"."status" = $1'], params: ['EXITED'] },
     { value: 'all', sql: null },
@@ -175,7 +183,14 @@ describe('clientFilterWhere', () => {
       clientFilterWhere({ stand: 'placed', lang: ['AR'], waiting: true }, CTX),
     )
     expect(compiled!.sql).toContain(' and ')
-    expect(compiled!.params).toEqual(['PLACED', '{"AR"}', 'RESIDENT', 'INTERESTED'])
+    expect(compiled!.params).toEqual([
+      'ACTIVE',
+      'PLACED',
+      'ACTIVE',
+      '{"AR"}',
+      'RESIDENT',
+      'INTERESTED',
+    ])
   })
 })
 

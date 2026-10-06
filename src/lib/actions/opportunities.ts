@@ -137,6 +137,11 @@ export interface OpportunityFormState {
   fieldErrors?: Record<string, string[] | undefined>
 }
 
+function isBlankField(formData: FormData, key: string): boolean {
+  const value = formData.get(key)
+  return typeof value !== 'string' || value.trim() === ''
+}
+
 /** Every save path shares this, so no caller has to remember to catch. */
 function toFormState(error: unknown, fallback: string): OpportunityFormState {
   if (error instanceof ValidationError) {
@@ -307,10 +312,24 @@ async function tryPublish(opportunityId: string): Promise<string | null> {
 }
 
 export async function publishOpportunityFromEdit(opportunityId: string): Promise<void> {
+  await publishFromPage(opportunityId, `/opportunities/${opportunityId}/edit`)
+}
+
+/**
+ * The same button on the listing itself. A draft's detail page said
+ * «Erst veröffentlichen, dann Personen zuordnen» and offered no way to do so
+ * short of opening the edit form. A refusal comes back to THIS page, beside
+ * the button that was pressed.
+ */
+export async function publishOpportunityFromDetail(opportunityId: string): Promise<void> {
+  await publishFromPage(opportunityId, `/opportunities/${opportunityId}`)
+}
+
+async function publishFromPage(opportunityId: string, refusalPath: string): Promise<void> {
   const failure = await tryPublish(opportunityId)
   redirect(
     failure
-      ? `/opportunities/${opportunityId}/edit?error=${encodeURIComponent(failure)}`
+      ? `${refusalPath}?error=${encodeURIComponent(failure)}`
       : `/opportunities/${opportunityId}`,
   )
 }
@@ -339,6 +358,22 @@ export async function addApplicant(
   formData: FormData,
 ): Promise<ApplicationActionState> {
   const user = await requirePermission('opportunities:write')
+
+  // Both pickers start EMPTY on purpose (a pre-selected first name attached
+  // whoever sorted first — live, Alex). An unchosen field is the user's to
+  // fix, so it is named and returned, never a generic validation shrug.
+  if (isBlankField(formData, 'residentId')) {
+    return {
+      error: ADMIN_LABELS.refusals.choosePerson,
+      fieldErrors: { residentId: [ADMIN_LABELS.refusals.choosePerson] },
+    }
+  }
+  if (isBlankField(formData, 'opportunityId')) {
+    return {
+      error: ADMIN_LABELS.refusals.choosePlace,
+      fieldErrors: { opportunityId: [ADMIN_LABELS.refusals.choosePlace] },
+    }
+  }
 
   let data
   try {
@@ -388,6 +423,8 @@ export async function addApplicant(
   }
 
   revalidateOpportunity(data.opportunityId)
+  // Proposed from the dossier as often as from the listing.
+  revalidatePath(`/residents/${data.residentId}`)
   return {}
 }
 
