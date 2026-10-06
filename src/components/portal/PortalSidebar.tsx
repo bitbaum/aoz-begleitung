@@ -9,6 +9,8 @@ import {
   PORTAL_SIDEBAR_GROUPS,
   PORTAL_SIDEBAR_PINNED,
   portalSidebarItems,
+  navBadgeCount,
+  type PortalNavBadges,
   type PortalNavGroup,
   type PortalNavItem,
 } from '@/lib/config/navigation'
@@ -24,13 +26,15 @@ import type { MessageKey } from '@/lib/i18n'
  */
 export function PortalNavAccordion({
   pathname,
-  messageUnreadCount = 0,
+  badges = {},
+  placed = false,
 }: {
   pathname: string
-  messageUnreadCount?: number
+  badges?: PortalNavBadges
+  placed?: boolean
 }) {
   const t = useT()
-  const items = portalSidebarItems()
+  const items = portalSidebarItems({ placed })
   const pinned = items.filter((item) => PORTAL_SIDEBAR_PINNED.includes(item.href))
   const grouped = items.filter((item) => !PORTAL_SIDEBAR_PINNED.includes(item.href))
 
@@ -43,7 +47,7 @@ export function PortalNavAccordion({
           key={item.href}
           item={item}
           active={isPortalPathActive(pathname, item.href)}
-          messageUnreadCount={messageUnreadCount}
+          badges={badges}
         />
       ))}
 
@@ -54,7 +58,7 @@ export function PortalNavAccordion({
           pathname={pathname}
           items={grouped}
           heading={t(`navGroup.${group}` as MessageKey)}
-          messageUnreadCount={messageUnreadCount}
+          badges={badges}
         />
       ))}
     </nav>
@@ -66,13 +70,13 @@ function NavGroup({
   pathname,
   items,
   heading,
-  messageUnreadCount,
+  badges,
 }: {
   group: PortalNavGroup
   pathname: string
   items: PortalNavItem[]
   heading: string
-  messageUnreadCount: number
+  badges: PortalNavBadges
 }) {
   const grouped = items.filter((item) => item.group === group)
   const containsCurrent = grouped.some((item) => isPortalPathActive(pathname, item.href))
@@ -103,7 +107,7 @@ function NavGroup({
             <GroupLink
               item={item}
               active={isPortalPathActive(pathname, item.href)}
-              messageUnreadCount={messageUnreadCount}
+              badges={badges}
             />
           </li>
         ))}
@@ -115,15 +119,15 @@ function NavGroup({
 function GroupLink({
   item,
   active,
-  messageUnreadCount,
+  badges,
 }: {
   item: PortalNavItem
   active: boolean
-  messageUnreadCount: number
+  badges: PortalNavBadges
 }) {
   const t = useT()
   const Icon = NAV_ICONS[item.icon]
-  const showUnread = item.labelKey === 'messages' && messageUnreadCount > 0
+  const count = navBadgeCount(item, badges)
   return (
     <Link
       href={item.href}
@@ -133,13 +137,19 @@ function GroupLink({
       <Icon className={`w-4 h-4 ${active ? 'text-brand-primary' : ''}`} aria-hidden="true" />
       <span className="flex min-w-0 items-center gap-2">
         <span>{t(portalNavMessageKey(item))}</span>
-        {showUnread && <span className="chip-warning text-xs">{messageUnreadCount}</span>}
+        {count > 0 && <span className="chip-warning text-xs">{count}</span>}
       </span>
     </Link>
   )
 }
 
-export function PortalSidebar({ messageUnreadCount = 0 }: { messageUnreadCount?: number }) {
+export function PortalSidebar({
+  badges = {},
+  placed = false,
+}: {
+  badges?: PortalNavBadges
+  placed?: boolean
+}) {
   const pathname = usePathname()
   const t = useT()
 
@@ -148,7 +158,7 @@ export function PortalSidebar({ messageUnreadCount = 0 }: { messageUnreadCount?:
       className="hidden lg:block w-60 xl:w-64 shrink-0 border-e border-ui-border bg-ui-surface sticky top-14 self-start h-[calc(100vh-3.5rem)] overflow-y-auto px-2 py-3"
       aria-label={t('nav.moreTitle')}
     >
-      <PortalNavAccordion pathname={pathname} messageUnreadCount={messageUnreadCount} />
+      <PortalNavAccordion pathname={pathname} badges={badges} placed={placed} />
     </aside>
   )
 }

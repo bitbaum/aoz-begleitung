@@ -22,6 +22,11 @@ import {
   type PermitRequirementId,
   type PermitStatementId,
 } from '@/lib/config/opportunities'
+import type {
+  OpenBoardEmpty,
+  ResidentContactHint,
+  ResidentNextStep,
+} from '@/lib/opportunities/pipeline'
 
 const KIND_KEYS: Record<OpportunityKindId, MessageKey> = {
   VOLUNTEERING: 'opportunities.kindVolunteering',
@@ -71,4 +76,44 @@ export function permitStatementLabel(t: Translator, kind: string, permit: string
 
 export function applicationStageLabel(t: Translator, stage: ApplicationStageId): string {
   return t(STAGE_KEYS[stage])
+}
+
+/**
+ * What the client's own thread says happens now — one sentence per
+ * `ResidentNextStep`, keyed by the union so a new state fails to compile here.
+ * A place that is yours but has no stated start date must not say «Unten
+ * steht, wo und ab wann»: there is nothing below about «wann».
+ */
+const NEXT_STEP_KEYS: Record<ResidentNextStep, MessageKey> = {
+  PROPOSED_TO_YOU: 'opportunities.nextProposed',
+  WAITING_ON_STAFF: 'opportunities.nextWaiting',
+  YOURS_TO_ATTEND: 'opportunities.nextAttend',
+  UNDER_WAY: 'opportunities.nextUnderWay',
+  FINISHED: 'opportunities.nextFinished',
+  NOT_THIS_TIME: 'opportunities.nextDeclined',
+  YOU_DECLINED: 'opportunities.nextYouDeclined',
+}
+
+export function residentNextStepKey(step: ResidentNextStep, hasStartDate: boolean): MessageKey {
+  if (step === 'YOURS_TO_ATTEND' && !hasStartDate) return 'opportunities.nextAttendUndated'
+  return NEXT_STEP_KEYS[step]
+}
+
+const CONTACT_HINT_KEYS: Record<ResidentContactHint, MessageKey> = {
+  BEFORE_START: 'opportunities.contactHint',
+  DURING: 'opportunities.contactHintDuring',
+  REFERENCE: 'opportunities.contactHintReference',
+}
+
+export function residentContactHintKey(hint: ResidentContactHint): MessageKey {
+  return CONTACT_HINT_KEYS[hint]
+}
+
+const OPEN_EMPTY_KEYS: Record<OpenBoardEmpty, MessageKey> = {
+  NONE_PUBLISHED: 'opportunities.openEmpty',
+  ALL_YOURS: 'opportunities.openAllYours',
+}
+
+export function openBoardEmptyKey(state: OpenBoardEmpty): MessageKey {
+  return OPEN_EMPTY_KEYS[state]
 }

@@ -71,6 +71,13 @@
       "when": 1790948325480,
       "tag": "0009_surveys",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790966049491,
+      "tag": "0010_learning_author_and_client_answer",
+      "breakpoints": true
     }
   ]
 }

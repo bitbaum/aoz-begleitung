@@ -10,9 +10,11 @@ import { PortalSidebar } from '@/components/portal/PortalSidebar'
 import { PortalTabBar } from '@/components/portal/PortalTabBar'
 import { BRAND } from '@/lib/config/brand'
 import { RESIDENT_COOKIE, STAFF_COOKIE } from '@/lib/auth/constants'
-import { db, resident as residentTable } from '@/lib/db'
-import { eq } from 'drizzle-orm'
+import { db, placement as placementTable, resident as residentTable } from '@/lib/db'
+import { and, eq } from 'drizzle-orm'
 import { residentUnreadCount } from '@/lib/messaging/queries'
+import { pendingProposalCount } from '@/lib/data/opportunities'
+import type { PortalNavBadges } from '@/lib/config/navigation'
 
 /**
  * The portal names itself in the reader's language.
@@ -52,7 +54,24 @@ export default async function PortalLayout({ children }: { children: React.React
         columns: { id: true },
       })
     : null
-  const messageUnreadCount = resident ? await residentUnreadCount(resident.id) : 0
+  const [messageUnreadCount, proposalCount, activePlacement] = resident
+    ? await Promise.all([
+        residentUnreadCount(resident.id),
+        // Proposals from the team waiting for the client's answer — the
+        // portal's other "somebody is waiting on you" count.
+        pendingProposalCount(resident.id),
+        db.query.placement.findFirst({
+          where: and(
+            eq(placementTable.residentId, resident.id),
+            eq(placementTable.status, 'ACTIVE'),
+          ),
+          columns: { id: true },
+        }),
+      ])
+    : [0, 0, null]
+  const badges: PortalNavBadges = { messages: messageUnreadCount, opportunities: proposalCount }
+  // Same question `/portal/housing` asks before redirecting a placed client.
+  const placed = Boolean(activePlacement)
 
   const { locale, t } = await getRequestTranslator()
 
@@ -61,8 +80,9 @@ export default async function PortalLayout({ children }: { children: React.React
   }
 
   return (
-    // Bottom padding clears the fixed tab bar. `lang`/`dir` sit here rather
-    // than on <html> so the landing page stays prerenderable.
+    // Bottom padding clears the fixed tab bar. `lang`/`dir` sit here for the
+    // server render, and LocaleProvider mirrors them onto <html> once mounted:
+    // the root layout stays static so the landing page can prerender.
     <div
       lang={locale}
       dir={LOCALES[locale].dir}
@@ -81,7 +101,7 @@ export default async function PortalLayout({ children }: { children: React.React
         </header>
 
         <div className="flex flex-1 min-h-0">
-          <PortalSidebar messageUnreadCount={messageUnreadCount} />
+          <PortalSidebar badges={badges} placed={placed} />
 
           <div className="flex-1 min-w-0 flex flex-col">
             <main id="portal-main" className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 sm:py-8">
@@ -104,7 +124,7 @@ export default async function PortalLayout({ children }: { children: React.React
           </div>
         </div>
 
-        <PortalTabBar messageUnreadCount={messageUnreadCount} />
+        <PortalTabBar badges={badges} placed={placed} />
       </LocaleProvider>
     </div>
   )

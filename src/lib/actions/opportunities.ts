@@ -7,7 +7,11 @@ import { requirePermission } from '@/lib/auth'
 import { getResidentCookie } from '@/lib/portal-auth'
 import {
   availableTransitions,
+  clientAnswerPending,
   evidenceForStartedApplication,
+  parseClientAnswer,
+  stageAfterClientAnswer,
+  type ClientAnswerId,
   isFull,
   mayAttachPeople,
   stageChangeRefusal,
@@ -79,6 +83,7 @@ async function refreshTranslations(opportunityId: string): Promise<void> {
         title: true,
         description: true,
         requirementNote: true,
+        schedule: true,
         translations: true,
       },
     })
@@ -539,7 +544,7 @@ export async function changeApplicationStage(
           .insert(learningRecord)
           .values({
             residentId: application.residentId,
-            ...evidenceForStartedApplication(listing, now),
+            ...evidenceForStartedApplication(listing, now, user.id),
           })
           .returning({ id: learningRecord.id })
         learningRecordId = record.id
@@ -611,6 +616,8 @@ const PORTAL_OPPORTUNITY_PATH = '/portal/opportunities'
 type PortalOutcome =
   | 'ok=interest'
   | 'ok=withdrawn'
+  | 'ok=proposalAccepted'
+  | 'ok=proposalDeclined'
   | 'error=unavailable'
   | 'error=full'
   | 'error=locked'
@@ -731,6 +738,94 @@ async function removeInterest(applicationId: string, residentId: string): Promis
   })
 
   return 'ok=withdrawn'
+}
+
+/**
+ * The client's answer to a proposal from their team.
+ *
+ * Only a STAFF row still at INTERESTED with no answer can be answered
+ * (`clientAnswerPending`), and only by the client it names. Accepting keeps
+ * the stage — the thread simply continues on the normal path with the team.
+ * Declining moves it to DECLINED and records that the CLIENT said no, so
+ * nobody later reads it as the place turning them down.
+ *
+ * Conditional on the row still being unanswered and at INTERESTED, so a coach
+ * moving the thread in the same minute cannot be overwritten by a stale page.
+ */
+async function recordClientAnswer(
+  applicationId: string,
+  residentId: string,
+  answer: ClientAnswerId,
+): Promise<PortalOutcome> {
+  const application = await db.query.opportunityApplication.findFirst({
+    where: eq(opportunityApplication.id, applicationId),
+    columns: {
+      id: true,
+      residentId: true,
+      opportunityId: true,
+      createdBy: true,
+      stage: true,
+      residentAnswer: true,
+    },
+  })
+
+  if (!application || application.residentId !== residentId) return 'error=unavailable'
+  if (!clientAnswerPending(application)) return 'error=locked'
+
+  const now = new Date()
+  const nextStage = stageAfterClientAnswer(answer)
+  try {
+    const [updated] = await db
+      .update(opportunityApplication)
+      .set({
+        residentAnswer: answer,
+        residentAnsweredAt: now,
+        ...(nextStage !== application.stage ? { stage: nextStage, stageChangedAt: now } : {}),
+      })
+      .where(
+        and(
+          eq(opportunityApplication.id, applicationId),
+          eq(opportunityApplication.stage, 'INTERESTED'),
+          isNull(opportunityApplication.residentAnswer),
+        ),
+      )
+      .returning({ id: opportunityApplication.id })
+    if (!updated) return 'error=locked'
+  } catch (error) {
+    logger.errorWithCause('Failed to record client answer', error, { applicationId })
+    return 'error=failed'
+  }
+
+  await logAudit({
+    action: 'UPDATE',
+    entity: 'OPPORTUNITY_APPLICATION',
+    entityId: applicationId,
+    changes: {
+      residentId,
+      actor: 'RESIDENT',
+      residentAnswer: answer,
+      ...(nextStage !== application.stage ? { from: application.stage, to: nextStage } : {}),
+    },
+  })
+
+  return answer === 'ACCEPTED' ? 'ok=proposalAccepted' : 'ok=proposalDeclined'
+}
+
+export async function answerProposal(formData: FormData): Promise<void> {
+  const residentId = await actingResidentId()
+  if (!residentId) redirect('/login')
+
+  const applicationId = String(formData.get('applicationId') || '')
+  const answer = parseClientAnswer(String(formData.get('answer') || ''))
+  const outcome: PortalOutcome =
+    applicationId && answer
+      ? await recordClientAnswer(applicationId, residentId, answer)
+      : 'error=unavailable'
+
+  revalidatePath(PORTAL_OPPORTUNITY_PATH)
+  revalidatePath('/portal', 'layout')
+  revalidateOpportunity()
+  redirect(`${PORTAL_OPPORTUNITY_PATH}?${outcome}`)
 }
 
 export async function withdrawInterest(formData: FormData): Promise<void> {

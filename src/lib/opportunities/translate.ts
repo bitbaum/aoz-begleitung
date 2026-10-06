@@ -32,6 +32,7 @@ const TranslationSchema = z.object({
   title: z.string().min(1).max(400),
   description: z.string().min(1).max(4000),
   requirementNote: z.string().max(1200).nullable().optional(),
+  schedule: z.string().max(400).nullable().optional(),
 })
 
 const MAX_TRANSLATION_TOKENS = 3000
@@ -67,13 +68,14 @@ function systemPrompt(): string {
 function userPrompt(listing: TranslatableListing, locale: LocaleId): string {
   return [
     `Zielsprache: ${LOCALES[locale].endonym} (${locale}).`,
-    'Übersetze die folgenden Felder und antworte als JSON mit genau den Schlüsseln "title", "description", "requirementNote".',
-    'Wenn "requirementNote" leer ist, gib null zurück.',
+    'Übersetze die folgenden Felder und antworte als JSON mit genau den Schlüsseln "title", "description", "requirementNote", "schedule".',
+    'Wenn "requirementNote" oder "schedule" leer ist, gib dafür null zurück.',
     '',
     JSON.stringify({
       title: listing.title,
       description: listing.description,
       requirementNote: listing.requirementNote,
+      schedule: listing.schedule,
     }),
   ].join('\n')
 }
@@ -115,6 +117,7 @@ async function translateOne(
       title: parsed.data.title,
       description: parsed.data.description,
       requirementNote: parsed.data.requirementNote ?? null,
+      schedule: parsed.data.schedule ?? null,
       sourceHash: hash,
     },
   }

@@ -34,6 +34,11 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
   // own vocabulary rather than a shade of "offen": every other thread on this
   // board is waiting on a process, this one is waiting on a person.
   awaitingAnswer: 'Wartet auf Antwort',
+  // A STAFF proposal and the client's answer to it. The opposite direction to
+  // awaitingAnswer: here the next move is the CLIENT's.
+  proposalPending: 'Vorgeschlagen · Antwort der Klient*in offen',
+  proposalAccepted: 'Klient*in ist interessiert',
+  proposalDeclined: 'Von der Klient*in abgelehnt',
   awaitingSince: sinceDaysPhrase,
   awaitingHint:
     'Diese Person hat sich selbst gemeldet. Bis jemand antwortet, gilt das nicht als Arbeitsmarktkontakt — und die Meldung bleibt in der Aufgabenliste.',

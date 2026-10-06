@@ -52,6 +52,11 @@ export type AuditEntity =
   // never the list), closed. A client's answer is never audited — "resident X
   // answered survey Y" is exactly the record the survey promises not to keep.
   | 'SURVEY'
+  // Learning evidence, when staff change or remove it — a level or an hours
+  // total feeds the dossier and the KPIs, so who changed it must be on record.
+  | 'LEARNING_RECORD'
+  // A house event cancelled or deleted by staff.
+  | 'HOUSE_EVENT'
 
 interface AuditLogEntry {
   action: AuditAction

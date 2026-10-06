@@ -30,7 +30,7 @@ export function PortalNav({ hasStaffAccess }: PortalNavProps) {
     <div className="flex items-center justify-between gap-3 w-full">
       <Link
         href="/portal"
-        className="text-base font-semibold tracking-tight text-brand-primary transition-opacity hover:opacity-70 sm:text-lg shrink-0"
+        className="inline-flex min-h-[44px] items-center text-base font-semibold tracking-tight text-brand-primary transition-opacity hover:opacity-70 sm:text-lg shrink-0"
       >
         {t(BRAND.portalTitleKey)}
       </Link>

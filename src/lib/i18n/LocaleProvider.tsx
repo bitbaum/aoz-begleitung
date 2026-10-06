@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useMemo } from 'react'
+import { createContext, useContext, useEffect, useMemo } from 'react'
 import { createTranslator, type MessageKey } from '@/lib/i18n'
 import { DEFAULT_LOCALE, LOCALES, type Locale, type LocaleId } from '@/lib/i18n/locales'
 
@@ -31,6 +31,24 @@ export function LocaleProvider({
     () => ({ locale: LOCALES[locale], t: createTranslator(locale) }),
     [locale],
   )
+
+  // The ROOT element carries the reader's language and direction while the
+  // portal is mounted. The root layout is shared with the prerendered public
+  // pages, so it says `lang="de"`; the portal's own wrapper already sets
+  // lang/dir for server-rendered text, but everything outside it — the
+  // document's language for a screen reader, the scrollbar side, a toast or
+  // dialog portalled to <body> — still read German, left to right, inside an
+  // Arabic portal. Restored on unmount so leaving the portal leaves no trace.
+  useEffect(() => {
+    const root = document.documentElement
+    const previous = { lang: root.lang, dir: root.dir }
+    root.lang = locale
+    root.dir = LOCALES[locale].dir
+    return () => {
+      root.lang = previous.lang
+      root.dir = previous.dir
+    }
+  }, [locale])
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
 }

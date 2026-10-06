@@ -1,9 +1,16 @@
 import type { Metadata } from 'next'
-import { db, housingUnit } from '@/lib/db'
-import { asc } from 'drizzle-orm'
 import { EmptyState, ListShell, PageHeader, PageShell } from '@/components/ui/Page'
 import { EVENTS_ADMIN_LABELS } from '@/lib/constants'
-import { listStaffEvents, createEventAsStaff, cancelEvent } from '@/lib/actions/events'
+import {
+  listStaffEvents,
+  createEventAsStaff,
+  cancelEvent,
+  deleteEvent,
+  listEventUnitOptions,
+} from '@/lib/actions/events'
+import { eventUnitOptions, mayDeleteEvent } from '@/lib/config/events'
+import { ConfirmEventAction } from '@/components/events/ConfirmEventAction'
+import { UI_LABELS } from '@/lib/constants'
 import { formatZurichDateTime } from '@/lib/utils/local-time'
 import { getCurrentUser, hasPermission, requirePermission } from '@/lib/auth'
 
@@ -21,22 +28,12 @@ async function submitCreateEvent(formData: FormData): Promise<void> {
   await createEventAsStaff(formData)
 }
 
-async function submitCancelEvent(formData: FormData): Promise<void> {
-  'use server'
-  await cancelEvent(formData)
-}
-
 export default async function EventsAdminPage() {
   await requirePermission('events:read')
   const staff = await getCurrentUser()
   const canWriteEvents = !!staff && hasPermission(staff, 'events:write')
-  const [events, units] = await Promise.all([
-    listStaffEvents(),
-    db.query.housingUnit.findMany({
-      columns: { id: true, code: true },
-      orderBy: [asc(housingUnit.code)],
-    }),
-  ])
+  const [events, unitRows] = await Promise.all([listStaffEvents(), listEventUnitOptions()])
+  const units = eventUnitOptions(unitRows)
 
   return (
     <PageShell>
@@ -70,12 +67,29 @@ export default async function EventsAdminPage() {
               <label htmlFor="ev-unit" className="label">
                 {EVENTS_ADMIN_LABELS.formUnit}
               </label>
-              <select id="ev-unit" name="housingUnitId" required className="input">
-                {units.map((unit) => (
-                  <option key={unit.id} value={unit.id}>
-                    {unit.code}
-                  </option>
-                ))}
+              {/* Blank first: a pre-selected first code is a choice nobody made. */}
+              <select id="ev-unit" name="housingUnitId" required defaultValue="" className="input">
+                <option value="" disabled>
+                  {EVENTS_ADMIN_LABELS.unitChoose}
+                </option>
+                {units.occupied.length > 0 ? (
+                  <optgroup label={EVENTS_ADMIN_LABELS.unitGroupOccupied}>
+                    {units.occupied.map((unit) => (
+                      <option key={unit.id} value={unit.id}>
+                        {unit.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ) : null}
+                {units.empty.length > 0 ? (
+                  <optgroup label={EVENTS_ADMIN_LABELS.unitGroupEmpty}>
+                    {units.empty.map((unit) => (
+                      <option key={unit.id} value={unit.id}>
+                        {unit.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ) : null}
               </select>
             </div>
             <div>
@@ -156,12 +170,37 @@ export default async function EventsAdminPage() {
                     </div>
                   </div>
                   {canWriteEvents && event.status !== 'CANCELLED' ? (
-                    <form action={submitCancelEvent}>
-                      <input type="hidden" name="id" value={event.id} />
-                      <button type="submit" className="btn-outline min-h-[44px] px-4">
-                        {EVENTS_ADMIN_LABELS.cancel}
-                      </button>
-                    </form>
+                    <ConfirmEventAction
+                      eventId={event.id}
+                      action={cancelEvent}
+                      copy={{
+                        trigger: EVENTS_ADMIN_LABELS.cancel,
+                        title: EVENTS_ADMIN_LABELS.cancelConfirmTitle,
+                        message: EVENTS_ADMIN_LABELS.cancelConfirm(
+                          event.rsvps.filter((r) => r.status === 'GOING').length,
+                        ),
+                        confirm: EVENTS_ADMIN_LABELS.cancel,
+                        cancel: EVENTS_ADMIN_LABELS.keep,
+                        processing: UI_LABELS.processing,
+                        failed: EVENTS_ADMIN_LABELS.failed,
+                      }}
+                    />
+                  ) : null}
+                  {canWriteEvents && mayDeleteEvent(event) ? (
+                    <ConfirmEventAction
+                      eventId={event.id}
+                      action={deleteEvent}
+                      copy={{
+                        trigger: EVENTS_ADMIN_LABELS.delete,
+                        title: EVENTS_ADMIN_LABELS.deleteConfirmTitle,
+                        message: EVENTS_ADMIN_LABELS.deleteConfirm,
+                        confirm: EVENTS_ADMIN_LABELS.delete,
+                        cancel: UI_LABELS.cancel,
+                        processing: UI_LABELS.processing,
+                        failed: EVENTS_ADMIN_LABELS.failed,
+                      }}
+                      buttonClassName="btn-ghost min-h-[44px] px-4 text-status-error"
+                    />
                   ) : null}
                 </div>
               </div>

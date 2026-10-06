@@ -300,7 +300,7 @@ export default async function ResidentPortal() {
       </div>
 
       {/* Every pillar, reachable from home — derived from the nav config. */}
-      <PortalPillarDirectory t={t} />
+      <PortalPillarDirectory t={t} placed={Boolean(currentPlacement)} />
     </div>
   )
 }

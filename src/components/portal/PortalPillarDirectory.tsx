@@ -12,9 +12,15 @@ import type { MessageKey } from '@/lib/i18n'
  * the "Mehr" sheet. This derives 100% from the nav config (groups, order,
  * icons, labels), so a new nav item appears here without touching this file.
  */
-export function PortalPillarDirectory({ t }: { t: (key: MessageKey) => string }) {
+export function PortalPillarDirectory({
+  t,
+  placed = false,
+}: {
+  t: (key: MessageKey) => string
+  placed?: boolean
+}) {
   // The overview item links to the page this section is on.
-  const items = portalSidebarItems().filter((item) => item.href !== '/portal')
+  const items = portalSidebarItems({ placed }).filter((item) => item.href !== '/portal')
 
   return (
     <section className="mt-8">

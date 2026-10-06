@@ -1,16 +1,22 @@
 import Link from 'next/link'
-import type { LearningRecord, ResidentOrStaff } from '@/lib/db'
+import type { LearningRecord } from '@/lib/db'
 import {
   LEARNING_CATEGORY_LABELS,
   LEARNING_KIND_LABELS,
   LEARNING_LABELS,
   LEARNING_STATUS_LABELS,
+  STAFF_LEARNING_ACTION_COPY,
+  STAFF_LEARNING_FORM_COPY,
+  learningAttribution,
   type LearningCategoryId,
   type LearningKindId,
   type LearningStatusId,
 } from '@/lib/config/learning'
 import { formatDate } from '@/lib/utils'
 import { residentName } from '@/lib/utils/resident-name'
+import { ROLE_LABELS } from '@/lib/constants/labels'
+import { LearningRecordActions } from '@/components/residents/LearningRecordActions'
+import { deleteLearningRecord, updateLearningRecord } from '@/lib/actions/learning'
 
 type ResidentSummary = {
   id: string
@@ -22,12 +28,16 @@ type ResidentSummary = {
 
 export type LearningBoardRecord = LearningRecord & {
   resident: ResidentSummary
+  recordedByUser?: { role: string } | null
+  fromApplication?: { id: string } | null
 }
 
 interface IntegrationBoardProps {
   records: LearningBoardRecord[]
   emptyLabel: string
   emptyAction?: React.ReactNode
+  /** Staff who may write learning get edit and delete on every card. */
+  canWrite?: boolean
 }
 
 function statusBadge(status: string): string {
@@ -37,11 +47,12 @@ function statusBadge(status: string): string {
   return 'badge badge-inactive'
 }
 
-function sourceLabel(source: ResidentOrStaff): string {
-  return source === 'RESIDENT' ? LEARNING_LABELS.sourceResident : LEARNING_LABELS.sourceStaff
-}
-
-export function IntegrationBoard({ records, emptyLabel, emptyAction }: IntegrationBoardProps) {
+export function IntegrationBoard({
+  records,
+  emptyLabel,
+  emptyAction,
+  canWrite = false,
+}: IntegrationBoardProps) {
   if (records.length === 0) {
     return (
       <div className="card text-center py-10">
@@ -70,7 +81,7 @@ export function IntegrationBoard({ records, emptyLabel, emptyAction }: Integrati
                     {LEARNING_KIND_LABELS[record.kind as LearningKindId]}
                   </span>
                   <span className="chip chip-neutral text-xs">
-                    {sourceLabel(record.recordedBy)}
+                    {learningAttribution(record, record.recordedByUser, ROLE_LABELS)}
                   </span>
                 </div>
                 <h3 className="font-semibold text-ui-text truncate">{record.title}</h3>
@@ -144,6 +155,21 @@ export function IntegrationBoard({ records, emptyLabel, emptyAction }: Integrati
                 <p className="text-sm text-ui-text whitespace-pre-wrap">{record.notes}</p>
               </div>
             )}
+
+            {record.fromApplication ? (
+              <p className="text-xs text-ui-muted">{LEARNING_LABELS.generatedFromOpportunity}</p>
+            ) : null}
+
+            {canWrite ? (
+              <LearningRecordActions
+                record={record}
+                formCopy={STAFF_LEARNING_FORM_COPY}
+                copy={STAFF_LEARNING_ACTION_COPY}
+                audience="staff"
+                updateAction={updateLearningRecord}
+                deleteAction={deleteLearningRecord}
+              />
+            ) : null}
           </article>
         )
       })}

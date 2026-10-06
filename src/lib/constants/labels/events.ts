@@ -36,6 +36,24 @@ export const EVENTS_ADMIN_LABELS = {
   submit: 'Erstellen',
   cancel: 'Absagen',
   cancelled: 'Abgesagt',
+  cancelConfirmTitle: 'Veranstaltung absagen?',
+  cancelConfirm: (going: number) =>
+    going > 0
+      ? `${going === 1 ? 'Eine Person hat' : `${going} Personen haben`} zugesagt und ${going === 1 ? 'bekommt' : 'bekommen'} eine Nachricht im Portal. Die Veranstaltung bleibt für sie als «Abgesagt» sichtbar.`
+      : 'Noch niemand hat zugesagt. Die Veranstaltung verschwindet aus dem Portal.',
+  keep: 'Nicht absagen',
+  delete: 'Löschen',
+  deleteConfirmTitle: 'Veranstaltung löschen?',
+  deleteConfirm:
+    'Die abgesagte Veranstaltung und alle Antworten darauf werden gelöscht. Das lässt sich nicht rückgängig machen.',
+  failed: 'Das hat nicht geklappt. Bitte laden Sie die Seite neu.',
+  // Sent into each «Ich komme» resident's message thread, in German like every
+  // other staff message there — no email.
+  cancellationMessage: (title: string, when: string) =>
+    `Die Veranstaltung «${title}» am ${when} ist abgesagt. Sie hatten zugesagt — deshalb diese Nachricht. Bei Fragen können Sie hier antworten.`,
+  unitGroupOccupied: 'Bewohnte Einheiten',
+  unitGroupEmpty: 'Zurzeit ohne Platzierung',
+  unitChoose: 'Einheit wählen',
   unit: 'Einheit',
   rsvps: 'Zusagen',
   category: categoryLabels,
