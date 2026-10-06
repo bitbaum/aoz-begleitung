@@ -30,7 +30,6 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  const { error } = await searchParams
   const opportunity = await getOpportunityDetail(id)
   return { title: opportunity?.title ?? L.pageTitle }
 }
@@ -53,6 +52,7 @@ export default async function OpportunityDetailPage({ params, searchParams }: Pr
   const staff = await requirePermission('opportunities:read')
   const canWrite = hasPermission(staff, 'opportunities:write')
   const { id } = await params
+  const { error } = await searchParams
 
   const opportunity = await getOpportunityDetail(id)
   if (!opportunity) notFound()
