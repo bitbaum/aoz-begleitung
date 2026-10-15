@@ -24,7 +24,8 @@ const nextConfig = {
             value: `default-src 'self'; script-src ${scriptSrc} https://loki.orangecat.ch; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.sentry.io https://loki.orangecat.ch; frame-ancestors 'self'`,
           },
           { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          // Loki records only after an explicit tap and browser microphone permission.
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(self), geolocation=()' },
         ],
       },
     ]
