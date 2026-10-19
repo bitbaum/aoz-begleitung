@@ -1,0 +1,53 @@
+{
+  "real": [
+    {
+      "unit": {
+        "code": "MUS-001",
+        "address": "Musterstrasse 1, 8000 Zürich",
+        "totalBeds": 5,
+        "totalRooms": 3,
+        "sharedRooms": 2,
+        "privateRooms": 1,
+        "sharedBathrooms": 1,
+        "privateBathrooms": 0,
+        "sharedKitchen": true,
+        "privateKitchen": false
+      },
+      "rooms": [
+        { "code": "R1", "label": "Zimmer 1", "beds": 1 },
+        { "code": "R2", "label": "Zimmer 2", "beds": 2 },
+        { "code": "R3", "label": "Zimmer 3", "beds": 2 }
+      ],
+      "residents": [
+        { "displayName": "Resident A", "room": "R1" },
+        { "displayName": "Resident B", "room": "R2" },
+        { "displayName": "Resident C", "room": "R3" },
+        { "displayName": "Resident D", "room": "R3" }
+      ]
+    }
+  ],
+  "placeholders": [
+    {
+      "unit": {
+        "code": "MUS-002-01",
+        "address": "Musterstrasse 2, 8000 Zürich",
+        "totalBeds": 3,
+        "totalRooms": 2,
+        "sharedRooms": 1,
+        "privateRooms": 1,
+        "sharedBathrooms": 1,
+        "privateBathrooms": 0,
+        "sharedKitchen": true,
+        "privateKitchen": false
+      },
+      "rooms": [
+        { "code": "R1", "label": "Zimmer 1", "beds": 1 },
+        { "code": "R2", "label": "Zimmer 2", "beds": 2 }
+      ],
+      "residents": [
+        { "displayName": "Platzhalter A", "room": "R1" },
+        { "displayName": "Platzhalter B", "room": "R2" }
+      ]
+    }
+  ]
+}

@@ -14,7 +14,7 @@ This file no longer describes the product. Current sources:
 | Where it is going | [docs/ROADMAP.md](docs/ROADMAP.md) (also the public `/roadmap`) |
 | How to work in this repo | [CLAUDE.md](CLAUDE.md) |
 
-Setting up a real apartment: see `scripts/db/seed-real.ts`; the apartment data
-lives outside the documentation.
+Setting up a real apartment: see [REAL-APARTMENTS-SETUP.md](REAL-APARTMENTS-SETUP.md); the apartment data
+lives in a gitignored local file, never in the repository.
 
 The live instance holds REAL client data. Never treat it as demo data.

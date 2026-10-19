@@ -67,9 +67,9 @@ export function ActionTile({
             className="flex items-center justify-between gap-3 min-h-[44px] py-2 px-3 -mx-1 rounded-md hover:bg-ui-subtle transition-colors"
           >
             <div className="min-w-0">
-              {/* The literal space is what keeps "Ihor" and "51 Tage" two words
+              {/* The literal space is what keeps a name and "51 Tage" two words
                   for copy, search and screen readers; the margin alone glued
-                  them into "Ihor51 Tage". */}
+                  them into "Name51 Tage". */}
               <span className="font-medium text-ui-text text-sm">{item.label}</span>{' '}
               <span className="text-ui-muted text-sm ml-1">{item.sublabel}</span>
             </div>

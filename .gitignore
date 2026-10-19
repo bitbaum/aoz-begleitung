@@ -56,3 +56,8 @@ next-env.d.ts
 # output dir so committed assets under public/ and docs/ are unaffected.
 /*.png
 .playwright-mcp/
+
+# Real apartment config (addresses, who lives where) — personal data, never
+# committed. Shape: scripts/db/real/apartments.example.json; loader: load.ts.
+scripts/db/real/*.local.json
+scripts/db/real/*.local.ts

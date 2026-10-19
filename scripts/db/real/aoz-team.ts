@@ -55,7 +55,7 @@
  * in the database, not by editing this file.
  *
  * Login codes are NOT in this file, for the same reason they are absent from
- * witikonerstrasse-458.ts: they are generated when the script runs and printed
+ * the apartment config: they are generated when the script runs and printed
  * once. Committing them would publish four working staff logins.
  */
 

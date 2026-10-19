@@ -48,23 +48,23 @@ describe('the staff unit picker is something a person can choose from', () => {
   const units = [
     {
       id: 'c',
-      code: 'WIT-426-10',
+      code: 'MUS-002-10',
       nickname: null,
-      address: 'Witikonerstrasse 426',
+      address: 'Musterstrasse 2',
       activePlacements: 0,
     },
     {
       id: 'a',
-      code: 'WIT-426-02',
+      code: 'MUS-002-02',
       nickname: 'Singapur',
-      address: 'Witikonerstrasse 426',
+      address: 'Musterstrasse 2',
       activePlacements: 2,
     },
     {
       id: 'b',
-      code: 'WIT-426-01',
+      code: 'MUS-002-01',
       nickname: null,
-      address: 'Witikonerstrasse 426',
+      address: 'Musterstrasse 2',
       activePlacements: 0,
     },
   ]
@@ -72,10 +72,10 @@ describe('the staff unit picker is something a person can choose from', () => {
   it('puts lived-in units first and names each beyond its code', () => {
     const options = eventUnitOptions(units)
     expect(options.occupied).toEqual([
-      { id: 'a', label: 'WIT-426-02 · Singapur · Witikonerstrasse 426' },
+      { id: 'a', label: 'MUS-002-02 · Singapur · Musterstrasse 2' },
     ])
     // Natural order: 01 before 10.
     expect(options.empty.map((unit) => unit.id)).toEqual(['b', 'c'])
-    expect(options.empty[0].label).toBe('WIT-426-01 · Witikonerstrasse 426')
+    expect(options.empty[0].label).toBe('MUS-002-01 · Musterstrasse 2')
   })
 })

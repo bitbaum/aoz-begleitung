@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest'
 
 import { excludesPlaceholders, isRealRow, type PlaceholderScope } from '@/lib/analytics/real-data'
 
+import { parseApartmentsConfig } from '../../../../scripts/db/real/load'
+
 /**
  * A seeded profile is not a client until someone claims it.
  *
@@ -93,17 +95,27 @@ describe('claiming a profile makes it a person', () => {
 })
 
 describe('the seed itself', () => {
-  const config = sourceOf('scripts/db/real/witikonerstrasse-426.ts')
   const script = sourceOf('scripts/db/seed-placeholders.ts')
+  // The real flats are personal data and live in a gitignored local file; the
+  // committed example shows the shape, and the loader is what both share.
+  const example = parseApartmentsConfig(
+    JSON.parse(sourceOf('scripts/db/real/apartments.example.json')),
+  )
 
   it('marks every seeded profile', () => {
     expect(script).toMatch(/isPlaceholder:\s*true/)
   })
 
   it('never invents an address', () => {
-    // Real AOZ stock, already in the database. The building is real; only the
-    // people are placeholders.
-    expect(config).toContain('Witikonerstrasse 426, 8053 Zürich')
+    // Real AOZ stock, already in the database. The unit row is ACTIVATED by
+    // code rather than inserted beside it; only the people are placeholders.
+    expect(script).toMatch(/\.update\(housingUnit\)/)
+    expect(script).toMatch(/eq\(housingUnit\.code, apartment\.unit\.code\)/)
+  })
+
+  it('reads its flats from the local config, never from a committed file', () => {
+    expect(script).toMatch(/loadApartmentsConfig\(\)\.placeholders/)
+    expect(example.placeholders.every((apartment) => apartment.placeholder)).toBe(true)
   })
 
   it('refuses to touch a flat holding a real client', () => {
@@ -114,10 +126,19 @@ describe('the seed itself', () => {
   it('leaves a bed free somewhere', () => {
     // A flat seeded to exactly full cannot demonstrate placing anyone, which
     // is the product's entire subject.
-    const beds = [...config.matchAll(/beds:\s*(\d+)/g)].map((m) => Number(m[1]))
-    const totals = [...config.matchAll(/totalBeds:\s*(\d+)/g)].map((m) => Number(m[1]))
-    const people = [...config.matchAll(/displayName:/g)].length
-    expect(beds.length).toBeGreaterThan(0)
-    expect(totals.reduce((a, b) => a + b, 0)).toBeGreaterThan(people)
+    const beds = example.placeholders.reduce((sum, a) => sum + a.unit.totalBeds, 0)
+    const people = example.placeholders.reduce((sum, a) => sum + a.residents.length, 0)
+    expect(example.placeholders.length).toBeGreaterThan(0)
+    expect(beds).toBeGreaterThan(people)
+  })
+
+  it('rejects a config that puts more people in a room than it has beds', () => {
+    const [flat] = example.placeholders
+    const overfull = {
+      placeholders: [
+        { ...flat, residents: [...flat.residents, ...flat.residents, ...flat.residents] },
+      ],
+    }
+    expect(() => parseApartmentsConfig(overfull)).toThrow(/more residents than beds/)
   })
 })

@@ -398,8 +398,8 @@ describe('ActionDashboard', () => {
         {...BASE_PROPS}
         viewer={{ role: 'BETREUUNG', scope: 'ALL_DOMAINS', isSystemAdmin: false }}
         overdueFollowUps={[
-          { id: 'inc-1', subject: 'Hana', unitCode: 'WIT-458', daysOverdue: 6 },
-          { id: 'inc-2', subject: null, unitCode: 'WIT-458', daysOverdue: 1 },
+          { id: 'inc-1', subject: 'Hana', unitCode: 'MUS-001', daysOverdue: 6 },
+          { id: 'inc-2', subject: null, unitCode: 'MUS-001', daysOverdue: 1 },
         ]}
       />,
     )
