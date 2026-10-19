@@ -120,7 +120,7 @@ describe('ActionTile', () => {
   })
 
   it("keeps a row's name and its detail two words (textContent, not a margin)", () => {
-    // Live 2026-10-02: "Ihor51 Tage", "AmirIn 4 Tagen", "GeorgyBewerbung…".
+    // Live 2026-10-02: each name was glued to its detail, e.g. "Name51 Tage".
     render(<ActionTile {...BASE} />)
     const row = screen.getByRole('link', { name: /RES-001 10 Tage/ })
     expect(row.textContent).toContain('RES-001 10 Tage')

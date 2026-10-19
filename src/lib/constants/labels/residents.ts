@@ -217,7 +217,7 @@ export const CLIENT_GROUP_LABELS = {
   saveHint:
     'Eine Gruppe speichert die Filter, nicht die Personen: wer dazugehört, wird bei jedem Öffnen neu bestimmt.',
   name: 'Name',
-  namePlaceholder: 'z.B. Arabisch sprechend in WIT-458',
+  namePlaceholder: 'z.B. Arabisch sprechend in Wohnung 3',
   description: 'Beschreibung (optional)',
   rename: 'Umbenennen',
   renameSubmit: 'Speichern',

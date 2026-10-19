@@ -1143,9 +1143,15 @@ profiles.
 
 ### Real deployments
 
-`scripts/db/seed-real.ts` seeds a REAL apartment from `scripts/db/real/*.ts` config
-(layout + who lives where; login codes are generated at runtime and printed
-once — never committed). The production instance `aoz.orangecat.ch` holds
+`scripts/db/seed-real.ts` seeds the REAL apartments from a **local, gitignored**
+config (layout + who lives where; login codes are generated at runtime and
+printed once — never committed). This repository is public, so no real address,
+unit code or resident name may be committed — not in config, docs, tests or
+comments. The config is `scripts/db/real/apartments.local.json`, or any path in
+`REAL_APARTMENTS_FILE`; `scripts/db/real/apartments.example.json` shows the
+shape with invented values, `scripts/db/real/load.ts` validates it, and both
+seed scripts exit with instructions when it is missing. Setup:
+`REAL-APARTMENTS-SETUP.md`. The production instance `aoz.orangecat.ch` holds
 real data only; there is no demo mode, no reset and no `--wipe` any more
 (removed 2026-10-01). See "Quick Access" below.
 
@@ -1535,12 +1541,12 @@ who actually arrives registers with that code at `/register`, the flag clears
 and the profile — with its placement, its flat and its history — is theirs.
 Exactly the staff shape: the code is minted first, the human arrives later.
 
-- **Real addresses, placeholder people.** `scripts/db/real/witikonerstrasse-426.ts`
-  activates `WIT-426-01` and `WIT-426-03`, rows already in the database from
-  AOZ's own stock import. Nothing invents an address. Seeded by
-  `scripts/db/seed-placeholders.ts`, which REFUSES any flat holding a
-  non-placeholder resident — real clients are never in a seed script's blast
-  radius.
+- **Real addresses, placeholder people.** The flats are real AOZ stock whose
+  unit rows are already in the database from AOZ's own stock import; nothing
+  invents an address. Which flats is the `placeholders` list in the local
+  apartment config (below). Seeded by `scripts/db/seed-placeholders.ts`, which
+  REFUSES any flat holding a non-placeholder resident — real clients are never
+  in a seed script's blast radius.
 - **Neutral factors, always.** Not one seeded preference is a statement about
   anybody. Inventing that a placeholder sleeps lightly would feed fiction into
   the compatibility algorithm and back out as a recommendation staff act on.

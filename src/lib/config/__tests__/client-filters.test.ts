@@ -24,7 +24,7 @@ const dialect = new PgDialect()
 const NOW = new Date('2026-10-02T12:00:00Z')
 const CTX = { viewerId: 'viewer-1', now: NOW }
 const SOURCES = {
-  units: [{ id: 'unit-1', code: 'WIT-458', nickname: 'Singapur' }],
+  units: [{ id: 'unit-1', code: 'MUS-001', nickname: 'Singapur' }],
   staff: [{ id: 'staff-2', name: 'Mira Keller' }],
   viewerHasCaseload: true,
 }

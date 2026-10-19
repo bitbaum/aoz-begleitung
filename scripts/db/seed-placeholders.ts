@@ -25,13 +25,18 @@
  * - A flat holding a resident who is NOT a placeholder is skipped even if the
  *   codes match. Real clients are never in the blast radius of a seed script.
  *
+ * Which flats: the `placeholders` list in the local apartment config (see
+ * scripts/db/real/load.ts). It is gitignored because it names real addresses,
+ * and this repository is public.
+ *
  * Codes are printed ONCE and committed nowhere. A placeholder's code is still a
  * credential: whoever holds it takes the profile over.
  */
 
 import { and, eq, inArray } from 'drizzle-orm'
 import { db, housingUnit, placement, placementSpot, resident as residentTable } from '@/lib/db'
-import { PLACEHOLDER_APARTMENTS, type PlaceholderApartment } from './real/witikonerstrasse-426'
+import { loadApartmentsConfig } from './real/load'
+import type { PlaceholderApartment } from './real/types'
 import { generateResidentCode } from '@/lib/auth/code-generation'
 
 const DRY_RUN = process.argv.includes('--dry-run')
@@ -198,7 +203,7 @@ async function main() {
   )
 
   let total = 0
-  for (const apartment of PLACEHOLDER_APARTMENTS) {
+  for (const apartment of loadApartmentsConfig().placeholders) {
     total += await seedApartment(apartment)
   }
 

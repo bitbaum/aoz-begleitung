@@ -1,11 +1,14 @@
 /**
- * Seed a REAL apartment (no demo data) from scripts/db/real/*.ts config.
+ * Seed the REAL apartments (no demo data) listed under `real` in the local
+ * apartment config — see scripts/db/real/load.ts for where that file lives.
+ * It is gitignored on purpose: addresses and who sleeps where are personal
+ * data, and this repository is public.
  *
  * Usage:
  *   npx ts-node -r tsconfig-paths/register --compiler-options '{"module":"CommonJS"}' scripts/db/seed-real.ts
  *
- * Idempotent: if the unit already has active placements the script refuses to
- * run, so a re-run can never duplicate people. (The `--wipe` flag that
+ * Idempotent: a unit that already has active placements is skipped, so a
+ * re-run can never duplicate people. (The `--wipe` flag that
  * truncated a demo instance was removed with the demo world on 2026-10-01.)
  *
  * Login codes are GENERATED here and printed once — hand them out and store
@@ -14,7 +17,8 @@
 
 import { eq } from 'drizzle-orm'
 import { db, housingUnit, placement, placementSpot, resident as residentTable } from '@/lib/db'
-import { REAL_APARTMENT } from './real/witikonerstrasse-458'
+import { loadApartmentsConfig } from './real/load'
+import type { RealApartment } from './real/types'
 import { generateResidentCode } from '@/lib/auth/code-generation'
 import { syncOrgRules } from '@/lib/governance/sync-org-rules'
 
@@ -33,27 +37,27 @@ async function uniqueResidentCode(): Promise<string> {
   throw new Error('could not generate a unique resident code')
 }
 
-async function main() {
+async function seedApartment(apartment: RealApartment): Promise<void> {
   const existing = await db.query.housingUnit.findFirst({
-    where: eq(housingUnit.code, REAL_APARTMENT.unit.code),
+    where: eq(housingUnit.code, apartment.unit.code),
     columns: { id: true },
     with: { placements: { where: eq(placement.status, 'ACTIVE'), columns: { id: true } } },
   })
   if (existing && existing.placements.length > 0) {
     console.error(
-      `✋ ${REAL_APARTMENT.unit.code} already has ${existing.placements.length} active placements — refusing to seed twice.`,
+      `✋ ${apartment.unit.code} already has ${existing.placements.length} active placements — refusing to seed twice.`,
     )
-    process.exit(1)
+    return
   }
 
   const [unit] = await db
     .insert(housingUnit)
-    .values({ ...REAL_APARTMENT.unit, status: 'FULL' })
+    .values({ ...apartment.unit, status: 'FULL' })
     .returning()
 
   // Rooms with their beds (the spot hierarchy the rest of the app expects).
   const bedsByRoom = new Map<string, string[]>()
-  for (const room of REAL_APARTMENT.rooms) {
+  for (const room of apartment.rooms) {
     const [roomSpot] = await db
       .insert(placementSpot)
       .values({
@@ -86,7 +90,7 @@ async function main() {
   const startDate = new Date()
   const credentials: Array<{ name: string; code: string; room: string }> = []
 
-  for (const person of REAL_APARTMENT.residents) {
+  for (const person of apartment.residents) {
     const bedIds = bedsByRoom.get(person.room)
     if (!bedIds || bedIds.length === 0) {
       throw new Error(`no free bed left in ${person.room} for ${person.displayName}`)
@@ -128,14 +132,24 @@ async function main() {
     credentials.push({ name: person.displayName, code, room: person.room })
   }
 
-  await syncOrgRules(db)
-
-  console.log(`\n🏠 Seeded ${REAL_APARTMENT.unit.code} (${REAL_APARTMENT.unit.address})`)
+  console.log(`\n🏠 Seeded ${apartment.unit.code} (${apartment.unit.address})`)
   console.log('\nLogin codes — hand these out, they are shown ONCE:\n')
   for (const c of credentials) {
     console.log(`  ${c.name.padEnd(10)} ${c.room}  →  ${c.code}`)
   }
   console.log('')
+}
+
+async function main() {
+  const { real } = loadApartmentsConfig()
+  if (real.length === 0) {
+    console.error('✋ The apartment config lists no `real` apartments — nothing to seed.')
+    process.exit(1)
+  }
+  for (const apartment of real) {
+    await seedApartment(apartment)
+  }
+  await syncOrgRules(db)
 }
 
 main()
