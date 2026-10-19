@@ -54,7 +54,7 @@ reconciler the box stayed on the 16 Aug release.
 Manual rebuild (brand switch, stuck job):
 
 ```bash
-gh workflow run deploy.yml -R bitbaum/aoz-housing
+gh workflow run deploy.yml -R bitbaum/aoz-begleitung
 ```
 
 Uncommitted work on a laptop is not in production. Neither is a branch that is not `master`.

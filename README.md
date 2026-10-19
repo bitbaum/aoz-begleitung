@@ -21,7 +21,7 @@ click signs in as a named staff account; no registration needed. Everything on
 the site is real; the only seeded people are unclaimed placeholder profiles.
 **Where AI is used and what it sends:** <https://aoz.orangecat.ch/ki-datenschutz>.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
 
 ## What it does
 
