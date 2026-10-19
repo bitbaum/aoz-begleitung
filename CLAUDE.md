@@ -336,7 +336,7 @@ user benefit:
 |---|---|
 | Deploy app `aoz-wohnen`, domain, DB `aoz_wohnen`, systemd units | Addresses. Renaming means DNS/Caddy/service churn. |
 | ~~Repo~~ — **renamed to `aoz-begleitung` on 2026-09-15** | It was listed here as an address, but nothing keyed on it: no systemd unit, Caddy file or database name contains the repo name, so the rename cost no churn at all. It was also the last public place the product was still called Housing. `JWT_ISSUER` below is a different matter and did not move. |
-| `JWT_ISSUER` (`aoz-housing`) | Changing it invalidates every live session. |
+| `JWT_ISSUER` (`aoz-housing`) | Changing it invalidates every live session. | <!-- docs-truth: keep — the live JWT issuer; changing it signs everyone out -->
 | Theme key `aoz-theme` | Changing it silently resets everyone's light/dark choice. |
 | **Existing resident codes** | `codePrefix` applies to NEW codes only; login resolves by exact string, so old `AOZ-` codes keep working forever. |
 
