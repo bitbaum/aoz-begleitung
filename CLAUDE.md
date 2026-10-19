@@ -359,7 +359,8 @@ Colour is *rationed*: brand red marks the one action that matters on a screen
 and nothing else. That is what keeps warning/error legible as signals in a tool
 whose whole job is surfacing conflict.
 
-**Tailwind v3** — config at `tailwind.config.ts`, which holds **zero** literal
+**Tailwind v4** — still with a JS config, `tailwind.config.ts`, loaded by
+`@config` in `src/app/globals.css`; it holds **zero** literal
 design values; it only maps utilities onto CSS vars. Both themes share one
 class surface — only the var values flip.
 
@@ -612,7 +613,7 @@ export const RESIDENT_FACTORS = {
 
 ### Labels (German UI)
 
-All user-facing text in `src/lib/constants/labels.ts`:
+All user-facing text in `src/lib/constants/labels/` (one file per domain, barrel `index.ts`):
 
 ```typescript
 // WRONG - hardcoded in component
@@ -821,7 +822,7 @@ Klient*innen list — id, URL param, German label, kind (`select` ·
 returning a Drizzle `where` on Resident. The filter bar, the status tabs
 (`stand`, which keeps the old `view` param), URL encoding, saved-group
 validation and group membership all iterate that list: **a new filter is one
-entry there** plus its row in `config/__tests__/client-filters.test.ts`, which
+entry there** plus its row in `src/lib/config/__tests__/client-filters.test.ts`, which
 fails when a filter has no case.
 
 - **A group is a saved FILTER, never a list of people.** `ClientGroup.filters`
@@ -851,7 +852,7 @@ Origin: AOZ's project **Wohnen+** sent residents an anonymous SurveyMonkey
 questionnaire, "Leben in der AOZ Wohnung", promising «Niemand erfährt, was Sie
 geantwortet haben». This is that, inside the product. Staff (`surveys:write`:
 BETREUUNG, SOZIALARBEIT, sysadmin) create a survey from a template
-(`config/survey-templates.ts`, questions in every offered portal locale), send
+(`src/lib/config/survey-templates.ts`, questions in every offered portal locale), send
 it, close it; `surveys:read` sees aggregates only. Nav: Klient*innen › Umfragen.
 
 - **Three tables, and the promise lives in the third.** `Survey` (questions
@@ -1443,7 +1444,7 @@ caseload queue), the `quietDay` button and `checkInChip`. Never write
 | FREIWILLIGENARBEIT | Freiwilligenarbeit & Gemeinschaft | volunteering caseload · requests · events · learning | volunteering queue |
 | LIEGENSCHAFTEN | Wohnungen & Platzierungen | matching · free beds · transfers · maintenance (listed) · critical (read) | matching |
 
-Rules, all pinned by `config/__tests__/roles.test.ts` over every role:
+Rules, all pinned by `src/lib/config/__tests__/roles.test.ts` over every role:
 
 - A desk only selects and orders; `DASHBOARD_SECTIONS` still gates each
   section on its permission, and a desk may not list one the role lacks.

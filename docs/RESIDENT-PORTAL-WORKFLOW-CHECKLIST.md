@@ -157,8 +157,8 @@ Pass type below: **Pass 1 = code review + automated checks (lint/tests), no full
 
 ## 9) Reliability & Regression
 
-- [x] `npm run -s lint` passes
-- [x] `npm test -- --runInBand` passes
+- [x] `pnpm run lint` passes
+- [x] `pnpm test` passes
 - [~] No critical console/runtime errors; one expected 400 surfaced during negative validation test
 - [~] No regression on admin-facing incident/maintenance data creation from portal submissions
 
