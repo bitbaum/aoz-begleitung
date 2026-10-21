@@ -56,5 +56,12 @@ export const resetPasswordSchema = z.object({
   password: passwordField,
 })
 
+/** /claim — a single-use claim link plus the credentials the person chooses. */
+export const claimAccountSchema = z.object({
+  token: z.string().min(1).max(200),
+  email: emailField,
+  password: passwordField,
+})
+
 export type RegisterInput = z.infer<typeof registerSchema>
 export type EmailLoginInput = z.infer<typeof emailLoginSchema>

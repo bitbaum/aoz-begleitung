@@ -93,6 +93,7 @@ export const PUBLIC_ROUTES = [
   '/register',
   '/forgot-password',
   '/reset-password',
+  '/claim',
   '/portal',
   '/portal/help',
   '/blog',

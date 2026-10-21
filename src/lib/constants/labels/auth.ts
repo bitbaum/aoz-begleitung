@@ -117,18 +117,6 @@ export const LOGIN_LABELS = {
     generic: 'Ein Fehler ist aufgetreten',
   },
   help: `Bei Problemen wenden Sie sich an die ${BRAND.shortName}-Verwaltung.`,
-  // Quick access: one button per NAMED REAL staff account
-  // (QUICK_ACCESS_STAFF_CODES), plus an unclaimed placeholder client. Not a
-  // demo — there is no invented data on this site any more (2026-10-01).
-  demo: {
-    title: 'Direkter Zugang für das Team',
-    description:
-      'Ohne Konto, ein Klick. Ihr eigenes Konto mit E-Mail und Passwort können Sie später unter «Konto erstellen» mit Ihrem Code einrichten.',
-    /** «Simon B. · Jobcoach» — the person's name, then what they do. */
-    staffDoor: (name: string, roleLabel: string) => `${name} · ${roleLabel}`,
-    notConfigured: 'Dieser Zugang ist nicht verfügbar.',
-    failed: 'Anmeldung über den direkten Zugang fehlgeschlagen.',
-  },
 } as const
 
 export const REGISTER_LABELS = {
@@ -190,4 +178,35 @@ export const RESET_PASSWORD_LABELS = {
   submitting: 'Wird gespeichert...',
   missingToken: 'Dieser Link ist unvollständig. Öffnen Sie den Link aus der E-Mail erneut.',
   requestNew: 'Neuen Link anfordern',
+} as const
+
+/** /claim — a colleague takes over the staff account provisioned for them. */
+export const CLAIM_LABELS = {
+  title: 'Konto übernehmen',
+  greeting: (name: string) => `Willkommen, ${name}.`,
+  subtitle:
+    'Legen Sie Ihre E-Mail-Adresse und ein Passwort fest. Danach melden Sie sich wie gewohnt an.',
+  email: 'E-Mail',
+  password: 'Passwort',
+  submit: 'Konto übernehmen',
+  submitting: 'Wird eingerichtet...',
+  checking: 'Link wird geprüft...',
+  invalid:
+    'Dieser Link ist ungültig, abgelaufen oder wurde bereits verwendet. Bitten Sie die Verwaltung um einen neuen Link.',
+  toLogin: 'Zur Anmeldung',
+} as const
+
+/** /settings — issuing and revoking claim links per colleague. */
+export const CLAIM_INVITE_LABELS = {
+  action: 'Übernahme-Link',
+  actionHint:
+    'Persönlichen Link erstellen, mit dem diese Person ihr Konto übernimmt (einmalig, 14 Tage gültig).',
+  creating: 'Wird erstellt...',
+  copy: 'Kopieren',
+  copied: 'Kopiert',
+  revoke: 'Widerrufen',
+  revoked: 'Link widerrufen.',
+  validUntil: (date: string) => `Gültig bis ${date}. Nur an diese Person weitergeben.`,
+  failed: 'Link konnte nicht erstellt werden.',
+  alreadyClaimed: 'Diese Person hat ihr Konto bereits übernommen.',
 } as const

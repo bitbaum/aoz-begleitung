@@ -28,28 +28,7 @@ function LoginForm() {
   const [password, setPassword] = useState('')
   const [code, setCode] = useState('')
   const [state, setState] = useState<LoginState>({ status: 'idle' })
-  // Which quick-access doors this deployment offers — server truth, not a
-  // build-baked flag, so a button only appears when pressing it can succeed.
-  // Each staff door is a named real account (QUICK_ACCESS_STAFF_CODES).
-  const [demoDoors, setDemoDoors] = useState<{ id: string; label: string }[]>([])
   const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    fetch('/api/auth/demo')
-      .then((res) => res.json())
-      .then((body) => {
-        if (!cancelled && body?.success) {
-          setDemoDoors(body.data?.doors ?? [])
-        }
-      })
-      .catch(() => {
-        // No quick-access section on failure — the login form is unaffected.
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
 
   // A personal sign-in link (`/login?code=…`, also what invite emails send).
   // The code IS the login — staff have no account to create — so the link
@@ -123,65 +102,6 @@ function LoginForm() {
     }
   }
 
-  async function submitDemo(role: string) {
-    setState({ status: 'loading' })
-
-    try {
-      const response = await fetch('/api/auth/demo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role }),
-      })
-      const data = await response.json()
-
-      if (!data.success) {
-        setState({ status: 'error', message: data.error || LOGIN_LABELS.error.generic })
-        return
-      }
-
-      const successMessage =
-        data.type === 'staff' ? LOGIN_LABELS.success.staff : LOGIN_LABELS.success.resident
-
-      setState({ status: 'success', type: data.type, message: successMessage })
-      scheduleRedirect(data.type)
-    } catch {
-      setState({ status: 'error', message: LOGIN_LABELS.error.generic })
-    }
-  }
-
-  /**
-   * The doors come FIRST, above the form.
-   *
-   * Someone arriving here without an account previously met a password field
-   * and a code field — two ways of being told no — with the thing they could
-   * actually do buried underneath. What most visitors want is to look at the
-   * product, and looking requires no credentials at all.
-   */
-  const demoDoorPanel =
-    demoDoors.length > 0 && state.status !== 'success' ? (
-      <div id="demo" className="mb-6 rounded-lg border border-ui-border bg-ui-subtle p-4">
-        <p className="text-sm font-medium text-ui-text">{LOGIN_LABELS.demo.title}</p>
-        <p className="mt-0.5 mb-3 text-xs text-ui-muted">{LOGIN_LABELS.demo.description}</p>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {demoDoors.map((door) => (
-            // Outline, not brand: these are equal choices, and brand red
-            // marks the ONE action that matters on a screen. Red blocks
-            // spend the whole palette on a menu and leave the form's own
-            // submit with nothing to be louder than.
-            <Button
-              key={door.id}
-              onClick={() => submitDemo(door.id)}
-              disabled={state.status === 'loading'}
-              variant="outline"
-              className="disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {door.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-    ) : null
-
   return (
     <AuthShell
       title={LOGIN_LABELS.title}
@@ -191,7 +111,6 @@ function LoginForm() {
         <AuthSuccess message={state.message} detail={LOGIN_LABELS.success.redirecting} />
       ) : (
         <>
-          {demoDoorPanel}
           <form onSubmit={handleSubmit} className="space-y-4">
             {verified === '1' && (
               <div className="alert-success" role="status">

@@ -16,9 +16,10 @@ It is meant to sit **beside** an organisation's case-management system
 integration layer those systems do not cover, plus a portal residents use in
 their own language.
 
-**Quick access for the team:** <https://aoz.orangecat.ch/login#demo> — one
-click signs in as a named staff account; no registration needed. Everything on
-the site is real; the only seeded people are unclaimed placeholder profiles.
+**Team access:** each colleague claims their own account through a personal,
+single-use link (valid 14 days) that an administrator issues under
+Einstellungen → Team → «Übernahme-Link». There is no public one-click login.
+Everything on the site is real; the only seeded people are unclaimed placeholder profiles.
 **Where AI is used and what it sends:** <https://aoz.orangecat.ch/ki-datenschutz>.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -98,9 +99,6 @@ pnpm run verify         # format, lint, typecheck, tests — what CI runs
 | `SESSION_SECRET` | Session signing key (a production build refuses to start without it) |
 | `NEXT_PUBLIC_APP_URL` | Absolute links in emails |
 | `NEXT_PUBLIC_BRAND` | Brand preset, inlined at build time (`src/lib/config/brand.ts`) |
-| `DEMO_ACCESS_ENABLED` | `true` opens the quick-access buttons on `/login` (`QUICK_ACCESS_ENABLED` also works) |
-| `QUICK_ACCESS_STAFF_CODES` | Comma-separated real staff codes, one button each, in this order |
-| `DEMO_RESIDENT_CODE` | Optional client button — only while that profile is an unclaimed placeholder |
 | `GROQ_API_KEY`, `OPENROUTER_API_KEY` | AI features (test access; see `/ki-datenschutz`) |
 
 The full list with comments is `.env.example`. Test counts are what CI

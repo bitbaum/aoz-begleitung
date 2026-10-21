@@ -13,6 +13,7 @@ import {
   appointment,
   auditLog,
   authToken,
+  claimInvite,
   careAssignment,
   careAttribute,
   compatibilityAssessment,
@@ -750,6 +751,13 @@ export const clientPermitRelations = relations(clientPermit, ({ one }) => ({
   }),
   reviewer: one(user, {
     fields: [clientPermit.reviewedBy],
+    references: [user.id],
+  }),
+}))
+
+export const claimInviteRelations = relations(claimInvite, ({ one }) => ({
+  user: one(user, {
+    fields: [claimInvite.userId],
     references: [user.id],
   }),
 }))

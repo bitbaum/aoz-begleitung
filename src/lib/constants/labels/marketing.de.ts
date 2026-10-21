@@ -14,7 +14,7 @@ import {
  * reported yet, and a landing page that invents its own evidence is the one
  * thing that would disqualify it in front of the people being asked to trust
  * it with vulnerable residents. Everything claimed here is a description of
- * what the software does, which is checkable by pressing a quick-access button.
+ * what the software does, which a colleague can check by signing in.
  * That rule binds every translation too — a language is not a licence to make
  * a stronger claim than the German page makes.
  */
@@ -28,7 +28,7 @@ const PLACEMENT_COPY: MarketingCopy = {
   // the product is has not decided what the product is.
   subline:
     'Wohnen, Alltag im Haus, Gemeinschaft und Integration in einem Verlauf — Fachpersonen und Klient*innen sehen denselben Stand.',
-  ctaPrimary: 'Produkt ansehen',
+  ctaPrimary: 'Anmelden',
   ctaSecondary: 'Anmelden',
   ctaNote: 'Kein Konto nötig. Direkter Zugang für das Team — ein Klick, das echte Produkt.',
 
@@ -196,7 +196,7 @@ const HOUSEHOLD_COPY: MarketingCopy = {
   headline: 'Die Wohnung, auf die ihr euch einigen könnt.',
   subline:
     'Wer hat den Abfall rausgebracht, wer hat das WC-Papier bezahlt, und ab wann ist es zu laut? Alles an einem Ort — damit es nicht jedes Mal von vorn ausgehandelt wird.',
-  ctaPrimary: 'Ausprobieren',
+  ctaPrimary: 'Anmelden',
   ctaSecondary: 'Anmelden',
   ctaNote: 'Kein Konto nötig. Direkter Zugang für das Team — ein Klick, das echte Produkt.',
 

@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, Check, X } from 'lucide-react'
 import { NAV_ICONS } from '@/lib/config/navigation'
-import { quickAccessHref } from '@/lib/quick-access/config'
 import { productSurfaces } from '@/lib/config/product-surface'
 import { getAllPosts } from '@/lib/blog/posts'
 import { formatCalendarDateLong } from '@/lib/utils/formatting'
@@ -92,9 +91,7 @@ function Hero({ c }: CopyProps) {
       </p>
 
       <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:items-center">
-        {/* Quick access is the primary action: it is the only claim on this
-            page a visitor can check for themselves in one click. */}
-        <Link href={quickAccessHref()} className="btn-secondary">
+        <Link href="/login" className="btn-secondary">
           {c.ctaPrimary}
           <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
@@ -350,7 +347,7 @@ function Closing({ c }: CopyProps) {
       <p className="mt-3 text-ui-muted max-w-2xl leading-relaxed">{c.closingBody}</p>
 
       <div className="mt-7 flex flex-col sm:flex-row gap-3">
-        <Link href={quickAccessHref()} className="btn-secondary">
+        <Link href="/login" className="btn-secondary">
           {c.ctaPrimary}
           <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>

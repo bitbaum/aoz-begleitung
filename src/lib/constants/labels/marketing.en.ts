@@ -27,7 +27,7 @@ const PLACEMENT_COPY: MarketingCopy = {
   headline: 'The whole support process, in one place.',
   subline:
     'Housing, daily life in the house, community and integration in a single record — professionals and clients see the same state of play.',
-  ctaPrimary: 'See the product',
+  ctaPrimary: 'Sign in',
   ctaSecondary: 'Sign in',
   ctaNote: 'No account needed. Direct access for the team — one click, the real product.',
 
@@ -185,7 +185,7 @@ const HOUSEHOLD_COPY: MarketingCopy = {
   headline: 'The flat you can actually agree on.',
   subline:
     'Who took the rubbish out, who paid for the toilet paper, and when is it too loud? All in one place — so it does not get renegotiated from scratch every time.',
-  ctaPrimary: 'Try it',
+  ctaPrimary: 'Sign in',
   ctaSecondary: 'Sign in',
   ctaNote: 'No account needed. Direct access for the team — one click, the real product.',
 

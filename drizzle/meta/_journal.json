@@ -78,6 +78,13 @@
       "when": 1790966049491,
       "tag": "0010_learning_author_and_client_answer",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792606880146,
+      "tag": "0011_claim_invites",
+      "breakpoints": true
     }
   ]
 }
