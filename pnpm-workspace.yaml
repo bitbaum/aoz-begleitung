@@ -19,6 +19,7 @@ allowBuilds:
 # should be deleted. Add lines only for versions we published ourselves —
 # never to hurry along a third-party package.
 minimumReleaseAgeExclude:
+  - '@bitbaum/chatkit'
   - '@bitbaum/ai-kit'
   # @bitbaum/mail-kit 0.1.0 is likewise our own package, published 2026-09-05.
   - '@bitbaum/mail-kit'
