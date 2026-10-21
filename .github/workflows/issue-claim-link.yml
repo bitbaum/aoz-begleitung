@@ -1,0 +1,52 @@
+name: Issue claim link
+
+# Stores a personal claim link for one staff member on production. Takes only
+# the SHA-256 HASH of a token generated elsewhere — this repo is public, so the
+# raw token must never pass through Actions. The issuer builds the URL
+# https://aoz.orangecat.ch/claim?token=<raw> themselves.
+# (Normal path: Einstellungen → Team → «Übernahme-Link». This is for operators.)
+
+on:
+  workflow_dispatch:
+    inputs:
+      staff_name:
+        description: Exact full name of the active staff member
+        required: true
+      token_hash:
+        description: SHA-256 hex of the raw token
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  issue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Insert on box
+        env:
+          SSH_KEY: ${{ secrets.HETZNER_SSH_PRIVATE_KEY }}
+          IP: ${{ vars.HETZNER_IP }}
+          STAFF_NAME: ${{ inputs.staff_name }}
+          TOKEN_HASH: ${{ inputs.token_hash }}
+        run: |
+          set -euo pipefail
+          [[ "$TOKEN_HASH" =~ ^[0-9a-f]{64}$ ]] || { echo "::error::bad hash"; exit 1; }
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts 2>/dev/null
+          scp -q scripts/ops/insert-claim-invite.js "ubuntu@$IP:/tmp/insert-claim-invite.js"
+          name_q=$(printf '%q' "$STAFF_NAME")
+          ssh -o BatchMode=yes "ubuntu@$IP" "bash -s" <<REMOTE
+          set -euo pipefail
+          APP=/opt/aoz-wohnen/app
+          ENVF=/opt/aoz-wohnen/shared/.env
+          [ -r "\$ENVF" ] || { echo "::error::cannot read \$ENVF"; exit 1; }
+          DATABASE_URL=\$(grep -E '^DATABASE_URL=' "\$ENVF" | head -1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//')
+          cp /tmp/insert-claim-invite.js "\$APP/.insert-claim-invite.js" 2>/dev/null || { mkdir -p /tmp/ci && cp /tmp/insert-claim-invite.js /tmp/ci/; }
+          cd "\$APP"
+          DATABASE_URL="\$DATABASE_URL" STAFF_NAME=$name_q TOKEN_HASH=$TOKEN_HASH NODE_PATH="\$APP/node_modules" node "\$( [ -f .insert-claim-invite.js ] && echo .insert-claim-invite.js || echo /tmp/ci/insert-claim-invite.js )"
+          rm -f "\$APP/.insert-claim-invite.js" /tmp/insert-claim-invite.js
+          REMOTE
