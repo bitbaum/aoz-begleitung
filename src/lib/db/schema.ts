@@ -1816,6 +1816,49 @@ export const authToken = pgTable(
   ],
 )
 
+/**
+ * A one-person, single-use link that lets a real colleague CLAIM the staff
+ * account that was provisioned for them: set their own email + password, then
+ * sign in normally. Replaces the public one-click quick-access buttons, which
+ * opened real accounts to anyone who had the URL.
+ *
+ * Only the SHA-256 hash of the token is stored. Issuing a new link for a person
+ * revokes their earlier unused ones; redeeming sets `usedAt`.
+ */
+export const claimInvite = pgTable(
+  'ClaimInvite',
+  {
+    id: text().primaryKey().$defaultFn(createId).notNull(),
+    createdAt: timestamp({ precision: 3, mode: 'date' })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    tokenHash: text().notNull(),
+    userId: text().notNull(),
+    createdById: text(),
+    expiresAt: timestamp({ precision: 3, mode: 'date' }).notNull(),
+    usedAt: timestamp({ precision: 3, mode: 'date' }),
+    revokedAt: timestamp({ precision: 3, mode: 'date' }),
+  },
+  (table) => [
+    uniqueIndex('ClaimInvite_tokenHash_key').using('btree', table.tokenHash.asc().nullsLast()),
+    index('ClaimInvite_userId_idx').using('btree', table.userId.asc().nullsLast()),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [user.id],
+      name: 'ClaimInvite_userId_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('cascade'),
+    foreignKey({
+      columns: [table.createdById],
+      foreignColumns: [user.id],
+      name: 'ClaimInvite_createdById_fkey',
+    })
+      .onUpdate('cascade')
+      .onDelete('set null'),
+  ],
+)
+
 export const taskCompletion = pgTable(
   'TaskCompletion',
   {

@@ -29,7 +29,7 @@ const PLACEMENT_COPY: MarketingCopy = {
   headline: 'Tout l’accompagnement au même endroit.',
   subline:
     'Logement, quotidien de la maison, vie collective et intégration dans un seul parcours — les équipes et les personnes accompagnées voient la même situation.',
-  ctaPrimary: 'Voir le produit',
+  ctaPrimary: 'Se connecter',
   ctaSecondary: 'Se connecter',
   ctaNote: 'Aucun compte nécessaire. Accès direct pour l’équipe — un clic, le vrai produit.',
 
@@ -185,7 +185,7 @@ const HOUSEHOLD_COPY: MarketingCopy = {
   headline: 'La colocation sur laquelle vous pouvez vous entendre.',
   subline:
     'Qui a sorti les poubelles, qui a payé le papier de toilette, et à partir de quand est-ce trop bruyant ? Tout au même endroit — pour ne pas tout renégocier à chaque fois.',
-  ctaPrimary: 'Essayer',
+  ctaPrimary: 'Se connecter',
   ctaSecondary: 'Se connecter',
   ctaNote: 'Aucun compte nécessaire. Accès direct pour l’équipe — un clic, le vrai produit.',
 

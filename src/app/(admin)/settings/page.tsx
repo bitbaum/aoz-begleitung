@@ -3,6 +3,7 @@ import { requirePermission, hasPermission } from '@/lib/auth'
 import { db, user as userTable } from '@/lib/db'
 import { eq, asc } from 'drizzle-orm'
 import { InviteForm } from './InviteForm'
+import { ClaimLinkButton } from '@/components/admin/ClaimLinkButton'
 import { ViewAsButton } from '@/components/admin/ViewAsButton'
 import { HandoverForm } from '@/components/admin/HandoverForm'
 import { EMAIL_CONFIG } from '@/lib/email/config'
@@ -64,7 +65,7 @@ export default async function SettingsPage() {
         lastLoginAt: true,
       },
       with: {
-        account: { columns: { email: true } },
+        account: { columns: { email: true, passwordHash: true } },
       },
       orderBy: [asc(userTable.name)],
     }),
@@ -138,6 +139,9 @@ export default async function SettingsPage() {
                     which this control deliberately does not offer. */}
                 {canInvite && !user.account?.email && (
                   <HandoverForm userId={user.id} name={user.name} />
+                )}
+                {canInvite && !user.account?.passwordHash && (
+                  <ClaimLinkButton userId={user.id} name={user.name} />
                 )}
                 {canInvite && user.id !== currentUser.id && (
                   <ViewAsButton userId={user.id} name={user.name} />
