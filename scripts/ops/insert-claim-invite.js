@@ -17,10 +17,13 @@ async function main() {
   const client = new Client({ connectionString: process.env.DATABASE_URL })
   await client.connect()
   try {
-    const users = await client.query(
-      'SELECT u.id, u.name, a."passwordHash" IS NOT NULL AS claimed FROM "User" u LEFT JOIN "Account" a ON a."userId" = u.id WHERE u.active AND lower(u.name) = lower($1)',
-      [name],
-    )
+    const base =
+      'SELECT u.id, u.name, a."passwordHash" IS NOT NULL AS claimed FROM "User" u LEFT JOIN "Account" a ON a."userId" = u.id WHERE u.active AND '
+    let users = await client.query(base + 'lower(u.name) = lower($1)', [name])
+    // Fall back to a unique prefix ("Simon B" → the one active Simon B…).
+    if (users.rowCount === 0) {
+      users = await client.query(base + "lower(u.name) LIKE lower($1) || '%'", [name])
+    }
     if (users.rowCount !== 1)
       throw new Error(`expected exactly 1 active staff named "${name}", found ${users.rowCount}`)
     const target = users.rows[0]
