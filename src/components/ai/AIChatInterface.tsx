@@ -1,5 +1,7 @@
 'use client'
 
+import { Markdown } from '@bitbaum/chatkit/react'
+
 import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Loader2 } from 'lucide-react'
 import { UI_LABELS, AI_ASSISTANT_LABELS, AI_SUGGESTED_QUESTIONS } from '@/lib/constants/labels'
@@ -152,7 +154,11 @@ export function AIChatInterface() {
         )}
 
         {messages.map((msg, i) => (
-          <MessageBubble key={i} message={msg} />
+          <MessageBubble
+            key={i}
+            message={msg}
+            onReply={i === messages.length - 1 && !streaming ? sendMessage : undefined}
+          />
         ))}
 
         {streaming && (
@@ -163,7 +169,7 @@ export function AIChatInterface() {
             <div className="flex-1 min-w-0">
               {streamingText ? (
                 <div className="prose prose-sm max-w-none text-ui-text whitespace-pre-wrap">
-                  {streamingText}
+                  <Markdown text={streamingText} />
                   <span className="inline-block w-1 h-4 bg-brand-primary ml-0.5 animate-pulse align-middle" />
                 </div>
               ) : (
@@ -222,7 +228,13 @@ export function AIChatInterface() {
   )
 }
 
-function MessageBubble({ message }: { message: Message }) {
+function MessageBubble({
+  message,
+  onReply,
+}: {
+  message: Message
+  onReply?: (text: string) => void
+}) {
   const isUser = message.role === 'user'
 
   return (
@@ -243,7 +255,13 @@ function MessageBubble({ message }: { message: Message }) {
             : 'bg-ui-subtle text-ui-text border border-ui-border'
         }`}
       >
-        <p className="whitespace-pre-wrap">{message.content}</p>
+        <div>
+          {isUser ? (
+            <p className="whitespace-pre-wrap">{message.content}</p>
+          ) : (
+            <Markdown text={message.content} onReply={onReply} />
+          )}
+        </div>
       </div>
     </div>
   )

@@ -1,9 +1,13 @@
+import { RICH_ANSWERS_INSTRUCTION } from '@bitbaum/chatkit'
 import { BRAND } from '@/lib/config/brand'
 import { withProviderFallback, type AIProvider, type AIProviderConfig } from '@/lib/ai/provider'
 import { AIProviderError } from '@/lib/ai/errors'
 import { executeStaffChatTool, STAFF_CHAT_TOOLS } from '@/lib/ai/staff-chat-tools'
 
-export const STAFF_CHAT_SYSTEM_PROMPT = `Du bist ein KI-Assistent für das ${BRAND.productName} System.
+export const STAFF_CHAT_SYSTEM_PROMPT =
+  RICH_ANSWERS_INSTRUCTION +
+  '\n\n' +
+  `Du bist ein KI-Assistent für das ${BRAND.productName} System.
 
 Deine Aufgabe: Mitarbeitenden dabei helfen, Informationen über Klient*innen, Unterkünfte, Platzierungen und Vorfälle schnell zu finden und zu analysieren.
 
