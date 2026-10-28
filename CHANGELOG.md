@@ -8,8 +8,16 @@ project does not tag semver releases yet — entries are grouped by deploy date
 Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
-last_modified_date: 2026-09-07
-last_modified_summary: Three weeks the log had missed — client-managed admin facts, a readable audit trail, placements and rankings that explain themselves.
+last_modified_date: 2026-10-28
+last_modified_summary: Shared account password handling and the shared admin chat thread, composer and streaming parser.
+
+## 2026-10-28 — Shared account passwords and admin chat
+
+- AccountKit owns the password rule and new password hashes. Existing bcrypt
+  passwords remain readable; long Unicode passwords are checked in full.
+- The admin assistant uses ChatKit's thread and composer, including scroll
+  intent, cancellation, an editable next draft and retry. AI Kit handles
+  network-fragmented response events instead of discarding partial JSON lines.
 
 ## 2026-09-07 — The client's own record, and decisions that explain themselves
 
