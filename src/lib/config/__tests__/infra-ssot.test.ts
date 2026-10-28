@@ -40,8 +40,8 @@ describe('production is Hetzner Postgres, not a cloud pooler', () => {
     expect(example).not.toMatch(/aoz_housing"/)
   })
 
-  it('tells CLAUDE.md and README the live host before they mention a database URL', () => {
-    for (const file of ['CLAUDE.md', 'README.md'] as const) {
+  it('tells AGENTS.md and README the live host before they mention a database URL', () => {
+    for (const file of ['AGENTS.md', 'README.md'] as const) {
       const text = read(file)
       expect(text).toMatch(/aoz_wohnen/)
       expect(text).toMatch(/Hetzner/)
