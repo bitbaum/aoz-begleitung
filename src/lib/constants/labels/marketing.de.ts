@@ -30,7 +30,8 @@ const PLACEMENT_COPY: MarketingCopy = {
     'Wohnen, Alltag im Haus, Gemeinschaft und Integration in einem Verlauf — Fachpersonen und Klient*innen sehen denselben Stand.',
   ctaPrimary: 'Anmelden',
   ctaSecondary: 'Anmelden',
-  ctaNote: 'Kein Konto nötig. Direkter Zugang für das Team — ein Klick, das echte Produkt.',
+  ctaNote:
+    'Persönliches Konto mit E-Mail und Passwort, oder über den Einladungslink Ihrer Administration.',
 
   problemEyebrow: 'Das Problem',
   problemTitle: 'Integration scheitert oft an Fragmentierung, nicht an fehlendem Willen.',
@@ -198,7 +199,8 @@ const HOUSEHOLD_COPY: MarketingCopy = {
     'Wer hat den Abfall rausgebracht, wer hat das WC-Papier bezahlt, und ab wann ist es zu laut? Alles an einem Ort — damit es nicht jedes Mal von vorn ausgehandelt wird.',
   ctaPrimary: 'Anmelden',
   ctaSecondary: 'Anmelden',
-  ctaNote: 'Kein Konto nötig. Direkter Zugang für das Team — ein Klick, das echte Produkt.',
+  ctaNote:
+    'Persönliches Konto mit E-Mail und Passwort, oder über den Einladungslink Ihrer Administration.',
 
   problemEyebrow: 'Warum',
   problemTitle: 'Streit in einer WG ist selten ein Streit über die Sache.',

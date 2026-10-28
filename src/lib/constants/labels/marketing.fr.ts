@@ -31,7 +31,8 @@ const PLACEMENT_COPY: MarketingCopy = {
     'Logement, quotidien de la maison, vie collective et intégration dans un seul parcours — les équipes et les personnes accompagnées voient la même situation.',
   ctaPrimary: 'Se connecter',
   ctaSecondary: 'Se connecter',
-  ctaNote: 'Aucun compte nécessaire. Accès direct pour l’équipe — un clic, le vrai produit.',
+  ctaNote:
+    'Un compte personnel avec e-mail et mot de passe, ou via le lien d’invitation de votre administration.',
 
   problemEyebrow: 'Le problème',
   problemTitle: 'L’intégration échoue souvent par fragmentation, pas par manque de volonté.',
@@ -187,7 +188,8 @@ const HOUSEHOLD_COPY: MarketingCopy = {
     'Qui a sorti les poubelles, qui a payé le papier de toilette, et à partir de quand est-ce trop bruyant ? Tout au même endroit — pour ne pas tout renégocier à chaque fois.',
   ctaPrimary: 'Se connecter',
   ctaSecondary: 'Se connecter',
-  ctaNote: 'Aucun compte nécessaire. Accès direct pour l’équipe — un clic, le vrai produit.',
+  ctaNote:
+    'Un compte personnel avec e-mail et mot de passe, ou via le lien d’invitation de votre administration.',
 
   problemEyebrow: 'Pourquoi',
   problemTitle: 'En colocation, une dispute porte rarement sur le sujet de la dispute.',

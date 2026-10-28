@@ -29,7 +29,8 @@ const PLACEMENT_COPY: MarketingCopy = {
     'Housing, daily life in the house, community and integration in a single record — professionals and clients see the same state of play.',
   ctaPrimary: 'Sign in',
   ctaSecondary: 'Sign in',
-  ctaNote: 'No account needed. Direct access for the team — one click, the real product.',
+  ctaNote:
+    'A personal account with email and password, or through the invitation link from your administrator.',
 
   problemEyebrow: 'The problem',
   problemTitle: 'Integration usually fails on fragmentation, not on willingness.',
@@ -187,7 +188,8 @@ const HOUSEHOLD_COPY: MarketingCopy = {
     'Who took the rubbish out, who paid for the toilet paper, and when is it too loud? All in one place — so it does not get renegotiated from scratch every time.',
   ctaPrimary: 'Sign in',
   ctaSecondary: 'Sign in',
-  ctaNote: 'No account needed. Direct access for the team — one click, the real product.',
+  ctaNote:
+    'A personal account with email and password, or through the invitation link from your administrator.',
 
   problemEyebrow: 'Why',
   problemTitle: 'An argument in a shared flat is rarely an argument about the thing itself.',
