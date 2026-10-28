@@ -23,7 +23,6 @@ vi.mock('@/lib/db', async () => ({
 
 vi.mock('@/lib/auth/passwords', async () => ({
   hashPassword: vi.fn(async () => 'hashed'),
-  PASSWORD_MIN_LENGTH: 8,
 }))
 
 const sendVerificationEmail = vi.fn(async () => {})

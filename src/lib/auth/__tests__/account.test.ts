@@ -77,7 +77,7 @@ vi.mock('@/lib/logger', async () => ({
 }))
 
 import { registerAccount, loginWithEmail, requestPasswordReset, resetPassword } from '../account'
-import { hashPassword } from '../passwords'
+import { hashPassword, verifyPassword } from '../passwords'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { account as accountTable, user as userTable } from '@/lib/db'
 
@@ -163,7 +163,7 @@ beforeEach(() => {
 })
 
 describe('registerAccount', () => {
-  it('claims a staff code: creates the account with a bcrypt hash, sends verification', async () => {
+  it('claims a staff code: creates the account with a shared password hash, sends verification', async () => {
     codeExists({ staff: true })
     mockAccountById.mockResolvedValue(account({ id: 'acc-new', user: STAFF }))
 
@@ -181,7 +181,7 @@ describe('registerAccount', () => {
     const [table, created] = mockInsert.mock.calls[0]
     expect(table).toBe(accountTable)
     expect(created).toMatchObject({ email: 'g@example.ch', userId: 'user-1' })
-    expect(created.passwordHash).toMatch(/^\$2[aby]\$/)
+    expect(await verifyPassword('secret-password', created.passwordHash)).toBe(true)
     expect(created.passwordHash).not.toBe('secret-password')
 
     expect(mockCreateAuthToken).toHaveBeenCalledWith('acc-new', 'VERIFY_EMAIL')
@@ -446,7 +446,7 @@ describe('resetPassword', () => {
     const [table, data, where] = mockUpdate.mock.calls[0]
     expect(table).toBe(accountTable)
     expect(where).toEqual({ column: 'id', value: 'acc-1' })
-    expect(data.passwordHash).toMatch(/^\$2[aby]\$/)
+    expect(await verifyPassword('new-password-123', data.passwordHash)).toBe(true)
     expect(data.emailVerifiedAt).toBeInstanceOf(Date)
   })
 

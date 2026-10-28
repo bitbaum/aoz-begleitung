@@ -132,11 +132,9 @@ function ClaimForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={8}
               autoComplete="new-password"
               className="input"
             />
-            <p className="mt-1.5 text-xs text-ui-muted">{REGISTER_LABELS.passwordHint}</p>
           </div>
           <Button
             type="submit"
