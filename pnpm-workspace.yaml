@@ -28,3 +28,9 @@ minimumReleaseAgeExclude:
   - '@bitbaum/accountkit'
   # ai-forms is ours as well (the form assistant); releases ship same-day.
   - 'ai-forms'
+
+# Security floors within the parent packages' supported major ranges. Remove
+# these when upstream minimums exclude the vulnerable releases (audit must pass).
+overrides:
+  'fast-uri@>=3.0.0 <3.1.9': '^3.1.9'
+  'vite@>=8.0.0 <8.2.4': '^8.2.4'

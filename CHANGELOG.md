@@ -11,6 +11,13 @@ created_date: 2026-01-15
 last_modified_date: 2026-10-28
 last_modified_summary: Shared account password handling and the shared admin chat thread, composer and streaming parser.
 
+## 2026-10-28 — Compatible dependency security patches
+
+- Updated Sentry's monitoring integration and compatible test/build dependencies
+  to remove known critical and high dependency advisories. The remaining
+  development-tool finding and its review condition are documented in the
+  [dependency review](docs/security/dependency-review-2026-10-28.md).
+
 ## 2026-10-28 — Shared account passwords and admin chat
 
 - AccountKit owns the password rule and new password hashes. Existing bcrypt
