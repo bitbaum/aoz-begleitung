@@ -1,7 +1,7 @@
 import { RICH_ANSWERS_INSTRUCTION } from '@bitbaum/chatkit'
 import { BRAND } from '@/lib/config/brand'
 import { withProviderFallback, type AIProvider, type AIProviderConfig } from '@/lib/ai/provider'
-import { AIProviderError } from '@/lib/ai/errors'
+import { completeProviderRequest } from '@/lib/ai/transport'
 import { executeStaffChatTool, STAFF_CHAT_TOOLS } from '@/lib/ai/staff-chat-tools'
 
 export const STAFF_CHAT_SYSTEM_PROMPT =
@@ -56,32 +56,18 @@ async function chatCompletion(
   provider: AIProvider,
   config: AIProviderConfig,
   messages: OpenAIMessage[],
+  signal?: AbortSignal,
 ): Promise<{ message: OpenAIMessage; finishReason: string | null }> {
-  const res = await fetch(config.url, {
-    method: 'POST',
-    headers: config.headers,
-    body: JSON.stringify({
-      model: config.model,
-      messages,
-      tools: STAFF_CHAT_TOOLS,
-      tool_choice: 'auto',
-      max_tokens: 4096,
-      temperature: 0.2,
-    }),
+  const result = await completeProviderRequest(config, {
+    messages,
+    signal,
+    tools: STAFF_CHAT_TOOLS,
+    extraBody: { tool_choice: 'auto' },
+    maxTokens: 4096,
+    temperature: 0.2,
   })
-
-  if (!res.ok) {
-    // Raw body onto the error for logging only — interpolating it into the
-    // message is what put Groq's organisation id on a caseworker's screen.
-    const detail = await res.text().catch(() => '')
-    throw new AIProviderError(provider, res.status, detail)
-  }
-
-  const body = (await res.json()) as {
-    choices?: Array<{
-      message?: OpenAIMessage
-      finish_reason?: string | null
-    }>
+  const body = result.raw as {
+    choices?: Array<{ message?: OpenAIMessage; finish_reason?: string | null }>
   }
 
   const choice = body.choices?.[0]
@@ -96,7 +82,7 @@ async function chatCompletion(
  * Run the staff assistant with tool use. Uses the fleet provider chain
  * (Groq → OpenRouter) via OpenAI-compatible chat completions.
  */
-export async function runStaffChat(turns: StaffChatTurn[]): Promise<string> {
+export async function runStaffChat(turns: StaffChatTurn[], signal?: AbortSignal): Promise<string> {
   // The whole tool-use loop runs against ONE provider. Switching vendors
   // mid-conversation would carry a half-finished tool exchange — assistant
   // `tool_calls` already pushed, their `tool` results not yet — to a model that
@@ -108,7 +94,7 @@ export async function runStaffChat(turns: StaffChatTurn[]): Promise<string> {
       ...turns.map((t) => ({ role: t.role, content: t.content })),
     ]
 
-    return runChatLoop(config.provider, config, messages)
+    return runChatLoop(config.provider, config, messages, signal)
   })
 }
 
@@ -116,9 +102,10 @@ async function runChatLoop(
   provider: AIProvider,
   config: Parameters<typeof chatCompletion>[1],
   messages: OpenAIMessage[],
+  signal?: AbortSignal,
 ): Promise<string> {
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-    const { message, finishReason } = await chatCompletion(provider, config, messages)
+    const { message, finishReason } = await chatCompletion(provider, config, messages, signal)
 
     if (
       message.role === 'assistant' &&

@@ -66,11 +66,14 @@ export async function POST(request: Request) {
 
   const { messages } = parsed.data
   const encoder = new TextEncoder()
+  const cancellation = new AbortController()
+  const signal = AbortSignal.any([request.signal, cancellation.signal])
 
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const answer = await runStaffChat(messages)
+        const answer = await runStaffChat(messages, signal)
+        if (signal.aborted) return
 
         // Stream in chunks so the UI shows progress (WhatsApp-like responsiveness).
         const chunks = answer.match(/\S+\s*|\s+/g) ?? [answer]
@@ -82,6 +85,7 @@ export async function POST(request: Request) {
 
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
       } catch (err) {
+        if (signal.aborted) return
         logger.errorWithCause('AI chat failed', err)
         // NEVER `err.message` here. That is what rendered
         // `groq chat failed (429): {"error":{"message":"Rate limit reached …
@@ -94,8 +98,11 @@ export async function POST(request: Request) {
           ),
         )
       } finally {
-        controller.close()
+        if (!signal.aborted) controller.close()
       }
+    },
+    cancel() {
+      cancellation.abort()
     },
   })
 
