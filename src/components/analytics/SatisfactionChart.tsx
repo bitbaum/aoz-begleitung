@@ -1,5 +1,10 @@
 import Link from 'next/link'
-import { SATISFACTION_EMOJIS } from '@/lib/constants'
+import { BarChart } from '@bitbaum/chartkit/react'
+import {
+  SATISFACTION_EMOJIS,
+  SATISFACTION_LABELS,
+  SATISFACTION_CHART_LABELS,
+} from '@/lib/constants'
 
 interface Props {
   days: number
@@ -58,30 +63,19 @@ export function SatisfactionChart({
               </div>
             )}
           </div>
-          <div className="space-y-2">
-            {satisfactionCounts.map((count, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <span className="w-8 text-lg text-center" aria-hidden="true">
-                  {SATISFACTION_EMOJIS[index]}
-                </span>
-                <div className="flex-1">
-                  <div className="h-4 bg-ui-border rounded-sm overflow-hidden">
-                    <div
-                      className={`h-full ${
-                        index >= 3
-                          ? 'bg-status-success'
-                          : index === 2
-                            ? 'bg-status-warning'
-                            : 'bg-status-error'
-                      }`}
-                      style={{ width: `${totalCheckIns > 0 ? (count / totalCheckIns) * 100 : 0}%` }}
-                    />
-                  </div>
-                </div>
-                <span className="w-12 text-sm text-ui-muted text-right">{count}</span>
-              </div>
-            ))}
-          </div>
+          <BarChart
+            rows={satisfactionCounts.map((count, index) => ({
+              label: `${index + 1}/5 ${SATISFACTION_LABELS[index]}`,
+              value: count,
+              share: count / totalCheckIns,
+              tone: index >= 3 ? 'positive' : index === 2 ? 'warning' : 'negative',
+            }))}
+            max={totalCheckIns}
+            order="input"
+            locale="de-CH"
+            labels={SATISFACTION_CHART_LABELS.table}
+            caption={SATISFACTION_CHART_LABELS.caption}
+          />
         </>
       )}
     </div>

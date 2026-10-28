@@ -250,3 +250,14 @@ export const SATISFACTION_LABELS = [
   'Zufrieden',
   'Sehr zufrieden',
 ]
+
+export const SATISFACTION_CHART_LABELS = {
+  caption: 'Check-ins nach Zufriedenheit',
+  table: {
+    row: 'Stufe',
+    value: 'Anzahl',
+    share: 'Anteil',
+    note: 'Hinweis',
+    estimated: 'geschätzt',
+  },
+} as const
