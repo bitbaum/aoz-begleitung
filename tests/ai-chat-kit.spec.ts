@@ -49,10 +49,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect
         .poll(() => scroller.evaluate((el) => el.scrollHeight > el.clientHeight + 100))
         .toBe(true)
-      await scroller.evaluate((el) => {
-        el.scrollTop = 0
-        el.dispatchEvent(new Event('scroll'))
-      })
+      await scroller.hover()
+      await page.mouse.wheel(0, -100000)
+      await expect.poll(() => scroller.evaluate((el) => el.scrollTop)).toBeLessThan(10)
       await expect(page.locator('.ck-jump')).toBeVisible()
       await page.evaluate(() => {
         const state = window as unknown as {
