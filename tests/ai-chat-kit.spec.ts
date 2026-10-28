@@ -45,7 +45,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
           new TextEncoder().encode(`data: ${JSON.stringify({ type: 'text', text })}\n\n`),
         )
       })
-      const scroller = page.locator('.ck-thread-wrap')
+      const scroller = page.locator('.ck-thread')
       await expect
         .poll(() => scroller.evaluate((el) => el.scrollHeight > el.clientHeight + 100))
         .toBe(true)
