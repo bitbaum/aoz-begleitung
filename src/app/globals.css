@@ -1,4 +1,5 @@
 @import '@bitbaum/chatkit/styles.css';
+@import '@bitbaum/chartkit/styles.css';
 @import 'tailwindcss';
 
 /* Tailwind v4 loads the legacy JS config explicitly. The config still holds
@@ -749,4 +750,14 @@
   --ck-fg-3: rgb(var(--color-ui-muted));
   --ck-line: rgb(var(--color-ui-border));
   --ck-line-2: rgb(var(--color-ui-border-strong));
+}
+
+/* Shared chart roles mapped to this product's RGB palette. */
+:root {
+  --ck-ink: rgb(var(--color-ui-text));
+  --ck-ink-muted: rgb(var(--color-ui-muted));
+  --ck-accent: rgb(var(--color-brand-primary));
+  --ck-up: rgb(var(--color-status-success));
+  --ck-warning: rgb(var(--color-status-warning));
+  --ck-down: rgb(var(--color-status-error));
 }

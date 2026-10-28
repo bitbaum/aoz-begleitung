@@ -27,6 +27,7 @@
   "dependencies": {
     "@bitbaum/accountkit": "^0.9.1",
     "@bitbaum/ai-kit": "^1.21.4",
+    "@bitbaum/chartkit": "^0.6.0",
     "@bitbaum/chatkit": "^0.21.2",
     "@bitbaum/mail-kit": "^0.2.0",
     "@fleet/ai-forms": "npm:ai-forms@^0.1.3",
