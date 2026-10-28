@@ -162,3 +162,53 @@ describe('no route may gate on a counter nothing increments', () => {
     expect(offenders.map((f) => f.replace(process.cwd() + '/', ''))).toEqual([])
   })
 })
+
+describe('shared sliding-window integration', () => {
+  const id = 'sliding-window-integration'
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
+    clearLoginAttempts(id)
+  })
+
+  afterEach(() => {
+    clearLoginAttempts(id)
+    vi.useRealTimers()
+  })
+
+  test('checking alone never spends the failed-login allowance', () => {
+    for (let i = 0; i < AUTH_CONFIG.rateLimit.maxAttempts * 2; i++) {
+      expect(checkRateLimit(id)).toEqual({ allowed: true })
+    }
+    for (let i = 0; i < AUTH_CONFIG.rateLimit.maxAttempts; i++) {
+      expect(consumeRateLimit(id)).toEqual({ allowed: true })
+    }
+    expect(checkRateLimit(id).allowed).toBe(false)
+  })
+
+  test('only expired attempts become available at a window boundary', () => {
+    const start = Date.now()
+    recordLoginAttempt(id)
+    vi.setSystemTime(start + 1_000)
+    for (let i = 1; i < AUTH_CONFIG.rateLimit.maxAttempts; i++) recordLoginAttempt(id)
+    expect(checkRateLimit(id).allowed).toBe(false)
+
+    vi.setSystemTime(start + AUTH_CONFIG.rateLimit.windowMs)
+    expect(consumeRateLimit(id)).toEqual({ allowed: true })
+    expect(consumeRateLimit(id)).toEqual({ allowed: false, retryAfter: 1 })
+
+    vi.setSystemTime(start + AUTH_CONFIG.rateLimit.windowMs + 1_000)
+    expect(consumeRateLimit(id)).toEqual({ allowed: true })
+  })
+
+  test('rejected failures do not move the recovery deadline', () => {
+    const start = Date.now()
+    for (let i = 0; i < AUTH_CONFIG.rateLimit.maxAttempts; i++) recordLoginAttempt(id)
+    vi.setSystemTime(start + AUTH_CONFIG.rateLimit.windowMs - 1_000)
+    recordLoginAttempt(id)
+    expect(checkRateLimit(id)).toEqual({ allowed: false, retryAfter: 1 })
+    vi.setSystemTime(start + AUTH_CONFIG.rateLimit.windowMs)
+    expect(checkRateLimit(id)).toEqual({ allowed: true })
+  })
+})

@@ -1,116 +1,43 @@
 /**
- * Rate Limiting for Login Attempts
- *
- * In-memory rate limiting. Simple but effective for single-instance deployments.
- * For multi-instance, replace with Redis-based solution.
+ * Shared per-process throttling for login failures and metered endpoints.
+ * The app owns quotas and identifiers; LimitKit owns window accounting and
+ * the bounded store. Multiple server processes require a shared-store design.
  */
-
+import { clientIp, MemoryStore, slidingWindow, type LimitResult } from 'limitkit'
 import { AUTH_CONFIG } from './config'
 
-interface RateLimitEntry {
-  attempts: number
-  firstAttempt: number
+const attempts = new MemoryStore()
+const limiter = slidingWindow(
+  { limit: AUTH_CONFIG.rateLimit.maxAttempts, windowMs: AUTH_CONFIG.rateLimit.windowMs },
+  attempts,
+)
+
+type RateLimitResult = { allowed: true } | { allowed: false; retryAfter: number }
+
+function resultForApp(result: LimitResult): RateLimitResult {
+  return result.allowed
+    ? { allowed: true }
+    : { allowed: false, retryAfter: result.retryAfterSeconds }
 }
 
-// In-memory store (cleared on server restart)
-const loginAttempts = new Map<string, RateLimitEntry>()
-
-// Cleanup interval (every 5 minutes)
-const CLEANUP_INTERVAL = 5 * 60 * 1000
-
-// Start cleanup timer — skip in test environments where the interval
-// leaks into Jest worker processes and prevents clean shutdown.
-if (typeof setInterval !== 'undefined' && process.env.NODE_ENV !== 'test') {
-  const cleanupTimer = setInterval(() => {
-    const now = Date.now()
-    loginAttempts.forEach((entry, key) => {
-      if (now - entry.firstAttempt > AUTH_CONFIG.rateLimit.windowMs) {
-        loginAttempts.delete(key)
-      }
-    })
-  }, CLEANUP_INTERVAL)
-
-  // Belt-and-suspenders: unref so a running process doesn't stay alive for this alone
-  if (typeof (cleanupTimer as NodeJS.Timeout).unref === 'function') {
-    ;(cleanupTimer as NodeJS.Timeout).unref()
-  }
+/** Inspect without consuming: only failed logins should count. */
+export function checkRateLimit(identifier: string): RateLimitResult {
+  return resultForApp(limiter.peek(identifier))
 }
 
-/**
- * Check if an IP/identifier is rate limited
- * Returns { allowed: true } or { allowed: false, retryAfter: seconds }
- */
-export function checkRateLimit(
-  identifier: string,
-): { allowed: true } | { allowed: false; retryAfter: number } {
-  const now = Date.now()
-  const entry = loginAttempts.get(identifier)
-
-  // No previous attempts
-  if (!entry) {
-    return { allowed: true }
-  }
-
-  // Window expired, reset
-  if (now - entry.firstAttempt > AUTH_CONFIG.rateLimit.windowMs) {
-    loginAttempts.delete(identifier)
-    return { allowed: true }
-  }
-
-  // Still within window, check attempts
-  if (entry.attempts >= AUTH_CONFIG.rateLimit.maxAttempts) {
-    const retryAfter = Math.ceil(
-      (AUTH_CONFIG.rateLimit.windowMs - (now - entry.firstAttempt)) / 1000,
-    )
-    return { allowed: false, retryAfter }
-  }
-
-  return { allowed: true }
-}
-
-/**
- * Record a login attempt (call after failed login)
- */
+/** Record a failed login. Refused attempts never prolong a lockout. */
 export function recordLoginAttempt(identifier: string): void {
-  const now = Date.now()
-  const entry = loginAttempts.get(identifier)
-
-  if (!entry || now - entry.firstAttempt > AUTH_CONFIG.rateLimit.windowMs) {
-    // New window
-    loginAttempts.set(identifier, { attempts: 1, firstAttempt: now })
-  } else {
-    // Increment attempts
-    entry.attempts++
-  }
+  limiter.check(identifier)
 }
 
-/**
- * Clear login attempts (call after successful login)
- */
+/** Successful login resets the caller's failed-attempt bucket. */
 export function clearLoginAttempts(identifier: string): void {
-  loginAttempts.delete(identifier)
+  attempts.set(identifier, { hits: [] })
 }
 
-/**
- * Check and record in one step — use this for anything that is not a login.
- *
- * `checkRateLimit` only reads the counter; something else has to call
- * `recordLoginAttempt` for it to ever rise. That split makes sense for logins,
- * where only *failed* attempts should count, and is a trap everywhere else: a
- * caller that just checks is a throttle that never trips, and it looks
- * identical in review to one that works.
- *
- * For a metered endpoint every call counts, so there is nothing to decide and
- * no second call to forget.
- */
-export function consumeRateLimit(
-  identifier: string,
-): { allowed: true } | { allowed: false; retryAfter: number } {
-  const result = checkRateLimit(identifier)
-  if (result.allowed) {
-    recordLoginAttempt(identifier)
-  }
-  return result
+/** Metered endpoints consume in one operation, so a check cannot be forgotten. */
+export function consumeRateLimit(identifier: string): RateLimitResult {
+  return resultForApp(limiter.check(identifier))
 }
 
 /**
@@ -125,9 +52,5 @@ export function consumeRateLimit(
  * gating code entry could never trip.
  */
 export function getClientIp(request: { headers: { get(name: string): string | null } }): string {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',').at(-1)?.trim() ||
-    request.headers.get('x-real-ip') ||
-    'unknown'
-  )
+  return clientIp(request.headers, { trustedProxies: 1 })
 }

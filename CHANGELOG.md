@@ -11,6 +11,13 @@ created_date: 2026-01-15
 last_modified_date: 2026-10-28
 last_modified_summary: Shared account password handling and the shared admin chat thread, composer and streaming parser.
 
+## 2026-10-28 — Shared rate limiting
+
+- LimitKit now owns bounded rate-limit storage, trusted-proxy IP extraction and
+  sliding windows. Failed-login accounting, successful-login reset and metered
+  endpoints retain their app-level contracts. Each attempt expires separately,
+  preventing a full allowance from returning while recent failures still count.
+
 ## 2026-10-28 — Compatible dependency security patches
 
 - Updated Sentry's monitoring integration and compatible test/build dependencies
