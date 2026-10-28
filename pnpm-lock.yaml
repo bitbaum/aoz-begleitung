@@ -51,6 +51,9 @@ importers:
       jose:
         specifier: ^6.2.13
         version: 6.2.13
+      limitkit:
+        specifier: ^0.2.1
+        version: 0.2.1
       lucide-react:
         specifier: ^1.61.0
         version: 1.61.0(@types/react@19.3.0)(react@19.3.1)
@@ -3829,6 +3832,10 @@ packages:
 
   limitkit@0.2.0:
     resolution: {integrity: sha512-x05857iOBGf04eRBAXWTtRTrGhRdBfW9fZa8rfJDx3rQNRBVQpwK2z9aiMYNWhRp71QoIjvA0rl4ZiL4+6O8rA==}
+    engines: {node: '>=20'}
+
+  limitkit@0.2.1:
+    resolution: {integrity: sha512-8IBrAi+W9axLDDiUE5F2+wabhLTNs1wpaBSf+RfytdXDm/KpOB6S8Xw7j0uoTQH5ti4A/EiRfyK1DbR6NcY1gA==}
     engines: {node: '>=20'}
 
   linkedom@0.18.14:
@@ -8355,6 +8362,8 @@ snapshots:
       lightningcss-win32-x64-msvc: 1.33.0
 
   limitkit@0.2.0: {}
+
+  limitkit@0.2.1: {}
 
   linkedom@0.18.14:
     dependencies:
