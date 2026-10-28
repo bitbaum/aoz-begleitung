@@ -151,13 +151,11 @@ describe('POST /api/auth/signup', () => {
     })
   })
 
-  it('rejects a too-short password with the German message', async () => {
-    const response = await signupPost(
-      jsonRequest('/api/auth/signup', { ...VALID, password: 'short' }),
-    )
+  it('rejects an empty password with the German message', async () => {
+    const response = await signupPost(jsonRequest('/api/auth/signup', { ...VALID, password: '' }))
     const body = await response.json()
     expect(response.status).toBe(400)
-    expect(body.error).toBe(ERROR_MESSAGES.AUTH_PASSWORD_TOO_SHORT)
+    expect(body.error).toBe(ERROR_MESSAGES.AUTH_PASSWORD_REQUIRED)
     expect(mockRegisterAccount).not.toHaveBeenCalled()
   })
 
@@ -233,7 +231,7 @@ describe('POST /api/auth/reset-password', () => {
 
   it('enforces the password policy before touching the token', async () => {
     const response = await resetPost(
-      jsonRequest('/api/auth/reset-password', { token: 'tok', password: 'short' }),
+      jsonRequest('/api/auth/reset-password', { token: 'tok', password: '' }),
     )
     expect(response.status).toBe(400)
     expect(mockResetPassword).not.toHaveBeenCalled()

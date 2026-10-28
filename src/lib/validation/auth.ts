@@ -4,16 +4,15 @@
  */
 
 import { z } from 'zod'
-import { PASSWORD_MIN_LENGTH } from '@/lib/auth/passwords'
+import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from '@bitbaum/accountkit/auth/password'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 
 const emailField = z.string().trim().toLowerCase().email(ERROR_MESSAGES.AUTH_EMAIL_INVALID)
 
 const passwordField = z
   .string()
-  .min(PASSWORD_MIN_LENGTH, ERROR_MESSAGES.AUTH_PASSWORD_TOO_SHORT)
-  // bcrypt truncates at 72 bytes — refuse silently-truncated passwords.
-  .max(72, ERROR_MESSAGES.AUTH_PASSWORD_TOO_LONG)
+  .min(MIN_PASSWORD_LENGTH, ERROR_MESSAGES.AUTH_PASSWORD_REQUIRED)
+  .max(MAX_PASSWORD_LENGTH, ERROR_MESSAGES.AUTH_PASSWORD_TOO_LONG)
 
 export const registerSchema = z.object({
   code: z.string().trim().toUpperCase().min(1, ERROR_MESSAGES.AUTH_CODE_REQUIRED),

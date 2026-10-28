@@ -100,7 +100,7 @@ describe('/api/auth/claim', () => {
 
   it('validates input before touching the link', async () => {
     const { POST } = await import('../claim/route')
-    const res = await POST(req('/api/auth/claim', 'POST', { ...VALID, password: 'short' }))
+    const res = await POST(req('/api/auth/claim', 'POST', { ...VALID, password: '' }))
     expect(res.status).toBe(400)
     expect(mockTake).not.toHaveBeenCalled()
   })

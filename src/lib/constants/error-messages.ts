@@ -23,8 +23,8 @@ export const ERROR_MESSAGES = {
   AUTH_HOUSEHOLD_NAME_REQUIRED: 'Bitte gib deiner Wohnung einen Namen',
   AUTH_HOUSEHOLD_NAME_TOO_LONG: 'Der Name ist zu lang (max. 80 Zeichen)',
   AUTH_EMAIL_INVALID: 'Gültige E-Mail-Adresse erforderlich',
-  AUTH_PASSWORD_TOO_SHORT: 'Passwort muss mindestens 8 Zeichen haben',
-  AUTH_PASSWORD_TOO_LONG: 'Passwort darf höchstens 72 Zeichen haben',
+  AUTH_PASSWORD_REQUIRED: 'Bitte gib ein Passwort ein',
+  AUTH_PASSWORD_TOO_LONG: 'Passwort darf höchstens 128 Zeichen haben',
   AUTH_CODE_UNKNOWN: 'Ungültiger Code. Verwenden Sie den Code, den Sie erhalten haben.',
   AUTH_ALREADY_REGISTERED:
     'Für diesen Code existiert bereits ein Konto. Verwenden Sie «Passwort vergessen», falls Sie das Passwort nicht mehr wissen.',

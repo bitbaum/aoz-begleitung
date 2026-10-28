@@ -25,5 +25,6 @@ minimumReleaseAgeExclude:
   - '@bitbaum/mail-kit'
   # bip-kit is our own package too; each release is days old when adopted.
   - 'bip-kit'
+  - '@bitbaum/accountkit'
   # ai-forms is ours as well (the form assistant); releases ship same-day.
   - 'ai-forms'

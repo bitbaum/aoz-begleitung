@@ -124,7 +124,6 @@ export const REGISTER_LABELS = {
   subtitle:
     'Mit Ihrem Zugangscode registrieren — danach melden Sie sich mit E-Mail und Passwort an.',
   codeHint: 'Der Code, den Sie von der Verwaltung oder Ihrer WG erhalten haben.',
-  passwordHint: 'Mindestens 8 Zeichen.',
   submit: 'Konto erstellen',
   submitting: 'Konto wird erstellt...',
   success: 'Konto erstellt — Sie sind angemeldet.',
