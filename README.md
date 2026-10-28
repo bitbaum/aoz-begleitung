@@ -2,7 +2,7 @@
 
 created_date: 2025-06-01
 last_modified_date: 2026-10-01
-last_modified_summary: The site is fully real — the invented demo world and its nightly reset are gone; /login offers quick access as named real staff accounts (QUICK_ACCESS_STAFF_CODES).
+last_modified_summary: The site is fully real — the invented demo world and its nightly reset are gone, and the one-click quick-access doors on /login were replaced by single-use claim links for staff.
 
 A platform for **accompanying people** in refugee accommodation and
 integration work. It is organised around the two questions staff arrive with —

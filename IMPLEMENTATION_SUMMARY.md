@@ -12,7 +12,7 @@ This file no longer describes the product. Current sources:
 | What the product is and does | [README.md](README.md) |
 | Where it runs | [docs/INFRASTRUCTURE.md](docs/INFRASTRUCTURE.md) |
 | Where it is going | [docs/ROADMAP.md](docs/ROADMAP.md) (also the public `/roadmap`) |
-| How to work in this repo | [CLAUDE.md](CLAUDE.md) |
+| How to work in this repo | [AGENTS.md](AGENTS.md) |
 
 Setting up a real apartment: see [REAL-APARTMENTS-SETUP.md](REAL-APARTMENTS-SETUP.md); the apartment data
 lives in a gitignored local file, never in the repository.
