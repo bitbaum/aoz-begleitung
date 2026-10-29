@@ -27,9 +27,15 @@ importers:
       '@bitbaum/design-tokens':
         specifier: ^1.2.0
         version: 1.2.0
+      '@bitbaum/listkit':
+        specifier: ^0.2.2
+        version: 0.2.2
       '@bitbaum/mail-kit':
         specifier: ^0.2.0
         version: 0.2.0
+      '@bitbaum/searchkit':
+        specifier: ^0.2.3
+        version: 0.2.3(react@19.3.1)
       '@bitbaum/sitekit':
         specifier: ^0.4.2
         version: 0.4.2(react@19.3.1)
@@ -341,9 +347,21 @@ packages:
     resolution: {integrity: sha512-13TSrgYbEzSqt5FNfW3HSJIFcenUto8nKlk4J4IUsepL0gsTBoZ0YDMiJTaJKmR8sPPmcCS94Z/xgUBQW43itw==}
     engines: {node: '>=20'}
 
+  '@bitbaum/listkit@0.2.2':
+    resolution: {integrity: sha512-MS7SpPodTaxXYccXW565M3sIYaDCHSpWFlJB77FdkE/fM7uktxn0u25p0BSWC97i4U6uCqPedYVt1xV34sGXnQ==}
+    engines: {node: '>=20'}
+
   '@bitbaum/mail-kit@0.2.0':
     resolution: {integrity: sha512-YkgMFRQ6HuzIB0q/Ao4FB4zb/YxVc0iKyVdRkFe2psJ4CQJvGxBfDlURomZMkgQfpBQox4QiT/iN9IGRz6SeTg==}
     engines: {node: '>=20'}
+
+  '@bitbaum/searchkit@0.2.3':
+    resolution: {integrity: sha512-eUN4f2kxn53Z0gz2f94NVcc+mt+taKnpmUr49tCLULKfx+Z/BYfc/tljOD+MUQIC4n/HMxEicey5GjhGOl5fvw==}
+    peerDependencies:
+      react: '>=18'
+    peerDependenciesMeta:
+      react:
+        optional: true
 
   '@bitbaum/sitekit@0.4.2':
     resolution: {integrity: sha512-Q8MsZcn8w1ljvrsQrOvTisC+nGzVpNX+ZcChzIGXCDLy3yRzU0HuhGD9c1YuH7gBz/HXgYXPDRPJT5UZ0B2lBg==}
@@ -5145,7 +5163,13 @@ snapshots:
 
   '@bitbaum/design-tokens@1.2.0': {}
 
+  '@bitbaum/listkit@0.2.2': {}
+
   '@bitbaum/mail-kit@0.2.0': {}
+
+  '@bitbaum/searchkit@0.2.3(react@19.3.1)':
+    optionalDependencies:
+      react: 19.3.1
 
   '@bitbaum/sitekit@0.4.2(react@19.3.1)':
     dependencies:

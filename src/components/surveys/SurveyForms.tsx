@@ -8,6 +8,8 @@
 
 import { useActionState, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toggleInSet } from '@bitbaum/listkit'
+import { searchSurveyAudience } from '@/lib/surveys/audience-search'
 import { closeSurvey, createSurvey, sendSurvey, type SurveyFormState } from '@/lib/actions/surveys'
 import { SURVEY_LABELS as L } from '@/lib/constants/labels/surveys'
 
@@ -149,18 +151,9 @@ export function SendSurveyForm({
     if (state.ok) router.refresh()
   }, [state, router])
 
-  const visibleClients = useMemo(() => {
-    const needle = query.trim().toLowerCase()
-    return needle ? clients.filter((client) => client.name.toLowerCase().includes(needle)) : clients
-  }, [clients, query])
+  const visibleClients = useMemo(() => searchSurveyAudience(clients, query), [clients, query])
 
-  const toggle = (id: string) =>
-    setPicked((previous) => {
-      const next = new Set(previous)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
+  const toggle = (id: string) => setPicked((previous) => new Set(toggleInSet([...previous], id)))
 
   return (
     <form

@@ -2,6 +2,7 @@
  * Small cross-cutting helpers the Prisma client used to provide implicitly.
  */
 import { DatabaseError } from 'pg'
+import { escapeLike as sharedEscapeLike } from '@bitbaum/listkit'
 
 /**
  * Postgres unique-constraint violation (SQLSTATE 23505) — what Prisma
@@ -22,5 +23,5 @@ export function isUniqueViolation(error: unknown): boolean {
  * the literal string. Prisma's `contains` escaped these internally.
  */
 export function escapeLike(value: string): string {
-  return value.replace(/[\\%_]/g, (c) => `\\${c}`)
+  return sharedEscapeLike(value)
 }
