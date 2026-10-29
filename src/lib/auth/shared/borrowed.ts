@@ -9,7 +9,6 @@
  * administrator, so closing a view can never widen what they had.
  */
 import { makeSignature } from 'better-auth/crypto'
-import { SESSION_DURATION_SECONDS } from '../constants'
 import { bindSessionScope, readSessionScope, sharedUserForStaff } from './identity'
 import { sharedAuth } from './runtime'
 
@@ -38,14 +37,10 @@ export async function openBorrowedSession(args: {
   const sharedUserId = await sharedUserForStaff(args.targetStaffId)
   if (!sharedUserId) return null
   const ctx = await sharedAuth.getAuth().$context
-  const created = await ctx.internalAdapter.createSession(sharedUserId)
-  if (!created) return null
-  // A borrowed view lasts a working session, as the legacy one did, not the
-  // fortnight a person's own sign-in gets.
-  const session =
-    (await ctx.internalAdapter.updateSession(created.token, {
-      expiresAt: new Date(Date.now() + SESSION_DURATION_SECONDS * 1000),
-    })) ?? created
+  // A colleague's account holds a staff identity, so the view gets the staff
+  // idle limit (runtime.ts, sessionLifetime) like any staff session.
+  const session = await ctx.internalAdapter.createSession(sharedUserId)
+  if (!session) return null
   try {
     await bindSessionScope(session.id, {
       side: 'staff',

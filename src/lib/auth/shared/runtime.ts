@@ -18,7 +18,8 @@ import { BRAND } from '@/lib/config/brand'
 import { getAppUrl } from '@/lib/config/app-url'
 import { db, resident } from '@/lib/db'
 import { releaseClaimInvite, takeClaimInvite } from '../claim-invites'
-import { bindSessionScope, linkIdentity, sharedUserForCode } from './identity'
+import { SESSION_DURATION_SECONDS } from '../constants'
+import { bindSessionScope, linkIdentity, sharedUserForCode, sharedUserHoldsStaff } from './identity'
 
 /** Whether the shared runtime answers. The legacy handlers answer otherwise. */
 export function sharedAuthEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
@@ -108,4 +109,8 @@ export const sharedAuth = createAuthRuntime({
   legacyBcrypt: bcrypt,
   domainCredentials,
   provisioning,
+  // Staff sessions keep AOZ's 8-hour idle limit (SESSION_DURATION); anyone
+  // holding a staff identity gets it, on every session of that account.
+  sessionLifetime: async (userId) =>
+    (await sharedUserHoldsStaff(userId)) ? SESSION_DURATION_SECONDS : null,
 })
