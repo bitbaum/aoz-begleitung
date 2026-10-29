@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/ui/DateInput'
 import {
   ACTIVITY_CATEGORY_LABELS,
   ACTIVITY_COST_LABELS,
@@ -132,7 +133,7 @@ export function ActivityFormFields({ activity }: ActivityFormFieldsProps) {
 
         <label className="space-y-1.5">
           <span className="text-sm font-medium text-ui-text">Startdatum</span>
-          <input
+          <DateInput
             name="startsAt"
             type="date"
             defaultValue={dateInputValue(activity?.startsAt)}
@@ -142,7 +143,7 @@ export function ActivityFormFields({ activity }: ActivityFormFieldsProps) {
 
         <label className="space-y-1.5">
           <span className="text-sm font-medium text-ui-text">Enddatum</span>
-          <input
+          <DateInput
             name="endsAt"
             type="date"
             defaultValue={dateInputValue(activity?.endsAt)}

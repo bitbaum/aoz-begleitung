@@ -1,5 +1,6 @@
 'use client'
 
+import { DateInput } from '@/components/ui/DateInput'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
@@ -294,7 +295,7 @@ export function LearningForm({
           <label htmlFor={`${idPrefix}-startedAt`} className="label">
             {copy.startedAt}
           </label>
-          <input
+          <DateInput
             id={`${idPrefix}-startedAt`}
             name="startedAt"
             type="date"
@@ -306,7 +307,7 @@ export function LearningForm({
           <label htmlFor={`${idPrefix}-completedAt`} className="label">
             {copy.completedAt}
           </label>
-          <input
+          <DateInput
             id={`${idPrefix}-completedAt`}
             name="completedAt"
             type="date"

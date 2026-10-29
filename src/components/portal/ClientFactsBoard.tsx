@@ -1,5 +1,6 @@
 'use client'
 
+import { DateInput } from '@/components/ui/DateInput'
 import { useActionState, useState } from 'react'
 
 import {
@@ -194,7 +195,8 @@ export function ClientFactsBoard({ locale, labels, insurances, contacts, permit 
                   <label className="block text-xs text-ui-muted" htmlFor={`until-${row.id}`}>
                     {labels.validUntil}
                   </label>
-                  <input
+                  <DateInput
+                    locale={locale}
                     id={`until-${row.id}`}
                     type="date"
                     name="validUntil"
@@ -278,7 +280,8 @@ export function ClientFactsBoard({ locale, labels, insurances, contacts, permit 
             <label className="block text-xs text-ui-muted" htmlFor="new-until">
               {labels.validUntil}
             </label>
-            <input
+            <DateInput
+              locale={locale}
               id="new-until"
               type="date"
               name="validUntil"
@@ -441,7 +444,8 @@ export function ClientFactsBoard({ locale, labels, insurances, contacts, permit 
           <label className="block text-xs text-ui-muted" htmlFor="permit-until">
             {labels.validUntil}
           </label>
-          <input
+          <DateInput
+            locale={locale}
             id="permit-until"
             type="date"
             name="validUntil"

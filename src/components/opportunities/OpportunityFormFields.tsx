@@ -1,5 +1,7 @@
 'use client'
 
+import { DateInput } from '@/components/ui/DateInput'
+
 /**
  * The opportunity form.
  *
@@ -237,7 +239,7 @@ export function OpportunityFormFields({ opportunity, action, cancelHref }: Props
 
           <label className="space-y-1.5">
             <span className="text-sm font-medium text-ui-text">{L.startsAt}</span>
-            <input
+            <DateInput
               name="startsAt"
               type="date"
               value={text('startsAt')}
@@ -248,7 +250,7 @@ export function OpportunityFormFields({ opportunity, action, cancelHref }: Props
 
           <label className="space-y-1.5">
             <span className="text-sm font-medium text-ui-text">{L.endsAt}</span>
-            <input
+            <DateInput
               name="endsAt"
               type="date"
               value={text('endsAt')}

@@ -1,5 +1,6 @@
 'use client'
 
+import { DateInput } from '@/components/ui/DateInput'
 import { useState } from 'react'
 
 import {
@@ -296,7 +297,7 @@ function AppointmentForm({
           <label htmlFor={`appt-when-${domain}`} className="label">
             {CARE_LABELS.appointmentWhen}
           </label>
-          <input
+          <DateInput
             id={`appt-when-${domain}`}
             name="startsAt"
             type="datetime-local"
@@ -384,7 +385,7 @@ function AppointmentRow({ item, canWrite }: { item: CareAppointment; canWrite: b
                 </label>
                 {/* Blank keeps the time the resident proposed. Prefilling it
                     would make "confirm what they asked for" look like a change. */}
-                <input
+                <DateInput
                   id={`accept-when-${item.id}`}
                   name="startsAt"
                   type="datetime-local"
@@ -507,7 +508,7 @@ function AppointmentRow({ item, canWrite }: { item: CareAppointment; canWrite: b
                 <label htmlFor={`move-when-${item.id}`} className="label">
                   {CARE_LABELS.newTimeLabel}
                 </label>
-                <input
+                <DateInput
                   id={`move-when-${item.id}`}
                   name="startsAt"
                   type="datetime-local"

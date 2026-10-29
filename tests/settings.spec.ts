@@ -5,6 +5,20 @@ import { findAdminNavLink } from './helpers'
 // storageState from playwright.config handles staff auth
 
 test.describe('Settings page', () => {
+  test('shared date picker preserves the pilot date submitted to the server', async ({ page }) => {
+    await page.goto('/settings')
+    await page.waitForLoadState('networkidle')
+    const date = page.locator('#pilotStartDate')
+    await date.fill('2026-10-15')
+    await expect(date).toHaveValue('2026-10-15')
+    await expect(date.locator('..').locator('.wk-input-text')).toContainText('15')
+    expect(
+      await date.evaluate((input) =>
+        new FormData((input as HTMLInputElement).form!).get('pilotStartDate'),
+      ),
+    ).toBe('2026-10-15')
+  })
+
   test('settings page loads with team and invite sections', async ({ page }) => {
     await page.goto('/settings')
 

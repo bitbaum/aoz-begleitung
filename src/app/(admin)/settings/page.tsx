@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/ui/DateInput'
 import type { Metadata } from 'next'
 import { requirePermission, hasPermission } from '@/lib/auth'
 import { db, user as userTable } from '@/lib/db'
@@ -166,7 +167,7 @@ export default async function SettingsPage() {
                 <label className="label" htmlFor="pilotStartDate">
                   {PILOT_BASELINE_LABELS.startDateLabel}
                 </label>
-                <input
+                <DateInput
                   type="date"
                   id="pilotStartDate"
                   name="pilotStartDate"

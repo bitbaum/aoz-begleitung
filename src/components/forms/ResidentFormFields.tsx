@@ -1,5 +1,7 @@
 'use client'
 
+import { DateInput } from '@/components/ui/DateInput'
+
 /**
  * Resident Form Fields
  *
@@ -191,7 +193,7 @@ function MedicalDocumentationSection({ defaultValues }: { defaultValues: FormVal
 
             <div>
               <label className="label">Datum der Dokumentation</label>
-              <input
+              <DateInput
                 type="date"
                 name="medicalDocDate"
                 defaultValue={

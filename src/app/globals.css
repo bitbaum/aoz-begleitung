@@ -1,3 +1,6 @@
+@import '@bitbaum/whenkit/styles.css';
+@import '@bitbaum/sitekit/styles.css';
+@import '@bitbaum/design-tokens/composition.css';
 @import '@bitbaum/chatkit/styles.css';
 @import '@bitbaum/chartkit/styles.css';
 @import 'tailwindcss';
@@ -760,4 +763,40 @@
   --ck-up: rgb(var(--color-status-success));
   --ck-warning: rgb(var(--color-status-warning));
   --ck-down: rgb(var(--color-status-error));
+}
+
+/* Shared shell and date controls inherit AOZ's semantic theme in both modes. */
+.wk-input {
+  --wk-bg: rgb(var(--color-ui-surface));
+  --wk-fg: rgb(var(--color-ui-text));
+  --wk-muted: rgb(var(--color-ui-muted));
+  --wk-line: rgb(var(--color-ui-border));
+  --wk-line-2: rgb(var(--color-ui-border-strong));
+  --wk-accent: rgb(var(--color-ui-text));
+  --wk-danger: rgb(var(--color-status-error-text));
+  --wk-radius: var(--radius-md);
+  --wk-font: var(--font-inter), sans-serif;
+}
+
+.public-shell {
+  --sk-fg: rgb(var(--color-ui-text));
+  --sk-muted: rgb(var(--color-ui-muted));
+  --sk-bg: rgb(var(--color-ui-canvas));
+  --sk-raised: rgb(var(--color-ui-surface));
+  --sk-line: rgb(var(--color-ui-border));
+  --sk-font: var(--font-inter), sans-serif;
+  --sk-width: 48rem;
+  --sk-gutter: 1rem;
+  --sk-radius: var(--radius-md);
+  --sk-header-height: 3.5rem;
+  --sk-mobile-header-height: 3.5rem;
+  --bb-frame-max: 48rem;
+  --bb-gutter: 1rem;
+}
+
+@media (min-width: 640px) {
+  .public-shell {
+    --sk-gutter: 1.5rem;
+    --bb-gutter: 1.5rem;
+  }
 }
