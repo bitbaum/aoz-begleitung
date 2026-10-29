@@ -27,7 +27,7 @@
   "dependencies": {
     "@bitbaum/accountkit": "^0.14.0",
     "@bitbaum/ai-kit": "^1.21.5",
-    "@bitbaum/chartkit": "^0.6.0",
+    "@bitbaum/chartkit": "^0.7.0",
     "@bitbaum/chatkit": "^0.21.2",
     "@bitbaum/design-tokens": "^1.2.0",
     "@bitbaum/listkit": "^0.2.2",
