@@ -17,7 +17,7 @@
     "identity": {
       "package": "@bitbaum/accountkit",
       "status": "partial",
-      "remaining": "Registration, invitations, credential migration, revocable sessions, resident mapping and configured-provider journeys remain open. Password primitives alone are not full adoption.",
+      "remaining": "Additive shared tables and actor mappings are staged; the rollback-only import rehearsal is documented in docs/ACCOUNTKIT-MIGRATION.md. Registration/provisioning, invitations, live credential cutover, revocable sessions, runtime actor authorization and configured-provider journeys remain open. Password primitives and staging tables alone are not full adoption.",
       "bindings": [
         {
           "file": "src/lib/auth/passwords.ts",
