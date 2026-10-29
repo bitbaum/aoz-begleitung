@@ -4,8 +4,9 @@
  */
 
 import { IN_CARE_RESIDENT_STATUSES } from '@/lib/config/resident-status'
-import { and, asc, desc, eq, ilike, inArray, isNull, notInArray, or, type SQL } from 'drizzle-orm'
-import { db, escapeLike, opportunity, opportunityApplication, resident } from '@/lib/db'
+import { searchText } from '@/lib/search/text-search'
+import { and, asc, desc, eq, inArray, isNull, notInArray, type SQL } from 'drizzle-orm'
+import { db, opportunity, opportunityApplication, resident } from '@/lib/db'
 import { RESIDENT_NAME_SELECT } from '@/lib/utils/resident-name'
 import type {
   ApplicationStageId,
@@ -75,7 +76,6 @@ export interface OpportunityListFilters {
 }
 
 function listWhere(filters: OpportunityListFilters): SQL | undefined {
-  const query = filters.query?.trim() ?? ''
   const conditions: SQL[] = []
   if (filters.publishedOnly) {
     conditions.push(eq(opportunity.status, 'PUBLISHED'))
@@ -90,15 +90,6 @@ function listWhere(filters: OpportunityListFilters): SQL | undefined {
   if (filters.kinds && filters.kinds.length > 0) {
     conditions.push(inArray(opportunity.kind, [...filters.kinds]))
   }
-  if (query) {
-    const pattern = `%${escapeLike(query)}%`
-    const textMatch = or(
-      ilike(opportunity.title, pattern),
-      ilike(opportunity.organisation, pattern),
-      ilike(opportunity.location, pattern),
-    )
-    if (textMatch) conditions.push(textMatch)
-  }
   return and(...conditions)
 }
 
@@ -107,7 +98,7 @@ function listWhere(filters: OpportunityListFilters): SQL | undefined {
  * seats without a second query per row.
  */
 export async function listOpportunities(filters: OpportunityListFilters) {
-  return db.query.opportunity.findMany({
+  const listings = await db.query.opportunity.findMany({
     where: listWhere(filters),
     with: {
       // `createdBy` and `supportedByUserId` ride along so the board can mark
@@ -127,6 +118,12 @@ export async function listOpportunities(filters: OpportunityListFilters) {
     },
     orderBy: [asc(opportunity.status), asc(opportunity.startsAt), desc(opportunity.updatedAt)],
   })
+  // Typed text narrows the filtered listings, typos and all.
+  return searchText(listings, filters.query, [
+    { name: 'title', get: (o) => o.title },
+    { name: 'organisation', get: (o) => o.organisation },
+    { name: 'location', get: (o) => o.location },
+  ])
 }
 
 export async function getOpportunityDetail(id: string) {

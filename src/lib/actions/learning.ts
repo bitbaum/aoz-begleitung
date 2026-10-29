@@ -1,9 +1,11 @@
 'use server'
 
 import { IN_CARE_RESIDENT_STATUSES } from '@/lib/config/resident-status'
+import { searchText } from '@/lib/search/text-search'
+import { residentName } from '@/lib/utils/resident-name'
 import { revalidatePath } from 'next/cache'
-import { db, learningRecord, resident, careAssignment, placement, escapeLike } from '@/lib/db'
-import { and, asc, count, desc, eq, ilike, inArray, notInArray, or, sql } from 'drizzle-orm'
+import { db, learningRecord, resident, careAssignment, placement } from '@/lib/db'
+import { and, asc, count, desc, eq, inArray, notInArray, sql } from 'drizzle-orm'
 import { getCurrentUser, hasPermission, requirePermission } from '@/lib/auth'
 import { getResidentCookie } from '@/lib/portal-auth'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
@@ -385,11 +387,14 @@ export interface LearningBoardFilters {
   category?: (typeof LEARNING_CATEGORIES)[number] | 'ALL'
 }
 
+/** The board shows this many records; a search ranks up to SEARCH_SCOPE_LIMIT. */
+const BOARD_LIMIT = 200
+const SEARCH_SCOPE_LIMIT = 2000
+
 export async function listLearningBoard(filters: LearningBoardFilters) {
   const user = await requirePermission('learning:read')
   const query = filters.query?.trim() || ''
   const kinds = boardKinds(filters.board)
-  const pattern = `%${escapeLike(query)}%`
 
   // Residents assigned to me (Prisma's `careAssignments: { some: { staffId } }`)
   const myResidentIds = db
@@ -410,26 +415,10 @@ export async function listLearningBoard(filters: LearningBoardFilters) {
     ...(filters.category && filters.category !== 'ALL'
       ? [eq(learningRecord.category, filters.category)]
       : []),
-    ...(query
-      ? [
-          or(
-            ilike(learningRecord.title, pattern),
-            ilike(learningRecord.provider, pattern),
-            ilike(learningRecord.notes, pattern),
-            inArray(
-              learningRecord.residentId,
-              db
-                .select({ id: resident.id })
-                .from(resident)
-                .where(or(ilike(resident.code, pattern), ilike(resident.displayName, pattern))),
-            ),
-          ),
-        ]
-      : []),
     ...(filters.mineOnly ? [inArray(learningRecord.residentId, myResidentIds)] : []),
   )
 
-  const [records, missingGerman, total, statusGroups, sourceGroups] = await Promise.all([
+  const [loaded, missingGerman, total, statusGroups, sourceGroups] = await Promise.all([
     db.query.learningRecord.findMany({
       where: recordWhere,
       with: {
@@ -453,7 +442,8 @@ export async function listLearningBoard(filters: LearningBoardFilters) {
         },
       },
       orderBy: [asc(learningRecord.status), desc(learningRecord.updatedAt)],
-      limit: 200,
+      // A search ranks the board's whole scoped set, not its first page.
+      limit: query ? SEARCH_SCOPE_LIMIT : BOARD_LIMIT,
     }),
     filters.board === 'volunteering'
       ? Promise.resolve([])
@@ -493,6 +483,31 @@ export async function listLearningBoard(filters: LearningBoardFilters) {
       .groupBy(learningRecord.recordedBy),
   ])
 
+  if (query) {
+    // Typed text narrows the scoped board; the counts describe what it found.
+    const found = searchText(loaded, query, [
+      { name: 'title', get: (r) => r.title },
+      { name: 'provider', get: (r) => r.provider },
+      { name: 'resident', get: (r) => (r.resident ? residentName(r.resident) : null) },
+      { name: 'residentCode', get: (r) => r.resident?.code },
+      { name: 'notes', get: (r) => r.notes },
+    ])
+    const countWhere = (match: (r: (typeof found)[number]) => boolean) => found.filter(match).length
+    return {
+      user,
+      records: found.slice(0, BOARD_LIMIT),
+      missingGerman,
+      stats: {
+        total: found.length,
+        planned: countWhere((r) => r.status === 'PLANNED'),
+        inProgress: countWhere((r) => r.status === 'IN_PROGRESS'),
+        completed: countWhere((r) => r.status === 'COMPLETED'),
+        residentLogged: countWhere((r) => r.recordedBy === 'RESIDENT'),
+        staffLogged: countWhere((r) => r.recordedBy === 'STAFF'),
+      },
+    }
+  }
+
   const stats = {
     total,
     planned: statusGroups.find((group) => group.status === 'PLANNED')?.count ?? 0,
@@ -502,7 +517,7 @@ export async function listLearningBoard(filters: LearningBoardFilters) {
     staffLogged: sourceGroups.find((group) => group.recordedBy === 'STAFF')?.count ?? 0,
   }
 
-  return { user, records, missingGerman, stats }
+  return { user, records: loaded, missingGerman, stats }
 }
 
 export async function listResidentLearningEvidence() {

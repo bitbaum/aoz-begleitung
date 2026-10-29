@@ -78,8 +78,8 @@
     },
     "search": {
       "package": "@bitbaum/searchkit",
-      "status": "partial",
-      "remaining": "Survey audience matching uses shared typo-tolerant search. SQL/name searches in the listed staff pages remain to migrate after preserving role/site restrictions. Exact code lookup remains a domain credential, not fuzzy matching.",
+      "status": "adopted",
+      "remaining": "Every listed staff search ranks the already-authorized rows through searchText (src/lib/search/text-search.ts): role, site and filter restrictions stay in the SQL that loads them, so search only narrows. The learning board ranks up to 2000 scoped records before showing 200, and its counts follow the search. Exact code lookup at sign-in remains a domain credential, not fuzzy matching.",
       "surfaces": [
         "src/app/(admin)/residents/page.tsx",
         "src/app/(admin)/housing/page.tsx",
@@ -91,15 +91,15 @@
       ],
       "bindings": [
         {
-          "file": "src/lib/surveys/audience-search.ts",
-          "symbols": ["createSearch"]
+          "file": "src/lib/search/text-search.ts",
+          "symbols": ["search"]
         }
       ]
     },
     "lists": {
       "package": "@bitbaum/listkit",
-      "status": "partial",
-      "remaining": "SQL wildcard escaping and survey selection toggling use shared operations. URL/filter codec migration remains open; preserve role-scoped defaults, neutral overrides and saved group semantics.",
+      "status": "adopted",
+      "remaining": "SQL wildcard escaping and selection toggles use ListKit. Codec exception, owner @bitbaum/listkit, 2026-10-29: the client-filter URL codec (src/lib/config/client-filters.ts) stays local because ListKit's parseQuery/writeQuery have no viewer-relative defaults (the Zuständig default depends on the viewer's caseload) and no neutral override that keeps a saved group from re-applying a default. Moving it would lose both. Revisit when ListKit supports per-request defaults with neutral values.",
       "surfaces": [
         "src/lib/config/client-filters.ts",
         "src/components/residents/ClientFilterBar.tsx",

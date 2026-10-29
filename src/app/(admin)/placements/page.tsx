@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { residentSearchFields, searchText } from '@/lib/search/text-search'
 import { db, placement, satisfactionCheckIn } from '@/lib/db'
 import { eq, ne, isNotNull, desc, count, avg } from 'drizzle-orm'
 import Link from 'next/link'
@@ -115,13 +116,17 @@ export default async function PlacementsListPage({ searchParams }: Props) {
     conflictEnds: conflictEndsCount,
   }
 
+  // Typed text narrows the loaded placements, typos and all.
+  const queryMatches = new Set(
+    searchText(placements, query, [
+      ...residentSearchFields((p: (typeof placements)[number]) => p.resident),
+      { name: 'unit', get: (p) => p.housingUnit.code },
+      { name: 'address', get: (p) => p.housingUnit.address },
+    ]),
+  )
+
   const filteredPlacements = placements.filter((placement) => {
-    const matchesQuery =
-      !query ||
-      residentName(placement.resident).toLowerCase().includes(query) ||
-      placement.resident.code.toLowerCase().includes(query) ||
-      placement.housingUnit.code.toLowerCase().includes(query) ||
-      placement.housingUnit.address.toLowerCase().includes(query)
+    const matchesQuery = queryMatches.has(placement)
 
     const lastCheckIn = placement.checkIns?.[0]
     const daysSinceCheckIn = lastCheckIn ? daysSinceCeil(lastCheckIn.createdAt) : null
