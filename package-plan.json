@@ -2,7 +2,7 @@
   "blocks": {
     "shell": {
       "package": "@bitbaum/sitekit",
-      "status": "implemented-pending-release",
+      "status": "deployed-and-publicly-exercised",
       "bindings": [
         {
           "file": "src/components/marketing/PublicChrome.tsx",
@@ -61,7 +61,7 @@
           "symbols": ["SharedDateInput"]
         }
       ],
-      "status": "implemented-pending-release"
+      "status": "deployed-and-checked-with-isolated-database"
     },
     "charts": {
       "package": "@bitbaum/chartkit",
@@ -74,8 +74,8 @@
     },
     "search": {
       "package": "@bitbaum/searchkit",
-      "status": "missing-applicable",
-      "remaining": "Source/API review confirms applicability: names and free-text currently use ILIKE or includes. Authorize candidates before shared matching; keep exact code lookup distinct. Add typoCases/evaluate tests when migrating.",
+      "status": "partial",
+      "remaining": "Survey audience matching uses shared typo-tolerant search. SQL/name searches in the listed staff pages remain to migrate after preserving role/site restrictions. Exact code lookup remains a domain credential, not fuzzy matching.",
       "surfaces": [
         "src/app/(admin)/residents/page.tsx",
         "src/app/(admin)/housing/page.tsx",
@@ -84,17 +84,33 @@
         "src/lib/actions/learning.ts",
         "src/lib/data/opportunities.ts",
         "src/components/surveys/SurveyForms.tsx"
+      ],
+      "bindings": [
+        {
+          "file": "src/lib/surveys/audience-search.ts",
+          "symbols": ["createSearch"]
+        }
       ]
     },
     "lists": {
       "package": "@bitbaum/listkit",
-      "status": "missing-applicable",
-      "remaining": "ListKit query state, preserved URL params and escaped LIKE patterns apply. Preserve role-scoped defaults, neutral overrides and saved group semantics at the product adapter. Migration and parity tests remain open.",
+      "status": "partial",
+      "remaining": "SQL wildcard escaping and survey selection toggling use shared operations. URL/filter codec migration remains open; preserve role-scoped defaults, neutral overrides and saved group semantics.",
       "surfaces": [
         "src/lib/config/client-filters.ts",
         "src/components/residents/ClientFilterBar.tsx",
         "src/app/(admin)/learning/page.tsx",
         "src/app/(admin)/opportunities/page.tsx"
+      ],
+      "bindings": [
+        {
+          "file": "src/lib/db/helpers.ts",
+          "symbols": ["sharedEscapeLike"]
+        },
+        {
+          "file": "src/components/surveys/SurveyForms.tsx",
+          "symbols": ["toggleInSet"]
+        }
       ]
     },
     "models": {
