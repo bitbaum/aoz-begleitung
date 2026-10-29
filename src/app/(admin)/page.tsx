@@ -256,7 +256,7 @@ export default async function AdminDashboard() {
     // Who is waiting for an answer. `staffInbox()` already sorts oldest-wait
     // first and carries `waitingSince`; the dashboard simply reads what the
     // inbox page has always had to itself.
-    show('messages') ? staffInbox() : [],
+    show('messages') && user ? staffInbox(user) : [],
     // Follow-ups the caseworker scheduled that have since passed.
     //
     // `getIncidentsNeedingFollowUp()` has always done this triage — overdue,

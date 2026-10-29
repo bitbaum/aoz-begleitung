@@ -25,9 +25,9 @@ export default async function StaffMessagesPage() {
   // arbeit coordinator could read all of it. The session guard in `proxy.ts`
   // proves somebody is staff; it cannot say which staff, and this is precisely
   // a surface where that difference is the whole point.
-  await requirePermission('messages:read')
+  const staff = await requirePermission('messages:read')
 
-  const threads = await staffInbox()
+  const threads = await staffInbox(staff)
   const waiting = threads.filter((thread) => thread.unreadCount > 0)
 
   return (

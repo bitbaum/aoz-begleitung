@@ -130,4 +130,30 @@ describe('the list and the badge share one WHERE', () => {
     expect(rendered).toContainEqual(render())
     expect(counts.approvals).toBe(2)
   })
+  it('keeps the private-conversation badge inside the viewer unit scope', async () => {
+    const viewer = {
+      id: 'care-staff',
+      role: 'BETREUUNG',
+      scope: 'OWN_DOMAIN',
+      isSystemAdmin: false,
+      siteAccess: 'ASSIGNED_UNITS',
+      assignedUnitIds: ['house-1'],
+    } as const
+    const wheres: unknown[] = []
+    const chain = {
+      from: () => chain,
+      innerJoin: () => chain,
+      where: (where: unknown) => {
+        wheres.push(where)
+        return Promise.resolve([{ n: 0 }])
+      },
+    }
+    mockSelect.mockReturnValue(chain)
+    mockFactQueue.mockResolvedValue([])
+    await waitingCounts(viewer)
+    const queries = wheres.map((where) => dialect.sqlToQuery(where as never))
+    expect(
+      queries.some((query) => query.params.includes('house-1') && query.params.includes('ACTIVE')),
+    ).toBe(true)
+  })
 })

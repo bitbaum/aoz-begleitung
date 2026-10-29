@@ -1,3 +1,4 @@
+import { residentScopeFilter, type SiteCapabilities } from '@/lib/auth/site-access'
 /**
  * Who is waiting for a staff answer — the one definition the Eingang page and
  * the navigation badge both read.
@@ -32,6 +33,7 @@ import { awaitingAnswerFilter } from '@/lib/data/opportunities'
 import {
   db,
   message,
+  messageThread,
   opportunity,
   opportunityApplication,
   resident,
@@ -41,7 +43,7 @@ import { logger } from '@/lib/logger'
 import { residentName } from '@/lib/utils/resident-name'
 
 /** A staff viewer, with the id the seat-scoped queues need. */
-export type WaitingViewer = StaffCapabilities & { id: string }
+export type WaitingViewer = StaffCapabilities & SiteCapabilities & { id: string }
 
 /**
  * The listing kinds whose requests this viewer answers.
@@ -136,12 +138,20 @@ async function waitingApplicationCount(viewer: StaffCapabilities): Promise<numbe
  * same rule `staffInbox()` uses for `waitingSince`, as one COUNT rather than a
  * load of every message, because this runs on every staff page.
  */
-async function waitingThreadCount(viewer: StaffCapabilities): Promise<number> {
-  if (!sectionVisible(viewer, 'messages')) return 0
+async function waitingThreadCount(viewer: WaitingViewer): Promise<number> {
+  if (!hasPermission(viewer, 'messages:read') || !sectionVisible(viewer, 'messages')) return 0
   const [row] = await db
     .select({ n: countDistinct(message.threadId) })
     .from(message)
-    .where(and(isNotNull(message.authorResidentId), isNull(message.readAt)))
+    .innerJoin(messageThread, eq(message.threadId, messageThread.id))
+    .innerJoin(resident, eq(messageThread.residentId, resident.id))
+    .where(
+      and(
+        isNotNull(message.authorResidentId),
+        isNull(message.readAt),
+        residentScopeFilter(viewer) ?? undefined,
+      ),
+    )
   return Number(row?.n ?? 0)
 }
 

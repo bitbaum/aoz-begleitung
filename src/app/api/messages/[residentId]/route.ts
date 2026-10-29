@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { requireStaffAuth } from '@/lib/auth'
+import { hasPermission } from '@/lib/auth/role-policy'
 import { logAudit } from '@/lib/audit'
 import { logger } from '@/lib/logger'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import {
   appendMessage,
+  findMessageResident,
   getOrCreateThread,
   loadThreadMessages,
   markThreadRead,
@@ -43,7 +45,20 @@ export async function GET(
     )
   }
 
+  if (!hasPermission(staff, 'messages:read')) {
+    return NextResponse.json(
+      { success: false, error: ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS },
+      { status: 403 },
+    )
+  }
+
   try {
+    if (!(await findMessageResident(params.residentId, staff))) {
+      return NextResponse.json(
+        { success: false, error: ERROR_MESSAGES.RESIDENT_NOT_FOUND },
+        { status: 404 },
+      )
+    }
     const thread = await getOrCreateThread(params.residentId)
     await markThreadRead(thread.id, { kind: 'staff', userId: staff.id })
     const messages = await loadThreadMessages(thread.id)
@@ -73,6 +88,13 @@ export async function POST(
     )
   }
 
+  if (!hasPermission(staff, 'messages:read')) {
+    return NextResponse.json(
+      { success: false, error: ERROR_MESSAGES.INSUFFICIENT_PERMISSIONS },
+      { status: 403 },
+    )
+  }
+
   let body: string
   try {
     const parsed = replySchema.safeParse(await request.json())
@@ -91,6 +113,12 @@ export async function POST(
   }
 
   try {
+    if (!(await findMessageResident(params.residentId, staff))) {
+      return NextResponse.json(
+        { success: false, error: ERROR_MESSAGES.RESIDENT_NOT_FOUND },
+        { status: 404 },
+      )
+    }
     const thread = await getOrCreateThread(params.residentId)
     const message = await appendMessage({
       threadId: thread.id,

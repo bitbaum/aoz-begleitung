@@ -11,6 +11,15 @@ created_date: 2026-01-15
 last_modified_date: 2026-10-28
 last_modified_summary: Shared account password handling and the shared admin chat thread, composer and streaming parser.
 
+## 2026-10-28 — Shared private-message reconciliation
+
+- ThreadKit reconciles optimistic and confirmed messages in both the resident
+  and staff views, with stable message ordering and unique browser correlation
+  IDs. Existing team-inbox read rules remain in place.
+- Staff message APIs now enforce messaging permission as well as a staff
+  session. The inbox, dashboard queue and direct conversations apply the
+  staff member's active-unit scope before reading or creating a thread.
+
 ## 2026-10-28 — Shared AI completion transport
 
 - AI Kit now sends and validates provider completions for form assistance and

@@ -1,18 +1,7 @@
-/**
- * Resident ↔ staff messaging — the pure part.
- *
- * WHY THIS EXISTS AT ALL. Every channel this product had was one-directional
- * and typed: a report goes to a desk, a transfer request gets approved or
- * denied, a proposal gets voted on. None of them answer "can I ask you
- * something?", and the absence showed up as reports filed under MAINTENANCE
- * that were really questions, because that was the only box available.
- *
- * WHY IT IS NOT A COPY OF THE CLINIC'S. vitareba has the same shape
- * (patient ↔ care team) and it is built on Drizzle with a different auth model,
- * so what transfers is the DESIGN — one thread per person, `readAt` per
- * message, unread counts driven off the thread's `updatedAt` — and not the
- * code. Rewriting the query layer was unavoidable either way.
+/** Resident/team messaging conventions. ThreadKit owns reconciliation;
+ * the app retains author columns, team read semantics and route authorization.
  */
+import { mergeMessages } from 'threadkit'
 
 export const MESSAGE_BODY_MAX_LENGTH = 4000
 
@@ -22,6 +11,8 @@ export type MessageParty =
 
 export interface MessageRow {
   id: string
+  /** Browser correlation only; not persisted by the existing message API. */
+  clientId?: string
   authorResidentId: string | null
   authorUserId: string | null
   body: string
@@ -84,4 +75,36 @@ export function messagesToMarkRead(messages: MessageRow[], party: MessageParty):
 export function isSendableBody(body: string): boolean {
   const trimmed = body.trim()
   return trimmed.length > 0 && trimmed.length <= MESSAGE_BODY_MAX_LENGTH
+}
+
+/** Merge rows from one already-authorized conversation, retaining domain fields. */
+export function mergeMessageRows(
+  threadId: string,
+  existing: readonly MessageRow[],
+  incoming: readonly MessageRow[],
+): MessageRow[] {
+  const rows = new Map(
+    [...existing, ...incoming].map((row) => [
+      row.id,
+      {
+        ...row,
+        createdAt: new Date(row.createdAt),
+        readAt: row.readAt === null ? null : new Date(row.readAt),
+      },
+    ]),
+  )
+  const canonical = (row: MessageRow) => ({
+    id: row.id,
+    clientId: row.clientId,
+    threadId,
+    authorId:
+      row.authorResidentId !== null
+        ? `resident:${row.authorResidentId}`
+        : `staff:${row.authorUserId}`,
+    body: row.body,
+    createdAt: new Date(row.createdAt),
+  })
+  return mergeMessages(existing.map(canonical), incoming.map(canonical)).map((row) =>
+    rows.get(row.id)!,
+  )
 }
