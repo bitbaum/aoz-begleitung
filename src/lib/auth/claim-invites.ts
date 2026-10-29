@@ -13,7 +13,8 @@
 
 import { createHash, randomBytes } from 'crypto'
 import { and, eq, gt, isNull } from 'drizzle-orm'
-import { db, claimInvite, user, account } from '@/lib/db'
+import { db, claimInvite, user, account, accountIdentity, sharedAuthAccount } from '@/lib/db'
+import { sharedAuthEnabled } from './shared/runtime'
 
 export const CLAIM_INVITE_TTL_MS = 14 * 24 * 60 * 60 * 1000
 
@@ -45,12 +46,8 @@ export async function issueClaimInvite(
   })
   if (!target) return { ok: false, reason: 'not_found' }
 
-  const existing = await db.query.account.findFirst({
-    where: eq(account.userId, userId),
-    columns: { passwordHash: true },
-  })
   // Already has a password: they sign in normally / reset via email.
-  if (existing?.passwordHash) return { ok: false, reason: 'already_claimed' }
+  if (await hasPassword(userId)) return { ok: false, reason: 'already_claimed' }
 
   await revokeClaimInvites(userId, now)
 
@@ -63,6 +60,30 @@ export async function issueClaimInvite(
     expiresAt,
   })
   return { ok: true, token, expiresAt }
+}
+
+/** Whether this colleague already has a password, in whichever store owns them. */
+async function hasPassword(userId: string): Promise<boolean> {
+  if (sharedAuthEnabled()) {
+    const mapped = await db.query.accountIdentity.findFirst({
+      where: eq(accountIdentity.staffId, userId),
+      columns: { sharedUserId: true },
+    })
+    if (!mapped) return false
+    const credential = await db.query.sharedAuthAccount.findFirst({
+      where: and(
+        eq(sharedAuthAccount.userId, mapped.sharedUserId),
+        eq(sharedAuthAccount.providerId, 'credential'),
+      ),
+      columns: { id: true },
+    })
+    return credential !== undefined
+  }
+  const existing = await db.query.account.findFirst({
+    where: eq(account.userId, userId),
+    columns: { passwordHash: true },
+  })
+  return Boolean(existing?.passwordHash)
 }
 
 /** Revoke every still-open link for a person. */

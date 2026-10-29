@@ -32,6 +32,8 @@ import {
 import type { SiteCapabilities } from './site-access'
 import { IMPERSONATION_CLAIM } from './impersonation'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
+import { sharedAuthEnabled } from './shared/runtime'
+import { endSharedSession, getSharedIdentities } from './shared/session'
 
 // Re-export types
 export type { TokenPayload }
@@ -81,6 +83,9 @@ export type LoginByCodeResult =
  * Returns null if not logged in or session invalid
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
+  // One reader for both runtimes: with the shared runtime on, the staff
+  // identity comes from the shared session and the rows, never the JWT.
+  if (sharedAuthEnabled()) return (await getSharedIdentities()).staff
   const cookieStore = await cookies()
   const token = cookieStore.get(AUTH_CONFIG.cookie.name)?.value
 
@@ -162,6 +167,7 @@ export async function maybeRefreshToken(token: string): Promise<string | null> {
  * Returns null if not logged in
  */
 export async function getCurrentResident(): Promise<AuthResident | null> {
+  if (sharedAuthEnabled()) return (await getSharedIdentities()).resident
   const cookieStore = await cookies()
   const residentCode = cookieStore.get(RESIDENT_COOKIE)?.value
 
@@ -179,6 +185,15 @@ export async function getCurrentResident(): Promise<AuthResident | null> {
     id: row.id,
     code: row.code,
   }
+}
+
+/**
+ * Whether a staff session is present, for navigation (offering the switch to
+ * the staff side). Not an authorization check: pages still call getCurrentUser.
+ */
+export async function hasStaffSession(): Promise<boolean> {
+  if (sharedAuthEnabled()) return (await getSharedIdentities()).staff !== null
+  return !!(await cookies()).get(AUTH_CONFIG.cookie.name)?.value
 }
 
 /**
@@ -393,6 +408,8 @@ export async function setSessionCookie(
  * Optionally clears both staff and resident cookies for full logout
  */
 export async function clearSessionCookie(clearAll = false): Promise<void> {
+  // One shared session carries both sides, so signing out ends it whole.
+  if (sharedAuthEnabled()) await endSharedSession()
   const cookieStore = await cookies()
   cookieStore.delete(AUTH_CONFIG.cookie.name)
   if (clearAll) {

@@ -8,6 +8,10 @@ import { STAFF_COOKIE } from '@/lib/auth/constants'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { logAudit } from '@/lib/audit'
 import { logger } from '@/lib/logger'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
+import { getSharedSession, writeSessionCookie } from '@/lib/auth/shared/session'
+import { closeBorrowedSession, openBorrowedSession } from '@/lib/auth/shared/borrowed'
+import { readSessionScope } from '@/lib/auth/shared/identity'
 
 /**
  * Open and close a borrowed staff view. @see lib/auth/impersonation.ts
@@ -104,13 +108,33 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // The email is the ADMIN's, deliberately: it is what the token carries for
-  // display, and a borrowed session should not hand out a colleague's address.
-  // Identity for every permission and query is `sub`, which is the target's id.
-  await setSessionCookie(
-    { id: target.id, email: currentUser.email, name: target.name, role: target.role },
-    currentUser.id,
-  )
+  if (sharedAuthEnabled()) {
+    // A real shared session for the colleague, scoped to their staff side,
+    // read-only by its scope row, remembering the administrator's own session.
+    const own = await getSharedSession()
+    const opened = own
+      ? await openBorrowedSession({
+          targetStaffId: target.id,
+          openerStaffId: currentUser.id,
+          openerSessionId: own.session.id,
+        })
+      : null
+    if (!opened) {
+      return NextResponse.json(
+        { success: false, error: IMPERSONATION_LABELS.unknownTarget },
+        { status: 404 },
+      )
+    }
+    await writeSessionCookie(opened)
+  } else {
+    // The email is the ADMIN's, deliberately: it is what the token carries for
+    // display, and a borrowed session should not hand out a colleague's address.
+    // Identity for every permission and query is `sub`, which is the target's id.
+    await setSessionCookie(
+      { id: target.id, email: currentUser.email, name: target.name, role: target.role },
+      currentUser.id,
+    )
+  }
 
   await logAudit({
     action: 'UPDATE',
@@ -125,6 +149,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE() {
+  if (sharedAuthEnabled()) return closeShared()
   const currentUser = await getCurrentUser()
   if (!currentUser) {
     return NextResponse.json(
@@ -174,4 +199,34 @@ export async function DELETE() {
   logger.info('Impersonation ended', { adminId: admin.id, targetId: currentUser.id })
 
   return NextResponse.json({ success: true, restored: true })
+}
+
+/**
+ * Shared-session form of DELETE. Reads the scope row, not the resolved user:
+ * a borrowed view whose administrator was deactivated resolves to nobody, and
+ * must still be closable rather than left standing.
+ */
+async function closeShared() {
+  const own = await getSharedSession()
+  const scope = own ? await readSessionScope(own.session.id) : null
+  if (!own || !scope?.impersonatorStaffId) {
+    return NextResponse.json({ success: true, restored: false })
+  }
+  const viewed = await getCurrentUser()
+  const back = await closeBorrowedSession(own.session.id)
+  await writeSessionCookie(back)
+  const restored = back.value !== ''
+  if (viewed) {
+    await logAudit({
+      action: 'UPDATE',
+      entity: 'STAFF_USER',
+      entityId: viewed.id,
+      userId: scope.impersonatorStaffId,
+      reason: `Ansicht beendet (${viewed.name})`,
+    })
+  }
+  logger.info('Impersonation ended', { adminId: scope.impersonatorStaffId, restored })
+  return restored
+    ? NextResponse.json({ success: true, restored: true })
+    : NextResponse.json({ success: false, error: ERROR_MESSAGES.AUTH_REQUIRED }, { status: 401 })
 }

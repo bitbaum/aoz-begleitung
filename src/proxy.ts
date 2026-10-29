@@ -20,6 +20,8 @@ import {
   isImpersonationExempt,
   isReadOnlyMethod,
 } from '@/lib/auth/impersonation'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
+import { sharedRequestFor } from '@/lib/auth/shared/session'
 
 /**
  * Middleware for authentication
@@ -61,6 +63,7 @@ function publicOrigin(request: NextRequest): string {
 }
 
 export async function proxy(request: NextRequest) {
+  if (sharedAuthEnabled()) return sharedProxy(request)
   const { pathname } = request.nextUrl
 
   // FIRST, above the public-route early return, and that position is the whole
@@ -178,6 +181,57 @@ export async function proxy(request: NextRequest) {
 
       return NextResponse.redirect(new URL('/portal', publicOrigin(request)))
     }
+  }
+
+  return NextResponse.next()
+}
+
+/**
+ * The same boundaries on shared sessions (AUTH_RUNTIME=accountkit). Proxy runs
+ * on Node, so it reads the session and its scope from the database: a borrowed
+ * view is refused writes by its scope row, on every path, before the
+ * public-route return, for the same reason the legacy check sits there.
+ */
+async function sharedProxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const { identities, borrowed } = await sharedRequestFor(request.headers)
+
+  if (borrowed && !isReadOnlyMethod(request.method) && !isImpersonationExempt(pathname)) {
+    return NextResponse.json(
+      { success: false, error: IMPERSONATION_LABELS.blocked },
+      { status: 403 },
+    )
+  }
+
+  if (isPublicRoute(pathname)) return NextResponse.next()
+
+  if (pathname === '/') {
+    const destination = destinationForRoot({
+      hasValidStaffSession: identities.staff !== null,
+      hasResidentSession: identities.resident !== null,
+    })
+    if (destination.kind !== 'staff-dashboard') {
+      const target = new URL(destination.to, publicOrigin(request))
+      return destination.kind === 'redirect'
+        ? NextResponse.redirect(target)
+        : NextResponse.rewrite(target)
+    }
+  }
+
+  if (requiresStaffAuth(pathname) && !identities.staff) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ success: false, error: 'Nicht angemeldet' }, { status: 401 })
+    }
+    const loginUrl = new URL('/login', publicOrigin(request))
+    loginUrl.searchParams.set('from', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  if (requiresResidentAuth(pathname) && !identities.resident) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ success: false, error: 'Nicht angemeldet' }, { status: 401 })
+    }
+    return NextResponse.redirect(new URL('/portal', publicOrigin(request)))
   }
 
   return NextResponse.next()

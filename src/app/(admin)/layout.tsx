@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { ArrowRightLeft } from 'lucide-react'
 import { MobileNav } from '@/components/layout/MobileNav'
@@ -12,7 +11,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { APP_LABELS, PAGE_TITLES, ROLE_LABELS } from '@/lib/constants/labels'
 import { ImpersonationBanner } from '@/components/layout/ImpersonationBanner'
 import { getCurrentUser } from '@/lib/auth'
-import { RESIDENT_COOKIE } from '@/lib/auth/constants'
+import { hasResidentSession } from '@/lib/portal-auth'
 import { deskFor } from '@/lib/config/roles'
 import { visibleMegaMenuGroups, visibleSystemLinks, withInboxBadge } from '@/lib/config/navigation'
 import { waitingBadgeCount } from '@/lib/inbox/waiting'
@@ -26,8 +25,7 @@ export const metadata: Metadata = {
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser()
-  const cookieStore = await cookies()
-  const hasPortalAccess = !!cookieStore.get(RESIDENT_COOKIE)?.value
+  const hasPortalAccess = await hasResidentSession()
 
   if (!user) {
     redirect('/login')

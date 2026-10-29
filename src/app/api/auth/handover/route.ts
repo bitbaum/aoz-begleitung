@@ -10,6 +10,8 @@ import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { HANDOVER_LABELS } from '@/lib/constants/labels/handover'
 import { logAudit } from '@/lib/audit'
 import { logger } from '@/lib/logger'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
+import { attachInvitedEmail } from '@/lib/auth/shared/identity'
 
 /**
  * Hand an already-provisioned staff member their own login.
@@ -105,10 +107,26 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  if (sharedAuthEnabled()) {
+    const attached = await attachInvitedEmail('staff', target.id, email)
+    if (attached === 'has_email') {
+      return NextResponse.json(
+        { success: false, error: HANDOVER_LABELS.alreadyHasEmail },
+        { status: 409 },
+      )
+    }
+    if (attached === 'taken') {
+      return NextResponse.json(
+        { success: false, error: HANDOVER_LABELS.emailTaken },
+        { status: 409 },
+      )
+    }
+  }
+
   // Changing an address someone already signs in with is a different act with
   // different consequences — it moves control of an account to another mailbox.
   // Refusing here keeps this endpoint to the one thing it claims to do.
-  if (target.account?.email) {
+  if (!sharedAuthEnabled() && target.account?.email) {
     return NextResponse.json(
       { success: false, error: HANDOVER_LABELS.alreadyHasEmail },
       { status: 409 },
@@ -116,7 +134,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await db.insert(account).values({ email, userId: target.id })
+    if (!sharedAuthEnabled()) await db.insert(account).values({ email, userId: target.id })
   } catch (error) {
     if (isUniqueViolation(error)) {
       // One email namespace across the whole product: this address may already

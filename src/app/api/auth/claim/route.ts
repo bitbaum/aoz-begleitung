@@ -17,6 +17,8 @@ import { claimAccountSchema } from '@/lib/validation/auth'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { CLAIM_LABELS } from '@/lib/constants/labels'
 import { logger } from '@/lib/logger'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
+import { sharedClaim } from '@/lib/auth/shared/bridge'
 
 function invalid() {
   return NextResponse.json({ success: false, error: CLAIM_LABELS.invalid }, { status: 410 })
@@ -70,6 +72,12 @@ export async function POST(request: NextRequest) {
         { success: false, error: parsed.error.issues[0]?.message || ERROR_MESSAGES.INVALID_INPUT },
         { status: 400 },
       )
+    }
+
+    if (sharedAuthEnabled()) {
+      const { token, email, password } = parsed.data
+      // The link is taken and given back inside AccountKit's claim.
+      return sharedClaim(request, { link: token }, { email, password }, 410, CLAIM_LABELS.invalid)
     }
 
     const taken = await takeClaimInvite(parsed.data.token)

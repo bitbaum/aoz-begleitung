@@ -8,8 +8,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyEmailToken } from '@/lib/auth/account'
 import { getAppUrl } from '@/lib/config/app-url'
 import { logger } from '@/lib/logger'
+import { sharedAuth, sharedAuthEnabled } from '@/lib/auth/shared/runtime'
 
 export async function GET(request: NextRequest) {
+  // The shared runtime owns this path once it is switched on.
+  if (sharedAuthEnabled()) return sharedAuth.GET(request)
   const token = request.nextUrl.searchParams.get('token')
 
   let verified = false

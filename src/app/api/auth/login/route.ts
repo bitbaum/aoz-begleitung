@@ -15,6 +15,8 @@ import { loginByCode, setSessionCookie } from '@/lib/auth'
 import { loginWithEmail } from '@/lib/auth/account'
 import { establishSessions } from '@/lib/auth/sessions'
 import { logger } from '@/lib/logger'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
+import { sharedCodeLogin, sharedEmailLogin } from '@/lib/auth/shared/bridge'
 import {
   checkRateLimit,
   clearLoginAttempts,
@@ -64,6 +66,10 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      if (sharedAuthEnabled()) {
+        return sharedEmailLogin(request, parsed.data.email, parsed.data.password)
+      }
+
       const result = await loginWithEmail(parsed.data)
       if (!result.success) {
         recordLoginAttempt(clientIp)
@@ -80,6 +86,8 @@ export async function POST(request: NextRequest) {
     }
 
     const trimmedCode = code.trim().toUpperCase()
+
+    if (sharedAuthEnabled()) return sharedCodeLogin(request, trimmedCode)
 
     const result = await loginByCode(trimmedCode, clientIp)
 

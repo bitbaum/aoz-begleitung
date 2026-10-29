@@ -17,13 +17,16 @@ import { createHouseholdSchema } from '@/lib/validation/auth'
 import { BRAND } from '@/lib/config/brand'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { logger } from '@/lib/logger'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
 
 export async function POST(request: NextRequest) {
   try {
     // Checked here as well as in the domain function. This is the network
     // edge: on an AOZ deployment the endpoint should not even accept the
     // request, let alone reach code that could create a resident row.
-    if (!BRAND.features.selfServeHousehold) {
+    // Not yet on the shared runtime: it writes a legacy password, and a
+    // second credential writer beside AccountKit is what the cutover forbids.
+    if (!BRAND.features.selfServeHousehold || sharedAuthEnabled()) {
       return NextResponse.json(
         { success: false, error: ERROR_MESSAGES.AUTH_CODE_REQUIRED },
         { status: 404 },

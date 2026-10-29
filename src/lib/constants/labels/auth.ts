@@ -103,6 +103,8 @@ export const LOGIN_LABELS = {
   emailVerified: 'E-Mail-Adresse bestätigt. Sie können sich jetzt anmelden.',
   emailVerifyFailed: 'Der Bestätigungslink ist ungültig oder abgelaufen.',
   passwordResetDone: 'Passwort gesetzt. Melden Sie sich jetzt damit an.',
+  resendVerification: 'Bestätigungslink erneut senden',
+  verificationResent: 'Link gesendet. Öffnen Sie ihn in Ihrem Postfach, dann sind Sie angemeldet.',
   submit: 'Anmelden',
   submitting: 'Anmelden...',
   success: {
@@ -127,6 +129,11 @@ export const REGISTER_LABELS = {
   submit: 'Konto erstellen',
   submitting: 'Konto wird erstellt...',
   success: 'Konto erstellt — Sie sind angemeldet.',
+  // Shared accounts: a new address is confirmed before it signs anyone in.
+  checkMail:
+    'Konto erstellt. Wir haben Ihnen einen Bestätigungslink geschickt — öffnen Sie ihn, dann sind Sie angemeldet.',
+  linkedSignIn: 'Code verknüpft. Melden Sie sich jetzt wie gewohnt an.',
+  toLogin: 'Zur Anmeldung',
   // Linking a second role is the same form, so it needs saying out loud —
   // otherwise nobody discovers that one login can hold both sides.
   linkTitle: 'Zwei Rollen, ein Login',

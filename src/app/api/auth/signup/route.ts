@@ -12,6 +12,8 @@ import { consumeRateLimit, getClientIp } from '@/lib/auth/rate-limit'
 import { registerSchema } from '@/lib/validation/auth'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { logger } from '@/lib/logger'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
+import { sharedClaim } from '@/lib/auth/shared/bridge'
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,6 +41,11 @@ export async function POST(request: NextRequest) {
         { success: false, error: parsed.error.issues[0]?.message || ERROR_MESSAGES.INVALID_INPUT },
         { status: 400 },
       )
+    }
+
+    if (sharedAuthEnabled()) {
+      const { code, email, password } = parsed.data
+      return sharedClaim(request, { code }, { email, password })
     }
 
     const result = await registerAccount(parsed.data)
