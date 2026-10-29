@@ -58,6 +58,9 @@ in `src/lib/auth/shared/` serves every sign-in:
 - A code session is bound to its own side in `AccountSessionScope` before its
   cookie is set: a resident code never opens the staff side of a dual account.
   A password sign-in carries both sides.
+- Sessions of anyone holding a staff identity keep AOZ's 8-hour idle limit
+  (`SESSION_DURATION`, through AccountKit's `sessionLifetime`), borrowed views
+  included; resident-only accounts keep AccountKit's 14-day default.
 - `identity.ts` answers who a session may act as on every request: active
   status, role, scope, site and unit reach come from the rows, never from the
   session. Identities created after the import are mapped on first use with the

@@ -136,6 +136,15 @@ export async function attachInvitedEmail(
   return 'attached'
 }
 
+/** Whether this shared user holds a staff identity (staff sessions have a shorter idle limit). */
+export async function sharedUserHoldsStaff(sharedUserId: string): Promise<boolean> {
+  const mapped = await db.query.accountIdentity.findFirst({
+    where: eq(accountIdentity.sharedUserId, sharedUserId),
+    columns: { staffId: true },
+  })
+  return Boolean(mapped?.staffId)
+}
+
 /** The shared user holding a staff identity, for a borrowed view. */
 export async function sharedUserForStaff(staffId: string): Promise<string | null> {
   const mapped = await db.query.accountIdentity.findFirst({

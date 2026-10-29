@@ -174,6 +174,8 @@ test('a borrowed view opens only the colleague’s staff side and returns to its
     openerSessionId: admin!.session.id,
   })
   const borrowedCookie = `${opened!.name}=${opened!.value}`
+  // Read first: the shared refresh used to push a written 8-hour expiry to 14 days.
+  await who(borrowedCookie)
   const [{ expires_at }] = (
     await pg.query<{ expires_at: Date }>(
       `SELECT s.expires_at FROM sessions s JOIN "AccountSessionScope" x ON x."sessionId" = s.id
@@ -199,4 +201,31 @@ test('a borrowed view opens only the colleague’s staff side and returns to its
   })
   await pg.exec(`UPDATE "User" SET active = false WHERE id = 'staff-dual'`)
   expect((await who(`${again!.name}=${again!.value}`))?.staff).toBeNull()
+})
+
+test('staff sessions keep the 8-hour idle limit; resident-only accounts keep the default', async () => {
+  const { post, cookieOf, who } = await runtime()
+  const hoursLeft = async (email: string) => {
+    const { rows } = await pg.query<{ expires_at: Date }>(
+      `SELECT s.expires_at FROM sessions s JOIN users u ON u.id = s.user_id WHERE u.email = $1`,
+      [email],
+    )
+    return (new Date(rows[0].expires_at).getTime() - Date.now()) / 3_600_000
+  }
+  const staff = cookieOf(
+    await post('/sign-in/email', { email: 'dual@example.test', password: PASSWORD }),
+  )
+  await who(staff)
+  await who(staff)
+  expect(await hoursLeft('dual@example.test')).toBeLessThanOrEqual(8)
+
+  await pg.exec(`UPDATE sessions SET updated_at = now() - interval '9 hours'
+    WHERE user_id = 'account-dual'`)
+  expect(await who(staff)).toBeNull()
+
+  const resident = cookieOf(
+    await post('/sign-in/email', { email: 'password@example.test', password: PASSWORD }),
+  )
+  await who(resident)
+  expect(await hoursLeft('password@example.test')).toBeGreaterThan(13 * 24)
 })
