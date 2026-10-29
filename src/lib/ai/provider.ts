@@ -1,35 +1,13 @@
 /**
- * Fleet AI provider — SSOT for every AI call in this app.
- *
- * Priority: Groq (free, fleet default) → OpenRouter (fallback, free-tier models).
- * Anthropic is not used; no deployment on the box carries that key.
- *
- * THIS FILE USED TO DESCRIBE A FALLBACK IT DID NOT HAVE. The sentence above has
- * been here all along, but `getAIProviderConfig()` picked ONE provider and
- * returned it, and every caller threw on the first failure. There was no chain,
- * no retry and no second vendor — so a Groq rate limit was terminal, and the
- * documented behaviour existed only in the comment. Both live deployments carry
- * `GROQ_API_KEY` and no `OPENROUTER_API_KEY`, which made the gap invisible:
- * with one key configured, "picks the first configured provider" and "falls
- * back to the second" are the same observable behaviour.
- *
- * The chain now comes from `ai-kit`, which the fleet already uses for
- * exactly this and which the shared inventory names as the answer to sixteen
- * hand-rolled provider clients. It is headless — it supplies the ordering, the
- * free-tier model lists and the 429 taxonomy; we keep the fetch.
- *
- * Falling back to a smaller model at the SAME vendor buys nothing: it draws on
- * the same org-wide daily budget, so on the day that budget runs out every link
- * in such a chain is already dead. Only a different vendor has a different
- * meter, which is why the chain crosses vendors and not model sizes.
- *
- * Surfaces:
- * - `completeText` — @fleet/ai-forms ("Aus Text ausfüllen" on intake)
- * - `runStaffChat` — streaming staff assistant (/api/ai/chat)
+ * Product provider selection and whole-operation fallback. AI Kit owns the
+ * HTTP completion protocol, deadlines and response validation via transport.ts.
+ * The staff tool loop restarts on the next provider as one operation; form
+ * assistance uses the same transport without owning another HTTP client.
  */
 
 import { freeChain, usableChain, chainFrom } from '@bitbaum/ai-kit'
 import { BRAND } from '@/lib/config/brand'
+import { completeProviderRequest } from './transport'
 import { AIChainExhaustedError, AIProviderError, shouldTryNextProvider } from './errors'
 import { recordAIHealthFailure, recordAIHealthSuccess } from './health'
 
@@ -74,6 +52,7 @@ export interface AIProviderConfig {
   url: string
   headers: Record<string, string>
   model: string
+  dailyTokens?: number
 }
 
 /**
@@ -147,6 +126,7 @@ export async function getAIProviderConfigs(): Promise<AIProviderConfig[]> {
       url: `${link.provider.baseUrl}/chat/completions`,
       headers,
       model: preferred?.model ?? link.model,
+      dailyTokens: link.provider.dailyTokens,
     })
   }
 
@@ -192,62 +172,15 @@ async function completeWithOpenAICompat(
   config: AIProviderConfig,
   input: CompletionInput,
 ): Promise<string> {
-  const res = await fetch(config.url, {
-    method: 'POST',
-    headers: config.headers,
-    body: JSON.stringify({
-      model: config.model,
-      max_tokens: input.maxTokens,
-      temperature: input.temperature,
-      messages: [
-        { role: 'system', content: input.system },
-        { role: 'user', content: input.prompt },
-      ],
-    }),
+  const result = await completeProviderRequest(config, {
+    messages: [
+      { role: 'system', content: input.system },
+      { role: 'user', content: input.prompt },
+    ],
+    maxTokens: input.maxTokens,
+    temperature: input.temperature,
   })
-
-  if (!res.ok) {
-    // The body goes on the error for the LOG. It must never be interpolated
-    // into a message that reaches a browser — it carries the vendor's own
-    // prose and, on Groq, the organisation id. @see ./errors.ts
-    const detail = await res.text().catch(() => '')
-    throw new AIProviderError(config.provider, res.status, detail)
-  }
-
-  const body = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string | null }; finish_reason?: string }>
-  }
-  const choice = body.choices?.[0]
-  const content = choice?.message?.content ?? ''
-
-  // An empty completion is a FAILURE, not an answer.
-  //
-  // This used to be `content ?? ''`, so a response carrying `content: null`
-  // returned the empty string as a success — `withProviderFallback` then called
-  // `recordAIHealthSuccess()`, the chain never fell through to the next
-  // provider, and the health endpoint reported `ok`. A blank answer, recorded
-  // as a healthy one.
-  //
-  // The way it happens is not exotic: a reasoning model spends the whole
-  // `max_tokens` budget on reasoning tokens and stops with
-  // `finish_reason: "length"` before emitting any content. Observed on an
-  // OpenRouter auto-routed model at a small budget. The app's real budgets
-  // (2000 for form fill) are far from that today — but the model behind a
-  // provider is not ours to pin forever, and this repo has already been bitten
-  // by model ids rotating underneath it.
-  //
-  // 502 rather than a bespoke status because `shouldTryNextProvider` falls
-  // through on `>= 500`: an unusable response from one provider should be
-  // retried on the next, which is the entire point of having a chain.
-  if (content.trim() === '') {
-    throw new AIProviderError(
-      config.provider,
-      502,
-      `empty completion (finish_reason: ${choice?.finish_reason ?? 'unknown'})`,
-    )
-  }
-
-  return content
+  return result.text
 }
 
 /**

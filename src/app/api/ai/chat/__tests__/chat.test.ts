@@ -129,7 +129,22 @@ describe('POST /api/ai/chat', () => {
     expect(text).toContain('"type":"text"')
     expect(text).toContain('42')
     expect(text).toContain('"type":"done"')
-    expect(mockRunStaffChat).toHaveBeenCalledWith(VALID_BODY.messages)
+    expect(mockRunStaffChat).toHaveBeenCalledWith(VALID_BODY.messages, expect.any(AbortSignal))
+  })
+
+  test('cancelling the response aborts the pending assistant operation', async () => {
+    mockHasAIProvider.mockReturnValue(true)
+    mockGetCurrentUser.mockResolvedValue(STAFF_USER)
+    let operationSignal: AbortSignal | undefined
+    mockRunStaffChat.mockImplementationOnce((_turns, signal: AbortSignal) => {
+      operationSignal = signal
+      return new Promise((_resolve, reject) => {
+        signal.addEventListener('abort', () => reject(signal.reason), { once: true })
+      })
+    })
+    const res = await POST(makeRequest(VALID_BODY))
+    await res.body!.cancel()
+    expect(operationSignal?.aborted).toBe(true)
   })
 
   test('streams a readable German error, never the vendor body', async () => {

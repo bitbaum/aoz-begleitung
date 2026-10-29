@@ -71,14 +71,11 @@ describe('which provider a completion uses', () => {
  * absence needs a test rather than a comment.
  */
 describe('where the model id comes from', () => {
-  const okResponse = {
-    ok: true,
-    json: async () => ({ choices: [{ message: { content: 'ok' } }] }),
-  } as Response
+  const okResponse = () => Response.json({ choices: [{ message: { content: 'ok' } }] })
 
   async function modelSentTo(env: Record<string, string | undefined>) {
     const { completeText } = await loadProvider(env)
-    const fetchMock = vi.spyOn(global, 'fetch').mockResolvedValue(okResponse)
+    const fetchMock = vi.spyOn(global, 'fetch').mockResolvedValue(okResponse())
     await completeText({ system: 's', prompt: 'p', maxTokens: 10, temperature: 0 })
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
     return JSON.parse(init.body as string).model as string
@@ -119,8 +116,7 @@ describe('where the model id comes from', () => {
 })
 
 describe('the Groq call', () => {
-  const okResponse = (content: string) =>
-    ({ ok: true, json: async () => ({ choices: [{ message: { content } }] }) }) as Response
+  const okResponse = (content: string) => Response.json({ choices: [{ message: { content } }] })
 
   it('sends the system prompt and returns the text', async () => {
     const { completeText } = await loadProvider({
@@ -139,7 +135,7 @@ describe('the Groq call', () => {
     expect(text).toBe('{"values":{}}')
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
     expect(url).toBe('https://api.groq.com/openai/v1/chat/completions')
-    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer gsk_test')
+    expect(new Headers(init.headers).get('Authorization')).toBe('Bearer gsk_test')
   })
 
   it('carries the provider body on the error for LOGS, not in the message', async () => {
@@ -149,11 +145,9 @@ describe('the Groq call', () => {
     // must still be reachable for `logger.errorWithCause`, just not by
     // anything that formats a response. @see lib/ai/errors.ts
     const { completeText } = await loadProvider({ GROQ_API_KEY: 'gsk_test' })
-    vi.spyOn(global, 'fetch').mockResolvedValue({
-      ok: false,
-      status: 400,
-      text: async () => 'model_decommissioned',
-    } as Response)
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      new Response('model_decommissioned', { status: 400 }),
+    )
 
     const failure = await completeText({
       system: 's',
@@ -166,7 +160,7 @@ describe('the Groq call', () => {
     expect(failure).toBeInstanceOf(AIChainExhaustedError)
 
     const last = (failure as InstanceType<typeof AIChainExhaustedError>).last
-    expect(last?.body).toBe('model_decommissioned')
+    expect(last?.body).toContain('model_decommissioned')
     expect(last?.message).not.toContain('model_decommissioned')
   })
 })
@@ -182,10 +176,7 @@ describe('an empty completion is a failure, not an answer', () => {
    * any content. The model behind a provider is not ours to pin forever.
    */
   const emptyResponse = (content: string | null, finish_reason: string) =>
-    ({
-      ok: true,
-      json: async () => ({ choices: [{ message: { content }, finish_reason }] }),
-    }) as Response
+    Response.json({ choices: [{ message: { content }, finish_reason }] })
 
   it.each([
     ['null content, truncated', null, 'length'],
@@ -217,10 +208,7 @@ describe('an empty completion is a failure, not an answer', () => {
     const fetchMock = vi
       .spyOn(global, 'fetch')
       .mockResolvedValueOnce(emptyResponse(null, 'length'))
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ choices: [{ message: { content: 'real answer' } }] }),
-      } as Response)
+      .mockResolvedValueOnce(Response.json({ choices: [{ message: { content: 'real answer' } }] }))
 
     const text = await completeText({ system: 's', prompt: 'p', maxTokens: 20, temperature: 0 })
 
@@ -246,10 +234,9 @@ describe('an empty completion is a failure, not an answer', () => {
 
   it('still returns a real answer untouched', async () => {
     const { completeText } = await loadProvider({ GROQ_API_KEY: 'gsk_test' })
-    vi.spyOn(global, 'fetch').mockResolvedValue({
-      ok: true,
-      json: async () => ({ choices: [{ message: { content: '{"values":{}}' } }] }),
-    } as Response)
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      Response.json({ choices: [{ message: { content: '{"values":{}}' } }] }),
+    )
 
     await expect(
       completeText({ system: 's', prompt: 'p', maxTokens: 20, temperature: 0 }),
@@ -263,10 +250,9 @@ describe('the OpenRouter call', () => {
       OPENROUTER_API_KEY: 'sk-or-test',
       OPENROUTER_MODEL: 'test/openrouter-model',
     })
-    const fetchMock = vi.spyOn(global, 'fetch').mockResolvedValue({
-      ok: true,
-      json: async () => ({ choices: [{ message: { content: 'ok' } }] }),
-    } as Response)
+    const fetchMock = vi
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(Response.json({ choices: [{ message: { content: 'ok' } }] }))
 
     await completeText({ system: 's', prompt: 'p', maxTokens: 10, temperature: 0 })
 

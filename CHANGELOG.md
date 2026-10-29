@@ -11,6 +11,14 @@ created_date: 2026-01-15
 last_modified_date: 2026-10-28
 last_modified_summary: Shared account password handling and the shared admin chat thread, composer and streaming parser.
 
+## 2026-10-28 — Shared AI completion transport
+
+- AI Kit now sends and validates provider completions for form assistance and
+  the staff assistant. Provider selection and staff-tool authorization remain
+  app-owned; a failed tool exchange restarts cleanly at the fallback provider.
+- Stopping the chat cancels the server's provider request. Empty replies still
+  trigger fallback, and provider diagnostics remain outside user-facing output.
+
 ## 2026-10-28 — Shared satisfaction chart
 
 - ChartKit renders the five satisfaction levels in their original order,
