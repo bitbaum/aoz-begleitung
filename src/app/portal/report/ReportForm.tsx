@@ -1,8 +1,9 @@
 'use client'
 
+import { DateInput } from '@/components/ui/DateInput'
 import { useMemo, useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { useT } from '@/lib/i18n/LocaleProvider'
+import { useT, useLocale } from '@/lib/i18n/LocaleProvider'
 import { buildReportFormLabels } from '@/lib/i18n/report-form'
 import { residentName, type NamedResident } from '@/lib/utils/resident-name'
 import { RESIDENT_REPORTS_ANCHOR } from '@/lib/reports/resident-reports'
@@ -15,6 +16,7 @@ type Category = 'MAINTENANCE' | 'INTERPERSONAL'
 
 export function ReportForm({ roommates }: Props) {
   const t = useT()
+  const locale = useLocale()
   const R = useMemo(() => buildReportFormLabels(t), [t])
 
   const [category, setCategory] = useState<Category | null>(null)
@@ -317,7 +319,8 @@ export function ReportForm({ roommates }: Props) {
             {category === 'INTERPERSONAL' && (
               <div>
                 <label className="label">{R.dateLabel}</label>
-                <input
+                <DateInput
+                  locale={locale.intlTag}
                   type="date"
                   name="incidentDate"
                   className="input"

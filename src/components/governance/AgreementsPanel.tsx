@@ -1,5 +1,6 @@
 'use client'
 
+import { DateInput } from '@/components/ui/DateInput'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import type { AgreementStatus } from '@/lib/db'
@@ -205,7 +206,7 @@ export function AgreementsPanel({
             <label htmlFor="agreement-review" className="label">
               Überprüfung am
             </label>
-            <input
+            <DateInput
               id="agreement-review"
               type="date"
               value={reviewDate}

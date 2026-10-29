@@ -30,6 +30,7 @@ minimumReleaseAgeExclude:
   - 'ai-forms'
   - limitkit@0.2.1
   - '@bitbaum/chartkit@0.6.0'
+  - '@bitbaum/whenkit@0.3.3'
 
 # Security floors within the parent packages' supported major ranges. Remove
 # these when upstream minimums exclude the vulnerable releases (audit must pass).

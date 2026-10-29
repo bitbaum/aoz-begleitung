@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/ui/DateInput'
 import type { Metadata } from 'next'
 import { EmptyState, ListShell, PageHeader, PageShell } from '@/components/ui/Page'
 import { EVENTS_ADMIN_LABELS } from '@/lib/constants'
@@ -119,7 +120,7 @@ export default async function EventsAdminPage() {
               <label htmlFor="ev-startsAt" className="label">
                 {EVENTS_ADMIN_LABELS.formStartsAt}
               </label>
-              <input
+              <DateInput
                 id="ev-startsAt"
                 name="startsAt"
                 type="datetime-local"

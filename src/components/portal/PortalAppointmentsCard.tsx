@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/ui/DateInput'
 import { CARE_ROLES, type CareRoleId } from '@/lib/config/care'
 import type { CareAppointment } from '@/lib/actions/care'
 import { requestAppointment } from '@/lib/actions/care'
@@ -35,7 +36,7 @@ export async function PortalAppointmentsCard({
   appointments,
   canRequest = false,
 }: PortalAppointmentsCardProps) {
-  const { t } = await getRequestTranslator()
+  const { t, locale } = await getRequestTranslator()
 
   async function submitRequest(formData: FormData): Promise<void> {
     'use server'
@@ -99,7 +100,8 @@ export async function PortalAppointmentsCard({
               <label htmlFor="request-when" className="label">
                 {t('care.requestWhen')}
               </label>
-              <input
+              <DateInput
+                locale={locale}
                 id="request-when"
                 name="startsAt"
                 type="datetime-local"

@@ -1,8 +1,9 @@
 'use client'
 
+import { DateInput } from '@/components/ui/DateInput'
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { useT } from '@/lib/i18n/LocaleProvider'
+import { useT, useLocale } from '@/lib/i18n/LocaleProvider'
 import { HOUSE_EVENT_CATEGORY_LABEL_KEYS, HOUSE_EVENT_CATEGORIES } from '@/lib/config/events'
 
 /**
@@ -14,6 +15,7 @@ import { HOUSE_EVENT_CATEGORY_LABEL_KEYS, HOUSE_EVENT_CATEGORIES } from '@/lib/c
  */
 export function EventCreateForm({ action }: { action: (formData: FormData) => void }) {
   const t = useT()
+  const locale = useLocale()
   const [open, setOpen] = useState(false)
 
   return (
@@ -74,7 +76,8 @@ export function EventCreateForm({ action }: { action: (formData: FormData) => vo
             <label htmlFor="ev-startsAt" className="label">
               {t('events.formStartsAt')}
             </label>
-            <input
+            <DateInput
+              locale={locale.intlTag}
               id="ev-startsAt"
               name="startsAt"
               type="datetime-local"

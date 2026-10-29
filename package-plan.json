@@ -1,0 +1,146 @@
+{
+  "blocks": {
+    "shell": {
+      "package": "@bitbaum/sitekit",
+      "status": "implemented-pending-release",
+      "bindings": [
+        {
+          "file": "src/components/marketing/PublicChrome.tsx",
+          "symbols": ["SiteMasthead"]
+        },
+        {
+          "file": "src/app/(public)/layout.tsx",
+          "symbols": ["SiteFooter"]
+        }
+      ]
+    },
+    "identity": {
+      "package": "@bitbaum/accountkit",
+      "status": "partial",
+      "remaining": "Registration, invitations, credential migration, revocable sessions, resident mapping and configured-provider journeys remain open. Password primitives alone are not full adoption.",
+      "bindings": [
+        {
+          "file": "src/lib/auth/passwords.ts",
+          "symbols": ["createPasswordHasher"]
+        }
+      ]
+    },
+    "publishing": {
+      "package": "bip-kit",
+      "bindings": [
+        {
+          "file": "src/lib/blog/BlogPostBody.tsx",
+          "symbols": ["ArticleBody"]
+        }
+      ]
+    },
+    "design": {
+      "package": "@bitbaum/design-tokens",
+      "status": "composition-only",
+      "remaining": "AOZ retains its product palette and font adapter. Review remaining local layout primitives.",
+      "bindings": [
+        {
+          "file": "src/app/globals.css"
+        }
+      ]
+    },
+    "chat": {
+      "package": "@bitbaum/chatkit",
+      "bindings": [
+        {
+          "file": "src/components/ai/AIChatInterface.tsx",
+          "symbols": ["ChatThread", "Composer"]
+        }
+      ]
+    },
+    "dates": {
+      "package": "@bitbaum/whenkit",
+      "bindings": [
+        {
+          "file": "src/components/ui/DateInput.tsx",
+          "symbols": ["SharedDateInput"]
+        }
+      ],
+      "status": "implemented-pending-release"
+    },
+    "charts": {
+      "package": "@bitbaum/chartkit",
+      "bindings": [
+        {
+          "file": "src/components/analytics/SatisfactionChart.tsx",
+          "symbols": ["BarChart"]
+        }
+      ]
+    },
+    "search": {
+      "package": "@bitbaum/searchkit",
+      "status": "missing-applicable",
+      "remaining": "Source/API review confirms applicability: names and free-text currently use ILIKE or includes. Authorize candidates before shared matching; keep exact code lookup distinct. Add typoCases/evaluate tests when migrating.",
+      "surfaces": [
+        "src/app/(admin)/residents/page.tsx",
+        "src/app/(admin)/housing/page.tsx",
+        "src/app/(admin)/placements/page.tsx",
+        "src/app/(admin)/matching/page.tsx",
+        "src/lib/actions/learning.ts",
+        "src/lib/data/opportunities.ts",
+        "src/components/surveys/SurveyForms.tsx"
+      ]
+    },
+    "lists": {
+      "package": "@bitbaum/listkit",
+      "status": "missing-applicable",
+      "remaining": "ListKit query state, preserved URL params and escaped LIKE patterns apply. Preserve role-scoped defaults, neutral overrides and saved group semantics at the product adapter. Migration and parity tests remain open.",
+      "surfaces": [
+        "src/lib/config/client-filters.ts",
+        "src/components/residents/ClientFilterBar.tsx",
+        "src/app/(admin)/learning/page.tsx",
+        "src/app/(admin)/opportunities/page.tsx"
+      ]
+    },
+    "models": {
+      "package": "@bitbaum/ai-kit",
+      "bindings": [
+        {
+          "file": "src/lib/ai/provider.ts",
+          "symbols": ["freeChain"]
+        }
+      ]
+    },
+    "mail": {
+      "package": "@bitbaum/mail-kit",
+      "bindings": [
+        {
+          "file": "src/lib/email/service.ts",
+          "symbols": ["sendMail"]
+        }
+      ]
+    },
+    "rate-limits": {
+      "package": "limitkit",
+      "bindings": [
+        {
+          "file": "src/lib/auth/rate-limit.ts",
+          "symbols": ["slidingWindow"]
+        }
+      ]
+    },
+    "messages": {
+      "package": "threadkit",
+      "bindings": [
+        {
+          "file": "src/lib/messaging/thread.ts",
+          "symbols": ["mergeMessages"]
+        }
+      ]
+    },
+    "form-assistance": {
+      "package": "ai-forms",
+      "bindings": [
+        {
+          "file": "src/app/api/ai/form-assist/route.ts",
+          "symbols": ["createFormAssistHandler"]
+        }
+      ]
+    }
+  }
+}

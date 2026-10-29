@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/ui/DateInput'
 import Link from 'next/link'
 import { addFollowUp } from '@/lib/actions'
 import { FormValidationUX } from '@/components/forms'
@@ -160,7 +161,7 @@ export function FollowUpForm({
           </div>
           <div>
             <label className="label">{FOLLOW_UP_FORM_LABELS.nextFollowUpLabel}</label>
-            <input type="date" name="scheduledNextDate" className="input" />
+            <DateInput type="date" name="scheduledNextDate" className="input" />
           </div>
           <div>
             <label className="label">{FOLLOW_UP_FORM_LABELS.priorityLabel}</label>

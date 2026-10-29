@@ -1,3 +1,4 @@
+import { DateInput } from '@/components/ui/DateInput'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { db, housingUnit, resident } from '@/lib/db'
@@ -294,7 +295,7 @@ export default async function NewIncidentPage({ searchParams }: Props) {
           <div className="space-y-4">
             <div>
               <label className="label">{INCIDENT_PAGE_LABELS.fieldDate}</label>
-              <input
+              <DateInput
                 type="date"
                 name="date"
                 required

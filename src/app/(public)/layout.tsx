@@ -1,9 +1,8 @@
 import Script from 'next/script'
 import Link from 'next/link'
-import { Logo } from '@/components/ui/Logo'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import { PublicLanguageSwitcher } from '@/components/marketing/PublicLanguageSwitcher'
-import { BLOG_LABELS } from '@/lib/constants/labels'
+import { SiteFooter } from '@bitbaum/sitekit/react'
+import { PublicMasthead } from '@/components/marketing/PublicChrome'
+import { APP_LABELS, BLOG_LABELS } from '@/lib/constants/labels'
 import { AI_DISCLOSURE_HREF } from '@/lib/config/ai-disclosure'
 
 /**
@@ -22,70 +21,29 @@ import { AI_DISCLOSURE_HREF } from '@/lib/config/ai-disclosure'
  */
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col bg-ui-canvas">
-      <a href="#public-main" className="skip-link">
-        Zum Inhalt springen
-      </a>
+    <div className="public-shell min-h-screen flex flex-col bg-ui-canvas">
+      <PublicMasthead />
 
-      <header className="chrome-bar sticky top-0">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between gap-4 h-14">
-            <div className="flex items-center gap-3">
-              <Logo href="/" size="md" />
-              <nav className="hidden md:flex items-center gap-1 text-sm">
-                <Link href="/blog" className="btn-ghost text-sm">
-                  Blog
-                </Link>
-                <Link href="/roadmap" className="btn-ghost text-sm">
-                  Roadmap
-                </Link>
-                <Link href="/changelog" className="btn-ghost text-sm">
-                  Changelog
-                </Link>
-              </nav>
-            </div>
-            <div className="flex items-center gap-1">
-              {/*
-                Renders itself only on pages that HAVE other languages — see the
-                component. It is a client component, but it reads the pathname
-                and nothing else: no cookie, no session, so the promise above
-                about this layout staying prerenderable still holds.
-              */}
-              <PublicLanguageSwitcher />
-              <ThemeToggle />
-              <Link href="/login" className="btn-ghost text-sm">
-                {BLOG_LABELS.toApp}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main id="public-main" className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main id="public-main" className="bb-frame flex-1 py-8 sm:py-12">
         {children}
       </main>
 
-      <footer className="border-t border-ui-border mt-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="eyebrow">{BLOG_LABELS.title}</p>
-            <div className="flex flex-wrap gap-4 text-sm text-ui-muted">
-              <Link href="/blog" className="hover:text-ui-text">
-                Blog
-              </Link>
-              <Link href="/roadmap" className="hover:text-ui-text">
-                Roadmap
-              </Link>
-              <Link href="/changelog" className="hover:text-ui-text">
-                Changelog
-              </Link>
-              <Link href={AI_DISCLOSURE_HREF} className="hover:text-ui-text">
-                KI und Datenschutz
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter
+        appearance="application"
+        chrome={{
+          name: APP_LABELS.name,
+          tagline: APP_LABELS.tagline,
+          footerNote: BLOG_LABELS.title,
+        }}
+        Link={Link}
+        label="Weitere Seiten"
+        links={[
+          { href: '/blog', label: 'Blog' },
+          { href: '/roadmap', label: 'Roadmap' },
+          { href: '/changelog', label: 'Changelog' },
+          { href: AI_DISCLOSURE_HREF, label: 'KI und Datenschutz' },
+        ]}
+      />
       {/* The feedback widget lives HERE and nowhere else: public pages carry
           no personal data, so a third-party script sees nothing it should not.
           Token is a literal so next build cannot tree-shake the Script away. */}
