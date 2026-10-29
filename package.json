@@ -25,7 +25,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@bitbaum/accountkit": "github:bitbaum/accountkit#4d62ab8ebed295a9b0af8bda0838fb01bd336418",
+    "@bitbaum/accountkit": "^0.10.0",
     "@bitbaum/ai-kit": "^1.21.5",
     "@bitbaum/chartkit": "^0.6.0",
     "@bitbaum/chatkit": "^0.21.2",
