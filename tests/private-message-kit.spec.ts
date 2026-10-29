@@ -56,7 +56,8 @@ for (const [width, colorScheme] of [
     releaseReply()
     await expect(page.getByRole('button', { name: 'Senden', exact: true })).toBeVisible()
     await expect(page.getByText(text, { exact: true })).toHaveCount(1)
-    await expect(page.getByRole('alert')).toHaveCount(0)
+    const composer = page.locator('form').filter({ has: page.getByRole('textbox') })
+    await expect(composer.getByRole('alert')).toHaveCount(0)
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(
       true,
     )

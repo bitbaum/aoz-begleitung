@@ -60,3 +60,25 @@ it.each(['staff', 'resident'] as const)(
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   },
 )
+
+it.each(['staff', 'resident'] as const)(
+  'shows a real reply error in the %s composer and restores its text',
+  async (party) => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(Response.json({ success: false }, { status: 403 })),
+    )
+    const { container } =
+      party === 'staff'
+        ? render(
+            <StaffReplyThread threadId="thread-1" residentId="resident-1" initialMessages={[]} />,
+          )
+        : render(<MessageThreadView threadId="thread-1" initialMessages={[]} />)
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: 'Eine fehlgeschlagene Nachricht.' } })
+    fireEvent.submit(input.closest('form')!)
+    await waitFor(() => expect(screen.getByRole('alert')).toBeVisible())
+    expect(input).toHaveValue('Eine fehlgeschlagene Nachricht.')
+    expect(container.querySelector('ol')).not.toBeInTheDocument()
+  },
+)
