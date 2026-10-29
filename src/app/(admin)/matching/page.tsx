@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { residentSearchFields, searchText } from '@/lib/search/text-search'
 import { db, resident, placement, housingUnit } from '@/lib/db'
 import { eq, and, inArray, notInArray, desc, asc } from 'drizzle-orm'
 import { logger } from '@/lib/logger'
@@ -309,13 +310,12 @@ export default async function MatchingPage({ searchParams }: Props) {
   const fastMode =
     params.mode === 'fast' || (params.mode !== 'standard' && BRAND.features.matchingFastDefault)
 
-  const filteredUnplacedResidents = unplacedResidents.filter((resident) => {
-    if (!residentQuery) return true
-    const languageText = (resident.languages || []).join(' ').toLowerCase()
-    return (
-      resident.code.toLowerCase().includes(residentQuery) || languageText.includes(residentQuery)
-    )
-  })
+  const filteredUnplacedResidents = [
+    ...searchText(unplacedResidents, residentQuery, [
+      ...residentSearchFields((r: (typeof unplacedResidents)[number]) => r),
+      { name: 'languages', get: (r) => r.languages ?? [] },
+    ]),
+  ]
 
   return (
     <div>

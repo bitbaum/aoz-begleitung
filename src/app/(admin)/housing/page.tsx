@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
-import { db, housingUnit, placement, incident, escapeLike } from '@/lib/db'
-import { and, or, eq, inArray, ilike, gte, asc } from 'drizzle-orm'
+import { db, housingUnit, placement, incident } from '@/lib/db'
+import { searchText } from '@/lib/search/text-search'
+import { and, eq, inArray, gte, asc } from 'drizzle-orm'
 import { StatCard } from '@/components/ui/Card'
 import { getDateDaysAgo } from '@/lib/utils'
 import { requirePermission } from '@/lib/auth'
@@ -39,7 +40,7 @@ export default async function HousingListPage({ searchParams }: Props) {
   // issued before the site axis existed.
   const unitFilter = unitScopeFilter(viewer)
 
-  const [unitRows, allUnitRows] = await Promise.all([
+  const [scopedUnitRows, allUnitRows] = await Promise.all([
     db.query.housingUnit.findMany({
       where: and(
         unitFilter ?? undefined,
@@ -48,15 +49,6 @@ export default async function HousingListPage({ searchParams }: Props) {
           : view === 'archived'
             ? eq(housingUnit.status, 'CLOSED')
             : undefined,
-        q
-          ? or(
-              ilike(housingUnit.code, `%${escapeLike(q)}%`),
-              // A caseworker who hears "Casa Harmonie" must be able to type it.
-              ilike(housingUnit.nickname, `%${escapeLike(q)}%`),
-              ilike(housingUnit.address, `%${escapeLike(q)}%`),
-              ilike(housingUnit.buildingCode, `%${escapeLike(q)}%`),
-            )
-          : undefined,
       ),
       columns: {
         id: true,
@@ -104,6 +96,15 @@ export default async function HousingListPage({ searchParams }: Props) {
         },
       },
     }),
+  ])
+
+  // Typed text narrows the units this viewer may see. A caseworker who hears
+  // "Casa Harmonie" must be able to type it, misspelt or not.
+  const unitRows = searchText(scopedUnitRows, q, [
+    { name: 'code', get: (u) => u.code },
+    { name: 'nickname', get: (u) => u.nickname },
+    { name: 'address', get: (u) => u.address },
+    { name: 'buildingCode', get: (u) => u.buildingCode },
   ])
 
   // Prisma's `_count` selects have no query-API equivalent — the filtered

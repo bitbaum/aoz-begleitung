@@ -1,14 +1,7 @@
 import type { Metadata } from 'next'
-import {
-  db,
-  escapeLike,
-  resident,
-  placement,
-  incident,
-  satisfactionCheckIn,
-  clientGroup,
-} from '@/lib/db'
-import { eq, and, or, gte, notInArray, isNotNull, ilike, desc, asc, count } from 'drizzle-orm'
+import { residentSearchFields, searchText } from '@/lib/search/text-search'
+import { db, resident, placement, incident, satisfactionCheckIn, clientGroup } from '@/lib/db'
+import { eq, and, or, gte, notInArray, isNotNull, desc, asc, count } from 'drizzle-orm'
 import {
   EMPTY_STATE_LABELS,
   RESIDENT_LIST_LABELS,
@@ -137,16 +130,10 @@ export default async function ResidentsListPage({ searchParams }: Props) {
   const residentsWhere = and(
     siteFilter ?? undefined,
     clientFilterWhere(filters, { viewerId: currentUser?.id ?? '', now }),
-    q
-      ? or(
-          ilike(resident.code, `%${escapeLike(q)}%`),
-          ilike(resident.displayName, `%${escapeLike(q)}%`),
-        )
-      : undefined,
   )
 
   const [
-    residents,
+    scopedResidents,
     statusGroups,
     placedCount,
     unplacedCount,
@@ -236,6 +223,13 @@ export default async function ResidentsListPage({ searchParams }: Props) {
       .from(clientGroup)
       .orderBy(asc(clientGroup.name)),
   ])
+
+  // Typed text narrows the already-scoped list; it never widens it.
+  const residents = searchText(
+    scopedResidents,
+    q,
+    residentSearchFields((r) => r),
+  )
 
   const incidentCountByResident = new Map(incidentGroups.map((g) => [g.subjectId, g.count]))
 
