@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Send } from 'lucide-react'
 import { useT } from '@/lib/i18n/LocaleProvider'
-import { MESSAGE_BODY_MAX_LENGTH, isSendableBody, type MessageRow } from '@/lib/messaging/thread'
+import {
+  MESSAGE_BODY_MAX_LENGTH,
+  isSendableBody,
+  mergeMessageRows,
+  type MessageRow,
+} from '@/lib/messaging/thread'
 import { formatDateTime } from '@/lib/utils/formatting'
 
 /**
@@ -14,9 +19,15 @@ import { formatDateTime } from '@/lib/utils/formatting'
  * empties and shows nothing for two seconds reads as "it did not send", and
  * people send again.
  */
-export function MessageThreadView({ initialMessages }: { initialMessages: MessageRow[] }) {
+export function MessageThreadView({
+  threadId,
+  initialMessages,
+}: {
+  threadId: string
+  initialMessages: MessageRow[]
+}) {
   const t = useT()
-  const [messages, setMessages] = useState(initialMessages)
+  const [messages, setMessages] = useState(() => mergeMessageRows(threadId, [], initialMessages))
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -37,15 +48,17 @@ export function MessageThreadView({ initialMessages }: { initialMessages: Messag
     setFailed(false)
     setBody('')
 
+    const pendingId = `pending-${crypto.randomUUID()}`
     const pending: MessageRow = {
-      id: `pending-${messages.length}`,
+      id: pendingId,
+      clientId: pendingId,
       authorResidentId: 'self',
       authorUserId: null,
       body: text,
       createdAt: new Date(),
       readAt: null,
     }
-    setMessages((current) => [...current, pending])
+    setMessages((current) => mergeMessageRows(threadId, current, [pending]))
 
     try {
       const response = await fetch('/api/portal/messages', {
@@ -57,7 +70,7 @@ export function MessageThreadView({ initialMessages }: { initialMessages: Messag
       if (!result.success) throw new Error(result.error)
 
       setMessages((current) =>
-        current.map((message) => (message.id === pending.id ? result.data.message : message)),
+        mergeMessageRows(threadId, current, [{ ...result.data.message, clientId: pendingId }]),
       )
     } catch {
       // Put the text back in the box rather than leaving a message on screen

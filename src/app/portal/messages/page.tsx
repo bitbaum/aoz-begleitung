@@ -54,7 +54,7 @@ export default async function PortalMessagesPage() {
         description={t('messages.subtitle')}
         backHref="/portal"
       />
-      <MessageThreadView initialMessages={messages} />
+      <MessageThreadView threadId={thread.id} initialMessages={messages} />
     </div>
   )
 }

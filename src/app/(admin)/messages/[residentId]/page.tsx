@@ -1,12 +1,15 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { db, resident as residentTable } from '@/lib/db'
-import { eq } from 'drizzle-orm'
 import { PageHeader } from '@/components/ui/Page'
 import { StaffReplyThread } from '@/components/messaging/StaffReplyThread'
-import { getOrCreateThread, loadThreadMessages, markThreadRead } from '@/lib/messaging/queries'
+import {
+  getOrCreateThread,
+  loadThreadMessages,
+  markThreadRead,
+  findMessageResident,
+} from '@/lib/messaging/queries'
 import { requirePermission } from '@/lib/auth'
-import { RESIDENT_NAME_SELECT, residentName } from '@/lib/utils/resident-name'
+import { residentName } from '@/lib/utils/resident-name'
 import { MESSAGES_LABELS } from '@/lib/constants/labels'
 
 export const metadata: Metadata = { title: MESSAGES_LABELS.threadTitle }
@@ -23,10 +26,7 @@ export default async function StaffThreadPage({
   // boundary is a link you can simply not click.
   const staff = await requirePermission('messages:read')
 
-  const resident = await db.query.resident.findFirst({
-    where: eq(residentTable.id, residentId),
-    columns: RESIDENT_NAME_SELECT,
-  })
+  const resident = await findMessageResident(residentId, staff)
   if (!resident) notFound()
 
   const thread = await getOrCreateThread(residentId)
@@ -42,7 +42,7 @@ export default async function StaffThreadPage({
         description={MESSAGES_LABELS.languageHint}
         backHref="/messages"
       />
-      <StaffReplyThread residentId={residentId} initialMessages={messages} />
+      <StaffReplyThread residentId={residentId} threadId={thread.id} initialMessages={messages} />
     </div>
   )
 }

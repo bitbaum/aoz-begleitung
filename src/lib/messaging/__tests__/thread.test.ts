@@ -1,5 +1,6 @@
 import {
   messageAuthor,
+  mergeMessageRows,
   isOwnMessage,
   isUnreadFor,
   unreadCountFor,
@@ -129,5 +130,34 @@ describe('what may be sent', () => {
     expect(isSendableBody('a'.repeat(MESSAGE_BODY_MAX_LENGTH))).toBe(true)
     expect(isSendableBody('a'.repeat(MESSAGE_BODY_MAX_LENGTH + 1))).toBe(false)
     expect(isSendableBody(`  ${'a'.repeat(MESSAGE_BODY_MAX_LENGTH)}  `)).toBe(true)
+  })
+})
+
+describe('ThreadKit reconciliation adapter', () => {
+  it('replaces an optimistic row once and preserves confirmed author/read metadata', () => {
+    const pending = fromStaff({ id: 'pending-a', clientId: 'pending-a' })
+    const confirmed = fromStaff({
+      id: 'saved-a',
+      clientId: 'pending-a',
+      authorUserId: 'user-2',
+      readAt: new Date('2026-08-16T11:00:00Z'),
+    })
+    const merged = mergeMessageRows('thread-1', [pending], [confirmed])
+    expect(merged).toEqual([confirmed])
+    expect(mergeMessageRows('thread-1', merged, [confirmed])).toEqual([confirmed])
+    expect(pending.id).toBe('pending-a')
+  })
+
+  it('orders out-of-order arrivals oldest first with a stable tie break', () => {
+    const late = fromStaff({ id: 'late' })
+    const first = fromResident({ id: 'a' })
+    const second = fromResident({ id: 'b' })
+    const existing = [late, second]
+    expect(mergeMessageRows('thread-1', existing, [first]).map((row) => row.id)).toEqual([
+      'a',
+      'b',
+      'late',
+    ])
+    expect(existing.map((row) => row.id)).toEqual(['late', 'b'])
   })
 })

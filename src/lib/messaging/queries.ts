@@ -1,5 +1,6 @@
-import { db, message as messageTable, messageThread } from '@/lib/db'
-import { asc, desc, eq, inArray } from 'drizzle-orm'
+import { residentScopeFilter, type SiteCapabilities } from '@/lib/auth/site-access'
+import { db, message as messageTable, messageThread, resident as residentTable } from '@/lib/db'
+import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 import { RESIDENT_NAME_SELECT } from '@/lib/utils/resident-name'
 import {
   messageAuthor,
@@ -132,8 +133,23 @@ export async function residentUnreadCount(residentId: string): Promise<number> {
  * question from four days ago matters more than one from an hour ago, and
  * sorting by recency buries exactly the person who has been waiting longest.
  */
-export async function staffInbox() {
+/** Resident existence and unit scope are checked before opening any thread. */
+export async function findMessageResident(residentId: string, viewer: SiteCapabilities) {
+  return db.query.resident.findFirst({
+    where: and(eq(residentTable.id, residentId), residentScopeFilter(viewer) ?? undefined),
+    columns: RESIDENT_NAME_SELECT,
+  })
+}
+
+export async function staffInbox(viewer: SiteCapabilities) {
+  const siteFilter = residentScopeFilter(viewer)
   const threads = await db.query.messageThread.findMany({
+    where: siteFilter
+      ? inArray(
+          messageThread.residentId,
+          db.select({ id: residentTable.id }).from(residentTable).where(siteFilter),
+        )
+      : undefined,
     orderBy: [desc(messageThread.updatedAt)],
     columns: { id: true, updatedAt: true },
     with: {

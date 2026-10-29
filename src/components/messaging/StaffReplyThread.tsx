@@ -4,7 +4,12 @@ import { useEffect, useRef, useState } from 'react'
 import { Send } from 'lucide-react'
 import { MESSAGES_LABELS } from '@/lib/constants/labels'
 import { formatDateTime } from '@/lib/utils/formatting'
-import { MESSAGE_BODY_MAX_LENGTH, isSendableBody, type MessageRow } from '@/lib/messaging/thread'
+import {
+  MESSAGE_BODY_MAX_LENGTH,
+  isSendableBody,
+  mergeMessageRows,
+  type MessageRow,
+} from '@/lib/messaging/thread'
 
 /**
  * The staff side of one conversation.
@@ -16,12 +21,14 @@ import { MESSAGE_BODY_MAX_LENGTH, isSendableBody, type MessageRow } from '@/lib/
  */
 export function StaffReplyThread({
   residentId,
+  threadId,
   initialMessages,
 }: {
   residentId: string
+  threadId: string
   initialMessages: MessageRow[]
 }) {
-  const [messages, setMessages] = useState(initialMessages)
+  const [messages, setMessages] = useState(() => mergeMessageRows(threadId, [], initialMessages))
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -40,15 +47,17 @@ export function StaffReplyThread({
     setFailed(false)
     setBody('')
 
+    const pendingId = `pending-${crypto.randomUUID()}`
     const pending: MessageRow = {
-      id: `pending-${messages.length}`,
+      id: pendingId,
+      clientId: pendingId,
       authorResidentId: null,
       authorUserId: 'self',
       body: text,
       createdAt: new Date(),
       readAt: null,
     }
-    setMessages((current) => [...current, pending])
+    setMessages((current) => mergeMessageRows(threadId, current, [pending]))
 
     try {
       const response = await fetch(`/api/messages/${residentId}`, {
@@ -60,7 +69,7 @@ export function StaffReplyThread({
       if (!result.success) throw new Error(result.error)
 
       setMessages((current) =>
-        current.map((message) => (message.id === pending.id ? result.data.message : message)),
+        mergeMessageRows(threadId, current, [{ ...result.data.message, clientId: pendingId }]),
       )
     } catch {
       // The text stays in the box. Clearing it optimistically would leave a
