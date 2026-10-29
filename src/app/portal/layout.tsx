@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { cookies } from 'next/headers'
 import { LOCALES } from '@/lib/i18n'
 import { getRequestTranslator } from '@/lib/i18n/request'
 import { LocaleProvider } from '@/lib/i18n/LocaleProvider'
@@ -9,7 +8,8 @@ import { PortalNav } from '@/components/portal/PortalNav'
 import { PortalSidebar } from '@/components/portal/PortalSidebar'
 import { PortalTabBar } from '@/components/portal/PortalTabBar'
 import { BRAND } from '@/lib/config/brand'
-import { RESIDENT_COOKIE, STAFF_COOKIE } from '@/lib/auth/constants'
+import { hasStaffSession } from '@/lib/auth'
+import { getResidentCookie } from '@/lib/portal-auth'
 import { db, placement as placementTable, resident as residentTable } from '@/lib/db'
 import { and, eq } from 'drizzle-orm'
 import { residentUnreadCount } from '@/lib/messaging/queries'
@@ -45,9 +45,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies()
-  const residentCode = cookieStore.get(RESIDENT_COOKIE)?.value
-  const hasStaffAccess = !!cookieStore.get(STAFF_COOKIE)?.value
+  const residentCode = await getResidentCookie()
+  const hasStaffAccess = await hasStaffSession()
   const resident = residentCode
     ? await db.query.resident.findFirst({
         where: eq(residentTable.code, residentCode),

@@ -1,10 +1,12 @@
 # AccountKit migration staging
 
 The application still authenticates through its existing handlers and cookies.
-The additive migration `drizzle/0012_accountkit_identity_staging.sql` only creates
-AccountKit's published tables and AOZ's `AccountIdentity` mapping. It does not
-copy credentials, activate a second writer, revoke sessions or switch the login
-screens. The wider acceptance queue remains in
+`AUTH_RUNTIME` is unset in every deployment, so nothing below the "Shared
+runtime" heading answers yet. The additive migrations
+`drizzle/0012_accountkit_identity_staging.sql` and
+`drizzle/0013_accountkit_session_scope.sql` create AccountKit's published
+tables, AOZ's `AccountIdentity` mapping and the per-session
+`AccountSessionScope`. They copy no credentials and switch no screen. The wider acceptance queue remains in
 [Fleet's checkpoint](https://github.com/bitbaum/fleet/blob/main/docs/remediation-resume-2026-10-29.md).
 
 ## Rehearse the import
@@ -44,32 +46,56 @@ synthetic dual/password/invited/code-only accounts, exercise the real shared
 password runtime and recovery, and verify rollback and conflict rejection.
 They do not establish production migration or browser evidence.
 
-## Before activating the runtime
+## Shared runtime (built, off)
 
-1. Extend and release AccountKit's shared provisioning contract for an invited
-   or code-only user to receive their first password, and for proof of an
-   existing account before linking a second AOZ actor. Do not recreate credential
-   storage, verification or recovery handlers in AOZ.
-2. Resolve verification parity: AOZ's old password login accepts an unverified
-   address. AccountKit 0.10.0 requires verification when mail is configured.
-   Preserve the imported verification flag and prove a usable verification or
-   recovery journey; never set it to true merely to pass sign-in.
-3. Wire the shared runtime, mail adapter and account screens. Preserve exact
-   code login through AccountKit's domain credential adapter, storing staff-only
-   or resident-only restrictions against the shared session before exposing its
-   cookie. A code for one actor must not open the other side of a dual account.
-4. Read revocable shared sessions on every staff and portal request, reload
-   active status, role, site and tenant restrictions, and preserve the read-only
-   impersonation boundary. Remove raw resident-cookie and local-JWT authority.
-5. Stop legacy auth writes for the final snapshot; reconcile and import once
-   under transaction locks, then switch all credential writers together. Record
-   counts and constraint checks without publishing account data. If rehearsal
-   fails, roll back and keep the legacy deployment authoritative. A rollback
-   after shared password changes requires credential reconciliation; it must
-   not restore an older password hash.
-6. Prove registration, single-use invitations, linking, password/reset/verify,
-   logout and revocation, role/site changes, dual identities, code scope,
-   impersonation, configured providers and local fallback against the isolated
-   database and deployed artifact. Production journeys require an approved
-   test identity. Then record exact merge/deploy and journey evidence through
-   the Fleet sweep.
+With `AUTH_RUNTIME=accountkit` and `BETTER_AUTH_SECRET` set, the shared runtime
+in `src/lib/auth/shared/` serves every sign-in:
+
+- `runtime.ts` builds AccountKit with AOZ's mail (fleet mail-kit), the imported
+  bcrypt hashes (`legacyBcrypt`), exact code login as a domain credential and
+  AccountKit's provisioning for claim links and codes. `/api/auth/[...all]`
+  mounts it; with the flag off that path answers 404.
+- A code session is bound to its own side in `AccountSessionScope` before its
+  cookie is set: a resident code never opens the staff side of a dual account.
+  A password sign-in carries both sides.
+- `identity.ts` answers who a session may act as on every request: active
+  status, role, scope, site and unit reach come from the rows, never from the
+  session. Identities created after the import are mapped on first use with the
+  same namespaced id and `.invalid` address the import gives them.
+- A claim (register screen with a code, or a claim link) gives an identity its
+  first password through AccountKit. A second identity joins an existing account
+  only on that account's own password; an invited account without one recovers
+  through its mailbox first. Admin invitations and hand-overs attach the
+  address, unverified, to the colleague's shared account.
+- "Ansicht wechseln" opens a real shared session for the colleague, scoped to
+  their staff side and read-only by its scope row, which the proxy enforces on
+  every write. Closing it returns to the administrator's own session only if
+  that session still lives.
+- The existing screens keep their API: `bridge.ts` answers `/api/auth/login`,
+  `/signup`, `/claim`, `/forgot-password` and `/reset-password` from AccountKit.
+  With mail configured an unconfirmed address is refused at sign-in with a
+  "send the link again" action, and a used reset link confirms the address it
+  was sent to (AccountKit 0.11). The self-serve household route refuses while
+  the shared runtime is on; it is off for AOZ.
+
+`src/lib/auth/__tests__/accountkit-runtime.test.ts` and
+`accountkit-journeys.test.ts` run all of this on the committed migration chain
+and the real import SQL. Neither is deployed or browser evidence.
+
+## Before switching
+
+1. Stop legacy auth writes for the final snapshot; reconcile and import once
+   under transaction locks, then set `AUTH_RUNTIME=accountkit` and
+   `BETTER_AUTH_SECRET` together, so every credential writer switches at once.
+   Record counts and constraint checks without publishing account data. If the
+   import fails, roll back and keep the legacy deployment authoritative. A
+   rollback after shared password changes requires credential reconciliation;
+   it must not restore an older password hash.
+2. Everyone signed in under legacy auth is signed out by the switch: legacy
+   JWTs and resident cookies are no longer read. Say so to staff beforehand.
+3. Prove registration, invitations, linking, password/reset/verify, logout and
+   revocation, role/site changes, dual identities, code scope, impersonation and
+   local fallback against the deployed artifact with an approved test identity.
+   AccountKit's own account screens (passkeys, second factor, session list) and
+   configured providers are not yet offered to AOZ users. Then record exact
+   merge/deploy and journey evidence through the Fleet sweep.

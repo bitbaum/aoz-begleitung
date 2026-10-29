@@ -18,6 +18,9 @@ import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { generateStaffCode } from '@/lib/auth/code-generation'
 import { checkRateLimit, recordLoginAttempt, getClientIp } from '@/lib/auth/rate-limit'
 import { logger } from '@/lib/logger'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
+import { attachInvitedEmail } from '@/lib/auth/shared/identity'
+import { sharedAuthUser } from '@/lib/db'
 
 /**
  * The violated constraint name from a pg unique-violation, walking wrapped
@@ -150,11 +153,16 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Check if email already registered
-  const existingEmail = await db.query.account.findFirst({
-    where: eq(account.email, email.toLowerCase()),
-    columns: { id: true },
-  })
+  // Check if email already registered — in whichever store owns addresses.
+  const existingEmail = sharedAuthEnabled()
+    ? await db.query.sharedAuthUser.findFirst({
+        where: eq(sharedAuthUser.email, email.toLowerCase()),
+        columns: { id: true },
+      })
+    : await db.query.account.findFirst({
+        where: eq(account.email, email.toLowerCase()),
+        columns: { id: true },
+      })
   if (existingEmail) {
     return NextResponse.json(
       { success: false, error: 'Diese E-Mail-Adresse ist bereits registriert' },
@@ -183,12 +191,26 @@ export async function POST(request: NextRequest) {
           active: true,
         })
         .returning({ id: userTable.id, code: userTable.code, name: userTable.name })
+      // On the shared runtime the address goes on the shared account below,
+      // never on a legacy Account row nobody would read.
+      if (sharedAuthEnabled()) return { ...created, account: { email: email.toLowerCase() } }
       const [createdAccount] = await tx
         .insert(account)
         .values({ email: email.toLowerCase(), userId: created.id })
         .returning({ email: account.email })
       return { ...created, account: { email: createdAccount.email } }
     })
+    if (sharedAuthEnabled()) {
+      // Unverified: a claim with this address, or recovery through it, gives
+      // the colleague their first password, and the mailbox proves it.
+      const attached = await attachInvitedEmail('staff', user.id, email)
+      if (attached !== 'attached') {
+        return NextResponse.json(
+          { success: false, error: 'Diese E-Mail-Adresse ist bereits registriert' },
+          { status: 409 },
+        )
+      }
+    }
   } catch (error) {
     // Race between pre-check and insert: surface conflict explicitly.
     if (isUniqueViolation(error)) {

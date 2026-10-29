@@ -12,7 +12,8 @@ type LoginState =
   | { status: 'idle' }
   | { status: 'loading' }
   | { status: 'success'; type: 'staff' | 'resident'; message: string }
-  | { status: 'error'; message: string }
+  | { status: 'error'; message: string; needsVerification?: boolean }
+  | { status: 'resent' }
 
 type LoginMode = 'email' | 'code'
 
@@ -55,7 +56,9 @@ function LoginForm() {
   }, [])
 
   // Outcome banners from email flows (verification link, password reset).
-  const verified = searchParams.get('verified')
+  // A failed shared verification link comes back to the same address with
+  // `error` added, so its presence overrides the `verified=1` it was sent with.
+  const verified = searchParams.get('error') ? '0' : searchParams.get('verified')
   const resetDone = searchParams.get('reset') === '1'
 
   function scheduleRedirect(role: 'staff' | 'resident') {
@@ -79,7 +82,11 @@ function LoginForm() {
       const data = await response.json()
 
       if (!data.success) {
-        setState({ status: 'error', message: data.error || LOGIN_LABELS.error.generic })
+        setState({
+          status: 'error',
+          message: data.error || LOGIN_LABELS.error.generic,
+          needsVerification: data.needsVerification === true,
+        })
         return
       }
 
@@ -88,6 +95,26 @@ function LoginForm() {
 
       setState({ status: 'success', type: data.type, message: successMessage })
       scheduleRedirect(data.type)
+    } catch {
+      setState({ status: 'error', message: LOGIN_LABELS.error.generic })
+    }
+  }
+
+  // Refused for an unconfirmed address: the way forward is on the same screen.
+  async function resendVerification() {
+    setState({ status: 'loading' })
+    try {
+      const response = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      })
+      const data = await response.json()
+      setState(
+        data.success
+          ? { status: 'resent' }
+          : { status: 'error', message: data.error || LOGIN_LABELS.error.generic },
+      )
     } catch {
       setState({ status: 'error', message: LOGIN_LABELS.error.generic })
     }
@@ -130,6 +157,20 @@ function LoginForm() {
             {state.status === 'error' && (
               <div className="alert-error" role="alert" aria-live="polite">
                 {state.message}
+                {state.needsVerification && (
+                  <button
+                    type="button"
+                    onClick={() => void resendVerification()}
+                    className="mt-2 block min-h-[44px] font-medium underline underline-offset-2"
+                  >
+                    {LOGIN_LABELS.resendVerification}
+                  </button>
+                )}
+              </div>
+            )}
+            {state.status === 'resent' && (
+              <div className="alert-success" role="status">
+                {LOGIN_LABELS.verificationResent}
               </div>
             )}
 

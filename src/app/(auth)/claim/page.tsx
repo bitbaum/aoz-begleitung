@@ -14,6 +14,7 @@ type ClaimState =
   | { status: 'loading'; name: string }
   | { status: 'error'; name: string; message: string }
   | { status: 'success' }
+  | { status: 'next'; message: string; toLogin: boolean }
 
 /**
  * /claim?token=… — a colleague takes over the account provisioned for them.
@@ -68,6 +69,14 @@ function ClaimForm() {
         setState({ status: 'error', name, message: data.error || LOGIN_LABELS.error.generic })
         return
       }
+      if (data.verifyEmail || data.signIn) {
+        setState({
+          status: 'next',
+          message: data.verifyEmail ? REGISTER_LABELS.checkMail : REGISTER_LABELS.linkedSignIn,
+          toLogin: data.signIn === true,
+        })
+        return
+      }
       setState({ status: 'success' })
       setTimeout(() => {
         router.push(data.type === 'resident' ? '/portal' : '/')
@@ -94,6 +103,17 @@ function ClaimForm() {
               {CLAIM_LABELS.toLogin}
             </Link>
           </p>
+        </div>
+      ) : state.status === 'next' ? (
+        <div className="space-y-4">
+          <AuthSuccess message={state.message} />
+          {state.toLogin && (
+            <p className="text-center text-sm">
+              <Link href="/login" className="font-medium text-ui-text underline underline-offset-2">
+                {REGISTER_LABELS.toLogin}
+              </Link>
+            </p>
+          )}
         </div>
       ) : state.status === 'success' ? (
         <AuthSuccess message={REGISTER_LABELS.success} detail={LOGIN_LABELS.success.redirecting} />

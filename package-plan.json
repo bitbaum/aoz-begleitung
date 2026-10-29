@@ -17,11 +17,15 @@
     "identity": {
       "package": "@bitbaum/accountkit",
       "status": "partial",
-      "remaining": "Additive shared tables and actor mappings are staged; the rollback-only import rehearsal is documented in docs/ACCOUNTKIT-MIGRATION.md. Registration/provisioning, invitations, live credential cutover, revocable sessions, runtime actor authorization and configured-provider journeys remain open. Password primitives and staging tables alone are not full adoption.",
+      "remaining": "Shared runtime is wired behind AUTH_RUNTIME=accountkit (off by default): exact code login scoped to its side, first-password claims and proof-gated linking through AccountKit's provisioning, revocable sessions read with role/site/unit reloaded per request, read-only borrowed views, and the existing screens served through the shared lifecycle. Open: the final locked import and switch of all credential writers, the self-serve household flow (off for AOZ), AccountKit's own account screens (passkeys, second factor, sessions), configured-provider journeys and deployed proof with an approved test identity. See docs/ACCOUNTKIT-MIGRATION.md.",
       "bindings": [
         {
           "file": "src/lib/auth/passwords.ts",
           "symbols": ["createPasswordHasher"]
+        },
+        {
+          "file": "src/lib/auth/shared/runtime.ts",
+          "symbols": ["createAuthRuntime", "createAuthMailer"]
         }
       ]
     },

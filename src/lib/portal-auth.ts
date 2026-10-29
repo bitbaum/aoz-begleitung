@@ -12,6 +12,8 @@ import { redirect } from 'next/navigation'
 import { db, resident, placement } from '@/lib/db'
 import { and, eq } from 'drizzle-orm'
 import { RESIDENT_COOKIE, RESIDENT_COOKIE_MAX_AGE_SECONDS } from '@/lib/auth/constants'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
+import { getSharedIdentities } from '@/lib/auth/shared/session'
 
 // Re-export so existing call sites continue to import from '@/lib/portal-auth'.
 export { RESIDENT_COOKIE }
@@ -28,12 +30,22 @@ export interface PortalAuthResult {
 }
 
 /**
+ * The signed-in resident's code: from the shared session when that runtime is
+ * on, else from the legacy cookie. The ONE place the portal learns who is
+ * asking; every helper below goes through it.
+ */
+async function currentResidentCode(): Promise<string | null> {
+  if (sharedAuthEnabled()) return (await getSharedIdentities()).resident?.code ?? null
+  const cookieStore = await cookies()
+  return cookieStore.get(RESIDENT_COOKIE)?.value ?? null
+}
+
+/**
  * Read the resident_code cookie, or redirect to the given path if missing.
  * Use from server components when you need to perform a custom Prisma query.
  */
 export async function requireResidentCookie(redirectTo = '/login'): Promise<string> {
-  const cookieStore = await cookies()
-  const code = cookieStore.get(RESIDENT_COOKIE)?.value
+  const code = await currentResidentCode()
   if (!code) redirect(redirectTo)
   return code
 }
@@ -43,8 +55,12 @@ export async function requireResidentCookie(redirectTo = '/login'): Promise<stri
  * Use from API routes that should return JSON 401 instead of redirecting.
  */
 export async function getResidentCookie(): Promise<string | null> {
-  const cookieStore = await cookies()
-  return cookieStore.get(RESIDENT_COOKIE)?.value ?? null
+  return currentResidentCode()
+}
+
+/** Whether a resident session is present, for navigation (not authorization). */
+export async function hasResidentSession(): Promise<boolean> {
+  return (await currentResidentCode()) !== null
 }
 
 /** Set the resident_code cookie after successful login. SSOT for cookie options. */
@@ -65,8 +81,7 @@ export async function setResidentCookie(code: string): Promise<void> {
  * and photo exist independently of whether they are currently placed.
  */
 export async function getPortalResident(): Promise<{ id: string; code: string } | null> {
-  const cookieStore = await cookies()
-  const residentCode = cookieStore.get(RESIDENT_COOKIE)?.value
+  const residentCode = await currentResidentCode()
   if (!residentCode) return null
 
   const row = await db.query.resident.findFirst({
@@ -124,8 +139,7 @@ export async function getActiveUnitMembers(housingUnitId: string): Promise<UnitM
  * Returns null if not authenticated or no active placement.
  */
 export async function getPortalAuth(): Promise<PortalAuthResult | null> {
-  const cookieStore = await cookies()
-  const residentCode = cookieStore.get(RESIDENT_COOKIE)?.value
+  const residentCode = await currentResidentCode()
 
   if (!residentCode) return null
 

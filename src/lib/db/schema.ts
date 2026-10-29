@@ -1821,6 +1821,23 @@ export const accountIdentity = pgTable('AccountIdentity', {
     .references(() => resident.id, { onDelete: 'set null' }),
 })
 
+/**
+ * What one shared session may open. A session without a row is a full sign-in
+ * (password, passkey, provider) and carries every identity its account holds.
+ * A login code opens only its own side of a dual account; a borrowed view is
+ * read-only, names the administrator who opened it and the session to return
+ * to. Deleted with the session.
+ */
+export const accountSessionScope = pgTable('AccountSessionScope', {
+  sessionId: text()
+    .primaryKey()
+    .references(() => sharedAuthSession.id, { onDelete: 'cascade' }),
+  side: text({ enum: ['staff', 'resident'] }),
+  impersonatorStaffId: text().references(() => user.id, { onDelete: 'cascade' }),
+  /** The opener's own session, restored when a borrowed view is closed (if it still lives). */
+  returnSessionId: text().references(() => sharedAuthSession.id, { onDelete: 'set null' }),
+})
+
 export const authToken = pgTable(
   'AuthToken',
   {

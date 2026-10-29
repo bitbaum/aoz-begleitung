@@ -12,6 +12,7 @@ type RegisterState =
   | { status: 'idle' }
   | { status: 'loading' }
   | { status: 'success'; type: 'staff' | 'resident'; roles: Array<'staff' | 'resident'> }
+  | { status: 'next'; message: string; toLogin: boolean }
   | { status: 'household'; residentCode: string }
   | { status: 'error'; message: string }
 
@@ -82,6 +83,15 @@ function RegisterForm() {
         return
       }
 
+      if (data.verifyEmail || data.signIn) {
+        setState({
+          status: 'next',
+          message: data.verifyEmail ? REGISTER_LABELS.checkMail : REGISTER_LABELS.linkedSignIn,
+          toLogin: data.signIn === true,
+        })
+        return
+      }
+
       setState({ status: 'success', type: data.type, roles: data.roles ?? [data.type] })
       redirectTimerRef.current = setTimeout(() => {
         router.push(data.type === 'staff' ? '/' : '/portal')
@@ -97,7 +107,18 @@ function RegisterForm() {
       title={REGISTER_LABELS.title}
       subtitle={mode === 'household' ? REGISTER_LABELS.householdSubtitle : REGISTER_LABELS.subtitle}
     >
-      {state.status === 'household' ? (
+      {state.status === 'next' ? (
+        <div className="space-y-4">
+          <AuthSuccess message={state.message} />
+          {state.toLogin && (
+            <p className="text-center text-sm">
+              <Link href="/login" className="font-medium text-ui-text underline underline-offset-2">
+                {REGISTER_LABELS.toLogin}
+              </Link>
+            </p>
+          )}
+        </div>
+      ) : state.status === 'household' ? (
         <div>
           <AuthSuccess message={REGISTER_LABELS.householdSuccess} />
           <div className="mt-4 rounded-lg border border-ui-border bg-ui-subtle p-4 text-center">

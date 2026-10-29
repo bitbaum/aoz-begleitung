@@ -11,6 +11,8 @@ import { consumeRateLimit, getClientIp } from '@/lib/auth/rate-limit'
 import { forgotPasswordSchema } from '@/lib/validation/auth'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { logger } from '@/lib/logger'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
+import { sharedForgotPassword } from '@/lib/auth/shared/bridge'
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,6 +41,8 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       )
     }
+
+    if (sharedAuthEnabled()) return sharedForgotPassword(request, parsed.data.email)
 
     const result = await requestPasswordReset(parsed.data.email)
     if (!result.success) {

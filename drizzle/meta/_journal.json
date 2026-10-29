@@ -92,6 +92,13 @@
       "when": 1793253129046,
       "tag": "0012_accountkit_identity_staging",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793256948458,
+      "tag": "0013_accountkit_session_scope",
+      "breakpoints": true
     }
   ]
 }

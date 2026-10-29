@@ -8,6 +8,8 @@ import { consumeRateLimit, getClientIp } from '@/lib/auth/rate-limit'
 import { resetPasswordSchema } from '@/lib/validation/auth'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { logger } from '@/lib/logger'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
+import { sharedResetPassword } from '@/lib/auth/shared/bridge'
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,6 +37,10 @@ export async function POST(request: NextRequest) {
         { success: false, error: parsed.error.issues[0]?.message || ERROR_MESSAGES.INVALID_INPUT },
         { status: 400 },
       )
+    }
+
+    if (sharedAuthEnabled()) {
+      return sharedResetPassword(request, parsed.data.token, parsed.data.password)
     }
 
     const result = await resetPassword(parsed.data.token, parsed.data.password)

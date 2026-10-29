@@ -33,6 +33,12 @@ export const ERROR_MESSAGES = {
     'Mit dieser E-Mail-Adresse ist bereits ein Zugang dieser Art verknüpft.',
   AUTH_LINK_PASSWORD_MISMATCH:
     'Für diese E-Mail-Adresse existiert bereits ein Konto. Geben Sie das Passwort dieses Kontos ein, um den Code damit zu verknüpfen.',
+  AUTH_EMAIL_NOT_VERIFIED:
+    'Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Wir können Ihnen den Link erneut senden.',
+  AUTH_EMAIL_NEEDS_RECOVERY:
+    'Zu dieser E-Mail-Adresse gibt es bereits ein Konto ohne Passwort. Setzen Sie zuerst über «Passwort vergessen?» ein Passwort und verknüpfen Sie dann diesen Code.',
+  AUTH_VERIFIED_EMAIL_MISMATCH:
+    'Dieses Konto hat bereits eine bestätigte E-Mail-Adresse. Verwenden Sie diese Adresse.',
   AUTH_RESET_TOKEN_INVALID: 'Dieser Link ist ungültig oder abgelaufen. Fordern Sie einen neuen an.',
   AUTH_EMAIL_NOT_CONFIGURED:
     'E-Mail-Versand ist auf dieser Installation nicht eingerichtet. Bitte wenden Sie sich an die Verwaltung.',
