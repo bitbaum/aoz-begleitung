@@ -22,6 +22,25 @@
 import { createId } from '@paralleldrive/cuid2'
 import { sql } from 'drizzle-orm'
 import {
+  user as sharedAuthUser,
+  session as sharedAuthSession,
+  account as sharedAuthAccount,
+  verification as sharedAuthVerification,
+  passkey as sharedAuthPasskey,
+  twoFactor as sharedAuthTwoFactor,
+} from '@bitbaum/accountkit/auth/schema'
+
+// Shared tables keep AccountKit's names and definitions. AOZ's existing User,
+// Resident and Account remain domain records during the additive migration.
+export {
+  sharedAuthUser,
+  sharedAuthSession,
+  sharedAuthAccount,
+  sharedAuthVerification,
+  sharedAuthPasskey,
+  sharedAuthTwoFactor,
+}
+import {
   customType,
   pgTable,
   type PgTableExtraConfigValue,
@@ -1785,6 +1804,22 @@ export const account = pgTable(
       .onDelete('cascade'),
   ],
 )
+
+/** Stable shared identity -> AOZ actors; addresses never establish this link. */
+export const accountIdentity = pgTable('AccountIdentity', {
+  sharedUserId: text()
+    .primaryKey()
+    .references(() => sharedAuthUser.id, { onDelete: 'cascade' }),
+  legacyAccountId: text()
+    .unique()
+    .references(() => account.id, { onDelete: 'set null' }),
+  staffId: text()
+    .unique()
+    .references(() => user.id, { onDelete: 'set null' }),
+  residentId: text()
+    .unique()
+    .references(() => resident.id, { onDelete: 'set null' }),
+})
 
 export const authToken = pgTable(
   'AuthToken',
