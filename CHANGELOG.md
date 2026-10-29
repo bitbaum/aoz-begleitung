@@ -8,10 +8,10 @@ project does not tag semver releases yet — entries are grouped by deploy date
 Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
-last_modified_date: 2026-10-28
-last_modified_summary: Shared account password handling and the shared admin chat thread, composer and streaming parser.
+last_modified_date: 2026-10-29
+last_modified_summary: Shared private-message reconciliation and scoped staff conversation access.
 
-## 2026-10-28 — Shared private-message reconciliation
+## 2026-10-29 — Shared private-message reconciliation
 
 - ThreadKit reconciles optimistic and confirmed messages in both the resident
   and staff views, with stable message ordering and unique browser correlation
