@@ -97,11 +97,7 @@ try {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } })
   page = await context.newPage()
   const pageErrors = []
-  // The signed-out landing page fails hydration on production too (#361); an
-  // error anywhere else, on any sign-in or account screen, fails the smoke.
-  page.on('pageerror', (e) => {
-    if (new URL(page.url()).pathname !== '/') pageErrors.push(`${page.url()}: ${e.message}`)
-  })
+  page.on('pageerror', (e) => pageErrors.push(`${page.url()}: ${e.message}`))
 
   // ── The method set, and the code door beside it ────────────────────────
   await page.goto(`${BASE}/login`)
