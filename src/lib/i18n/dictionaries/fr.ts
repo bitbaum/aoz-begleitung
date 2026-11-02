@@ -25,6 +25,10 @@ export const fr: Dictionary = {
   'nav.marketplace': 'Marché',
   'nav.events': 'Événements',
   'nav.preferences': 'Paramètres',
+  'nav.accountSecurity': 'Connexion et sécurité',
+  'accountSecurity.deletion':
+    'Votre accès est lié à votre code personnel. Seule votre personne de contact peut le supprimer.',
+  'accountSecurity.help': 'Aide et contact',
   'nav.profile': 'Profil',
   'nav.transfer': 'Demande de transfert',
   'nav.help': 'Aide',

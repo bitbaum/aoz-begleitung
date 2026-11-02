@@ -174,6 +174,8 @@ export const FORGOT_PASSWORD_LABELS = {
   success:
     'Falls ein Konto mit dieser E-Mail existiert, haben wir einen Link zum Zurücksetzen gesendet. Prüfen Sie auch den Spam-Ordner.',
   backToLogin: 'Zurück zur Anmeldung',
+  // Without account mail no link can arrive: say so, and name the way in that still works.
+  unavailable: `Das Zurücksetzen per E-Mail ist gerade nicht verfügbar. Melden Sie sich mit Ihrem persönlichen Code an oder wenden Sie sich an Ihre Ansprechperson bei ${BRAND.shortName}.`,
 } as const
 
 export const RESET_PASSWORD_LABELS = {
@@ -215,4 +217,15 @@ export const CLAIM_INVITE_LABELS = {
   validUntil: (date: string) => `Gültig bis ${date}. Nur an diese Person weitergeben.`,
   failed: 'Link konnte nicht erstellt werden.',
   alreadyClaimed: 'Diese Person hat ihr Konto bereits übernommen.',
+} as const
+
+/** The account page (/konto, /portal/konto): AccountKit's panel around AOZ's words. */
+export const ACCOUNT_SECURITY_LABELS = {
+  title: 'Anmeldung & Sicherheit',
+  description: 'Passwort, Passkeys, zweiter Faktor und verknüpfte Anmeldungen.',
+  // Nobody deletes their own login: identities are provisioned and retired by AOZ.
+  deletion: (org: string) =>
+    `Ihr Zugang gehört zu Ihrem persönlichen Code. Aufheben kann ihn nur die ${org}-Verwaltung.`,
+  help: 'Hilfe und Kontakt',
+  unavailable: 'Diese Seite ist nach der Umstellung der Anmeldung verfügbar.',
 } as const

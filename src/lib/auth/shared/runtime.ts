@@ -113,4 +113,12 @@ export const sharedAuth = createAuthRuntime({
   // holding a staff identity gets it, on every session of that account.
   sessionLifetime: async (userId) =>
     (await sharedUserHoldsStaff(userId)) ? SESSION_DURATION_SECONDS : null,
+  // A person never deletes their own login: residents' files, staff duties and
+  // the audit trail hang off identities AOZ provisions and retires (an admin
+  // deactivates a staff identity; intake closes a resident's). The account
+  // panel says whom to ask instead.
+  accountDeletion: false,
+  // With mail, an unconfirmed address is refused at sign-in with a "send the
+  // link again" action, as AOZ's own sign-in always did (AGENTS.md, "Flows").
+  emailConfirmation: 'before-sign-in',
 })

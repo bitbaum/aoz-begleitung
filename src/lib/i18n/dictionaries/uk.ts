@@ -29,6 +29,10 @@ export const uk: Dictionary = {
   'nav.marketplace': 'Дошка оголошень',
   'nav.events': 'Заходи',
   'nav.preferences': 'Налаштування',
+  'nav.accountSecurity': 'Вхід і безпека',
+  'accountSecurity.deletion':
+    'Ваш доступ прив’язаний до вашого особистого коду. Видалити його може лише ваша контактна особа.',
+  'accountSecurity.help': 'Допомога та контакти',
   'nav.profile': 'Профіль',
   'nav.transfer': 'Переїзд',
   'nav.help': 'Допомога',

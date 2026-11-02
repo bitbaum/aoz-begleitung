@@ -25,6 +25,10 @@ export const so: Dictionary = {
   'nav.marketplace': 'Suuqa',
   'nav.events': 'Dhacdooyinka',
   'nav.preferences': 'Dejinta',
+  'nav.accountSecurity': 'Gelitaanka iyo amniga',
+  'accountSecurity.deletion':
+    'Gelitaankaagu wuxuu ku xiran yahay koodhkaaga gaarka ah. Kaliya qofka lagula xiriiro ayaa tirtiri kara.',
+  'accountSecurity.help': 'Caawimo iyo xiriir',
   'nav.profile': 'Astaanta',
   'nav.transfer': 'Codsi wareejin',
   'nav.help': 'Caawimo',

@@ -1,294 +1,51 @@
-'use client'
-
-import { useState, FormEvent, useEffect, useRef, Suspense } from 'react'
+import { Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Button } from '@/components/ui/Button'
-import { AuthShell, AuthSuccess } from '@/components/auth/AuthShell'
+import { connection } from 'next/server'
+import { authLabelsFor } from '@bitbaum/accountkit/auth'
+import { SignInForm } from '@/components/auth/AuthForms'
+import { aozMethods } from '@/lib/auth/methods'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
 import { LOGIN_LABELS } from '@/lib/constants/labels'
-import { BRAND } from '@/lib/config/brand'
+import { LoginForm } from './LoginForm'
 
-type LoginState =
-  | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'success'; type: 'staff' | 'resident'; message: string }
-  | { status: 'error'; message: string; needsVerification?: boolean }
-  | { status: 'resent' }
+type Props = { searchParams: Promise<{ from?: string; error?: string }> }
 
-type LoginMode = 'email' | 'code'
-
-function LoginForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  // Which door opens first is a brand flag. Invite links with ?code= still
-  // land on the code form so the invited person just presses Anmelden.
-  const [mode, setMode] = useState<LoginMode>(
-    searchParams.get('code') ? 'code' : BRAND.features.codeFirstLogin ? 'code' : 'email',
-  )
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [code, setCode] = useState('')
-  const [state, setState] = useState<LoginState>({ status: 'idle' })
-  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // A personal sign-in link (`/login?code=…`, also what invite emails send).
-  // The code IS the login — staff have no account to create — so the link
-  // signs in straight away instead of stopping at a prefilled form. Once only:
-  // a failed attempt leaves the form for a retry by hand.
-  const autoLoginTried = useRef(false)
-  useEffect(() => {
-    const urlCode = searchParams.get('code')
-    if (!urlCode) return
-    const normalized = urlCode.trim().toUpperCase()
-    setCode(normalized)
-    if (autoLoginTried.current) return
-    autoLoginTried.current = true
-    void submitLogin({ code: normalized })
-    // submitLogin is stable for this purpose; the guard above makes it once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams])
-
-  // Clear any pending redirect timer on unmount
-  useEffect(() => {
-    return () => {
-      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current)
-    }
-  }, [])
-
-  // Outcome banners from email flows (verification link, password reset).
-  // A failed shared verification link comes back to the same address with
-  // `error` added, so its presence overrides the `verified=1` it was sent with.
-  const verified = searchParams.get('error') ? '0' : searchParams.get('verified')
-  const resetDone = searchParams.get('reset') === '1'
-
-  function scheduleRedirect(role: 'staff' | 'resident') {
-    if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current)
-    redirectTimerRef.current = setTimeout(() => {
-      router.push(role === 'staff' ? '/' : '/portal')
-      router.refresh()
-    }, 1000)
-  }
-
-  async function submitLogin(body: Record<string, string>) {
-    setState({ status: 'loading' })
-
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-
-      const data = await response.json()
-
-      if (!data.success) {
-        setState({
-          status: 'error',
-          message: data.error || LOGIN_LABELS.error.generic,
-          needsVerification: data.needsVerification === true,
-        })
-        return
-      }
-
-      const successMessage =
-        data.type === 'staff' ? LOGIN_LABELS.success.staff : LOGIN_LABELS.success.resident
-
-      setState({ status: 'success', type: data.type, message: successMessage })
-      scheduleRedirect(data.type)
-    } catch {
-      setState({ status: 'error', message: LOGIN_LABELS.error.generic })
-    }
-  }
-
-  // Refused for an unconfirmed address: the way forward is on the same screen.
-  async function resendVerification() {
-    setState({ status: 'loading' })
-    try {
-      const response = await fetch('/api/auth/resend-verification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
-      })
-      const data = await response.json()
-      setState(
-        data.success
-          ? { status: 'resent' }
-          : { status: 'error', message: data.error || LOGIN_LABELS.error.generic },
-      )
-    } catch {
-      setState({ status: 'error', message: LOGIN_LABELS.error.generic })
-    }
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    if (mode === 'email') {
-      await submitLogin({ email: email.trim(), password })
-    } else {
-      await submitLogin({ code: code.trim() })
-    }
-  }
-
-  return (
-    <AuthShell
-      title={LOGIN_LABELS.title}
-      subtitle={mode === 'email' ? LOGIN_LABELS.subtitle : LOGIN_LABELS.codeSubtitle}
-    >
-      {state.status === 'success' ? (
-        <AuthSuccess message={state.message} detail={LOGIN_LABELS.success.redirecting} />
-      ) : (
-        <>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {verified === '1' && (
-              <div className="alert-success" role="status">
-                {LOGIN_LABELS.emailVerified}
-              </div>
-            )}
-            {verified === '0' && (
-              <div className="alert-warning" role="status">
-                {LOGIN_LABELS.emailVerifyFailed}
-              </div>
-            )}
-            {resetDone && (
-              <div className="alert-success" role="status">
-                {LOGIN_LABELS.passwordResetDone}
-              </div>
-            )}
-            {state.status === 'error' && (
-              <div className="alert-error" role="alert" aria-live="polite">
-                {state.message}
-                {state.needsVerification && (
-                  <button
-                    type="button"
-                    onClick={() => void resendVerification()}
-                    className="mt-2 block min-h-[44px] font-medium underline underline-offset-2"
-                  >
-                    {LOGIN_LABELS.resendVerification}
-                  </button>
-                )}
-              </div>
-            )}
-            {state.status === 'resent' && (
-              <div className="alert-success" role="status">
-                {LOGIN_LABELS.verificationResent}
-              </div>
-            )}
-
-            {mode === 'email' ? (
-              <>
-                <div>
-                  <label htmlFor="email" className="label">
-                    {LOGIN_LABELS.email}
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={LOGIN_LABELS.emailPlaceholder}
-                    required
-                    autoComplete="email"
-                    autoFocus
-                    className="input"
-                  />
-                </div>
-                <div>
-                  <div className="flex items-baseline justify-between">
-                    <label htmlFor="password" className="label">
-                      {LOGIN_LABELS.password}
-                    </label>
-                    {/* inline-flex + min-h so the tap target clears 44px without
-                      moving the label off the password row's baseline. */}
-                    <Link
-                      href="/forgot-password"
-                      className="inline-flex items-center min-h-[44px] text-xs text-ui-muted underline-offset-2 hover:text-ui-text hover:underline"
-                    >
-                      {LOGIN_LABELS.forgotPassword}
-                    </Link>
-                  </div>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="current-password"
-                    className="input"
-                  />
-                </div>
-              </>
-            ) : (
-              <div>
-                <label htmlFor="code" className="label">
-                  {LOGIN_LABELS.code}
-                </label>
-                <input
-                  type="text"
-                  id="code"
-                  name="code"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  placeholder={LOGIN_LABELS.codePlaceholder}
-                  required
-                  autoComplete="off"
-                  autoCapitalize="characters"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  inputMode="text"
-                  autoFocus={!searchParams.get('code')}
-                  className="input font-mono text-center text-lg tracking-wider"
-                />
-                <p className="mt-1.5 text-xs text-ui-muted">{LOGIN_LABELS.codeHint}</p>
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              disabled={state.status === 'loading'}
-              className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {state.status === 'loading' ? LOGIN_LABELS.submitting : LOGIN_LABELS.submit}
-            </Button>
-
-            {/* gap-x, not justify-between alone: inside the narrow auth card the two
-                items fill the line, and "Mit Code anmelden" ran straight into
-                "Noch kein Konto?" with nothing between them. */}
-            <div className="flex flex-wrap items-center justify-between gap-x-4 text-sm">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(mode === 'email' ? 'code' : 'email')
-                  setState({ status: 'idle' })
-                }}
-                className="min-h-[44px] text-ui-muted underline-offset-2 hover:text-ui-text hover:underline"
-              >
-                {mode === 'email' ? LOGIN_LABELS.useCode : LOGIN_LABELS.useEmail}
-              </button>
-              <span className="text-ui-muted">
-                {LOGIN_LABELS.noAccount}{' '}
-                <Link
-                  href="/register"
-                  className="inline-flex items-center min-h-[44px] font-medium text-ui-text underline underline-offset-2"
-                >
-                  {LOGIN_LABELS.registerLink}
-                </Link>
-              </span>
-            </div>
-          </form>
-        </>
-      )}
-
-      <p className="mt-6 text-center text-xs text-ui-muted">{LOGIN_LABELS.help}</p>
-    </AuthShell>
-  )
+/** Only a same-origin path, never `//host` or a full URL. */
+function landing(from: string | undefined): string {
+  return from && from.startsWith('/') && !from.startsWith('//') && !from.startsWith('/\\')
+    ? from
+    : '/'
 }
 
-export default function LoginPage() {
+/**
+ * Sign-in. With AUTH_RUNTIME=accountkit the email door is AccountKit's form
+ * with every method this deployment offers; it lands on `from`, or on `/`,
+ * which sends staff to their dashboard and residents to the portal (proxy.ts).
+ */
+export default async function LoginPage({ searchParams }: Props) {
+  // Which methods are offered is the box's env, read per request.
+  await connection()
+  const { from, error } = await searchParams
+  const accountkit = sharedAuthEnabled() ? (
+    <SignInForm
+      labels={authLabelsFor('de')}
+      methods={aozMethods()}
+      next={landing(from)}
+      signInPath="/login"
+      initialError={Boolean(error)}
+      signUpLink={
+        <Link
+          href="/register"
+          className="inline-flex items-center min-h-[44px] font-medium text-ui-text underline underline-offset-2"
+        >
+          {LOGIN_LABELS.registerLink}
+        </Link>
+      }
+    />
+  ) : undefined
   return (
     <Suspense>
-      <LoginForm />
+      <LoginForm accountkit={accountkit} />
     </Suspense>
   )
 }

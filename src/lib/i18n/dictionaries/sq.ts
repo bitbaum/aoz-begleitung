@@ -22,6 +22,10 @@ export const sq: Dictionary = {
   'nav.marketplace': 'Tregu',
   'nav.events': 'Ngjarjet',
   'nav.preferences': 'Cilësimet',
+  'nav.accountSecurity': 'Hyrja dhe siguria',
+  'accountSecurity.deletion':
+    'Qasja juaj lidhet me kodin tuaj personal. Vetëm personi juaj i kontaktit mund ta heqë.',
+  'accountSecurity.help': 'Ndihmë dhe kontakt',
   'nav.profile': 'Profili',
   'nav.transfer': 'Kërkesë për transferim',
   'nav.help': 'Ndihmë',

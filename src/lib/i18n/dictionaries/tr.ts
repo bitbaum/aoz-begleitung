@@ -36,6 +36,10 @@ export const tr: Dictionary = {
   'nav.marketplace': 'Pazar Yeri',
   'nav.events': 'Etkinlikler',
   'nav.preferences': 'Ayarlar',
+  'nav.accountSecurity': 'Giriş ve güvenlik',
+  'accountSecurity.deletion':
+    'Erişiminiz kişisel kodunuza bağlıdır. Onu yalnızca irtibat kişiniz kaldırabilir.',
+  'accountSecurity.help': 'Yardım ve iletişim',
   'nav.profile': 'Profil',
   'nav.transfer': 'Nakil talebi',
   'nav.help': 'Yardım',

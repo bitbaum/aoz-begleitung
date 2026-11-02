@@ -1,0 +1,87 @@
+name: Browser smoke
+# Every way into AOZ on AccountKit, in real Chromium, against the production
+# server and a real PostgreSQL built from the committed migrations plus the
+# cutover's import, with AUTH_RUNTIME=accountkit as on the switched box
+# (scripts/browser-smoke.mjs says what it checks). The fleet's shared-package
+# gate requires this workflow on any pull request that changes a shared
+# account package. Synthetic people only; no mail is sent.
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch: {}
+
+concurrency:
+  group: browser-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  every-way-in:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: aoz_smoke
+          POSTGRES_PASSWORD: aoz_smoke
+          POSTGRES_DB: aoz_smoke
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U aoz_smoke -d aoz_smoke"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://aoz_smoke:aoz_smoke@127.0.0.1:5432/aoz_smoke
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_TELEMETRY_DISABLED: '1'
+      SESSION_SECRET: synthetic-browser-smoke-session-secret-32chars
+      BETTER_AUTH_SECRET: synthetic-browser-smoke-secret-at-least-32-chars
+      AUTH_RUNTIME: accountkit
+      BASE_URL: http://localhost:3000
+      STAFF_EMAIL: smoke-staff@example.test
+      STAFF_PASSWORD: synthetic staff password
+      STAFF_CODE: AOZ-SMOKE01
+      RESIDENT_CODE: RES-SMOKE01
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      # setup-pnpm's default store nests inside its own bin dir (see ci.yml).
+      - run: pnpm config set store-dir ~/.pnpm-store --global
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply the committed migrations
+        run: pnpm run db:migrate
+      - run: pnpm run build
+      - name: Assemble the standalone server
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+      # People as AOZ's own sign-in left them, then the cutover's own import.
+      - name: Seed accounts from before the move, then import them
+        run: |
+          node scripts/ci/seed-legacy-accounts.mjs
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 --single-transaction -q -f scripts/db/accountkit-import.sql
+      - name: Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Every way in, on AccountKit's screens
+        run: |
+          (cd .next/standalone && PORT=3000 HOSTNAME=127.0.0.1 node server.js > ../../server.log 2>&1 &)
+          for i in $(seq 60); do curl -sf -o /dev/null http://localhost:3000/login && break; sleep 1; done
+          node scripts/browser-smoke.mjs
+      - name: Keep screenshots and the server log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: aoz-browser-smoke
+          path: |
+            browser-smoke-artifacts/
+            server.log
+          retention-days: 14
+          if-no-files-found: warn
