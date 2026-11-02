@@ -9,6 +9,7 @@ import {
   type PublicLocaleId,
 } from '@/lib/constants/labels/marketing'
 import { landingPath } from '@/lib/config/public-locales'
+import { LANDING_ROUTE } from '@/lib/auth/route-boundaries'
 
 /**
  * The language switcher for the pages you can read without an account.
@@ -38,7 +39,12 @@ export function PublicLanguageSwitcher() {
   // control is noise and the header is better without it.
   if (offered.length < 2) return null
 
-  const current = offered.find((locale) => landingPath(locale.id as PublicLocaleId) === pathname)
+  // A stranger at `/` is shown the default language's landing by a rewrite
+  // (proxy.ts, LANDING_ROUTE): the server renders it as that route, the browser
+  // still reads `/`. Both must name the same page, or the server's switcher
+  // meets a client that renders none and hydration fails (issue 361).
+  const page = pathname === '/' ? LANDING_ROUTE : pathname
+  const current = offered.find((locale) => landingPath(locale.id as PublicLocaleId) === page)
   if (!current) return null
 
   return (
