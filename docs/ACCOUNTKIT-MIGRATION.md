@@ -1,12 +1,16 @@
-# AccountKit migration staging
+# AccountKit migration
 
-The application still authenticates through its existing handlers and cookies.
-`AUTH_RUNTIME` is unset in every deployment, so nothing below the "Shared
-runtime" heading answers yet. The additive migrations
+AOZ answers every sign-in from AccountKit since the switch on 2026-11-02
+(loki `accountkit-switch.yml`, `aoz-begleitung switch`): a fresh backup was
+restored and rehearsed, 24 identities were imported under a stopped app,
+`AUTH_RUNTIME=accountkit` was set, an imported bcrypt account signed in on the
+public site, and the digest of every staff member's role, scope, admin flag,
+site reach and active flag was the same before and after. Everyone signed in
+under the legacy cookies signs in again once. The additive migrations
 `drizzle/0012_accountkit_identity_staging.sql` and
 `drizzle/0013_accountkit_session_scope.sql` create AccountKit's published
 tables, AOZ's `AccountIdentity` mapping and the per-session
-`AccountSessionScope`. They copy no credentials and switch no screen. The wider acceptance queue remains in
+`AccountSessionScope`. The wider acceptance queue remains in
 [Fleet's checkpoint](https://github.com/bitbaum/fleet/blob/main/docs/remediation-resume-2026-10-29.md).
 
 ## Rehearse the import
@@ -46,10 +50,10 @@ synthetic dual/password/invited/code-only accounts, exercise the real shared
 password runtime and recovery, and verify rollback and conflict rejection.
 They do not establish production migration or browser evidence.
 
-## Shared runtime (built, off)
+## Shared runtime
 
-With `AUTH_RUNTIME=accountkit` and `BETTER_AUTH_SECRET` set, the shared runtime
-in `src/lib/auth/shared/` serves every sign-in:
+With `AUTH_RUNTIME=accountkit` and `BETTER_AUTH_SECRET` set (the box, since the
+switch), the shared runtime in `src/lib/auth/shared/` serves every sign-in:
 
 - `runtime.ts` builds AccountKit with AOZ's mail (fleet mail-kit), the imported
   bcrypt hashes (`legacyBcrypt`), exact code login as a domain credential and
