@@ -111,6 +111,8 @@ export const SYSTEM_LINKS: NavItem[] = [
   // compatibility score (i.e. all of them), matching the page's own guard.
   { href: '/algorithm', icon: 'brain', label: 'Algorithmus', permission: 'dashboard:read' },
   { href: '/portal/help', icon: 'help', label: 'Hilfe' },
+  // Every staff member's own sign-in methods: password, passkeys, second factor.
+  { href: '/konto', icon: 'settings', label: 'Anmeldung & Sicherheit' },
 ]
 
 export function visibleSystemLinks(viewer: StaffCapabilities): NavItem[] {
@@ -486,6 +488,7 @@ export interface PortalNavItem {
     | 'reports'
     | 'complaints'
     | 'preferences'
+    | 'accountSecurity'
     | 'profile'
     | 'help'
     | 'transfer'
@@ -659,6 +662,8 @@ export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
   // to the person and follow them between flats.
   { href: '/portal/unterlagen', labelKey: 'documents', icon: 'clipboard', group: 'account' },
   { href: '/portal/preferences', labelKey: 'preferences', icon: 'wrench', group: 'account' },
+  // How I sign in: password, passkeys, a second factor (AccountKit's panel).
+  { href: '/portal/konto', labelKey: 'accountSecurity', icon: 'settings', group: 'account' },
   { href: '/portal/help', labelKey: 'help', icon: 'help', aozTab: 4, group: 'account' },
 ]
 

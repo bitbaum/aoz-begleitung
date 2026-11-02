@@ -36,6 +36,8 @@ export const STAFF_ROUTES = [
   // cannot open a page. Staff-only: an anonymous visitor has no role to
   // explain, and belongs at /login.
   '/kein-zugriff',
+  // A staff member's own sign-in methods (AccountKit's panel).
+  '/konto',
   '/learning',
   '/maintenance',
   '/marketplace',

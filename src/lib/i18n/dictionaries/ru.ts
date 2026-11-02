@@ -36,6 +36,10 @@ export const ru: Dictionary = {
   'nav.marketplace': 'Барахолка',
   'nav.events': 'Мероприятия',
   'nav.preferences': 'Настройки',
+  'nav.accountSecurity': 'Вход и безопасность',
+  'accountSecurity.deletion':
+    'Ваш доступ привязан к вашему личному коду. Удалить его может только ваше контактное лицо.',
+  'accountSecurity.help': 'Помощь и контакты',
   'nav.profile': 'Профиль',
   'nav.transfer': 'Заявка на переезд',
   'nav.help': 'Помощь',

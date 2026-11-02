@@ -32,6 +32,10 @@ export const de = {
   'nav.marketplace': 'Marktplatz',
   'nav.events': 'Veranstaltungen',
   'nav.preferences': 'Einstellungen',
+  'nav.accountSecurity': 'Anmeldung & Sicherheit',
+  'accountSecurity.deletion':
+    'Ihr Zugang gehört zu Ihrem persönlichen Code. Aufheben kann ihn nur Ihre Ansprechperson.',
+  'accountSecurity.help': 'Hilfe und Kontakt',
   'nav.profile': 'Profil',
   'nav.transfer': 'Verlegung',
   'nav.help': 'Hilfe',

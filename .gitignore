@@ -61,3 +61,4 @@ next-env.d.ts
 # committed. Shape: scripts/db/real/apartments.example.json; loader: load.ts.
 scripts/db/real/*.local.json
 scripts/db/real/*.local.ts
+browser-smoke-artifacts/

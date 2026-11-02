@@ -27,6 +27,10 @@ export const ar: Dictionary = {
   'nav.marketplace': 'السوق',
   'nav.events': 'الفعاليات',
   'nav.preferences': 'الإعدادات',
+  'nav.accountSecurity': 'تسجيل الدخول والأمان',
+  'accountSecurity.deletion':
+    'وصولك مرتبط برمزك الشخصي. لا يمكن إلغاؤه إلا من قبل الشخص المسؤول عنك.',
+  'accountSecurity.help': 'المساعدة والتواصل',
   'nav.profile': 'الملف الشخصي',
   'nav.transfer': 'طلب النقل',
   'nav.help': 'المساعدة',

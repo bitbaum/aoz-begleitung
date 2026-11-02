@@ -1,94 +1,44 @@
-'use client'
-
-import { useState, FormEvent } from 'react'
+import { connection } from 'next/server'
 import Link from 'next/link'
-import { Button } from '@/components/ui/Button'
-import { AuthShell, AuthSuccess } from '@/components/auth/AuthShell'
-import { LOGIN_LABELS, FORGOT_PASSWORD_LABELS } from '@/lib/constants/labels'
+import { authLabelsFor } from '@bitbaum/accountkit/auth'
+import { AuthShell } from '@/components/auth/AuthShell'
+import { aozMethods } from '@/lib/auth/methods'
+import { sharedAuthEnabled } from '@/lib/auth/shared/runtime'
+import { FORGOT_PASSWORD_LABELS } from '@/lib/constants/labels'
+import { LegacyForgotPassword } from './LegacyForgotPassword'
+import { RecoveryScreen } from './RecoveryScreen'
 
-type ForgotState =
-  | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'success' }
-  | { status: 'error'; message: string }
-
-export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('')
-  const [state, setState] = useState<ForgotState>({ status: 'idle' })
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setState({ status: 'loading' })
-
-    try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
-      })
-      const data = await response.json()
-
-      if (!data.success) {
-        setState({ status: 'error', message: data.error || LOGIN_LABELS.error.generic })
-        return
-      }
-
-      setState({ status: 'success' })
-    } catch {
-      setState({ status: 'error', message: LOGIN_LABELS.error.generic })
-    }
-  }
-
+/**
+ * "Passwort vergessen?": AccountKit's recovery form with the shared runtime on.
+ * The mailed link lands on /login, which sets the new password. Without
+ * account mail the page says so instead of pretending a link was sent.
+ */
+export default async function ForgotPasswordPage() {
+  await connection()
+  if (!sharedAuthEnabled()) return <LegacyForgotPassword />
+  const methods = aozMethods()
   return (
     <AuthShell title={FORGOT_PASSWORD_LABELS.title} subtitle={FORGOT_PASSWORD_LABELS.subtitle}>
-      {state.status === 'success' ? (
-        <AuthSuccess message={FORGOT_PASSWORD_LABELS.success} />
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {state.status === 'error' && (
-            <div className="alert-error" role="alert" aria-live="polite">
-              {state.message}
-            </div>
-          )}
-
-          <div>
-            <label htmlFor="email" className="label">
-              {LOGIN_LABELS.email}
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={LOGIN_LABELS.emailPlaceholder}
-              required
-              autoComplete="email"
-              autoFocus
-              className="input"
-            />
+      <div className="space-y-4">
+        {methods.passwordReset ? (
+          <RecoveryScreen
+            labels={authLabelsFor('de')}
+            methods={methods}
+            next="/"
+            signInPath="/login"
+          />
+        ) : (
+          <div className="alert-error" role="alert">
+            {FORGOT_PASSWORD_LABELS.unavailable}
           </div>
-
-          <Button
-            type="submit"
-            disabled={state.status === 'loading'}
-            className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {state.status === 'loading'
-              ? FORGOT_PASSWORD_LABELS.submitting
-              : FORGOT_PASSWORD_LABELS.submit}
-          </Button>
-        </form>
-      )}
-
-      <p className="mt-6 text-center text-sm">
+        )}
         <Link
           href="/login"
-          className="text-ui-muted underline-offset-2 hover:text-ui-text hover:underline"
+          className="inline-flex items-center min-h-[44px] text-sm text-ui-muted underline-offset-2 hover:text-ui-text hover:underline"
         >
           {FORGOT_PASSWORD_LABELS.backToLogin}
         </Link>
-      </p>
+      </div>
     </AuthShell>
   )
 }

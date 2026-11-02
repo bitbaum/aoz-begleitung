@@ -17,6 +17,10 @@ export const en: Dictionary = {
   'nav.marketplace': 'Marketplace',
   'nav.events': 'Events',
   'nav.preferences': 'Settings',
+  'nav.accountSecurity': 'Sign-in & security',
+  'accountSecurity.deletion':
+    'Your access belongs to your personal code. Only your contact person can remove it.',
+  'accountSecurity.help': 'Help and contact',
   'nav.profile': 'Profile',
   'nav.transfer': 'Transfer',
   'nav.help': 'Help',

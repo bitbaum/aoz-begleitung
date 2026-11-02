@@ -85,20 +85,46 @@ in `src/lib/auth/shared/` serves every sign-in:
 `accountkit-journeys.test.ts` run all of this on the committed migration chain
 and the real import SQL. Neither is deployed or browser evidence.
 
-## Before switching
+## AccountKit's own screens (with the runtime on)
 
-1. Stop legacy auth writes for the final snapshot; reconcile and import once
-   under transaction locks, then set `AUTH_RUNTIME=accountkit` and
-   `BETTER_AUTH_SECRET` together, so every credential writer switches at once.
-   Record counts and constraint checks without publishing account data. If the
-   import fails, roll back and keep the legacy deployment authoritative. A
-   rollback after shared password changes requires credential reconciliation;
-   it must not restore an older password hash.
-2. Everyone signed in under legacy auth is signed out by the switch: legacy
-   JWTs and resident cookies are no longer read. Say so to staff beforehand.
-3. Prove registration, invitations, linking, password/reset/verify, logout and
-   revocation, role/site changes, dual identities, code scope, impersonation and
-   local fallback against the deployed artifact with an approved test identity.
-   AccountKit's own account screens (passkeys, second factor, session list) and
-   configured providers are not yet offered to AOZ users. Then record exact
-   merge/deploy and journey evidence through the Fleet sweep.
+With `AUTH_RUNTIME=accountkit` the pages render AccountKit's components; with
+it off they are the legacy screens, so a rollback of the runtime is a rollback
+of the screens too.
+
+- `/login`: the email door is AccountKit's `SignInForm` with every method this
+  deployment offers (`src/lib/auth/methods.ts`): password, passkey, an email
+  sign-in link and recovery with mail, OrangeCat with `ORANGECAT_OAUTH_*`, the
+  shared bitbaum sign-in with `SIGNIN_*` once Morulia publishes a provider. The
+  code door stays AOZ's (a domain credential through the bridge), as does the
+  `/login?code=…` link. A sign-in lands on `from`, or on `/`, which sends staff
+  to their dashboard and residents to the portal.
+- `/forgot-password` is AccountKit's recovery form; its link, and old
+  `/reset-password?token=…` links, land on `/login`, which sets the password.
+- `/konto` (staff, in the user menu) and `/portal/konto` (residents, under
+  "Mein Konto") are AccountKit's `AccountPanel`: password, passkeys, a second
+  factor, linked sign-ins, sign-out. Names stay on `User` and `Resident`
+  (`ownProfile`). Nobody deletes their own login (`accountDeletion: false`):
+  identities are provisioned and retired by AOZ, and the panel says whom to ask.
+- `/register` (claiming a code) stays AOZ's screen over AccountKit's
+  provisioning: AccountKit has no claim or code screen yet
+  ([accountkit#67](https://github.com/bitbaum/accountkit/issues/67)).
+- With mail, an unconfirmed address is still refused at sign-in
+  (`emailConfirmation: 'before-sign-in'`). A code sign-in is refused for anyone
+  with a second factor enrolled, and a code session cannot change account
+  security (AccountKit's domain-credential rules).
+
+## The switch
+
+It runs on the box through loki's `accountkit-switch.yml`
+(`scripts/hetzner/accountkit-cutover.sh`), never by hand: `rehearse` restores
+last night's dump into a temporary database, runs the import there with a
+throwaway account, prints counts and drops it (the restore proof of the
+backup); `switch` takes a fresh dump, rehearses it, stops the app for the
+import, sets `AUTH_RUNTIME=accountkit` and proves on the public site that an
+imported bcrypt account signs in and that the staff role digest is unchanged;
+`rollback` empties `AUTH_RUNTIME` and restarts, and never empties a table.
+Everyone signed in under the legacy cookies signs in again once.
+
+A rollback after people changed passwords, added passkeys or set a second
+factor through AccountKit needs credential reconciliation: those exist only in
+the shared tables. It must not restore an older password hash.

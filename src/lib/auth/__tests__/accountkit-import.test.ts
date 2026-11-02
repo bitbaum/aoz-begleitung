@@ -166,6 +166,8 @@ test('real shared runtime reads imported hashes and stable ids; reset revokes it
       site: { url: origin, title: 'Synthetic migration', slug: 'aoz-import' },
       database: drizzle(pg, { schema: authSchema }),
       legacyBcrypt: bcrypt,
+      // AOZ's own rule (src/lib/auth/shared/runtime.ts): with mail, confirm first.
+      emailConfirmation: 'before-sign-in',
       env: {
         NODE_ENV: 'production',
         BETTER_AUTH_SECRET: 'synthetic-rehearsal-secret-at-least-32-characters',

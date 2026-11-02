@@ -19,6 +19,10 @@ export const fa: Dictionary = {
   'nav.marketplace': 'بازار',
   'nav.events': 'رویدادها',
   'nav.preferences': 'تنظیمات',
+  'nav.accountSecurity': 'ورود و امنیت',
+  'accountSecurity.deletion':
+    'دسترسی شما به کد شخصی‌تان وابسته است. فقط فرد رابط شما می‌تواند آن را حذف کند.',
+  'accountSecurity.help': 'راهنما و تماس',
   'nav.profile': 'نمایه',
   'nav.transfer': 'جابه‌جایی',
   'nav.help': 'راهنما',

@@ -40,6 +40,11 @@ const SESSION_IS_ENOUGH = new Set([
   // The permission-denied page itself. Requiring a permission to be told you
   // lack a permission is a redirect loop.
   'kein-zugriff/page.tsx',
+  // Every staff member's OWN sign-in methods, read from their own shared
+  // session: nobody else's account appears, and nothing about the product is
+  // administered here. A second-factor secret is shown only to the person
+  // setting it up, after their password.
+  'konto/page.tsx',
   // The dashboard composes from per-area queries that each apply their own
   // boundary; it is the landing page every staff member must reach.
   'page.tsx',
