@@ -2,9 +2,12 @@
 
 import {
   AccountPanel as SharedAccountPanel,
+  ClaimForm as SharedClaimForm,
   PasswordRecoveryForm,
   SignInForm as SharedSignInForm,
   type AuthClasses,
+  type ClaimProof,
+  type CodeDoor,
 } from '@bitbaum/accountkit/auth/react'
 // Types only: the runtime half of this entry point pulls in node:crypto.
 import type { AuthLabels, SignInMethods } from '@bitbaum/accountkit/auth'
@@ -40,8 +43,21 @@ type Common = {
   signInPath: string
 }
 
-export function SignInForm(props: Common & { initialError: boolean; signUpLink: ReactNode }) {
+export function SignInForm(
+  props: Common & { initialError: boolean; signUpLink: ReactNode; codeDoor?: CodeDoor },
+) {
   return <SharedSignInForm {...props} client={authClient} classes={AUTH_CLASSES} />
+}
+
+/** Claiming a code or a claim link: an email and a first password (AccountKit's ClaimForm). */
+export function ClaimForm(
+  props: Omit<Common, 'methods'> & {
+    methods: SignInMethods
+    signInLink: ReactNode
+    proof: ClaimProof
+  },
+) {
+  return <SharedClaimForm {...props} client={authClient} classes={AUTH_CLASSES} />
 }
 
 export function RecoveryForm(

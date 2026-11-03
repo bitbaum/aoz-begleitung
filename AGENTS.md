@@ -1505,10 +1505,10 @@ One email namespace across the whole product, because there is exactly one
 
 ### Flows
 
-With `AUTH_RUNTIME=accountkit` (the switched box), `/login`'s email door,
-`/forgot-password` and the account pages `/konto` and `/portal/konto` are
-AccountKit's own screens; the code door and `/register` stay AOZ's, over
-AccountKit's endpoints. `docs/ACCOUNTKIT-MIGRATION.md` is the SSOT. The table
+With `AUTH_RUNTIME=accountkit` (the switched box), every sign-in screen is
+AccountKit's own: `/login` (with AOZ's code as its code door), `/register` and
+`/claim` (its `ClaimForm`), `/forgot-password`, and the account pages `/konto`
+and `/portal/konto`. `docs/ACCOUNTKIT-MIGRATION.md` is the SSOT. The table
 below is the legacy runtime's, kept for a rollback.
 
 ```

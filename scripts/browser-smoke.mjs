@@ -30,7 +30,7 @@ import { authLabelsFor } from '@bitbaum/accountkit/auth'
 const BASE = process.env.BASE_URL ?? 'http://localhost:3000'
 const L = authLabelsFor('de')
 const OUT = 'browser-smoke-artifacts'
-const { STAFF_EMAIL, STAFF_PASSWORD, STAFF_CODE, RESIDENT_CODE } = process.env
+const { STAFF_EMAIL, STAFF_PASSWORD, STAFF_CODE, RESIDENT_CODE, CLAIM_CODE } = process.env
 const TIMEOUT = 30_000
 const EIGHT_HOURS = 8 * 60 * 60 * 1000
 const EXPECT = {
@@ -39,7 +39,8 @@ const EXPECT = {
 }
 // AOZ's own words (src/lib/constants/labels/auth.ts).
 const USE_CODE = 'Mit Code anmelden'
-const CODE_SUBMIT = 'Anmelden'
+const CODE_LABEL = 'Zugangscode'
+const CLAIM_SUBMIT = { ...authLabelsFor('en').claim, ...L.claim }.submit
 const ASK_INSTEAD = 'Ihr Zugang gehört zu Ihrem persönlichen Code.'
 
 const shot = (page, name) =>
@@ -61,11 +62,12 @@ async function emailSignIn(page, email, password) {
   await button(page, L.signIn).click()
 }
 
+/** AccountKit's code door, in AOZ's words for its personal code. */
 async function codeSignIn(page, code) {
   await page.goto(`${BASE}/login`)
   await button(page, USE_CODE).click()
-  await page.locator('#code').fill(code)
-  await page.locator('form').getByRole('button', { name: CODE_SUBMIT, exact: true }).click()
+  await page.getByLabel(CODE_LABEL, { exact: true }).fill(code.toLowerCase())
+  await button(page, L.signIn).click()
 }
 
 await mkdir(OUT, { recursive: true })
@@ -75,8 +77,8 @@ const browser = await chromium.launch(
 let page
 
 try {
-  if (!STAFF_EMAIL || !STAFF_PASSWORD || !STAFF_CODE || !RESIDENT_CODE) {
-    throw new Error('set STAFF_EMAIL, STAFF_PASSWORD, STAFF_CODE and RESIDENT_CODE')
+  if (!STAFF_EMAIL || !STAFF_PASSWORD || !STAFF_CODE || !RESIDENT_CODE || !CLAIM_CODE) {
+    throw new Error('set STAFF_EMAIL, STAFF_PASSWORD, STAFF_CODE, RESIDENT_CODE and CLAIM_CODE')
   }
 
   // ── The sign-in pages at phone widths ──────────────────────────────────
@@ -170,6 +172,31 @@ try {
   await byCode.waitForURL((u) => u.pathname === '/', { timeout: TIMEOUT })
   check((await shared(byCode))?.user !== undefined, 'a staff code still opens the dashboard')
   await byCode.close()
+
+  // ── A personal link: /login?code=… signs in at once ────────────────────
+  const linked = await (await browser.newContext()).newPage()
+  await linked.goto(`${BASE}/login?code=${RESIDENT_CODE.toLowerCase()}`)
+  await linked.waitForURL((u) => u.pathname.startsWith('/portal'), { timeout: TIMEOUT })
+  check(!linked.url().includes('code='), 'a personal link signs in and leaves the address bar')
+  await linked.close()
+
+  // ── Claiming a code: AccountKit's ClaimForm on /register ───────────────
+  const claimer = await (await browser.newContext()).newPage()
+  await claimer.goto(`${BASE}/register?code=${CLAIM_CODE}`)
+  check(
+    (await claimer.getByLabel(CODE_LABEL, { exact: true }).inputValue()) === CLAIM_CODE,
+    "an invitation's code is filled in",
+  )
+  await claimer.getByLabel(L.email, { exact: true }).fill('smoke-claim@example.test')
+  await claimer.locator('#acct-password').fill('synthetic claim password')
+  await button(claimer, CLAIM_SUBMIT).click()
+  await claimer.waitForURL((u) => u.pathname === '/', { timeout: TIMEOUT })
+  check(
+    (await shared(claimer))?.user?.email === 'smoke-claim@example.test',
+    'claiming a code sets a first password and signs in',
+  )
+  await shot(claimer, 'claimed')
+  await claimer.close()
 
   check(pageErrors.length === 0, `no uncaught page errors (${pageErrors.join(' | ')})`)
 } catch (error) {

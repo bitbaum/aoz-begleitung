@@ -46,6 +46,7 @@ jobs:
       STAFF_PASSWORD: synthetic staff password
       STAFF_CODE: AOZ-SMOKE01
       RESIDENT_CODE: RES-SMOKE01
+      CLAIM_CODE: AOZ-SMOKE02
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

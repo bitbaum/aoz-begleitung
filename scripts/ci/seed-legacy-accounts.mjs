@@ -12,9 +12,19 @@
 import bcrypt from 'bcryptjs'
 import pg from 'pg'
 
-const { DATABASE_URL, STAFF_EMAIL, STAFF_PASSWORD, STAFF_CODE, RESIDENT_CODE } = process.env
-if (!DATABASE_URL || !STAFF_EMAIL || !STAFF_PASSWORD || !STAFF_CODE || !RESIDENT_CODE) {
-  console.error('set DATABASE_URL, STAFF_EMAIL, STAFF_PASSWORD, STAFF_CODE and RESIDENT_CODE')
+const { DATABASE_URL, STAFF_EMAIL, STAFF_PASSWORD, STAFF_CODE, RESIDENT_CODE, CLAIM_CODE } =
+  process.env
+if (
+  !DATABASE_URL ||
+  !STAFF_EMAIL ||
+  !STAFF_PASSWORD ||
+  !STAFF_CODE ||
+  !RESIDENT_CODE ||
+  !CLAIM_CODE
+) {
+  console.error(
+    'set DATABASE_URL, STAFF_EMAIL, STAFF_PASSWORD, STAFF_CODE, RESIDENT_CODE and CLAIM_CODE',
+  )
   process.exit(2)
 }
 const client = new pg.Client({ connectionString: DATABASE_URL })
@@ -40,7 +50,13 @@ try {
        'MODERATE', 'NON_SMOKER', 'NONE', 3, false)`,
     [RESIDENT_CODE],
   )
-  console.log('seeded 1 staff account (code + bcrypt) and 1 resident (code)')
+  // A colleague with a code and no account yet: the smoke claims it.
+  await client.query(
+    `INSERT INTO "User" (id, "updatedAt", name, code, active, "isSystemAdmin", scope, "siteAccess")
+     VALUES ('smoke-claim', now(), 'Smoke Claim', $1, true, false, 'OWN_DOMAIN', 'ALL_UNITS')`,
+    [CLAIM_CODE],
+  )
+  console.log('seeded 1 staff account (code + bcrypt), 1 resident (code), 1 code to claim')
 } finally {
   await client.end()
 }

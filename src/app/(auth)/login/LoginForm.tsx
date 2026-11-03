@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent, useEffect, useRef, type ReactNode } from 'react'
+import { useState, FormEvent, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
@@ -18,13 +18,10 @@ type LoginState =
 type LoginMode = 'email' | 'code'
 
 /**
- * AOZ's sign-in. Two doors: an email (with AUTH_RUNTIME=accountkit, AccountKit's
- * own SignInForm: password, passkey, an email link, OrangeCat, the bitbaum
- * sign-in) and a personal code, which stays AOZ's and reaches AccountKit as a
- * domain credential through the bridge. `accountkit` is that form, rendered
- * by the page; without it the email door is the legacy form below.
+ * The legacy sign-in, served while AUTH_RUNTIME is not accountkit (a rollback).
+ * With the shared runtime on, the page renders AccountKit's SignInForm instead.
  */
-export function LoginForm({ accountkit }: { accountkit?: ReactNode }) {
+export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   // Which door opens first is a brand flag. Invite links with ?code= still
@@ -134,39 +131,6 @@ export function LoginForm({ accountkit }: { accountkit?: ReactNode }) {
     } else {
       await submitLogin({ code: code.trim() })
     }
-  }
-
-  if (accountkit && mode === 'email' && state.status !== 'success') {
-    return (
-      <AuthShell title={LOGIN_LABELS.title} subtitle={LOGIN_LABELS.subtitle}>
-        <div className="space-y-4">
-          {verified === '1' && (
-            <div className="alert-success" role="status">
-              {LOGIN_LABELS.emailVerified}
-            </div>
-          )}
-          {verified === '0' && (
-            <div className="alert-warning" role="status">
-              {LOGIN_LABELS.emailVerifyFailed}
-            </div>
-          )}
-          {accountkit}
-          <div className="flex flex-wrap items-center justify-between gap-x-4 text-sm">
-            <button
-              type="button"
-              onClick={() => {
-                setMode('code')
-                setState({ status: 'idle' })
-              }}
-              className="min-h-[44px] text-ui-muted underline-offset-2 hover:text-ui-text hover:underline"
-            >
-              {LOGIN_LABELS.useCode}
-            </button>
-          </div>
-        </div>
-        <p className="mt-6 text-center text-xs text-ui-muted">{LOGIN_LABELS.help}</p>
-      </AuthShell>
-    )
   }
 
   return (
