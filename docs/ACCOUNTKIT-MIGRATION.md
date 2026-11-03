@@ -95,13 +95,14 @@ With `AUTH_RUNTIME=accountkit` the pages render AccountKit's components; with
 it off they are the legacy screens, so a rollback of the runtime is a rollback
 of the screens too.
 
-- `/login`: the email door is AccountKit's `SignInForm` with every method this
-  deployment offers (`src/lib/auth/methods.ts`): password, passkey, an email
-  sign-in link and recovery with mail, OrangeCat with `ORANGECAT_OAUTH_*`, the
-  shared bitbaum sign-in with `SIGNIN_*` once Morulia publishes a provider. The
-  code door stays AOZ's (a domain credential through the bridge), as does the
-  `/login?code=…` link. A sign-in lands on `from`, or on `/`, which sends staff
-  to their dashboard and residents to the portal.
+- `/login` is AccountKit's `SignInForm` with every method this deployment
+  offers (`src/lib/auth/methods.ts`): password, passkey, an email sign-in link
+  and recovery with mail, OrangeCat with `ORANGECAT_OAUTH_*`, the shared bitbaum
+  sign-in with `SIGNIN_*` once Morulia publishes a provider, and AOZ's personal
+  code as its `codeDoor` (a domain credential, `/sign-in/domain`). The
+  invitations' `/login?code=…` link signs in at once and leaves the address
+  bar. A sign-in lands on `from`, or on `/`, which sends staff to their
+  dashboard and residents to the portal.
 - `/forgot-password` is AccountKit's recovery form; its link, and old
   `/reset-password?token=…` links, land on `/login`, which sets the password.
 - `/konto` (staff, in the user menu) and `/portal/konto` (residents, under
@@ -109,9 +110,10 @@ of the screens too.
   factor, linked sign-ins, sign-out. Names stay on `User` and `Resident`
   (`ownProfile`). Nobody deletes their own login (`accountDeletion: false`):
   identities are provisioned and retired by AOZ, and the panel says whom to ask.
-- `/register` (claiming a code) stays AOZ's screen over AccountKit's
-  provisioning: AccountKit has no claim or code screen yet
-  ([accountkit#67](https://github.com/bitbaum/accountkit/issues/67)).
+- `/register` (claiming a code; an invitation's `?code=` fills it in) and
+  `/claim?token=…` (a claim link, checked first and greeting the colleague by
+  name) are AccountKit's `ClaimForm`, resolved by AOZ's provisioning
+  (`CLAIM_PROOF` in `src/lib/auth/shared/runtime.ts`).
 - With mail, an unconfirmed address is still refused at sign-in
   (`emailConfirmation: 'before-sign-in'`). A code sign-in is refused for anyone
   with a second factor enrolled, and a code session cannot change account

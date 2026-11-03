@@ -13,8 +13,8 @@ importers:
   .:
     dependencies:
       '@bitbaum/accountkit':
-        specifier: ^0.26.1
-        version: 0.26.1(954de71e8f5fdaadcc46ce7e98c5ae90)
+        specifier: ^0.27.0
+        version: 0.27.0(954de71e8f5fdaadcc46ce7e98c5ae90)
       '@bitbaum/ai-kit':
         specifier: ^1.24.0
         version: 1.24.0(react@19.3.1)
@@ -37,8 +37,8 @@ importers:
         specifier: ^0.2.3
         version: 0.2.3(react@19.3.1)
       '@bitbaum/sitekit':
-        specifier: ^0.5.0
-        version: 0.5.0(react@19.3.1)
+        specifier: ^0.5.1
+        version: 0.5.1(react@19.3.1)
       '@bitbaum/whenkit':
         specifier: ^0.3.3
         version: 0.3.3(react@19.3.1)
@@ -394,8 +394,8 @@ packages:
   '@better-fetch/fetch@1.3.3':
     resolution: {integrity: sha512-U6SlDt/GUWtK2JAxS/NhdoYTEim+EL1G5byz2TUj83KjLZBUpYzb5SmX0aXaCnbGkAjFKnV/o/0+cyXMbEcqqg==}
 
-  '@bitbaum/accountkit@0.26.1':
-    resolution: {integrity: sha512-eVl3vfUWPqXq54rQx2HIrAbJ55xcVk9mD3yUOYgkjynMIPKvcLv39RAckqlWV2Xg/N5OaY/ijIKfHjbozVnNrA==}
+  '@bitbaum/accountkit@0.27.0':
+    resolution: {integrity: sha512-5dBGE8va8x6qnZGKTGDPu72w9b3/MqTGZG+BpsynQ05MF1FsEcN3EkYNXQhZshpjW139qyG9CTym/jFLVP8ilA==}
     engines: {node: '>=20'}
     hasBin: true
     peerDependencies:
@@ -460,8 +460,8 @@ packages:
       react:
         optional: true
 
-  '@bitbaum/sitekit@0.5.0':
-    resolution: {integrity: sha512-73t+j8cYrxQzjMfwSmJJHp/1zHpfK4sUQvPgKaWYpLPEv4aqXudPeGzrIQHMBqCjQqLA6IxOSPT8/BEOfIWaRA==}
+  '@bitbaum/sitekit@0.5.1':
+    resolution: {integrity: sha512-BaXFT3C+TXEmBwbMmgaRVJ2bENn3YbCKXA3aE9HGaOXk7u6Yfs0wgGwy1upWimeEh/PFiXnVVvFr4M/uzOzwbw==}
     engines: {node: '>=20'}
     peerDependencies:
       react: '>=18'
@@ -5478,7 +5478,7 @@ snapshots:
 
   '@better-fetch/fetch@1.3.3': {}
 
-  '@bitbaum/accountkit@0.26.1(954de71e8f5fdaadcc46ce7e98c5ae90)':
+  '@bitbaum/accountkit@0.27.0(954de71e8f5fdaadcc46ce7e98c5ae90)':
     dependencies:
       '@noble/curves': 2.4.0
       '@scure/base': 2.4.0
@@ -5522,7 +5522,7 @@ snapshots:
     optionalDependencies:
       react: 19.3.1
 
-  '@bitbaum/sitekit@0.5.0(react@19.3.1)':
+  '@bitbaum/sitekit@0.5.1(react@19.3.1)':
     dependencies:
       react: 19.3.1
       zod: 4.6.7
