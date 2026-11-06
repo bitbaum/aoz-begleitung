@@ -37,8 +37,8 @@ importers:
         specifier: ^0.2.3
         version: 0.2.3(react@19.3.1)
       '@bitbaum/sitekit':
-        specifier: ^0.6.1
-        version: 0.6.1(react@19.3.1)
+        specifier: ^0.7.0
+        version: 0.7.0(react@19.3.1)
       '@bitbaum/whenkit':
         specifier: ^0.3.3
         version: 0.3.3(react@19.3.1)
@@ -460,8 +460,8 @@ packages:
       react:
         optional: true
 
-  '@bitbaum/sitekit@0.6.1':
-    resolution: {integrity: sha512-2Yjz69kn+mAZpSYdBTlpmr+MPBljBYSVOWW+gSyH3XuMonHoaDAi523QvVEKUAp3BUuItnslrIfg75xUpIPVig==}
+  '@bitbaum/sitekit@0.7.0':
+    resolution: {integrity: sha512-FG1CzAvhR1yXGKPtKbQdpHhK44r2ULClhWY8A5zXf94k/ub/+Mfhyb0lk/vBTdJmROu+sOM6f0xXiEFhmZHkzg==}
     engines: {node: '>=20'}
     peerDependencies:
       react: '>=18'
@@ -5522,7 +5522,7 @@ snapshots:
     optionalDependencies:
       react: 19.3.1
 
-  '@bitbaum/sitekit@0.6.1(react@19.3.1)':
+  '@bitbaum/sitekit@0.7.0(react@19.3.1)':
     dependencies:
       react: 19.3.1
       zod: 4.6.7
