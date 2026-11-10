@@ -10,31 +10,15 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 
-# pnpm refuses packages published within its minimum-release-age window — a
-# supply-chain guard against a compromised release being installed before
-# anyone notices. @bitbaum/ai-kit 0.6.2 is our own package, published to npm
-# the day before this commit, so it needs an explicit exemption.
-#
-# Temporary: once 0.6.2 is older than the window this entry is redundant and
-# should be deleted. Add lines only for versions we published ourselves —
-# never to hurry along a third-party package.
+# Our own packages are published by our own tagged workflows; minimumReleaseAge
+# would refuse each fresh publish until it ages. One scope glob covers every
+# @bitbaum package; the four unscoped ones are named (fleet SHARED.md).
 minimumReleaseAgeExclude:
-  - '@bitbaum/chatkit'
-  - '@bitbaum/ai-kit'
-  # @bitbaum/mail-kit 0.1.0 is likewise our own package, published 2026-09-05.
-  - '@bitbaum/mail-kit'
-  # bip-kit is our own package too; each release is days old when adopted.
-  - 'bip-kit'
-  - '@bitbaum/accountkit'
-  # ai-forms is ours as well (the form assistant); releases ship same-day.
-  - 'ai-forms'
-  - limitkit@0.2.1
-  - '@bitbaum/chartkit@0.6.0 || 0.7.0'
-  - '@bitbaum/whenkit@0.3.3'
-  - '@bitbaum/listkit@0.2.2'
-  - '@bitbaum/searchkit@0.2.3'
-  - '@bitbaum/design-tokens@1.4.0 || 1.5.1 || 1.5.2'
-  - '@bitbaum/sitekit@0.5.0 || 0.5.1 || 0.6.1 || 0.7.0'
+  - '@bitbaum/*'
+  - limitkit
+  - bip-kit
+  - threadkit
+  - ai-forms
 
 # Security floors within the parent packages' supported major ranges. Remove
 # these when upstream minimums exclude the vulnerable releases (audit must pass).
