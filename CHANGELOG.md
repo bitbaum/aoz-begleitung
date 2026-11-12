@@ -9,7 +9,16 @@ Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
 last_modified_date: 2026-11-12
-last_modified_summary: Landing page claims match the deployment; Impressum and privacy statement on the public site.
+last_modified_summary: Published login codes are refused; landing page claims match the deployment; Impressum and privacy statement on the public site.
+
+## 2026-11-12 — Published login codes are refused
+
+- Login codes that were printed in this public repository (the admin seed
+  default, a legacy demo code, a code quoted in a comment) no longer open
+  anything: sign-in, account registration and claim refuse them. The accounts
+  themselves are unchanged and sign in with e-mail and password.
+- `db:seed:admin` has no default code any more; it generates a random one and
+  prints it once.
 
 ## 2026-11-12 — Real team list out of the public repository
 

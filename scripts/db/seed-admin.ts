@@ -4,31 +4,31 @@
  * Usage:
  *   pnpm run db:seed:admin
  *
- * Or with custom code:
- *   ADMIN_CODE=AOCH-CUSTOM pnpm run db:seed:admin
+ * Without ADMIN_CODE a random code is generated and printed once. There is no
+ * default code: the old default was published in this repository, so anyone
+ * could sign in with it, and the login now refuses it (published-codes.ts).
  */
 
 import { eq } from 'drizzle-orm'
 import { db, user, account } from '@/lib/db'
 import { BRAND } from '@/lib/config/brand'
 import { WIDEST_CAPABILITIES } from '@/lib/auth/role-policy'
+import { generateStaffCode } from '@/lib/auth/code-generation'
+import { isPublishedCode } from '@/lib/auth/published-codes'
 
-// Derived from the active brand — a rebrand must not silently orphan the seeded
-// admin, which is exactly what happened when the default moved to AOCH.
-const ADMIN_CODE = process.env.ADMIN_CODE || `${BRAND.codePrefix}ADMIN1`
+// Random unless given, with the active brand's prefix. Never a fixed default.
+const ADMIN_CODE = process.env.ADMIN_CODE?.trim() || generateStaffCode()
 const ADMIN_NAME = process.env.ADMIN_NAME || 'Administrator'
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@aoz.ch'
 
-function generateStaffCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let code = BRAND.codePrefix
-  for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)]
-  }
-  return code
-}
-
 async function main() {
+  if (isPublishedCode(ADMIN_CODE)) {
+    throw new Error(
+      'ADMIN_CODE is a code that was published in this repository; the login refuses it. ' +
+        'Unset ADMIN_CODE to have a random one generated.',
+    )
+  }
+
   console.log('Creating admin user...')
 
   // Check if admin already exists by code

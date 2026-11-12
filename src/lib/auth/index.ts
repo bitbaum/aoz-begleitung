@@ -33,6 +33,7 @@ import type { SiteCapabilities } from './site-access'
 import { IMPERSONATION_CLAIM } from './impersonation'
 import { ERROR_MESSAGES } from '@/lib/constants/error-messages'
 import { sharedAuthEnabled } from './shared/runtime'
+import { isPublishedCode } from './published-codes'
 import { endSharedSession, getSharedIdentities } from './shared/session'
 
 // Re-export types
@@ -295,6 +296,12 @@ export async function isAuthenticated(): Promise<boolean> {
  * changes meaning.
  */
 export async function loginByCode(code: string, clientIp: string): Promise<LoginByCodeResult> {
+  // A code that was published is not a credential. @see published-codes.ts
+  if (isPublishedCode(code)) {
+    recordLoginAttempt(clientIp)
+    return { success: false, error: 'Ungültiger Code' }
+  }
+
   if (ALL_CODE_PREFIXES.some((prefix) => code.startsWith(prefix))) {
     // Staff login
     const staff = await db.query.user.findFirst({

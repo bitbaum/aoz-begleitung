@@ -42,7 +42,7 @@ const answeredApp = (stage: ApplicationStageId): JobApplicationInput => ({
 
 const client = (over: Partial<JobClientInput> = {}): JobClientInput => ({
   residentId: 'r1',
-  name: 'George B',
+  name: 'Alex B',
   createdAt: daysAgo(1),
   learningRecords: [],
   applications: [],
@@ -58,18 +58,18 @@ describe('the production case this was built from', () => {
    * queue, and a Jobcoach holds none of those permissions.
    */
   it('a newly registered job-seeker with nothing arranged is not "nothing to do"', () => {
-    const george = client({ createdAt: daysAgo(NO_CONTACT_GRACE_DAYS + 1) })
-    const queue = buildJobQueue([george], NOW)
+    const waiting = client({ createdAt: daysAgo(NO_CONTACT_GRACE_DAYS + 1) })
+    const queue = buildJobQueue([waiting], NOW)
 
     expect(queue.length).toBeGreaterThan(0)
-    expect(queue[0]).toMatchObject({ residentId: 'r1', name: 'George B' })
+    expect(queue[0]).toMatchObject({ residentId: 'r1', name: 'Alex B' })
   })
 
   it('names the person, so the dashboard can too', () => {
     // The old screen did not mention the client at all. A count alone would
     // reproduce that: "1 Aufgabe" tells a coach nothing about whom.
     const queue = buildJobQueue([client({ createdAt: daysAgo(30) })], NOW)
-    expect(queue.every((row) => row.name === 'George B')).toBe(true)
+    expect(queue.every((row) => row.name === 'Alex B')).toBe(true)
   })
 })
 

@@ -444,7 +444,7 @@ describe('the hero and the header cannot disagree', () => {
    */
   const jobRow = {
     residentId: 'r1',
-    name: 'George B',
+    name: 'Alex B',
     signal: 'NO_LABOUR_MARKET_CONTACT' as const,
     opportunityId: null,
   }
@@ -456,7 +456,7 @@ describe('the hero and the header cannot disagree', () => {
 
   it('names the client rather than a bare count', () => {
     const result = determinePrimaryAction({ ...EMPTY, jobQueue: [jobRow] })
-    expect(result.description).toContain('George B')
+    expect(result.description).toContain('Alex B')
   })
 
   it('still yields to a critical incident', () => {
@@ -525,7 +525,7 @@ describe('the hero follows the viewer desk', () => {
   /**
    * Live, 2026-10-02: Stepan pressed «Ich habe Interesse». The Jobcoach and
    * Freiwilligenarbeit dashboards counted it under "Wartet auf eine Antwort",
-   * while «Als Nächstes» named Georgy for "Noch kein Arbeitsmarktkontakt" —
+   * while «Als Nächstes» named Alex for "Noch kein Arbeitsmarktkontakt" —
    * because Stepan is on nobody's seat, so he reached the hero only through
    * `applications`, which the desks ranked BELOW their caseload queue.
    */
@@ -536,7 +536,7 @@ describe('the hero follows the viewer desk', () => {
         jobQueue: [
           {
             residentId: 'g1',
-            name: 'Georgy',
+            name: 'Alex',
             signal: 'NO_LABOUR_MARKET_CONTACT',
             opportunityId: null,
           },
@@ -547,7 +547,7 @@ describe('the hero follows the viewer desk', () => {
       'FREIWILLIGENARBEIT',
       {
         volunteeringQueue: [
-          { residentId: 'g1', name: 'Georgy', signal: 'NO_ENGAGEMENT', opportunityId: null },
+          { residentId: 'g1', name: 'Alex', signal: 'NO_ENGAGEMENT', opportunityId: null },
         ],
       },
     ],

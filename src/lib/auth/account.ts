@@ -22,6 +22,7 @@ import { ALL_RESIDENT_CODE_PREFIXES } from '@/lib/auth/code-prefixes'
 import { db, account, user, resident } from '@/lib/db'
 import { eq, type SQL } from 'drizzle-orm'
 import { hashPassword, verifyPassword } from './passwords'
+import { isPublishedCode } from './published-codes'
 import { createAuthToken, consumeAuthToken } from './tokens'
 import { sendEmail } from '@/lib/email/service'
 import { verifyEmailEmail, passwordResetEmail } from '@/lib/email/templates'
@@ -108,6 +109,9 @@ type CodeIdentity =
 
 /** Resolve a login code to the identity it names. */
 async function findIdentityByCode(code: string): Promise<CodeIdentity | null> {
+  // A published code names nobody. @see ./published-codes.ts
+  if (isPublishedCode(code)) return null
+
   if (ALL_CODE_PREFIXES.some((prefix) => code.startsWith(prefix))) {
     const staff = await db.query.user.findFirst({
       where: eq(user.code, code),

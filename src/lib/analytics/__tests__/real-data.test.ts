@@ -15,7 +15,7 @@ describe('which rows belong to the pilot', () => {
   })
 
   it('keeps a real row', () => {
-    expect(isRealRow({ residentId: 'georgy' }, scope)).toBe(true)
+    expect(isRealRow({ residentId: 'emil' }, scope)).toBe(true)
   })
 
   it('keeps everything when there are no placeholders', () => {
@@ -38,7 +38,7 @@ describe('work queues are about people somebody is serving', () => {
    */
   const placements = [
     { id: 'p1', resident: { id: 'placeholder-1' } },
-    { id: 'p2', resident: { id: 'georgy' } },
+    { id: 'p2', resident: { id: 'emil' } },
   ]
 
   it('drops a placeholder carried one level down', () => {

@@ -70,7 +70,7 @@ test.describe('Authentication flow', () => {
   })
 
   test('shows success and redirects on valid staff login', async ({ page }) => {
-    const staffCode = process.env.E2E_STAFF_CODE || `${BRAND.codePrefix}ADMIN1`
+    const staffCode = process.env.E2E_STAFF_CODE || `${BRAND.codePrefix}E2E001`
     await page.goto('/login')
     await waitForCodeFormReady(page)
 
@@ -85,7 +85,7 @@ test.describe('Authentication flow', () => {
   })
 
   test('code input is case-insensitive', async ({ page }) => {
-    const staffCode = process.env.E2E_STAFF_CODE || `${BRAND.codePrefix}ADMIN1`
+    const staffCode = process.env.E2E_STAFF_CODE || `${BRAND.codePrefix}E2E001`
     await page.goto('/login')
     await waitForCodeFormReady(page)
 
