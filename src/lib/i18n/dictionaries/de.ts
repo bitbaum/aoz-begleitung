@@ -689,7 +689,7 @@ export const de = {
     'Der Code bleibt Ihr Login. Name, Foto und Text sind freiwillig und jederzeit änderbar.',
   'profile.codeLabel': 'Ihr Login-Code',
   'profile.displayNameLabel': 'Name',
-  'profile.displayNamePlaceholder': 'z.B. Alex',
+  'profile.displayNamePlaceholder': 'z.B. Max',
   'profile.photoHint': 'JPG, PNG oder WebP — wird automatisch verkleinert.',
   'profile.photoLabel': 'Foto',
   'profile.photoRemove': 'Foto entfernen',

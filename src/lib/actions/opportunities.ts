@@ -365,7 +365,7 @@ export async function addApplicant(
   const user = await requirePermission('opportunities:write')
 
   // Both pickers start EMPTY on purpose (a pre-selected first name attached
-  // whoever sorted first — live, Alex). An unchosen field is the user's to
+  // whoever sorted first — live, Max). An unchosen field is the user's to
   // fix, so it is named and returned, never a generic validation shrug.
   if (isBlankField(formData, 'residentId')) {
     return {

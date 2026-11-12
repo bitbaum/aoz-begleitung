@@ -653,7 +653,7 @@ export const PORTAL_LABELS = {
     codeHint:
       'Der Code bleibt Ihr Login. Name, Foto und Text sind freiwillig und jederzeit änderbar.',
     displayNameLabel: 'Name',
-    displayNamePlaceholder: 'z.B. Alex',
+    displayNamePlaceholder: 'z.B. Max',
     bioLabel: 'Über mich',
     bioPlaceholder: 'z.B. Ich koche gern und stehe früh auf.',
     photoLabel: 'Foto',

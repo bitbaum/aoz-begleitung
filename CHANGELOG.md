@@ -20,6 +20,13 @@ last_modified_summary: Every server action checks who is asking.
   data is about, may read; nobody else.
 - A test fails when a new server action exports without a check.
 
+## 2026-11-12 — The claim-link workflow no longer publishes a name
+
+- The operator workflow that issues a claim link takes the staff member's
+  user id instead of their name, and logs only the id. The repository's
+  Actions logs are public, and a name entered there was printed in them.
+
+
 ## 2026-11-12 — The privacy pages say what happens today
 
 - `/ki-datenschutz` no longer calls the AI a placeholder that is switched off

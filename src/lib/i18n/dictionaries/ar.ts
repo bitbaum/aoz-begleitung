@@ -563,7 +563,7 @@ export const ar: Dictionary = {
   'profile.codeHint': 'الرمز يبقى للدخول. الاسم والصورة والنص اختياريان ويمكن تغييرهما.',
   'profile.codeLabel': 'رمز الدخول',
   'profile.displayNameLabel': 'الاسم',
-  'profile.displayNamePlaceholder': 'مثلاً Alex',
+  'profile.displayNamePlaceholder': 'مثلاً Max',
   'profile.photoHint': 'JPG أو PNG أو WebP — يُصغّر تلقائياً.',
   'profile.photoLabel': 'صورة',
   'profile.photoRemove': 'إزالة الصورة',
