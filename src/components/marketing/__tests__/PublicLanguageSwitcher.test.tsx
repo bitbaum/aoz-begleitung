@@ -38,3 +38,17 @@ describe('PublicLanguageSwitcher', () => {
     expect(markupAt('/blog')).toBe('')
   })
 })
+
+describe('PublicLanguageSwitcher tap targets', () => {
+  it('gives every chip a 44x44 minimum, not just 44px of height', () => {
+    // QA, 12 Nov 2026: "DE", "EN", "FR" measured 29-31px wide at 390px.
+    const html = markupAt(LANDING_ROUTE)
+    if (publicLocales().length < 2) return
+    const chips = html.match(/<a [^>]*>/g) ?? []
+    expect(chips).toHaveLength(publicLocales().length)
+    for (const chip of chips) {
+      expect(chip).toContain('min-w-[44px]')
+      expect(chip).toContain('min-h-[44px]')
+    }
+  })
+})
