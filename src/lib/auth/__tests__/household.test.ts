@@ -132,7 +132,7 @@ const INPUT = {
   email: 'neu@example.ch',
   password: 'a-good-password',
   householdName: 'Singapur',
-  displayName: 'Alex',
+  displayName: 'Max',
 }
 
 describe('registerWithNewHousehold', () => {
@@ -179,7 +179,7 @@ describe('registerWithNewHousehold', () => {
     // asked, so the stored value must be the refusal, not a guess.
     expect(resident.gender).toBe('PREFER_NOT_SAY')
     expect(resident.preferencesCompletedAt).toBeUndefined()
-    expect(resident.displayName).toBe('Alex')
+    expect(resident.displayName).toBe('Max')
   })
 
   it('keeps the resident nameless when no display name is given', async () => {

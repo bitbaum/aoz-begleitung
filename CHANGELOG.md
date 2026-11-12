@@ -17,6 +17,13 @@ last_modified_summary: Each landing language is its own page to search engines.
   of the German page, and a shared link shows the page itself, in its
   language, rather than the site root in German.
 
+## 2026-11-12 — The claim-link workflow no longer publishes a name
+
+- The operator workflow that issues a claim link takes the staff member's
+  user id instead of their name, and logs only the id. The repository's
+  Actions logs are public, and a name entered there was printed in them.
+
+
 ## 2026-11-12 — The privacy pages say what happens today
 
 - `/ki-datenschutz` no longer calls the AI a placeholder that is switched off

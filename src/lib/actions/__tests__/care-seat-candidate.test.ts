@@ -44,7 +44,7 @@ vi.mock('@/lib/audit', async () => ({ logAudit: vi.fn() }))
 vi.mock('@/lib/auth', async () => ({
   getCurrentUser: vi.fn(async () => ({
     id: 'staff-admin',
-    name: 'Alex',
+    name: 'Max',
     role: 'BETREUUNG' as const,
     scope: 'ALL_DOMAINS' as const,
     isSystemAdmin: true,
