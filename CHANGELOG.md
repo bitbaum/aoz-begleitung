@@ -20,6 +20,18 @@ last_modified_summary: Every server action checks who is asking.
   data is about, may read; nobody else.
 - A test fails when a new server action exports without a check.
 
+## 2026-11-12 — The privacy pages say what happens today
+
+- `/ki-datenschutz` no longer calls the AI a placeholder that is switched off
+  "before real data" is processed: the data in this product is real, and the
+  page now says that AI receives it today under free-tier terms.
+- `/datenschutz` no longer says an account exists only by invitation. It lists
+  the ways an account can be created, says an account reaches data about
+  people only once an invitation or code links it, names the health, insurance
+  and permit data the product holds, lists Google and GitHub as sign-in
+  services, and says the feedback window can record voice and uses AI.
+
+
 ## 2026-11-12 — The AI never sees health data, and only disclosed providers are called
 
 - The form assistant no longer receives the stored health and support

@@ -188,7 +188,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   closingTitle: 'Sehen Sie es sich an.',
   closingBody:
-    'Ein Konto für Verwaltung, Begleitung oder das Portal der Klient*innen erhalten Sie über die Einladung Ihrer Administration. Blog, Roadmap und Changelog sind ohne Konto lesbar und machen die Produktentscheidungen nachvollziehbar.',
+    'Zugang zu Verwaltung, Begleitung oder dem Portal der Klient*innen erhalten Sie über die Einladung Ihrer Administration. Blog, Roadmap und Changelog sind ohne Konto lesbar und machen die Produktentscheidungen nachvollziehbar.',
 }
 
 /** The household register: the people who actually live in the flat. */
