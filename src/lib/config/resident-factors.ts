@@ -107,7 +107,7 @@ export const RESIDENT_FACTORS: Record<string, CompatibilityFactorDef> = {
      * profile; never scored (weight 0, rule NONE).
      */
     description: 'Wie die Person genannt werden möchte — kann sie später selbst ändern.',
-    placeholder: 'z.B. Stepan',
+    placeholder: 'z.B. Erika',
     required: false,
     intake: 'essential',
     formSection: 'basic',

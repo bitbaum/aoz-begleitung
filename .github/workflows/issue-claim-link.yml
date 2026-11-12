@@ -5,12 +5,16 @@ name: Issue claim link
 # raw token must never pass through Actions. The issuer builds the URL
 # https://aoz.orangecat.ch/claim?token=<raw> themselves.
 # (Normal path: Einstellungen → Team → «Übernahme-Link». This is for operators.)
+#
+# It takes the staff member's USER ID, never a name. This repository and its
+# Actions logs are public, and GitHub prints step env values in the log: a
+# name typed here was published (two runs on 2026-10-21 did exactly that).
 
 on:
   workflow_dispatch:
     inputs:
-      staff_name:
-        description: Exact full name of the active staff member
+      staff_user_id:
+        description: User id of the active staff member (not their name — the log is public)
         required: true
       token_hash:
         description: SHA-256 hex of the raw token
@@ -29,16 +33,16 @@ jobs:
         env:
           SSH_KEY: ${{ secrets.HETZNER_SSH_PRIVATE_KEY }}
           IP: ${{ vars.HETZNER_IP }}
-          STAFF_NAME: ${{ inputs.staff_name }}
+          STAFF_USER_ID: ${{ inputs.staff_user_id }}
           TOKEN_HASH: ${{ inputs.token_hash }}
         run: |
           set -euo pipefail
           [[ "$TOKEN_HASH" =~ ^[0-9a-f]{64}$ ]] || { echo "::error::bad hash"; exit 1; }
+          [[ "$STAFF_USER_ID" =~ ^[A-Za-z0-9_-]{8,64}$ ]] || { echo "::error::staff_user_id must be a user id, not a name"; exit 1; }
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "$IP" >> ~/.ssh/known_hosts 2>/dev/null
           scp -q scripts/ops/insert-claim-invite.js "ubuntu@$IP:/tmp/insert-claim-invite.js"
-          name_q=$(printf '%q' "$STAFF_NAME")
           ssh -o BatchMode=yes "ubuntu@$IP" "bash -s" <<REMOTE
           set -euo pipefail
           APP=/opt/aoz-wohnen/app
@@ -47,6 +51,6 @@ jobs:
           DATABASE_URL=\$(grep -E '^DATABASE_URL=' "\$ENVF" | head -1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//')
           cp /tmp/insert-claim-invite.js "\$APP/.insert-claim-invite.js" 2>/dev/null || { mkdir -p /tmp/ci && cp /tmp/insert-claim-invite.js /tmp/ci/; }
           cd "\$APP"
-          DATABASE_URL="\$DATABASE_URL" STAFF_NAME=$name_q TOKEN_HASH=$TOKEN_HASH NODE_PATH="\$APP/node_modules" node "\$( [ -f .insert-claim-invite.js ] && echo .insert-claim-invite.js || echo /tmp/ci/insert-claim-invite.js )"
+          DATABASE_URL="\$DATABASE_URL" STAFF_USER_ID=$STAFF_USER_ID TOKEN_HASH=$TOKEN_HASH NODE_PATH="\$APP/node_modules" node "\$( [ -f .insert-claim-invite.js ] && echo .insert-claim-invite.js || echo /tmp/ci/insert-claim-invite.js )"
           rm -f "\$APP/.insert-claim-invite.js" /tmp/insert-claim-invite.js
           REMOTE
