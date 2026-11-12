@@ -294,3 +294,11 @@ describe('the landing page advertises only what this brand has switched on', () 
     })
   })
 })
+
+describe('the register page names where a code really comes from', () => {
+  it('mentions a WG only where the brand lets a flat issue codes', async () => {
+    const { REGISTER_LABELS } = await import('@/lib/constants/labels/auth')
+    const { BRAND } = await import('@/lib/config/brand')
+    expect(/WG/.test(REGISTER_LABELS.codeHint)).toBe(BRAND.features.selfServeHousehold)
+  })
+})
