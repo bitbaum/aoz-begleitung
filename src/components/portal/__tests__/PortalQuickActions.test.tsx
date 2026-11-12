@@ -15,7 +15,7 @@ import { availableLocales, createTranslator, type LocaleId } from '@/lib/i18n'
  * preferences form. A resident with nothing to do was told a task was waiting,
  * and sent to a settings page to look for it. In all six offered languages.
  *
- * Found by reading George's own dashboard on the live instance. It never
+ * Found by reading the operator's own dashboard on the live instance. It never
  * appeared in a walkthrough because the DEMO resident always has a chore, so
  * the branch that renders for a real, quiet caseload was the one branch nobody
  * looked at.

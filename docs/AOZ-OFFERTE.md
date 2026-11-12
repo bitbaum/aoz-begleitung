@@ -1,7 +1,7 @@
 # Offerte: AOZ Begleitung — Integrationsplattform für Fachpersonen
 
 **Für** AOZ (Asyl-Organisation Zürich)
-**Von** Georgy Butaev, Zürich
+**Von** Cato (orangecat.ch)
 **Datum** 15. August 2026  
 **Zuletzt angepasst** 7. September 2026 — Fünf Rollen statt vier, angebotene Sprachen korrigiert, fehlende Umlaute im ganzen Dokument behoben.  
 **Gültig bis** 14. Oktober 2026

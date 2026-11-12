@@ -336,7 +336,7 @@ export const ROLE_PERMISSIONS = {
    * PEOPLE about their housing, and holds their HOUSING care seats. Those
    * are two jobs, and giving both the same role said they were one.
    *
-   * `residents:write` IS granted (2026-10-01, George): the Liegenschaften
+   * `residents:write` IS granted (2026-10-01, operator decision): the Liegenschaften
    * lead takes in new tenants — creates the person and places them — so
    * intake must not wait on a care role being free. Preferences and care
    * work stay with care; this is about getting someone a bed.

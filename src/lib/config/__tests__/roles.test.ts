@@ -114,7 +114,7 @@ describe('what each desk is FOR', () => {
     // "The clock is theirs": a person asked. The caseload queue holds only the
     // clients on this seat, so a requester nobody holds reaches the hero
     // through `applications` alone — ranked lower, they lost it to a client
-    // who had asked for nothing (live 2026-10-02, Stepan vs Georgy).
+    // who had asked for nothing (live 2026-10-02, two different clients).
     for (const role of STAFF_ROLES.filter((r) => caseloadQueueFor(r) !== null)) {
       expect({ role, first: heroOrder(own(role))[0] }).toEqual({ role, first: 'applications' })
     }

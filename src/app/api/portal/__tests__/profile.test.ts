@@ -107,7 +107,7 @@ import { PgDialect } from 'drizzle-orm/pg-core'
 
 // --- Helpers ---
 
-const RESIDENT = { id: 'georgy', code: 'RES-GEO001' }
+const RESIDENT = { id: 'emil', code: 'RES-EML001' }
 const AUTH = { resident: RESIDENT, placement: { id: 'placement-1', housingUnitId: 'unit-1' } }
 
 function jsonRequest(url: string, body: unknown): NextRequest {
@@ -142,7 +142,7 @@ beforeEach(() => {
     return Promise.resolve({ id, profileVisibility: 'ROOMMATES' })
   })
   mockResidentUpdate.mockImplementation((args: { set: unknown }) =>
-    Promise.resolve([{ id: 'georgy', code: 'RES-GEO001', ...(args.set as object) }]),
+    Promise.resolve([{ id: 'emil', code: 'RES-EML001', ...(args.set as object) }]),
   )
   mockUnitUpdate.mockImplementation((args: { set: { nickname: string | null } }) =>
     Promise.resolve([{ id: 'unit-1', nickname: args.set.nickname }]),
@@ -152,19 +152,17 @@ beforeEach(() => {
 describe('PATCH /api/portal/profile', () => {
   it('returns 401 without a session', async () => {
     mockGetPortalResident.mockResolvedValue(null)
-    const response = await patchProfile(
-      jsonRequest('/api/portal/profile', { displayName: 'Georgy' }),
-    )
+    const response = await patchProfile(jsonRequest('/api/portal/profile', { displayName: 'Alex' }))
     expect(response.status).toBe(401)
   })
 
   it('updates displayName and bio', async () => {
     const response = await patchProfile(
-      jsonRequest('/api/portal/profile', { displayName: '  Georgy ', bio: 'Zimmer 1' }),
+      jsonRequest('/api/portal/profile', { displayName: '  Alex ', bio: 'Zimmer 1' }),
     )
     expect(response.status).toBe(200)
     expect(mockResidentUpdate.mock.calls[0][0].set).toEqual({
-      displayName: 'Georgy',
+      displayName: 'Alex',
       bio: 'Zimmer 1',
       updatedAt: expect.any(Date),
     })
@@ -201,7 +199,7 @@ describe('POST /api/portal/profile/photo', () => {
     const response = await uploadPhoto(photoRequest(file))
     expect(response.status).toBe(200)
     const upsert = mockPhotoUpsert.mock.calls[0][0]
-    expect(upsert.values.residentId).toBe('georgy')
+    expect(upsert.values.residentId).toBe('emil')
     expect(upsert.values.mimeType).toBe('image/jpeg')
     // Conflict on residentId makes the insert an upsert per resident.
     expect(upsert.conflict.target).toBe(residentPhoto.residentId)
@@ -235,7 +233,7 @@ describe('POST /api/portal/profile/photo', () => {
   it('DELETE removes the photo', async () => {
     const response = await deletePhoto()
     expect(response.status).toBe(200)
-    expect(mockPhotoDeleteMany).toHaveBeenCalledWith(eq(residentPhoto.residentId, 'georgy'))
+    expect(mockPhotoDeleteMany).toHaveBeenCalledWith(eq(residentPhoto.residentId, 'emil'))
   })
 })
 
@@ -249,8 +247,8 @@ describe('GET /api/portal/residents/[id]/photo', () => {
   }
 
   it('serves your own photo without a placement check', async () => {
-    mockPhotoFindFirst.mockResolvedValue({ ...PHOTO, residentId: 'georgy' })
-    const response = await get('georgy')
+    mockPhotoFindFirst.mockResolvedValue({ ...PHOTO, residentId: 'emil' })
+    const response = await get('emil')
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('image/jpeg')
     expect(mockPlacementFindFirst).not.toHaveBeenCalled()

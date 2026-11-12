@@ -78,13 +78,13 @@ import { eq } from 'drizzle-orm'
 // --- Helpers ---
 
 const AUTH = {
-  resident: { id: 'georgy', code: 'RES-GEO001' },
+  resident: { id: 'emil', code: 'RES-EML001' },
   placement: { id: 'placement-1', housingUnitId: 'unit-1' },
 }
 
 const MEMBERS = [
   { id: 'amara', code: 'RES-AMA001', displayName: 'Amara', photoVersion: null },
-  { id: 'georgy', code: 'RES-GEO001', displayName: 'Georgy', photoVersion: null },
+  { id: 'emil', code: 'RES-EML001', displayName: 'Alex', photoVersion: null },
   { id: 'hana', code: 'RES-HAN001', displayName: 'Hana', photoVersion: null },
   { id: 'noor', code: 'RES-NOO001', displayName: 'Noor', photoVersion: null },
 ]
@@ -124,8 +124,8 @@ describe('POST /api/portal/expenses', () => {
     expect(response.status).toBe(200)
 
     const created = mockExpenseCreate.mock.calls[0][0]
-    expect(created.paidById).toBe('georgy')
-    expect(created.createdById).toBe('georgy')
+    expect(created.paidById).toBe('emil')
+    expect(created.createdById).toBe('emil')
     const shares = mockShareCreate.mock.calls[0][0] as {
       residentId: string
       amountRappen: number
@@ -147,7 +147,7 @@ describe('POST /api/portal/expenses', () => {
     expect(response.status).toBe(200)
     const created = mockExpenseCreate.mock.calls[0][0]
     expect(created.paidById).toBe('hana')
-    expect(created.createdById).toBe('georgy')
+    expect(created.createdById).toBe('emil')
     expect(mockShareCreate.mock.calls[0][0]).toHaveLength(2)
   })
 
@@ -165,7 +165,7 @@ describe('POST /api/portal/expenses', () => {
     const response = await createExpense(
       jsonRequest('/api/portal/expenses', 'POST', {
         ...VALID_EXPENSE,
-        participantIds: ['georgy', 'stranger'],
+        participantIds: ['emil', 'stranger'],
       }),
     )
     expect(response.status).toBe(400)
@@ -190,7 +190,7 @@ describe('DELETE /api/portal/expenses/[id]', () => {
     id: 'expense-1',
     housingUnitId: 'unit-1',
     paidById: 'hana',
-    createdById: 'georgy',
+    createdById: 'emil',
     amountRappen: 4000,
   }
 
@@ -211,7 +211,7 @@ describe('DELETE /api/portal/expenses/[id]', () => {
   })
 
   it('lets the payer delete', async () => {
-    mockExpenseFindFirst.mockResolvedValue({ ...EXPENSE, paidById: 'georgy', createdById: 'hana' })
+    mockExpenseFindFirst.mockResolvedValue({ ...EXPENSE, paidById: 'emil', createdById: 'hana' })
     const response = await del()
     expect(response.status).toBe(200)
   })
@@ -238,13 +238,13 @@ describe('POST /api/portal/settlements', () => {
     )
     expect(response.status).toBe(200)
     const created = mockSettlementCreate.mock.calls[0][0]
-    expect(created).toMatchObject({ fromId: 'georgy', toId: 'hana', amountRappen: 1500 })
+    expect(created).toMatchObject({ fromId: 'emil', toId: 'hana', amountRappen: 1500 })
   })
 
   it('refuses paying yourself', async () => {
     const response = await createSettlement(
       jsonRequest('/api/portal/settlements', 'POST', {
-        toResidentId: 'georgy',
+        toResidentId: 'emil',
         amountRappen: 1500,
       }),
     )

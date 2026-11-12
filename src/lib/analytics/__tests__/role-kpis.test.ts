@@ -32,7 +32,7 @@ const unanswered = (): JobApplicationInput => ({
 
 const client = (over: Partial<JobKpiClient> = {}): JobKpiClient => ({
   residentId: 'r1',
-  name: 'George B',
+  name: 'Alex B',
   createdAt: daysAgo(30),
   learningRecords: [],
   applications: [],
