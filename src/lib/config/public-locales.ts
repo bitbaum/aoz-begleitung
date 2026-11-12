@@ -77,3 +77,35 @@ export function landingPath(locale: PublicLocaleId): string {
  * 404, which is the accurate thing for a stranger to be told.
  */
 export const LANDING_ROUTES: string[] = PUBLIC_LOCALE_IDS.map(landingPath)
+
+/**
+ * Where a language's sign-in page lives. German keeps `/login` — the address
+ * every invitation, claim link and expired-session redirect already uses — and
+ * the others are prefixed like their landing page, so a reader who arrived at
+ * `/fr/willkommen` and taps "se connecter" stays in French.
+ *
+ * A real route rather than `/login?lang=fr`: AccountKit appends its own query
+ * (`?error=oidc&next=…`) to the sign-in path, so a path that already carries a
+ * query would come back malformed and drop the language on the first error.
+ */
+export function loginPath(locale: PublicLocaleId): string {
+  return locale === PUBLIC_DEFAULT_LOCALE ? '/login' : `/${locale}/login`
+}
+
+/**
+ * Every prefixed sign-in URL, for the middleware allow-list. German's `/login`
+ * is already listed there by name.
+ */
+export const LOCALISED_LOGIN_ROUTES: string[] = PREFIXED_LOCALE_IDS.map(loginPath)
+
+/**
+ * Which public language a URL is in, read from its first segment.
+ *
+ * For chrome that wraps pages it does not own (the public layout, the account
+ * shell, the 404 page): a layout is not handed its child's params, but every
+ * localised URL starts with its language, and everything else is German.
+ */
+export function publicLocaleOfPath(pathname: string | null | undefined): PublicLocaleId {
+  const first = (pathname ?? '').split('/')[1] ?? ''
+  return isPublicLocale(first) ? first : PUBLIC_DEFAULT_LOCALE
+}

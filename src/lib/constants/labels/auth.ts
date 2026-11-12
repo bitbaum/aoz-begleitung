@@ -1,7 +1,8 @@
 /**
  * Authentication and role labels
  */
-import { BRAND } from '@/lib/config/brand'
+import { BRAND, type BrandId } from '@/lib/config/brand'
+import type { PublicLocaleId } from '@/lib/config/public-locales'
 import { RESIDENT_CODE_PREFIX } from '@/lib/auth/code-prefixes'
 
 /**
@@ -120,6 +121,72 @@ export const LOGIN_LABELS = {
   },
   help: `Bei Problemen wenden Sie sich an die ${BRAND.shortName}-Verwaltung.`,
 } as const
+
+/**
+ * The sign-in page's own words in each public language — the part of
+ * `LOGIN_LABELS` that `/en/login` and `/fr/login` render. The form fields
+ * themselves come translated from AccountKit (`authLabelsFor`).
+ *
+ * The person word is per brand as well as per language, for the same reason
+ * `clientTermPlural` is: "clients" is AOZ's register, a shared flat has
+ * flatmates.
+ */
+export interface LoginCopy {
+  title: string
+  subtitle: string
+  audienceHint: string
+  emailVerified: string
+  emailVerifyFailed: string
+  registerLink: string
+  useCode: string
+  code: string
+  codeHint: string
+  help: string
+}
+
+const CLIENT_TERM_PLURAL: Record<'en' | 'fr', Record<BrandId, string>> = {
+  en: { aoz: 'clients', wg: 'flatmates' },
+  fr: { aoz: 'personnes accompagnées', wg: 'colocataires' },
+}
+
+export const LOGIN_COPY: Record<PublicLocaleId, LoginCopy> = {
+  de: {
+    title: LOGIN_LABELS.title,
+    subtitle: LOGIN_LABELS.subtitle,
+    audienceHint: LOGIN_LABELS.audienceHint,
+    emailVerified: LOGIN_LABELS.emailVerified,
+    emailVerifyFailed: LOGIN_LABELS.emailVerifyFailed,
+    registerLink: LOGIN_LABELS.registerLink,
+    useCode: LOGIN_LABELS.useCode,
+    code: LOGIN_LABELS.code,
+    codeHint: LOGIN_LABELS.codeHint,
+    help: LOGIN_LABELS.help,
+  },
+  en: {
+    title: 'Sign in',
+    subtitle: 'Sign in with email and password',
+    audienceHint: `For staff and ${CLIENT_TERM_PLURAL.en[BRAND.id]} — one login, both roles.`,
+    emailVerified: 'Email address confirmed. You can sign in now.',
+    emailVerifyFailed: 'The confirmation link is invalid or has expired.',
+    registerLink: 'Create an account',
+    useCode: 'Sign in with a code',
+    code: 'Access code',
+    codeHint: 'Use your personal access code.',
+    help: `If you have trouble signing in, please contact the ${BRAND.shortName} administration.`,
+  },
+  fr: {
+    title: 'Se connecter',
+    subtitle: 'Se connecter avec e-mail et mot de passe',
+    audienceHint: `Pour le personnel et les ${CLIENT_TERM_PLURAL.fr[BRAND.id]} — un seul compte, les deux rôles.`,
+    emailVerified: 'Adresse e-mail confirmée. Vous pouvez maintenant vous connecter.',
+    emailVerifyFailed: 'Le lien de confirmation est invalide ou a expiré.',
+    registerLink: 'Créer un compte',
+    useCode: 'Se connecter avec un code',
+    code: 'Code d’accès',
+    codeHint: 'Utilisez votre code d’accès personnel.',
+    help: `En cas de problème, veuillez vous adresser à l’administration ${BRAND.shortName}.`,
+  },
+}
 
 export const REGISTER_LABELS = {
   title: 'Konto erstellen',

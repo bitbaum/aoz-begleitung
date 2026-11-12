@@ -5,7 +5,7 @@
 
 // Deliberately the only import here, and deliberately a module that carries no
 // landing COPY: this file is loaded by middleware on the edge.
-import { LANDING_ROUTES } from '@/lib/config/public-locales'
+import { LANDING_ROUTES, LOCALISED_LOGIN_ROUTES } from '@/lib/config/public-locales'
 
 // Routes that require staff authentication.
 //
@@ -116,6 +116,9 @@ export const PUBLIC_ROUTES = [
   // login form. Not hypothetical — `public-routes-reachable.test.ts` failed on
   // exactly that when `/[lang]/willkommen` was added.
   ...LANDING_ROUTES,
+  // The sign-in page in the other public languages (`/en/login`, `/fr/login`).
+  // Spread for the same reason as the landing pages above.
+  ...LOCALISED_LOGIN_ROUTES,
   '/api/auth',
   '/api/health',
   '/api/cron',

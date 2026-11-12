@@ -6,6 +6,7 @@ import { getAllPosts } from '@/lib/blog/posts'
 import { formatCalendarDateLong } from '@/lib/utils/formatting'
 import { BLOG_LABELS } from '@/lib/constants/labels'
 import { LOCALES } from '@/lib/i18n/locales'
+import { loginPath } from '@/lib/config/public-locales'
 import {
   marketingCopy,
   type MarketingCopy,
@@ -45,7 +46,7 @@ export function Landing({ locale }: { locale: PublicLocaleId }) {
     // which is the difference between readable and unintelligible for the one
     // group of readers who cannot compensate by looking at it.
     <div className="-my-8 sm:-my-12" lang={LOCALES[locale].intlTag} dir={LOCALES[locale].dir}>
-      <Hero c={c} />
+      <Hero c={c} signIn={loginPath(locale)} />
       {/*
         WHAT IT DOES COMES BEFORE WHY IT EXISTS.
 
@@ -68,7 +69,7 @@ export function Landing({ locale }: { locale: PublicLocaleId }) {
       <Ethics c={c} />
       <ProductDocs c={c} />
       {posts.length > 0 && <FromTheBlog c={c} posts={posts} />}
-      <Closing c={c} />
+      <Closing c={c} signIn={loginPath(locale)} />
     </div>
   )
 }
@@ -79,7 +80,8 @@ interface CopyProps {
 
 /* ── Sections ────────────────────────────────────────────────────────────── */
 
-function Hero({ c }: CopyProps) {
+/** `signIn` is this language's sign-in page, so the CTA does not drop the reader into German. */
+function Hero({ c, signIn }: CopyProps & { signIn: string }) {
   return (
     <section className="py-14 sm:py-20 border-b border-ui-border">
       <p className="eyebrow">{c.eyebrow}</p>
@@ -91,11 +93,11 @@ function Hero({ c }: CopyProps) {
       </p>
 
       <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:items-center">
-        <Link href="/login" className="btn-secondary">
+        <Link href={signIn} className="btn-secondary">
           {c.ctaPrimary}
           <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
-        <Link href="/login" className="btn-outline">
+        <Link href={signIn} className="btn-outline">
           {c.ctaSecondary}
         </Link>
       </div>
@@ -338,7 +340,7 @@ function ProductDocs({ c }: CopyProps) {
   )
 }
 
-function Closing({ c }: CopyProps) {
+function Closing({ c, signIn }: CopyProps & { signIn: string }) {
   return (
     <section className="py-14 sm:py-20">
       <h2 className="text-2xl sm:text-3xl font-semibold tracking-heading text-ui-text text-balance">
@@ -347,7 +349,7 @@ function Closing({ c }: CopyProps) {
       <p className="mt-3 text-ui-muted max-w-2xl leading-relaxed">{c.closingBody}</p>
 
       <div className="mt-7 flex flex-col sm:flex-row gap-3">
-        <Link href="/login" className="btn-secondary">
+        <Link href={signIn} className="btn-secondary">
           {c.ctaPrimary}
           <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
