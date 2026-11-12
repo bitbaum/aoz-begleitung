@@ -179,8 +179,23 @@ export function matchesRoute(pathname: string, route: string): boolean {
   return pathname === route || pathname.startsWith(`${route}/`)
 }
 
+/**
+ * Public routes that are public as ONE page, not as a subtree.
+ *
+ * `/portal` is the portal's own entry: anonymous visitors land there and are
+ * sent on to sign in. Matched as a prefix it made every `/portal/...` page
+ * public at the middleware, so the proxy returned before it ever asked
+ * `requiresResidentAuth`, and every page entry in RESIDENT_ROUTES was dead
+ * config. Each page still redirected on its own, so nothing leaked, but the
+ * declared boundary and the enforced one disagreed (found 2026-11-12). Its
+ * public children (`/portal/help`) are listed by name.
+ */
+const EXACT_PUBLIC_ROUTES: ReadonlySet<string> = new Set(['/portal'])
+
 export function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some((route) => matchesRoute(pathname, route))
+  return PUBLIC_ROUTES.some((route) =>
+    EXACT_PUBLIC_ROUTES.has(route) ? pathname === route : matchesRoute(pathname, route),
+  )
 }
 
 export function requiresStaffAuth(pathname: string): boolean {
