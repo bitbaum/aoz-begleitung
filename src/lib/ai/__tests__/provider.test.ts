@@ -13,6 +13,7 @@ async function loadProvider(env: Record<string, string | undefined>) {
     GROQ_API_KEY: undefined,
     OPENROUTER_API_KEY: undefined,
     ANTHROPIC_API_KEY: undefined,
+    GEMINI_API_KEY: undefined,
     ...env,
   }
   return import('../provider')
@@ -21,6 +22,22 @@ async function loadProvider(env: Record<string, string | undefined>) {
 afterEach(() => {
   process.env = ORIGINAL_ENV
   vi.restoreAllMocks()
+})
+
+describe('only disclosed providers are ever called', () => {
+  it('ignores a key for a vendor the disclosure does not name', async () => {
+    const { getAIProviderConfigs } = await loadProvider({
+      GROQ_API_KEY: 'gsk_test',
+      GEMINI_API_KEY: 'gemini_test',
+    })
+    const providers = (await getAIProviderConfigs()).map((config) => config.provider)
+    expect(providers).toEqual(['groq'])
+  })
+
+  it('calls nothing when only an undisclosed vendor has a key', async () => {
+    const { getAIProviderConfigs } = await loadProvider({ GEMINI_API_KEY: 'gemini_test' })
+    expect(await getAIProviderConfigs()).toEqual([])
+  })
 })
 
 describe('which provider a completion uses', () => {

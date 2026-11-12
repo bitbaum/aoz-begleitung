@@ -1,10 +1,5 @@
 import Script from 'next/script'
-import Link from 'next/link'
-import { SiteFooter } from '@bitbaum/sitekit/react'
-import { PublicMasthead } from '@/components/marketing/PublicChrome'
-import { APP_LABELS, BLOG_LABELS } from '@/lib/constants/labels'
-import { AI_DISCLOSURE_HREF } from '@/lib/config/ai-disclosure'
-import { IMPRESSUM_HREF, LEGAL_LABELS, PRIVACY_HREF } from '@/lib/config/legal'
+import { PublicFooter, PublicMasthead, PublicShell } from '@/components/marketing/PublicChrome'
 
 /**
  * The route group for pages that are readable without an account.
@@ -22,31 +17,14 @@ import { IMPRESSUM_HREF, LEGAL_LABELS, PRIVACY_HREF } from '@/lib/config/legal'
  */
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="public-shell min-h-screen flex flex-col bg-ui-canvas">
+    <PublicShell>
       <PublicMasthead />
 
       <main id="public-main" className="bb-frame flex-1 py-8 sm:py-12">
         {children}
       </main>
 
-      <SiteFooter
-        appearance="application"
-        chrome={{
-          name: APP_LABELS.name,
-          tagline: APP_LABELS.tagline,
-          footerNote: BLOG_LABELS.title,
-        }}
-        Link={Link}
-        label="Weitere Seiten"
-        links={[
-          { href: '/blog', label: 'Blog' },
-          { href: '/roadmap', label: 'Roadmap' },
-          { href: '/changelog', label: 'Changelog' },
-          { href: AI_DISCLOSURE_HREF, label: 'KI und Datenschutz' },
-          { href: PRIVACY_HREF, label: LEGAL_LABELS.privacy },
-          { href: IMPRESSUM_HREF, label: LEGAL_LABELS.impressum },
-        ]}
-      />
+      <PublicFooter />
       {/* The feedback widget lives HERE and nowhere else: public pages carry
           no personal data, so a third-party script sees nothing it should not.
           Token is a literal so next build cannot tree-shake the Script away. */}
@@ -55,6 +33,6 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         strategy="afterInteractive"
         data-fc-project="fcw_757c716fede237047d988f8d715a144d"
       />
-    </div>
+    </PublicShell>
   )
 }
