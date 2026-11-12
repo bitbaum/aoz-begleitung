@@ -9,7 +9,16 @@ Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
 last_modified_date: 2026-11-12
-last_modified_summary: Impressum and privacy statement on the public site.
+last_modified_summary: Landing page claims match the deployment; Impressum and privacy statement on the public site.
+
+## 2026-11-12 — Landing page claims match the deployment
+
+- The landing page no longer invites visitors to a "direct access on the
+  sign-in page": those one-click doors were replaced by single-use claim links
+  on 2026-10-01. It now says an account comes through an invitation.
+- The AOZ page no longer advertises house votes, which are switched off for
+  AOZ. A test ties what each brand's page claims to that brand's feature flags,
+  in every language the page comes in.
 
 ## 2026-11-12 — Impressum and privacy statement
 

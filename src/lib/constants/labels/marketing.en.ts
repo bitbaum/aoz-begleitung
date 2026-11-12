@@ -79,7 +79,7 @@ const PLACEMENT_COPY: MarketingCopy = {
       body: 'Accommodation, placement, transfers, maintenance and incidents in one record — with matching that explains why it suggests this particular combination.',
     },
     {
-      icon: 'vote',
+      icon: 'scroll',
       title: 'The house runs its own daily life',
       body: 'House rules with versions and acknowledgement, chores with a fairness balance, and a path for concerns that ends in an answer.',
     },
@@ -101,13 +101,13 @@ const PLACEMENT_COPY: MarketingCopy = {
     {
       icon: 'chart',
       title: 'Accountable to everyone',
-      body: 'Every placement is logged, every score can be taken apart, every vote result stays explainable against the rule in force at the time.',
+      body: 'Every placement is logged, every score can be taken apart, every house rule stays readable in the version in force at the time.',
     },
   ],
 
   scienceEyebrow: 'Scientific basis',
   scienceTitle: `Method rather than opinion: ${FACTOR_COUNT} matching factors — and everyday mechanics built on documented findings.`,
-  scienceBody: `The compatibility factors are derived from published research — Swiss studies first, international ones for context, ${SOURCE_COUNT} sources in total — and the strength of evidence is shown for each factor: some findings come from other forms of housing and are, for collective accommodation, a reasoned assumption that the pilot tests. And the mechanics beyond matching follow the same standard: from self-share bias in the cleaning rota to the rule that safety is never put to a vote. The full methodology including the source list is readable in the product by every professional — and through the direct access on the sign-in page.`,
+  scienceBody: `The compatibility factors are derived from published research — Swiss studies first, international ones for context, ${SOURCE_COUNT} sources in total — and the strength of evidence is shown for each factor: some findings come from other forms of housing and are, for collective accommodation, a reasoned assumption that the pilot tests. And the mechanics beyond matching follow the same standard: from self-share bias in the cleaning rota to the rule that safety topics always stay with the professionals. The full methodology including the source list is readable in the product by every professional.`,
   science: [
     {
       title: 'Cleanliness is a direction, not an average',
@@ -130,8 +130,8 @@ const PLACEMENT_COPY: MarketingCopy = {
       body: 'People who tidy overestimate their own share — a documented bias, not a character flaw. So the chore plan shows how much each person has actually carried, instead of setting memory against memory.',
     },
     {
-      title: 'Safety is never put to a vote',
-      body: 'Households decide their own daily life — but a majority cannot vote away a minority’s safety. Those topics always go to the professionals, and every vote result stays explainable against the rule in force at the time.',
+      title: 'Safety is never decided by the house',
+      body: 'House rules are put to residents and acknowledged by them, and every change is put to them again. Safety topics always go to the professionals, and every rule stays readable in the version in force at the time.',
     },
   ],
 
@@ -178,7 +178,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   closingTitle: 'Take a look.',
   closingBody:
-    'The direct access on the sign-in page opens the real product — administration, support and the resident portal. Blog, roadmap and changelog make the product decisions traceable.',
+    'An account for administration, support or the resident portal comes through an invitation from your administration. Blog, roadmap and changelog can be read without an account and make the product decisions traceable.',
 }
 
 const HOUSEHOLD_COPY: MarketingCopy = {
@@ -323,7 +323,8 @@ const HOUSEHOLD_COPY: MarketingCopy = {
   ],
 
   closingTitle: 'Have a look.',
-  closingBody: 'The direct access opens the real product — you see exactly what the residents see.',
+  closingBody:
+    'Sign in with your code or your email address — you see exactly what your flatmates see.',
 }
 
 export const marketingEn: MarketingRegisters = {

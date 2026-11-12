@@ -1,4 +1,10 @@
-import { MARKETING_COPY_BY_BRAND, type MarketingCopy } from '@/lib/constants/labels/marketing'
+import {
+  MARKETING_COPY_BY_BRAND,
+  PUBLIC_LOCALE_IDS,
+  isPublicCopyComplete,
+  marketingCopy,
+  type MarketingCopy,
+} from '@/lib/constants/labels/marketing'
 import { BRANDS, type BrandId } from '@/lib/config/brand'
 import { NAV_ICONS } from '@/lib/config/navigation'
 
@@ -246,5 +252,45 @@ describe('Swiss German spelling', () => {
     // real offenders sail through afterwards.
     const correct = 'Neue Steuer ist teuer, heute Feuer — schliessen und Aussenbereich'
     expect(STRIPPED_UMLAUTS.filter((word) => correct.includes(word))).toEqual([])
+  })
+})
+
+describe('the landing page advertises only what this brand has switched on', () => {
+  // The AOZ page advertised house votes ("jedes Abstimmungsergebnis") while
+  // `householdVotes` was off for AOZ: its residents acknowledge rules, they do
+  // not vote on them. A feature flag that hides the control must also hide the
+  // promise, in every language the page comes in.
+  const CLAIMS: { feature: 'householdVotes' | 'householdMoney'; words: RegExp }[] = [
+    { feature: 'householdVotes', words: /abstimm|\bvotes?\b|\bvoter\b|\bvotent\b/i },
+    { feature: 'householdMoney', words: /ausgabe|schulde|expense|\bowes?\b|dépense/i },
+  ]
+
+  const cases = brandIds.flatMap((id) =>
+    PUBLIC_LOCALE_IDS.filter((locale) => isPublicCopyComplete(locale, id)).map(
+      (locale) => [id, locale] as const,
+    ),
+  )
+
+  it.each(cases)('%s/%s claims no feature the brand disables', (id, locale) => {
+    const prose = JSON.stringify(marketingCopy(locale, id))
+    const offending = CLAIMS.filter(
+      (claim) => !BRANDS[id].features[claim.feature] && claim.words.test(prose),
+    ).map((claim) => claim.feature)
+    expect({ id, locale, offending }).toEqual({ id, locale, offending: [] })
+  })
+
+  it.each(cases)('%s/%s promises no one-click door into the product', (id, locale) => {
+    // The quick-access doors on /login were replaced by single-use claim links
+    // on 2026-10-01; the page went on inviting visitors to use them.
+    const prose = JSON.stringify(marketingCopy(locale, id))
+    expect({
+      id,
+      locale,
+      door: /direkte[rn]? zugang|direct access|accès direct/i.test(prose),
+    }).toEqual({
+      id,
+      locale,
+      door: false,
+    })
   })
 })

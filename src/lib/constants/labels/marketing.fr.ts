@@ -81,7 +81,7 @@ const PLACEMENT_COPY: MarketingCopy = {
       body: 'Hébergements, placements, transferts, maintenance et incidents dans un seul parcours — avec un appariement qui explique pourquoi il propose cette combinaison.',
     },
     {
-      icon: 'vote',
+      icon: 'scroll',
       title: 'La maison organise son quotidien',
       body: 'Règles de la maison versionnées et confirmées, tâches avec bilan d’équité et un chemin pour les demandes qui aboutit à une réponse.',
     },
@@ -103,13 +103,13 @@ const PLACEMENT_COPY: MarketingCopy = {
     {
       icon: 'chart',
       title: 'Vérifiable par toutes et tous',
-      body: 'Chaque placement est journalisé, chaque score décomposable, chaque résultat de vote explicable au regard de la règle alors en vigueur.',
+      body: 'Chaque placement est journalisé, chaque score décomposable, chaque règle de la maison consultable dans sa version alors en vigueur.',
     },
   ],
 
   scienceEyebrow: 'Base scientifique',
   scienceTitle: `Une méthode, pas une opinion : ${FACTOR_COUNT} facteurs d’appariement — et une mécanique du quotidien fondée sur des résultats documentés.`,
-  scienceBody: `Les facteurs de compatibilité sont tirés de la recherche publiée — études suisses d’abord, internationales pour la mise en contexte, ${SOURCE_COUNT} sources au total — et la solidité des preuves est indiquée pour chaque facteur : certains résultats proviennent d’autres formes de logement et constituent, pour l’hébergement collectif, une hypothèse argumentée que le pilote vérifie. Et la mécanique au-delà de l’appariement suit les mêmes exigences : du biais d’auto-évaluation dans le plan de nettoyage à la règle selon laquelle la sécurité ne se met jamais au vote. La méthodologie complète et la liste des sources sont consultables dans le produit par toutes les équipes — et via l’accès direct sur la page de connexion.`,
+  scienceBody: `Les facteurs de compatibilité sont tirés de la recherche publiée — études suisses d’abord, internationales pour la mise en contexte, ${SOURCE_COUNT} sources au total — et la solidité des preuves est indiquée pour chaque facteur : certains résultats proviennent d’autres formes de logement et constituent, pour l’hébergement collectif, une hypothèse argumentée que le pilote vérifie. Et la mécanique au-delà de l’appariement suit les mêmes exigences : du biais d’auto-évaluation dans le plan de nettoyage à la règle selon laquelle les questions de sécurité relèvent toujours des équipes. La méthodologie complète et la liste des sources sont consultables dans le produit par toutes les équipes.`,
   science: [
     {
       title: 'La propreté est une direction, pas une moyenne',
@@ -132,8 +132,8 @@ const PLACEMENT_COPY: MarketingCopy = {
       body: 'Celles et ceux qui rangent surestiment leur propre part — un biais documenté, pas un défaut de caractère. Le plan des tâches montre donc ce que chacune et chacun a réellement porté, au lieu d’opposer des souvenirs.',
     },
     {
-      title: 'La sécurité ne se met jamais au vote',
-      body: 'Les ménages décident eux-mêmes de leur quotidien — mais une majorité ne peut pas voter la suppression de la sécurité d’une minorité. Ces sujets vont toujours aux équipes, et chaque résultat de vote reste explicable au regard de la règle alors en vigueur.',
+      title: 'La sécurité n’est jamais décidée par la maison',
+      body: 'Les règles de la maison sont présentées aux résidentes et résidents, qui les confirment, et chaque modification leur est présentée à nouveau. Les questions de sécurité vont toujours aux équipes, et chaque règle reste consultable dans sa version alors en vigueur.',
     },
   ],
 
@@ -178,7 +178,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   closingTitle: 'Jetez-y un œil.',
   closingBody:
-    'L’accès direct sur la page de connexion ouvre le vrai produit — administration, accompagnement et portail des résidentes et résidents. Le blog, la roadmap et le changelog rendent les décisions produit traçables.',
+    'Un compte pour l’administration, l’accompagnement ou le portail des résidentes et résidents s’obtient par l’invitation de votre administration. Le blog, la roadmap et le changelog se lisent sans compte et rendent les décisions produit traçables.',
 }
 
 const HOUSEHOLD_COPY: MarketingCopy = {
@@ -324,7 +324,7 @@ const HOUSEHOLD_COPY: MarketingCopy = {
 
   closingTitle: 'Regardez par vous-même.',
   closingBody:
-    'L’accès direct ouvre le vrai produit — vous voyez exactement ce que voient les personnes qui y habitent.',
+    'Connectez-vous avec votre code ou votre adresse e-mail — vous voyez exactement ce que voient les personnes qui habitent avec vous.',
 }
 
 export const marketingFr: MarketingRegisters = {
