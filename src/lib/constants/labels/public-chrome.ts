@@ -55,6 +55,16 @@ const TAGLINE: Record<Exclude<PublicLocaleId, 'de'>, Record<BrandId, string>> = 
   fr: { aoz: 'Plateforme d’intégration', wg: 'Vivre ensemble' },
 }
 
+/**
+ * The brand's tagline in each language. Per brand as well as per language, for
+ * the same reason the tagline is a brand field at all: an organisation's
+ * integration platform is not a shared flat's "living together".
+ */
+const TAGLINE: Record<Exclude<PublicLocaleId, 'de'>, Record<BrandId, string>> = {
+  en: { aoz: 'Integration platform', wg: 'Living together' },
+  fr: { aoz: 'Plateforme d’intégration', wg: 'Vivre ensemble' },
+}
+
 export const PUBLIC_CHROME: Record<PublicLocaleId, PublicChromeCopy> = {
   de: {
     skipLink: 'Zum Inhalt springen',

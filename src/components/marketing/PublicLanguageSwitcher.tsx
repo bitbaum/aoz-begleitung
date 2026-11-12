@@ -11,6 +11,9 @@ import {
 import { landingPath } from '@/lib/config/public-locales'
 import { LANDING_ROUTE } from '@/lib/auth/route-boundaries'
 
+/** One language chip: a full 44x44 tap target at every width. */
+const CHIP = 'btn-ghost text-sm min-h-[44px] min-w-[44px] justify-center px-1.5 sm:px-2'
+
 /**
  * The language switcher for the pages you can read without an account.
  *
@@ -63,11 +66,11 @@ export function PublicLanguageSwitcher() {
             // shows. A screen-reader user on a phone should hear "Français",
             // not "F R".
             aria-label={locale.endonym}
-            className={
-              isCurrent
-                ? 'btn-ghost text-sm px-1.5 sm:px-2 text-ui-text font-semibold'
-                : 'btn-ghost text-sm px-1.5 sm:px-2 text-ui-muted'
-            }
+            // `min-w-[44px]` because `btn` only guarantees the HEIGHT. A
+            // two-letter code with phone padding came out 29-31px wide at
+            // 390px (QA, 12 Nov 2026) — three tap targets narrower than a
+            // thumb, side by side. Three 44px chips still fit the row.
+            className={isCurrent ? `${CHIP} text-ui-text font-semibold` : `${CHIP} text-ui-muted`}
           >
             {/*
               Two-character code on a phone, endonym from `sm:` up.
