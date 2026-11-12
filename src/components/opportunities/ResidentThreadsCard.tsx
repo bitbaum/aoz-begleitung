@@ -9,7 +9,7 @@
  * for themselves.
  *
  * That became load-bearing the moment the dashboard learned to say "Interesse
- * wartet auf Antwort — Alex B" and linked to `/residents/<id>`: the tile
+ * wartet auf Antwort — Max M" and linked to `/residents/<id>`: the tile
  * named a person, the page it opened did not mention the thread, and the coach
  * had to guess which of the listings it was. A queue whose destination cannot
  * show the work is a queue nobody can clear.

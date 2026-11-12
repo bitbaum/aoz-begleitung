@@ -84,7 +84,7 @@ const AUTH = {
 
 const MEMBERS = [
   { id: 'amara', code: 'RES-AMA001', displayName: 'Amara', photoVersion: null },
-  { id: 'emil', code: 'RES-EML001', displayName: 'Alex', photoVersion: null },
+  { id: 'emil', code: 'RES-EML001', displayName: 'Max', photoVersion: null },
   { id: 'hana', code: 'RES-HAN001', displayName: 'Hana', photoVersion: null },
   { id: 'noor', code: 'RES-NOO001', displayName: 'Noor', photoVersion: null },
 ]

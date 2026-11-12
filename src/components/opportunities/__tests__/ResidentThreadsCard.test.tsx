@@ -1,5 +1,5 @@
 /**
- * «Platz vorschlagen» on the dossier. Live 2026-10-02: Stepan's
+ * «Platz vorschlagen» on the dossier. Live 2026-10-02: Erika's
  * «Einsätze & Bewerbungen» said «Noch nichts» with no way forward.
  */
 import '@testing-library/jest-dom/vitest'
