@@ -31,7 +31,7 @@ export function AddApplicantForm({ opportunityId, people }: Props) {
         <label className="block w-full space-y-1.5 sm:w-auto">
           <span className="block text-xs font-medium text-ui-text">{L.addApplicant}</span>
           {/* Starts EMPTY: with no empty option the browser pre-selects the
-              first name, and one press of «Speichern» attached Alex by
+              first name, and one press of «Speichern» attached Max by
               accident (live 2026-10-02). The action refuses a blank too. */}
           <select name="residentId" required defaultValue="" className="input">
             <option value="" disabled>

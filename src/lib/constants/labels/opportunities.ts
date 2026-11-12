@@ -124,7 +124,7 @@ export const OPPORTUNITIES_ADMIN_LABELS = {
   addApplicantHint: 'Wer hat Interesse an diesem Platz?',
   addApplicantEmpty: 'Alle betreuten Personen sind diesem Platz bereits zugeordnet.',
   // The empty first option of the picker. A select with no empty option
-  // submits whoever sorts first — that attached Alex by accident, live.
+  // submits whoever sorts first — that attached Max by accident, live.
   choosePersonOption: 'Person wählen …',
   applicantsEmpty: 'Noch niemand zugeordnet.',
   applicantNote: 'Notiz',

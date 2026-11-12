@@ -22,8 +22,7 @@ import {
  * always zero.
  *
  * Observed in production on 2026-09-02: the Jobcoach had a client assigned that
- * same day — job-seeking, two years without work, an unrecognised trade
- * qualification, German at A2 — and the dashboard said
+ * same day, with real labour-market work outstanding, and the dashboard said
  * "🎉 Alles unter Kontrolle! Keine dringenden Aufgaben", without naming the client.
  *
  * That is the same failure the `unassigned` state was added to fix, one level
