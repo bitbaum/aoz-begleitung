@@ -178,7 +178,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   closingTitle: 'Jetez-y un œil.',
   closingBody:
-    'Un compte pour l’administration, l’accompagnement ou le portail des résidentes et résidents s’obtient par l’invitation de votre administration. Le blog, la roadmap et le changelog se lisent sans compte et rendent les décisions produit traçables.',
+    'L’accès à l’administration, à l’accompagnement ou au portail des résidentes et résidents s’obtient par l’invitation de votre administration. Le blog, la roadmap et le changelog se lisent sans compte et rendent les décisions produit traçables.',
 }
 
 const HOUSEHOLD_COPY: MarketingCopy = {

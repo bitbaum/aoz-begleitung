@@ -178,7 +178,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   closingTitle: 'Take a look.',
   closingBody:
-    'An account for administration, support or the resident portal comes through an invitation from your administration. Blog, roadmap and changelog can be read without an account and make the product decisions traceable.',
+    'Access to administration, support or the resident portal comes through an invitation from your administration. Blog, roadmap and changelog can be read without an account and make the product decisions traceable.',
 }
 
 const HOUSEHOLD_COPY: MarketingCopy = {
