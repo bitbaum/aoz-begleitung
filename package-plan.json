@@ -6,11 +6,7 @@
       "bindings": [
         {
           "file": "src/components/marketing/PublicChrome.tsx",
-          "symbols": ["SiteMasthead"]
-        },
-        {
-          "file": "src/app/(public)/layout.tsx",
-          "symbols": ["SiteFooter"]
+          "symbols": ["SiteMasthead", "SiteFooter"]
         }
       ]
     },

@@ -16,9 +16,25 @@ export const AI_DISCLOSURE_HREF = '/ki-datenschutz'
 
 /** Where AI runs today, and on what terms. Placeholders, not a contract. */
 export const AI_PROVIDERS_TODAY = [
-  { name: 'Groq', country: 'USA', role: 'erste Wahl' },
-  { name: 'OpenRouter', country: 'USA', role: 'Ersatz, wenn Groq nicht antwortet' },
+  { id: 'groq', name: 'Groq', country: 'USA', role: 'erste Wahl' },
+  {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    country: 'USA',
+    role: 'Ersatz, wenn Groq nicht antwortet',
+  },
 ] as const
+
+/**
+ * The provider ids the product may call — exactly the ones disclosed above.
+ * `lib/ai/provider.ts` drops every other vendor from the shared chain, so a
+ * key set on the box for a vendor nobody disclosed is ignored rather than
+ * used. The shared chain also offers Google; it stays off until it is named
+ * here and on the public pages.
+ */
+export const DISCLOSED_AI_PROVIDER_IDS: ReadonlySet<string> = new Set(
+  AI_PROVIDERS_TODAY.map((provider) => provider.id),
+)
 
 export interface AiSurface {
   /** Source file of the call site — pinned by the disclosure test. */
@@ -35,7 +51,8 @@ export const AI_SURFACES: readonly AiSurface[] = [
     name: 'Formular-Assistent',
     usedBy: 'Fachpersonen beim Erfassen einer Person oder eines Einsatzplatzes',
     sent: 'Der eingetippte oder eingefügte Text und die aktuellen Formularwerte.',
-    neverSent: 'Der Klient*innen-Code, medizinische Angaben und der Bewilligungsweg eines Platzes.',
+    neverSent:
+      'Der Klient*innen-Code, die gespeicherten Angaben zu Gesundheit und Unterstützungsbedarf (z. B. medizinische Geräte, Schlafgeräte, Einzelzimmer-Bedarf, Mobilität) und der Bewilligungsweg eines Platzes. Was Fachpersonen selbst in das Eingabefeld tippen, wird übermittelt; Gesundheitsangaben gehören nicht dort hinein.',
   },
   {
     source: 'src/app/api/ai/chat/route.ts',

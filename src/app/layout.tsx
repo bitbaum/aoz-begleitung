@@ -8,6 +8,7 @@ import './globals.css'
 // globals.css). Both ship in @bitbaum/design-tokens: no build fetches fonts.
 import { mono, sans } from './fonts'
 import { BRAND } from '@/lib/config/brand'
+import { publicSiteUrl } from '@/lib/config/app-url'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -24,7 +25,7 @@ export const viewport: Viewport = {
  * The host stays `aoz-wohnen` regardless of brand: it is an address, not
  * branding (see lib/config/brand.ts).
  */
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://aoz.orangecat.ch'
+const SITE_URL = publicSiteUrl()
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

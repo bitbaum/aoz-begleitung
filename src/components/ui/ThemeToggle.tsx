@@ -19,7 +19,26 @@ function applyTheme(mode: ThemeMode) {
   }
 }
 
-export function ThemeToggle({ className = '' }: { className?: string }) {
+/** The button's accessible name for each CURRENT mode. */
+export type ThemeToggleLabels = Record<ThemeMode, string>
+
+const GERMAN_LABELS: ThemeToggleLabels = {
+  system: 'Systemdesign wechseln',
+  light: 'Helles Design wechseln',
+  dark: 'Dunkles Design wechseln',
+}
+
+/**
+ * `labels` lets a page in another language name the button in that language;
+ * the staff side and the portal chrome are German and pass nothing.
+ */
+export function ThemeToggle({
+  className = '',
+  labels = GERMAN_LABELS,
+}: {
+  className?: string
+  labels?: ThemeToggleLabels
+}) {
   const [mode, setMode] = useState<ThemeMode>('system')
 
   useEffect(() => {
@@ -37,8 +56,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
   }
 
   const Icon = mode === 'dark' ? Moon : mode === 'light' ? Sun : Monitor
-  const label =
-    mode === 'dark' ? 'Dunkles Design' : mode === 'light' ? 'Helles Design' : 'Systemdesign'
+  const label = labels[mode]
 
   return (
     <Button
@@ -47,8 +65,8 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
       size="icon"
       onClick={nextMode}
       className={className}
-      aria-label={`${label} wechseln`}
-      title={`${label} wechseln`}
+      aria-label={label}
+      title={label}
     >
       <Icon className="h-4 w-4" aria-hidden="true" />
     </Button>

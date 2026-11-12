@@ -11,12 +11,21 @@ created_date: 2026-01-15
 last_modified_date: 2026-11-12
 last_modified_summary: The claim-link workflow no longer publishes a name.
 
-
 ## 2026-11-12 — The claim-link workflow no longer publishes a name
 
 - The operator workflow that issues a claim link takes the staff member's
   user id instead of their name, and logs only the id. The repository's
   Actions logs are public, and a name entered there was printed in them.
+
+## 2026-11-12 — The AI never sees health data, and only disclosed providers are called
+
+- The form assistant no longer receives the stored health and support
+  answers of a person (the whole "Unterstützungsbedarf" section, medical
+  devices and mobility), and cannot write them. `/ki-datenschutz` promised
+  this; until now the edit form sent them as current values.
+- AI calls go only to the providers `/ki-datenschutz` names. A key for any
+  other vendor on the server is ignored.
+
 ## 2026-11-12 — Published login codes are refused
 
 - Login codes that were printed in this public repository (the admin seed

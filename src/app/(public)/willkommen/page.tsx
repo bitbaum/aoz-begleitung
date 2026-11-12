@@ -21,8 +21,8 @@ export const dynamic = 'force-static'
 export const metadata: Metadata = {
   // `absolute` because this title already NAMES the product, and the root
   // layout's template appends the product name to everything else. Without it
-  // the landing page's tab reads "AOZ Begleitung — Integrationsplattform | AOZ
-  // Begleitung": the brand twice, in the one place a first-time visitor looks.
+  // the landing page's tab reads "AOZ — Integrationsplattform | AOZ": the
+  // brand twice, in the one place a first-time visitor looks.
   title: { absolute: `${BRAND.productName} — ${BRAND.tagline}` },
   description: BRAND.metaDescription,
   alternates: alternateLanguageLinks(),
