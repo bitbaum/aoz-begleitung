@@ -55,4 +55,25 @@ describe('AI disclosure', () => {
   it('the disclosure is readable without an account', () => {
     expect(PUBLIC_ROUTES).toContain('/ki-datenschutz')
   })
+
+  it('names every field the listing translation sends', () => {
+    // The prompt also carried `schedule`, which the disclosure did not name
+    // (found 2026-11-12). Each field the prompt serialises is named here.
+    const source = readFileSync(join(REPO, 'src/lib/opportunities/translate.ts'), 'utf8')
+    const surface = AI_SURFACES.find((s) => s.source === 'src/lib/opportunities/translate.ts')!
+    const words: Record<string, RegExp> = {
+      title: /Titel/,
+      description: /Beschreibung/,
+      requirementNote: /Hinweis/,
+      schedule: /Zeitangaben/,
+    }
+    const sent = [...source.matchAll(/^\s+(\w+): listing\.\w+,$/gm)].map((m) => m[1])
+    expect(sent.length).toBeGreaterThan(0)
+    for (const field of sent) {
+      expect({ field, named: words[field]?.test(surface.sent) ?? false }).toEqual({
+        field,
+        named: true,
+      })
+    }
+  })
 })
