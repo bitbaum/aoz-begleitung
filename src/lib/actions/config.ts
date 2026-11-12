@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { db, systemConfig } from '@/lib/db'
 import { eq } from 'drizzle-orm'
-import { requirePermission } from '@/lib/auth'
+import { requirePermission, requireStaffAuth } from '@/lib/auth'
 
 export interface SystemConfigData {
   pilotBaselineIncidentsPerMonth: number | null
@@ -13,6 +13,7 @@ export interface SystemConfigData {
 }
 
 export async function getSystemConfig(): Promise<SystemConfigData> {
+  await requireStaffAuth()
   const config = await db.query.systemConfig.findFirst({
     where: eq(systemConfig.id, 'singleton'),
   })

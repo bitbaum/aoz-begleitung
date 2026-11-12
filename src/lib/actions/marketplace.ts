@@ -1,5 +1,6 @@
 'use server'
 
+import { requireStaffReader } from './read-guards'
 import { revalidatePath } from 'next/cache'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { db, marketplacePost } from '@/lib/db'
@@ -145,6 +146,7 @@ export async function listMyMarketplacePosts(): Promise<MarketplacePostSummary[]
 }
 
 export async function listStaffMarketplacePosts(): Promise<MarketplacePostSummary[]> {
+  await requireStaffReader()
   const rows = await db.query.marketplacePost.findMany({
     with: POST_INCLUDE,
     orderBy: [desc(marketplacePost.createdAt)],
