@@ -9,7 +9,14 @@ Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
 last_modified_date: 2026-11-12
-last_modified_summary: Filled the gap from 2026-09-08 to 2026-11-03 from the merged pull requests.
+last_modified_summary: Each landing language is its own page to search engines.
+
+## 2026-11-12 — Each landing language is its own page to search engines
+
+- `/en/willkommen` and `/fr/willkommen` name themselves as canonical instead
+  of the German page, and a shared link shows the page itself, in its
+  language, rather than the site root in German.
+
 
 ## 2026-11-12 — Roadmap, changelog and blog read cleanly
 

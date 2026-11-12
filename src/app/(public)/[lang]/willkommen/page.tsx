@@ -5,12 +5,14 @@ import { Landing } from '@/components/marketing/Landing'
 import {
   PUBLIC_DEFAULT_LOCALE,
   isPublicLocale,
+  landingPath,
   marketingCopy,
   publicLocales,
   type PublicLocaleId,
 } from '@/lib/constants/labels/marketing'
 import { alternateLanguageLinks } from '@/lib/config/public-routes'
 import { PREFIXED_LOCALE_IDS } from '@/lib/config/public-locales'
+import { LOCALES } from '@/lib/i18n/locales'
 
 /**
  * The landing page in every language that is not German.
@@ -61,7 +63,15 @@ export async function generateMetadata({
     // sentence of this page that IS translated and does the same job, so a
     // French result in a search engine reads as French.
     description: copy.subline,
-    alternates: alternateLanguageLinks(),
+    alternates: alternateLanguageLinks(lang),
+    // The root layout's openGraph names the site root in German. A shared
+    // English or French link should show this page, in its language.
+    openGraph: {
+      title: `${BRAND.productName} — ${BRAND.tagline}`,
+      description: copy.subline,
+      url: landingPath(lang),
+      locale: LOCALES[lang].intlTag.replace('-', '_'),
+    },
   }
 }
 
