@@ -9,8 +9,15 @@ Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
 last_modified_date: 2026-11-12
-last_modified_summary: Published login codes are refused; landing page claims match the deployment; Impressum and privacy statement on the public site.
+last_modified_summary: Roadmap, changelog and blog read cleanly.
 
+
+## 2026-11-12 — Roadmap, changelog and blog read cleanly
+
+- `/roadmap` and `/changelog` no longer show the docs' internal maintenance
+  notes as a paragraph under the header; they show a "Stand" date instead.
+- Blog posts, written in English, are marked as English, so screen readers no
+  longer read them with German pronunciation.
 ## 2026-11-12 — Published login codes are refused
 
 - Login codes that were printed in this public repository (the admin seed
