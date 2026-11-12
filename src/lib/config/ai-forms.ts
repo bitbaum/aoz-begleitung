@@ -24,14 +24,39 @@ import { OPPORTUNITY_AREA_NAME, OPPORTUNITY_KIND_LABELS } from './opportunities'
 import { CEFR_LEVELS } from './learning'
 
 /**
- * Factors the assistant may never write.
+ * Health and support factors: never shown to the model, never written by it.
+ *
+ * `/ki-datenschutz` promises that the form assistant never sends medical
+ * information. Until 2026-11-12 only `code` was excluded, so the edit form sent
+ * the stored "Medizinische Geräte", sleep-equipment (CPAP), night-disturbance
+ * and single-room-need values to the provider as "current values". Health data
+ * is particularly sensitive under the Swiss data protection act, and a staff
+ * member fills these fields in by hand in seconds.
+ *
+ * The whole `health` section ("Unterstützungsbedarf") is taken by SECTION, so a
+ * factor added to it later is excluded without anyone remembering this list.
+ * Two health-related factors live in the `practical` section and are named.
+ */
+export const AI_HEALTH_SECTION_ID = 'health'
+const HEALTH_FACTORS_OUTSIDE_SECTION = ['medicalEquipment', 'mobilityNeeds'] as const
+
+/**
+ * Factors the assistant may never see or write.
  *
  * `code` is the resident's anonymous reference number. It is an identifier
  * issued by AOZ, not a fact about the person, so a model inventing a
  * plausible-looking one is strictly worse than leaving it blank — it would
  * either collide with a real resident or create an untraceable record.
+ *
+ * The health and support factors are excluded for the reason above. The
+ * package drops an excluded field from the field list AND from the current
+ * values it sends (`redactExcluded`), and refuses a model reply that writes it.
  */
-export const AI_EXCLUDED_FACTOR_IDS: ReadonlySet<string> = new Set(['code'])
+export const AI_EXCLUDED_FACTOR_IDS: ReadonlySet<string> = new Set([
+  'code',
+  ...getFactorsBySection(AI_HEALTH_SECTION_ID).map((factor) => factor.id),
+  ...HEALTH_FACTORS_OUTSIDE_SECTION,
+])
 
 /** Longest free-text the model may write into a notes field. */
 const MAX_AI_TEXT = 2000

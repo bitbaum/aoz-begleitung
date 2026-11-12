@@ -7,6 +7,7 @@
 
 import { freeChain, usableChain, chainFrom } from '@bitbaum/ai-kit'
 import { BRAND } from '@/lib/config/brand'
+import { DISCLOSED_AI_PROVIDER_IDS } from '@/lib/config/ai-disclosure'
 import { completeProviderRequest } from './transport'
 import { AIChainExhaustedError, AIProviderError, shouldTryNextProvider } from './errors'
 import { recordAIHealthFailure, recordAIHealthSuccess } from './health'
@@ -92,7 +93,13 @@ export async function getAIProviderConfigs(): Promise<AIProviderConfig[]> {
   // across every link, so a deployment with only OPENROUTER_API_KEY posted
   // `openai/gpt-oss-120b` to OpenRouter — a model id that vendor does not
   // serve. A model name only means something at the vendor that publishes it.
-  const links = usableChain(freeChain('AOZ'), process.env)
+  //
+  // Only the vendors /ki-datenschutz names. The shared free chain also carries
+  // Google, which would be used as soon as GEMINI_API_KEY appears on the box —
+  // sending staff input to a provider the public disclosure does not name.
+  const links = usableChain(freeChain('AOZ'), process.env).filter((link) =>
+    DISCLOSED_AI_PROVIDER_IDS.has(link.provider.id),
+  )
 
   // ONE link per vendor. The chain lists several models per provider, but a
   // second model at the SAME vendor draws on the same org-wide daily budget —

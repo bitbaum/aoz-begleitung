@@ -9,8 +9,17 @@ Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
 last_modified_date: 2026-11-12
-last_modified_summary: Published login codes are refused; landing page claims match the deployment; Impressum and privacy statement on the public site.
+last_modified_summary: The AI never sees health data, and only disclosed providers are called.
 
+
+## 2026-11-12 — The AI never sees health data, and only disclosed providers are called
+
+- The form assistant no longer receives the stored health and support
+  answers of a person (the whole "Unterstützungsbedarf" section, medical
+  devices and mobility), and cannot write them. `/ki-datenschutz` promised
+  this; until now the edit form sent them as current values.
+- AI calls go only to the providers `/ki-datenschutz` names. A key for any
+  other vendor on the server is ignored.
 ## 2026-11-12 — Published login codes are refused
 
 - Login codes that were printed in this public repository (the admin seed
