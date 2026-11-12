@@ -65,7 +65,7 @@ export const AI_SURFACES: readonly AiSurface[] = [
     source: 'src/lib/opportunities/translate.ts',
     name: 'Übersetzung von Einsatzplätzen',
     usedBy: 'automatisch, für das Portal der Klient*innen',
-    sent: 'Titel, Beschreibung und Hinweis eines veröffentlichten Einsatzplatzes.',
+    sent: 'Titel, Beschreibung, Hinweis und Zeitangaben eines veröffentlichten Einsatzplatzes.',
     neverSent: 'Angaben zu Personen. Die Angabe zur Bewilligung wird nie maschinell übersetzt.',
   },
 ]
