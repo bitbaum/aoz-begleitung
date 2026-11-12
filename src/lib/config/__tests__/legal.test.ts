@@ -31,6 +31,12 @@ describe('legal pages', () => {
     expect(layout).toContain('PRIVACY_HREF')
   })
 
+  it('both are linked from the sign-in screens', () => {
+    const shell = readFileSync(join(process.cwd(), 'src/components/auth/AuthShell.tsx'), 'utf8')
+    expect(shell).toContain('IMPRESSUM_HREF')
+    expect(shell).toContain('PRIVACY_HREF')
+  })
+
   it('both name the operator contact', () => {
     expect(text(IMPRESSUM_COPY)).toContain(OPERATOR.email)
     expect(text(PRIVACY_COPY)).toContain(OPERATOR.email)

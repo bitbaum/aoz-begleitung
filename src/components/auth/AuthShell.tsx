@@ -16,6 +16,7 @@
  *    page it sits behind.
  */
 
+import { IMPRESSUM_HREF, LEGAL_LABELS, PRIVACY_HREF } from '@/lib/config/legal'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
@@ -103,6 +104,26 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
         </div>
 
         {footer}
+
+        {/* Whoever is about to type an e-mail address and a password here can
+            read who runs the site and what happens to their data first. */}
+        <nav
+          aria-label={LEGAL_LABELS.navLabel}
+          className="mt-6 flex justify-center gap-4 text-xs text-ui-muted"
+        >
+          <Link
+            href={PRIVACY_HREF}
+            className="hover:text-ui-text underline-offset-2 hover:underline"
+          >
+            {LEGAL_LABELS.privacy}
+          </Link>
+          <Link
+            href={IMPRESSUM_HREF}
+            className="hover:text-ui-text underline-offset-2 hover:underline"
+          >
+            {LEGAL_LABELS.impressum}
+          </Link>
+        </nav>
       </div>
     </div>
   )

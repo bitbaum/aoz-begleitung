@@ -150,6 +150,7 @@ export const LEGAL_LABELS = {
   aiHref: AI_DISCLOSURE_HREF,
   impressum: 'Impressum',
   privacy: 'Datenschutz',
+  navLabel: 'Rechtliches',
 } as const
 
 interface LegalCopy {
