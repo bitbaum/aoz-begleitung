@@ -91,7 +91,7 @@ const PLACEMENT_COPY: MarketingCopy = {
       body: 'Unterkünfte, Platzierung, Verlegungen, Wartung und Vorfälle in einem Verlauf — mit einem Matching, das erklärt, warum es diese Kombination vorschlägt.',
     },
     {
-      icon: 'vote',
+      icon: 'scroll',
       title: 'Das Haus regelt seinen Alltag',
       body: 'Hausregeln mit Versionen und Bestätigung, Aufgaben mit Fairness-Bilanz und ein Weg für Anliegen, der bis zur Antwort führt.',
     },
@@ -113,13 +113,13 @@ const PLACEMENT_COPY: MarketingCopy = {
     {
       icon: 'chart',
       title: 'Nachvollziehbar für alle',
-      body: 'Jede Platzierung ist protokolliert, jeder Score zerlegbar, jedes Abstimmungsergebnis mit der damals gültigen Regel erklärbar.',
+      body: 'Jede Platzierung ist protokolliert, jeder Score zerlegbar, jede Hausregel in ihrer damals gültigen Fassung nachlesbar.',
     },
   ],
 
   scienceEyebrow: 'Wissenschaftliche Grundlage',
   scienceTitle: `Keine Meinung, sondern Methode: ${FACTOR_COUNT} Matching-Faktoren — und Alltagsmechanik nach dokumentierten Befunden.`,
-  scienceBody: `Die Kompatibilitätsfaktoren sind aus publizierter Forschung abgeleitet — Schweizer Studien zuerst, internationale zur Einordnung, insgesamt ${SOURCE_COUNT} Quellen —, und die Evidenzstärke ist je Faktor offen ausgewiesen: Manche Befunde stammen aus anderen Wohnformen und sind für Kollektivunterkünfte eine begründete Annahme, die der Pilot prüft. Und die Mechanik jenseits des Matchings folgt denselben Massstäben: vom Eigenanteil-Bias beim Putzplan bis zur Regel, dass Sicherheit nie zur Abstimmung steht. Die vollständige Methodik samt Quellenverzeichnis ist im Produkt für alle Fachpersonen einsehbar — auch über den direkten Zugang auf der Anmeldeseite.`,
+  scienceBody: `Die Kompatibilitätsfaktoren sind aus publizierter Forschung abgeleitet — Schweizer Studien zuerst, internationale zur Einordnung, insgesamt ${SOURCE_COUNT} Quellen —, und die Evidenzstärke ist je Faktor offen ausgewiesen: Manche Befunde stammen aus anderen Wohnformen und sind für Kollektivunterkünfte eine begründete Annahme, die der Pilot prüft. Und die Mechanik jenseits des Matchings folgt denselben Massstäben: vom Eigenanteil-Bias beim Putzplan bis zur Regel, dass Sicherheitsthemen immer bei den Fachpersonen liegen. Die vollständige Methodik samt Quellenverzeichnis ist im Produkt für alle Fachpersonen einsehbar.`,
   science: [
     {
       title: 'Sauberkeit ist eine Richtung, kein Durchschnitt',
@@ -142,8 +142,8 @@ const PLACEMENT_COPY: MarketingCopy = {
       body: 'Wer aufräumt, überschätzt den eigenen Anteil — ein dokumentierter Bias, kein Charakterfehler. Der Aufgabenplan zeigt deshalb, wer wie viel getragen hat, statt Erinnerung gegen Erinnerung antreten zu lassen.',
     },
     {
-      title: 'Sicherheit steht nie zur Abstimmung',
-      body: 'Haushalte entscheiden über ihren Alltag selbst — aber eine Mehrheit kann die Sicherheit einer Minderheit nicht wegstimmen. Solche Themen gehen immer an die Fachpersonen, und jedes Abstimmungsergebnis bleibt mit der damals gültigen Regel erklärbar.',
+      title: 'Sicherheit entscheidet nie das Haus',
+      body: 'Hausregeln werden den Klient*innen vorgelegt und von ihnen bestätigt, und jede Änderung wird neu vorgelegt. Sicherheitsthemen gehen immer an die Fachpersonen, und jede Regel bleibt in ihrer damals gültigen Fassung nachlesbar.',
     },
   ],
 
@@ -188,7 +188,7 @@ const PLACEMENT_COPY: MarketingCopy = {
 
   closingTitle: 'Sehen Sie es sich an.',
   closingBody:
-    'Der direkte Zugang auf der Anmeldeseite öffnet das echte Produkt — Verwaltung, Begleitung und das Portal der Klient*innen. Blog, Roadmap und Changelog machen die Produktentscheidungen nachvollziehbar.',
+    'Ein Konto für Verwaltung, Begleitung oder das Portal der Klient*innen erhalten Sie über die Einladung Ihrer Administration. Blog, Roadmap und Changelog sind ohne Konto lesbar und machen die Produktentscheidungen nachvollziehbar.',
 }
 
 /** The household register: the people who actually live in the flat. */
@@ -334,7 +334,7 @@ const HOUSEHOLD_COPY: MarketingCopy = {
 
   closingTitle: 'Schau es dir an.',
   closingBody:
-    'Der direkte Zugang öffnet das echte Produkt — du siehst genau das, was die Bewohnenden sehen.',
+    'Melde dich mit deinem Code oder deiner E-Mail-Adresse an — du siehst genau das, was deine Mitbewohnenden sehen.',
 }
 
 export const marketingDe: MarketingRegisters = {
