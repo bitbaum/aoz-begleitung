@@ -6,7 +6,7 @@
  * register, and Einsatzplatz listings were machine-translated, all through
  * free test access at US providers, and no screen said so.
  *
- * The public page (/ki-datenschutz) and the "KI · Testbetrieb" badge both
+ * The public page (/ki-datenschutz) and the "KI · Testzugang" badge both
  * render from THIS list, so a new AI feature cannot ship undisclosed without
  * someone deciding what to write here — `ai-disclosure.test.ts` checks every
  * call site of the provider is named below.
@@ -71,14 +71,14 @@ export const AI_SURFACES: readonly AiSurface[] = [
 ]
 
 export const AI_DISCLOSURE_COPY = {
-  badge: 'KI · Testbetrieb',
-  badgeTitle: 'KI-Hilfe im Testbetrieb — was übermittelt wird und an wen',
+  badge: 'KI · Testzugang',
+  badgeTitle: 'KI-Hilfe über kostenlose Testzugänge — was übermittelt wird und an wen',
   pageTitle: 'KI und Datenschutz',
   pageLead:
-    'Wo in diesem Produkt KI vorkommt, was ihr übermittelt wird, an wen — und was sich ändert, bevor echte Daten im Regelbetrieb verarbeitet werden.',
-  todayTitle: 'Heute: Testbetrieb',
+    'Wo in diesem Produkt KI vorkommt, was ihr übermittelt wird, an wen — und was sich vor dem Regelbetrieb ändert.',
+  todayTitle: 'Heute: kostenlose Zugänge, echte Daten',
   today:
-    'Die KI-Funktionen laufen über kostenlose Testzugänge externer Anbieter. Sie sind Platzhalter, um zu zeigen, wie die Funktionen arbeiten — kein Vertrag, keine Zusage zu Speicherung oder Training.',
+    'Die KI-Funktionen laufen heute über kostenlose Testzugänge externer Anbieter in den USA, ohne Auftragsbearbeitungsvertrag und ohne Zusage zu Speicherung oder Training. Die Daten in diesem Produkt sind echt: Was unten als übermittelt steht, sind Angaben über echte Personen.',
   providersTitle: 'Anbieter heute',
   surfacesTitle: 'Wo KI vorkommt',
   sentLabel: 'Übermittelt',
@@ -92,8 +92,8 @@ export const AI_DISCLOSURE_COPY = {
   ],
   contractTitle: 'Vor dem Regelbetrieb',
   contract:
-    'Bevor eine Organisation echte Daten im Regelbetrieb verarbeitet, wird die KI entweder abgeschaltet oder durch ein Modell mit Hosting in der Schweiz bzw. einen Anbieter mit Auftragsbearbeitungsvertrag ersetzt (keine Speicherung, kein Training) — nach Freigabe durch deren Datenschutzstelle.',
+    'Bevor eine Organisation das Produkt im Regelbetrieb einsetzt, wird die KI entweder abgeschaltet oder durch ein Modell mit Hosting in der Schweiz bzw. einen Anbieter mit Auftragsbearbeitungsvertrag ersetzt (keine Speicherung, kein Training) — nach Freigabe durch deren Datenschutzstelle.',
   englishTitle: 'In English',
   english:
-    'AI appears in three places: a form assistant and a question assistant for staff, and machine translation of job and volunteering listings. Today it runs on free test access at Groq (USA), with OpenRouter (USA) as a fallback — placeholders, not a contract. Placement is a published formula, not AI; residents never talk to an AI; a person reviews every suggestion. Before real data is processed in regular operation, AI is either switched off or replaced by a Swiss-hosted model or a provider under a data-processing agreement.',
+    'AI appears in three places: a form assistant and a question assistant for staff, and machine translation of job and volunteering listings. Today it runs on free test access at Groq (USA), with OpenRouter (USA) as a fallback: no contract, no data-processing agreement and no commitment on storage or training. The data in this product is real, so what is sent is about real people. Placement is a published formula, not AI; residents never talk to an AI inside the product; a person reviews every suggestion. Before an organisation uses the product in regular operation, AI is either switched off or replaced by a Swiss-hosted model or a provider under a data-processing agreement. The feedback window on the public pages is a separate service and is described in the privacy statement.',
 } as const
