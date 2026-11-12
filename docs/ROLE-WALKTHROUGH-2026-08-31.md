@@ -35,7 +35,8 @@ rather than leaving the seat quietly empty — an unstaffed domain looks
 identical to a staffed one nobody has used yet. The SOCIAL seat is covered by
 the all-domains Betreuerin's oversight.
 
-Provisioning lives in `scripts/db/real/aoz-team.ts` (config) +
+Provisioning lives in `scripts/db/real/aoz-team.ts` (shape and loader; the
+people themselves are in a gitignored local file since 2026-11-12) +
 `scripts/maintenance/ensure-aoz-team.ts` (idempotent, matches by name, so it
 is also how a reach is corrected later). Codes are generated at run time and
 printed once — never committed, for the same reason the real apartment's

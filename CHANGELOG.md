@@ -11,6 +11,14 @@ created_date: 2026-01-15
 last_modified_date: 2026-11-12
 last_modified_summary: Landing page claims match the deployment; Impressum and privacy statement on the public site.
 
+## 2026-11-12 — Real team list out of the public repository
+
+- The list of real staff members that `ensure-aoz-team.ts` provisions is no
+  longer committed. It is read from a gitignored local file
+  (`scripts/db/real/aoz-team.local.json`, or `REAL_TEAM_FILE`), the same way
+  the real apartments already are; `aoz-team.example.json` shows the shape
+  with invented people. Earlier commits are unchanged.
+
 ## 2026-11-12 — Landing page claims match the deployment
 
 - The landing page no longer invites visitors to a "direct access on the

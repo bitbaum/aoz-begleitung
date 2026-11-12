@@ -57,8 +57,9 @@ next-env.d.ts
 /*.png
 .playwright-mcp/
 
-# Real apartment config (addresses, who lives where) — personal data, never
-# committed. Shape: scripts/db/real/apartments.example.json; loader: load.ts.
+# Real apartment config (addresses, who lives where) and real team config
+# (names, roles) — personal data, never committed. Shapes:
+# scripts/db/real/*.example.json; loaders: load.ts and aoz-team.ts.
 scripts/db/real/*.local.json
 scripts/db/real/*.local.ts
 browser-smoke-artifacts/

@@ -1,0 +1,32 @@
+{
+  "team": [
+    {
+      "name": "Beispiel Betreuung",
+      "role": "BETREUUNG",
+      "scope": "ALL_DOMAINS",
+      "isSystemAdmin": false,
+      "note": "Betreuung — Wohnen ist der eigene Bereich, sieht zusätzlich alle Klient*innen."
+    },
+    {
+      "name": "Beispiel Jobcoach",
+      "role": "JOBCOACH",
+      "scope": "OWN_DOMAIN",
+      "isSystemAdmin": false,
+      "note": "Jobcoach — sieht die Personen, die er oder sie begleitet."
+    },
+    {
+      "name": "Beispiel Freiwilligenarbeit",
+      "role": "FREIWILLIGENARBEIT",
+      "scope": "OWN_DOMAIN",
+      "isSystemAdmin": false,
+      "note": "Freiwilligenarbeit — sieht die Personen, die er oder sie begleitet."
+    },
+    {
+      "name": "Beispiel Liegenschaften",
+      "role": "LIEGENSCHAFTEN",
+      "scope": "OWN_DOMAIN",
+      "isSystemAdmin": false,
+      "note": "Liegenschaften — Unterkünfte, Platzierungen und Unterhalt. Keine Fallführung."
+    }
+  ]
+}
