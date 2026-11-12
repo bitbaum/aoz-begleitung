@@ -26,9 +26,17 @@ describe('legal pages', () => {
   })
 
   it('both are linked from the public footer', () => {
+    // The layout renders PublicFooter; the links themselves live there, in
+    // every language. The rendered footer is checked per locale in
+    // components/marketing/__tests__/PublicChrome.test.tsx.
     const layout = readFileSync(join(process.cwd(), 'src/app/(public)/layout.tsx'), 'utf8')
-    expect(layout).toContain('IMPRESSUM_HREF')
-    expect(layout).toContain('PRIVACY_HREF')
+    expect(layout).toContain('<PublicFooter />')
+    const chrome = readFileSync(
+      join(process.cwd(), 'src/components/marketing/PublicChrome.tsx'),
+      'utf8',
+    )
+    expect(chrome).toContain('IMPRESSUM_HREF')
+    expect(chrome).toContain('PRIVACY_HREF')
   })
 
   it('both name the operator contact', () => {

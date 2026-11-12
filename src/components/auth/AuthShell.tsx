@@ -59,7 +59,7 @@ export function AuthShell({
     // so on a phone it follows the card instead of pushing it below the fold.
     <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,26rem)] lg:items-center gap-8 lg:gap-12">
       <div className="fixed right-4 top-4 z-10">
-        <ThemeToggle />
+        <ThemeToggle labels={PUBLIC_CHROME[locale].theme} />
       </div>
 
       <section className="order-2 lg:order-1 min-w-0">
