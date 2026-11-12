@@ -41,6 +41,8 @@ export interface PublicChromeCopy {
   aiLink: string
   privacy: string
   impressum: string
+  /** The 404 page. The action is named for where it goes: the home page. */
+  notFound: { title: string; body: string; action: string }
 }
 
 /**
@@ -73,6 +75,11 @@ export const PUBLIC_CHROME: Record<PublicLocaleId, PublicChromeCopy> = {
     aiLink: 'KI und Datenschutz',
     privacy: 'Datenschutz',
     impressum: 'Impressum',
+    notFound: {
+      title: 'Seite nicht gefunden',
+      body: 'Die angeforderte Seite existiert nicht oder wurde verschoben.',
+      action: 'Zur Startseite',
+    },
   },
   en: {
     skipLink: 'Skip to content',
@@ -93,6 +100,11 @@ export const PUBLIC_CHROME: Record<PublicLocaleId, PublicChromeCopy> = {
     aiLink: 'AI and privacy',
     privacy: 'Privacy',
     impressum: 'Legal notice',
+    notFound: {
+      title: 'Page not found',
+      body: 'The page you asked for does not exist or has moved.',
+      action: 'Go to the home page',
+    },
   },
   fr: {
     skipLink: 'Aller au contenu',
@@ -113,5 +125,10 @@ export const PUBLIC_CHROME: Record<PublicLocaleId, PublicChromeCopy> = {
     aiLink: 'IA et protection des données',
     privacy: 'Protection des données',
     impressum: 'Mentions légales',
+    notFound: {
+      title: 'Page introuvable',
+      body: 'La page demandée n’existe pas ou a été déplacée.',
+      action: 'Aller à la page d’accueil',
+    },
   },
 }
