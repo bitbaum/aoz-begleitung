@@ -9,8 +9,17 @@ Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
 last_modified_date: 2026-11-12
-last_modified_summary: Published login codes are refused; landing page claims match the deployment; Impressum and privacy statement on the public site.
+last_modified_summary: Every server action checks who is asking.
 
+
+## 2026-11-12 — Every server action checks who is asking
+
+- Ten read functions exported as server actions (care team, assignable
+  staff, care attributes, appointments, staff event and marketplace lists,
+  unit addresses, system configuration) now check the session themselves
+  instead of relying on the page that calls them. Staff, or the client the
+  data is about, may read; nobody else.
+- A test fails when a new server action exports without a check.
 ## 2026-11-12 — Published login codes are refused
 
 - Login codes that were printed in this public repository (the admin seed

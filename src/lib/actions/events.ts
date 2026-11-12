@@ -1,5 +1,6 @@
 'use server'
 
+import { requireStaffReader } from './read-guards'
 import { revalidatePath } from 'next/cache'
 import { db, eventRsvp, houseEvent, placement } from '@/lib/db'
 import type { EventRsvpStatus, HouseEventCategory, HouseEventStatus } from '@/lib/db'
@@ -132,6 +133,7 @@ export async function listUnitEvents(now: Date = new Date()): Promise<{
 }
 
 export async function listStaffEvents(): Promise<HouseEventSummary[]> {
+  await requireStaffReader()
   const rows = await db.query.houseEvent.findMany({
     with: {
       housingUnit: { columns: { id: true, code: true } },
@@ -362,6 +364,7 @@ export async function deleteEvent(
 
 /** Units for the staff event form, with how many people live in each. */
 export async function listEventUnitOptions(): Promise<EventUnitOption[]> {
+  await requireStaffReader()
   const units = await db.query.housingUnit.findMany({
     columns: { id: true, code: true, nickname: true, address: true },
     with: { placements: { where: eq(placement.status, 'ACTIVE'), columns: { id: true } } },
