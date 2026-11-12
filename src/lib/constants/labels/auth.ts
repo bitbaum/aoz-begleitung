@@ -192,7 +192,11 @@ export const REGISTER_LABELS = {
   title: 'Konto erstellen',
   subtitle:
     'Mit Ihrem Zugangscode registrieren — danach melden Sie sich mit E-Mail und Passwort an.',
-  codeHint: 'Der Code, den Sie von der Verwaltung oder Ihrer WG erhalten haben.',
+  // Only a WG deployment hands out codes from the flat itself; on AOZ every
+  // code comes from intake or a staff invite, and "Ihrer WG" was wrong there.
+  codeHint: BRAND.features.selfServeHousehold
+    ? 'Der Code, den Sie von der Verwaltung oder Ihrer WG erhalten haben.'
+    : 'Der Code, den Sie von der Verwaltung erhalten haben.',
   submit: 'Konto erstellen',
   submitting: 'Konto wird erstellt...',
   success: 'Konto erstellt — Sie sind angemeldet.',

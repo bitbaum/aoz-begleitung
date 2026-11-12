@@ -17,6 +17,7 @@ last_modified_summary: Each landing language is its own page to search engines.
   of the German page, and a shared link shows the page itself, in its
   language, rather than the site root in German.
 
+
 ## 2026-11-12 — Roadmap, changelog and blog read cleanly
 
 - `/roadmap` and `/changelog` no longer show the docs' internal maintenance
@@ -97,6 +98,26 @@ last_modified_summary: Each landing language is its own page to search engines.
   data, and which cookies are set. The AI providers in the list come from the
   same config as `/ki-datenschutz`.
 
+## 2026-11-02 to 2026-11-03 — Sign-in on the shared account screens
+
+- Sign-in moved onto AccountKit's own screens, with passkeys and a second
+  factor (#362); code sign-in and the account claim followed onto the same
+  screens (#365). The sign-in page offers e-mail and password, an e-mail
+  link, a passkey, a Lightning wallet, and Google, GitHub or OrangeCat.
+- Inter and JetBrains Mono come from the shared design tokens and are served
+  from this site, no longer loaded from Google (#366).
+- The landing page's language switcher renders the same on server and
+  browser (#363).
+
+## 2026-10-29 — Shared account runtime behind a switch, staff search
+
+- The shared account runtime (AccountKit) was wired in behind
+  `AUTH_RUNTIME`, off by default (#342), with its identity schema staged and
+  an import rehearsed (#340); staff sessions on it last 8 hours (#344).
+- Every staff list uses the shared typo-tolerant search (#346); survey
+  audiences use the shared matching and selection (#338).
+- The public shell and date fields come from shared packages (#335).
+
 ## 2026-10-29 — Shared private-message reconciliation
 
 - ThreadKit reconciles optimistic and confirmed messages in both the resident
@@ -141,6 +162,58 @@ last_modified_summary: Each landing language is its own page to search engines.
 - The admin assistant uses ChatKit's thread and composer, including scroll
   intent, cancellation, an editable next draft and retry. AI Kit handles
   network-fragmented response events instead of discarding partial JSON lines.
+
+## 2026-10-14 to 2026-10-22 — Claim links replace quick access
+
+- The public quick-access login into staff accounts was replaced by
+  personal, single-use claim links (#311), with an operator workflow that
+  stores a link by token hash only (#312, #313).
+- Real residents and real addresses were taken out of the public repository
+  (#308), and the MIT licence the README claims was added (#307).
+- The staff chat uses the shared audio-enabled chat engine (#314) and shared
+  visual AI answers (#309); the feedback widget may take voice notes (#303).
+
+## 2026-10-01 to 2026-10-06 — Everything on the site is real; roles by desk
+
+- The invented demo world and its nightly reset were removed; besides real
+  data, the site holds only unclaimed placeholder profiles (#283). The login
+  page's quick-access buttons then signed in as named staff, until claim
+  links replaced them (#311). A demo with invented people
+  had run from 2026-09-25, first on its own instance and then on the main
+  site behind separate doors (#258, #265, #272, #282); demo logins were
+  switched off in production on 2026-09-25 (#256).
+- One desk per role decides each person's Eingang, hero and dossier tab
+  (#284).
+- Einsatzplätze got a real application lifecycle and one review page (#286).
+- Client filters come from one config, and groups can be saved (#288).
+- Anonymous surveys for client groups (#289).
+- The portal addresses clients with Sie in every language (#291).
+- Fixes from walking every role on the live site (#285, #287, #290, #293,
+  #294).
+
+## 2026-09-24 to 2026-09-30 — Person-centred navigation, honest pages
+
+- The start page became Eingang: who is waiting on me, with a badge (#254).
+  Staff navigation is person-centred, with one catalogue of places (#257).
+- The feedback widget is off private pages, and the landing page says only
+  what is true (#259).
+- Household fit notes replace per-person problem ranking (#260); nothing
+  that places people uses religion or origin proxies (#261).
+- Where AI is used, what it sends and to whom is shown everywhere staff meet
+  it (#262).
+- The portal has an Einsatzplätze tab with a one-tap filter (#264); the
+  person's page is split into sections, each role opening on its own work
+  (#268).
+- The AOZH badge was retired: the product is AOZ's (#270).
+- The Einsatzplatz assistant fills gaps, writes the description and speaks
+  German (#253).
+
+## 2026-09-08 to 2026-09-17 — Placeholder profiles, login throttle
+
+- Claimable placeholder profiles replaced the fabricated demo world (#231).
+- The login throttle no longer keys on a value the caller picks (#245).
+- Docs name the live product (aoz.orangecat.ch) and the renamed repository
+  (#237, #243).
 
 ## 2026-09-07 — The client's own record, and decisions that explain themselves
 
