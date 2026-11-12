@@ -5,6 +5,7 @@ import 'bip-kit/styles.css'
 import '@/lib/blog/blog.css'
 import { parseRepoDocBlocks } from '@/lib/blog/blocks'
 import { BlogPostBody } from '@/lib/blog/BlogPostBody'
+import { formatCalendarDateLong } from '@/lib/utils/formatting'
 
 export const dynamic = 'force-static'
 
@@ -25,6 +26,14 @@ export default function PublicChangelogPage() {
           Nachvollziehbare Änderungen, laufend dokumentiert. Roadmap sagt, wohin wir gehen.
           Changelog sagt, was schon da ist.
         </p>
+        {changelog.lastModified ? (
+          <p className="mt-3 text-sm text-ui-muted numeric">
+            Stand:{' '}
+            <time dateTime={changelog.lastModified}>
+              {formatCalendarDateLong(changelog.lastModified)}
+            </time>
+          </p>
+        ) : null}
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href="/roadmap" className="btn-outline">
             Roadmap

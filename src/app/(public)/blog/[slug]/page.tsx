@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { ReadingProgress, Toc } from 'bip-kit/react'
 import 'bip-kit/styles.css'
 import '@/lib/blog/blog.css'
-import { getAllPosts, getPostBySlug } from '@/lib/blog/posts'
+import { BLOG_LANG, getAllPosts, getPostBySlug } from '@/lib/blog/posts'
 import { parsePostBlocks } from '@/lib/blog/blocks'
 import { BlogPostBody } from '@/lib/blog/BlogPostBody'
 import { BLOG_LABELS } from '@/lib/constants/labels'
@@ -63,7 +63,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           beside it, so the 280px breakout cannot cause horizontal scroll). The
           Toc hides itself under 3 headings, so short posts stay single-column. */}
       <div className="2xl:grid 2xl:grid-cols-[minmax(0,1fr)_240px] 2xl:gap-10 2xl:-mr-[280px]">
-        <article>
+        <article lang={BLOG_LANG}>
           <header className="mb-8 pb-8 border-b border-ui-border">
             <p className="eyebrow numeric">
               {BLOG_LABELS.published}{' '}

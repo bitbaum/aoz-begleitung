@@ -5,6 +5,7 @@ import 'bip-kit/styles.css'
 import '@/lib/blog/blog.css'
 import { parseRepoDocBlocks } from '@/lib/blog/blocks'
 import { BlogPostBody } from '@/lib/blog/BlogPostBody'
+import { formatCalendarDateLong } from '@/lib/utils/formatting'
 
 export const dynamic = 'force-static'
 
@@ -25,6 +26,14 @@ export default function PublicRoadmapPage() {
           Die öffentliche Sicht auf Prioritäten, Richtung und die wissenschaftliche Grundlage hinter
           der Produktentwicklung.
         </p>
+        {roadmap.lastModified ? (
+          <p className="mt-3 text-sm text-ui-muted numeric">
+            Stand:{' '}
+            <time dateTime={roadmap.lastModified}>
+              {formatCalendarDateLong(roadmap.lastModified)}
+            </time>
+          </p>
+        ) : null}
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href="/blog" className="btn-outline">
             Blog
