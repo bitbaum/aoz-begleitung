@@ -17,6 +17,14 @@ last_modified_summary: Each landing language is its own page to search engines.
   of the German page, and a shared link shows the page itself, in its
   language, rather than the site root in German.
 
+## 2026-11-12 — Roadmap, changelog and blog read cleanly
+
+- `/roadmap` and `/changelog` no longer show the docs' internal maintenance
+  notes as a paragraph under the header; they show a "Stand" date instead.
+- Blog posts, written in English, are marked as English, so screen readers no
+  longer read them with German pronunciation.
+
+
 ## 2026-11-12 — Every server action checks who is asking
 
 - Ten read functions exported as server actions (care team, assignable

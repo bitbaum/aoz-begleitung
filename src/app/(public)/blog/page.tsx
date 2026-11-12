@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { getAllPosts } from '@/lib/blog/posts'
+import { getAllPosts, BLOG_LANG } from '@/lib/blog/posts'
 import { BLOG_LABELS } from '@/lib/constants/labels'
 import { formatCalendarDateLong } from '@/lib/utils/formatting'
 
@@ -33,8 +33,12 @@ export default function BlogIndexPage() {
             <li key={post.slug}>
               <Link href={`/blog/${post.slug}`} className="card-hover">
                 <p className="eyebrow numeric">{formatCalendarDateLong(post.date)}</p>
-                <h2 className="text-lg sm:text-xl font-semibold text-ui-text mt-1">{post.title}</h2>
-                <p className="text-sm text-ui-muted mt-2 line-clamp-3">{post.excerpt}</p>
+                <h2 lang={BLOG_LANG} className="text-lg sm:text-xl font-semibold text-ui-text mt-1">
+                  {post.title}
+                </h2>
+                <p lang={BLOG_LANG} className="text-sm text-ui-muted mt-2 line-clamp-3">
+                  {post.excerpt}
+                </p>
               </Link>
             </li>
           ))}

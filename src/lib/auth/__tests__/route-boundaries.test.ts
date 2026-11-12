@@ -42,6 +42,17 @@ describe('auth route boundaries', () => {
     expect(isPublicRoute('/api/auth/login')).toBe(true)
   })
 
+  test('the portal entry is public, its pages are not', () => {
+    // '/portal' matched as a prefix made every portal page public at the
+    // middleware, so RESIDENT_ROUTES was never consulted for a page.
+    expect(isPublicRoute('/portal')).toBe(true)
+    expect(isPublicRoute('/portal/help')).toBe(true)
+    for (const page of ['/portal/profile', '/portal/expenses', '/portal/chores/123']) {
+      expect({ page, public: isPublicRoute(page) }).toEqual({ page, public: false })
+      expect({ page, resident: requiresResidentAuth(page) }).toEqual({ page, resident: true })
+    }
+  })
+
   test('staff routes require staff auth', () => {
     expect(requiresStaffAuth('/')).toBe(true)
     expect(requiresStaffAuth('/residents')).toBe(true)

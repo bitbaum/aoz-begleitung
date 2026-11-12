@@ -27,6 +27,14 @@ import { readCollection, type CollectionEntry } from 'bip-kit/node'
 
 const BLOG_DIR = join(process.cwd(), 'docs', 'blog')
 
+/**
+ * The engineering blog is written in English, inside a site whose <html> is
+ * German. Without saying so, screen readers read every post with German
+ * pronunciation (found 2026-11-12). The post page marks its article with this.
+ * A post in another language needs this to become per-post.
+ */
+export const BLOG_LANG = 'en'
+
 export interface BlogPost {
   /** URL segment: the filename stem with the date prefix removed. */
   slug: string
