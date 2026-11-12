@@ -8,8 +8,16 @@ project does not tag semver releases yet — entries are grouped by deploy date
 Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
-last_modified_date: 2026-10-29
-last_modified_summary: Shared private-message reconciliation and scoped staff conversation access.
+last_modified_date: 2026-11-12
+last_modified_summary: Impressum and privacy statement on the public site.
+
+## 2026-11-12 — Impressum and privacy statement
+
+- The public site has an Impressum (`/impressum`) and a privacy statement
+  (`/datenschutz`), linked from the footer of every public page. They name the
+  operator and contact, where the data is hosted, which subprocessors receive
+  data, and which cookies are set. The AI providers in the list come from the
+  same config as `/ki-datenschutz`.
 
 ## 2026-10-29 — Shared private-message reconciliation
 

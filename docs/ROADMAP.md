@@ -3,8 +3,8 @@
 Related: [Changelog](../CHANGELOG.md) · [Blog](blog/README.md) · [Integration research framework](./INTEGRATION-RESEARCH-FRAMEWORK.md)
 
 created_date: 2026-01-15
-last_modified_date: 2026-09-26
-last_modified_summary: Rewritten for the person-centred product and the people who fund and run this work. Investor framing removed; pilot targets are stated as hypotheses the pilot tests; language status corrected (6 offered, 3 speaker-reviewed).
+last_modified_date: 2026-11-12
+last_modified_summary: Impressum and privacy statement moved from Next to done. Earlier: Rewritten for the person-centred product and the people who fund and run this work. Investor framing removed; pilot targets are stated as hypotheses the pilot tests; language status corrected (6 offered, 3 speaker-reviewed).
 
 ## What this is for
 
@@ -57,6 +57,8 @@ Done:
   progress and not offered until complete.
 - A no-account demo on its own instance with invented data.
 - AI use disclosed at `/ki-datenschutz` and wherever staff meet it.
+- Impressum (`/impressum`) and privacy statement (`/datenschutz`), with the
+  list of subprocessors.
 
 Next:
 - Pilot measurement tooling: baseline import, staff time sampling, an
@@ -64,7 +66,6 @@ Next:
   people).
 - Human review of the portal languages most asylum seekers read — Tigrinya
   and Dari first.
-- Impressum and privacy statement; a subprocessor list.
 
 ## Later (2027)
 
