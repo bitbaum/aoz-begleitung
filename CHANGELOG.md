@@ -14,6 +14,16 @@ last_modified_summary: Filled the gap from 2026-09-08 to 2026-11-03 from the mer
 
 
 
+## 2026-11-12 — The privacy pages say what happens today
+
+- `/ki-datenschutz` no longer calls the AI a placeholder that is switched off
+  "before real data" is processed: the data in this product is real, and the
+  page now says that AI receives it today under free-tier terms.
+- `/datenschutz` no longer says an account exists only by invitation. It lists
+  the ways an account can be created, says an account reaches data about
+  people only once an invitation or code links it, names the health, insurance
+  and permit data the product holds, lists Google and GitHub as sign-in
+  services, and says the feedback window can record voice and uses AI.
 
 ## 2026-11-12 — The AI never sees health data, and only disclosed providers are called
 
@@ -23,6 +33,7 @@ last_modified_summary: Filled the gap from 2026-09-08 to 2026-11-03 from the mer
   this; until now the edit form sent them as current values.
 - AI calls go only to the providers `/ki-datenschutz` names. A key for any
   other vendor on the server is ignored.
+
 ## 2026-11-12 — Published login codes are refused
 
 - Login codes that were printed in this public repository (the admin seed
