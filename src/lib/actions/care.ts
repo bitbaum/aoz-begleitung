@@ -1,5 +1,6 @@
 'use server'
 
+import { requireStaffOrSelf, requireStaffReader } from './read-guards'
 import { revalidatePath } from 'next/cache'
 import {
   db,
@@ -82,6 +83,7 @@ export type CareAttributeValue = {
  * Used to power the "Meine Klient*innen" filter on the client board.
  */
 export async function getMyResidentIds(staffId: string): Promise<string[]> {
+  await requireStaffReader()
   const assignments = await db.query.careAssignment.findMany({
     where: eq(careAssignment.staffId, staffId),
     columns: { residentId: true },
@@ -114,6 +116,7 @@ function revalidateResident(residentId: string) {
 }
 
 export async function getCareTeam(residentId: string): Promise<CareSeat[]> {
+  await requireStaffOrSelf(residentId)
   const assignments = await db.query.careAssignment.findMany({
     where: eq(careAssignment.residentId, residentId),
     with: { staff: { columns: { id: true, name: true } } },
@@ -140,6 +143,7 @@ export async function getCareTeam(residentId: string): Promise<CareSeat[]> {
  * real question — see `canStaffWorkDomain` in config/care.ts.
  */
 export async function listAssignableStaff(): Promise<AssignableStaff[]> {
+  await requireStaffReader()
   return db.query.user.findMany({
     where: eq(userTable.active, true),
     columns: { id: true, name: true, role: true, scope: true },
@@ -148,6 +152,7 @@ export async function listAssignableStaff(): Promise<AssignableStaff[]> {
 }
 
 export async function listCareAttributes(residentId: string): Promise<CareAttributeValue[]> {
+  await requireStaffReader()
   const rows = await db.query.careAttribute.findMany({
     where: eq(careAttribute.residentId, residentId),
   })
@@ -159,6 +164,7 @@ export async function listCareAttributes(residentId: string): Promise<CareAttrib
 }
 
 export async function listResidentAppointments(residentId: string): Promise<CareAppointment[]> {
+  await requireStaffReader()
   const rows = await db.query.appointment.findMany({
     where: eq(appointmentTable.residentId, residentId),
     with: { staff: { columns: { id: true, name: true } } },
@@ -183,6 +189,7 @@ export async function listUpcomingResidentAppointments(
   residentId: string,
   now = new Date(),
 ): Promise<CareAppointment[]> {
+  await requireStaffOrSelf(residentId)
   const answeredSince = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
 
   const rows = await db.query.appointment.findMany({

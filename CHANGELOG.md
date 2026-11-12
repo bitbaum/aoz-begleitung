@@ -18,6 +18,16 @@ last_modified_summary: Roadmap, changelog and blog read cleanly.
 - Blog posts, written in English, are marked as English, so screen readers no
   longer read them with German pronunciation.
 
+## 2026-11-12 — Every server action checks who is asking
+
+- Ten read functions exported as server actions (care team, assignable
+  staff, care attributes, appointments, staff event and marketplace lists,
+  unit addresses, system configuration) now check the session themselves
+  instead of relying on the page that calls them. Staff, or the client the
+  data is about, may read; nobody else.
+- A test fails when a new server action exports without a check.
+
+
 ## 2026-11-12 — The claim-link workflow no longer publishes a name
 
 - The operator workflow that issues a claim link takes the staff member's
