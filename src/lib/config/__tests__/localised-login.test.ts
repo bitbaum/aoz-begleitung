@@ -13,6 +13,12 @@ import {
 import { LOGIN_COPY } from '@/lib/constants/labels/auth'
 import { PUBLIC_CHROME } from '@/lib/constants/labels/public-chrome'
 
+/** Every string in a nested copy table. */
+function leaves(value: unknown): string[] {
+  if (typeof value === 'string') return [value]
+  return Object.values(value as Record<string, unknown>).flatMap(leaves)
+}
+
 /**
  * QA, 12 Nov 2026: `/en/login` and `/fr/login` answered 404, so a reader who
  * followed the English landing page to "sign in" met a dead end. Each public
@@ -33,7 +39,7 @@ describe('localised sign-in', () => {
   it('has the sign-in words and the chrome in every public language', () => {
     for (const locale of PUBLIC_LOCALE_IDS) {
       for (const value of Object.values(LOGIN_COPY[locale])) expect(value.trim()).not.toBe('')
-      for (const value of Object.values(PUBLIC_CHROME[locale])) expect(value.trim()).not.toBe('')
+      for (const value of leaves(PUBLIC_CHROME[locale])) expect(value.trim()).not.toBe('')
     }
   })
 

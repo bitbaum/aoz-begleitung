@@ -57,6 +57,8 @@ describe('design tokens are defined in exactly one place', () => {
     // Same constraint, different renderer: the social-preview card is drawn by
     // Satori, which also cannot read CSS custom properties.
     'src/app/opengraph-image.tsx',
+    // The install manifest is JSON a browser reads before any CSS exists.
+    'src/app/manifest.ts',
   ]
 
   it('has no hardcoded hex colour outside the token files', () => {

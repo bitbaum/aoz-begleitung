@@ -70,7 +70,7 @@ export const IMPRESSUM_COPY = {
       id: 'betreiber',
       title: 'Betreiber und Kontakt',
       paragraphs: [
-        `Diese Website und die Software «${BRAND.productName}» werden von ${OPERATOR.name} (${OPERATOR.site}) entwickelt und betrieben.`,
+        `Diese Website und die Software dahinter werden von ${OPERATOR.name} (${OPERATOR.site}) entwickelt und betrieben.`,
         `Kontakt für alle Anliegen, auch zum Datenschutz: ${OPERATOR.email}`,
       ],
     },

@@ -36,7 +36,8 @@ describe('brand presets', () => {
       residentCodePrefix: 'KL-',
       clientTerm: 'Klient*in',
       clientTermPlural: 'Klient*innen',
-      productName: 'AOZ Begleitung',
+      // The public name is just the organisation's (QA, 12 Nov 2026).
+      productName: 'AOZ',
       // Neutral register: an AOZ Unterkunft is not asserted to be someone's
       // home by the software they are required to use.
       portalName: 'Mein Bereich',

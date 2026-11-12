@@ -162,7 +162,12 @@ export interface Brand {
    * on the singular's value is the hardcoding this config exists to remove.
    */
   clientTermPlural: string
-  /** Product name in the chrome, login page and page titles. */
+  /**
+   * Product name in the chrome, login page, page titles, social card and
+   * install manifest — the PUBLIC name. For AOZ that is the organisation's
+   * own name and nothing more (operator brief, 12 Nov 2026): "AOZ Begleitung" was a
+   * product name nobody uses, sitting in every tab and link preview.
+   */
   productName: string
   /**
    * What the CLIENT-facing portal calls itself.
@@ -215,7 +220,7 @@ export const BRANDS: Record<BrandId, Brand> = {
     residentCodePrefix: 'KL-',
     clientTerm: 'Klient*in',
     clientTermPlural: 'Klient*innen',
-    productName: 'AOZ Begleitung',
+    productName: 'AOZ',
     portalName: 'Mein Bereich',
     portalTitleKey: 'portal.title',
     tagline: 'Integrationsplattform',
