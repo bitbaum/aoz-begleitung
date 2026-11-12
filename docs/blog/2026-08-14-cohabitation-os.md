@@ -76,3 +76,11 @@ locations whether placements informed by compatibility cut incidents,
 relocations and mediation hours — and report the result either way.
 Everything else rests on one boring, verifiable sentence: *the conflicts
 stopped happening.*
+
+> **Editor's note, 2026-11-12.** Two things above have changed since this was
+> written. The product now runs two presentations, not three: the neutral
+> badge was retired on 2026-09-26, and the product is branded AOZ, with a
+> separate preset for a real shared flat. And the current roadmap
+> (https://aoz.orangecat.ch/roadmap) no longer lists portable
+> resident-owned profiles or a cross-operator vacancy network; what remains
+> of that direction is one installation serving several operators.
