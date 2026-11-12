@@ -9,8 +9,14 @@ Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
 last_modified_date: 2026-11-12
-last_modified_summary: Published login codes are refused; landing page claims match the deployment; Impressum and privacy statement on the public site.
+last_modified_summary: The claim-link workflow no longer publishes a name.
 
+
+## 2026-11-12 — The claim-link workflow no longer publishes a name
+
+- The operator workflow that issues a claim link takes the staff member's
+  user id instead of their name, and logs only the id. The repository's
+  Actions logs are public, and a name entered there was printed in them.
 ## 2026-11-12 — Published login codes are refused
 
 - Login codes that were printed in this public repository (the admin seed
