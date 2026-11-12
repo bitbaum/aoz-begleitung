@@ -9,8 +9,14 @@ Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
 last_modified_date: 2026-11-12
-last_modified_summary: Published login codes are refused; landing page claims match the deployment; Impressum and privacy statement on the public site.
+last_modified_summary: Each landing language is its own page to search engines.
 
+
+## 2026-11-12 — Each landing language is its own page to search engines
+
+- `/en/willkommen` and `/fr/willkommen` name themselves as canonical instead
+  of the German page, and a shared link shows the page itself, in its
+  language, rather than the site root in German.
 ## 2026-11-12 — Published login codes are refused
 
 - Login codes that were printed in this public repository (the admin seed

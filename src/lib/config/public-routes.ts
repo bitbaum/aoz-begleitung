@@ -27,7 +27,15 @@ import { LOCALES } from '@/lib/i18n/locales'
  * `x-default` points at German — it is the language the product is written in
  * and the safe answer for a reader whose own language is not offered.
  */
-export function alternateLanguageLinks(): Metadata['alternates'] {
+export function alternateLanguageLinks(
+  /**
+   * The language of the page asking. Each translation is its own canonical:
+   * the English page used to name the German one as canonical while listing
+   * itself as the `en` alternate, which tells a search engine two opposite
+   * things and drops the translation from results (found 2026-11-12).
+   */
+  locale: PublicLocaleId = PUBLIC_DEFAULT_LOCALE,
+): Metadata['alternates'] {
   const languages: Record<string, string> = {}
 
   for (const locale of publicLocales()) {
@@ -38,5 +46,5 @@ export function alternateLanguageLinks(): Metadata['alternates'] {
 
   languages['x-default'] = landingPath(PUBLIC_DEFAULT_LOCALE)
 
-  return { canonical: landingPath(PUBLIC_DEFAULT_LOCALE), languages }
+  return { canonical: landingPath(locale), languages }
 }

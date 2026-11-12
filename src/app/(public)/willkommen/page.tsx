@@ -26,6 +26,12 @@ export const metadata: Metadata = {
   title: { absolute: `${BRAND.productName} — ${BRAND.tagline}` },
   description: BRAND.metaDescription,
   alternates: alternateLanguageLinks(),
+  openGraph: {
+    title: `${BRAND.productName} — ${BRAND.tagline}`,
+    description: BRAND.metaDescription,
+    url: '/willkommen',
+    locale: 'de_CH',
+  },
 }
 
 export default function LandingPage() {

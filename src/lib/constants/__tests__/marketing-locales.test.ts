@@ -288,6 +288,15 @@ describe('where each language lives', () => {
     expect(advertised.sort()).toEqual(expected.sort())
   })
 
+  it('makes each offered language its own canonical', () => {
+    // /en/willkommen named the German page as canonical while listing itself
+    // as the en alternate — two opposite signals to a search engine.
+    for (const locale of publicLocales()) {
+      const id = locale.id as PublicLocaleId
+      expect(alternateLanguageLinks(id)?.canonical).toBe(landingPath(id))
+    }
+  })
+
   it('points x-default at German', () => {
     const alternates = alternateLanguageLinks()
     expect(alternates?.languages?.['x-default']).toBe('/willkommen')
