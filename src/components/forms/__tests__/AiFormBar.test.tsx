@@ -1,7 +1,7 @@
 /**
  * Words that touch only through a CSS margin are ONE word to copy, search and
  * screen readers. Live 2026-10-02 the opportunity form's heading read
- * "KI · TestbetriebAus einem Inserat ausfüllen". textContent is what those
+ * "KI · TestzugangAus einem Inserat ausfüllen". textContent is what those
  * readers get; a screenshot cannot show this.
  */
 import '@testing-library/jest-dom/vitest'
@@ -44,12 +44,12 @@ describe('AiFormBar heading', () => {
   it('keeps the AI badge and the title two phrases', () => {
     render(<AiFormBar form={form} fillTitle="Aus einem Inserat ausfüllen" />)
     const heading = screen.getByRole('heading', { level: 2 })
-    expect(heading.textContent).toMatch(/Testbetrieb\s+Aus einem Inserat/)
+    expect(heading.textContent).toMatch(/Testzugang\s+Aus einem Inserat/)
   })
 
   it('gives the badge link a 44px hit area', () => {
     render(<AiFormBar form={form} fillTitle="Aus einem Inserat ausfüllen" />)
-    const link = screen.getByRole('link', { name: /Testbetrieb/ })
+    const link = screen.getByRole('link', { name: /Testzugang/ })
     expect(link.className).toContain('min-h-[44px]')
   })
 })
