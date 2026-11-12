@@ -10,6 +10,15 @@ const scriptSrc = isDev ? "'self' 'unsafe-inline' 'unsafe-eval'" : "'self' 'unsa
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  async redirects() {
+    return [
+      // There is no price list: the product is built for AOZ, and nothing on
+      // the site sells it. `/preise` was a guessed URL that answered 404, so it
+      // goes to the page that does say what this is. 308 — permanent, and the
+      // method is kept.
+      { source: '/preise', destination: '/willkommen', permanent: true },
+    ]
+  },
   async headers() {
     return [
       {

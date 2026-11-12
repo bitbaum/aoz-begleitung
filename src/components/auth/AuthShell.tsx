@@ -11,7 +11,7 @@
  *    without editing the URL bar. The logo is now the way back.
  * 2. A PAGE THAT EXPLAINS NOTHING. A lone form on an empty canvas asks a
  *    stranger to identify themselves before telling them what this is. The
- *    aside answers that, and it reads from MARKETING_COPY rather than
+ *    aside answers that, and it reads from the landing copy rather than
  *    restating the pitch, so the login page can never contradict the landing
  *    page it sits behind.
  */
@@ -20,8 +20,14 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import { APP_LABELS, LOGIN_LABELS, MARKETING_COPY } from '@/lib/constants/labels'
+import { LegalLinks } from '@/components/marketing/LegalLinks'
+import { APP_LABELS, LOGIN_COPY, PUBLIC_CHROME, marketingCopy } from '@/lib/constants/labels'
 import { BRAND } from '@/lib/config/brand'
+import {
+  PUBLIC_DEFAULT_LOCALE,
+  landingPath,
+  type PublicLocaleId,
+} from '@/lib/config/public-locales'
 
 interface AuthShellProps {
   title: string
@@ -29,9 +35,25 @@ interface AuthShellProps {
   children: React.ReactNode
   /** Rendered below the card (secondary actions, demo doors). */
   footer?: React.ReactNode
+  /**
+   * The language of the page around the form. German unless the route says
+   * otherwise (`/en/login`, `/fr/login`): the pitch beside the form, the way
+   * back and the legal links all follow it.
+   */
+  locale?: PublicLocaleId
 }
 
-export function AuthShell({ title, subtitle, children, footer }: AuthShellProps) {
+export function AuthShell({
+  title,
+  subtitle,
+  children,
+  footer,
+  locale = PUBLIC_DEFAULT_LOCALE,
+}: AuthShellProps) {
+  const pitch = marketingCopy(locale)
+  // German goes to `/`, which already shows a stranger the German landing; the
+  // other languages go to their own landing rather than back to German.
+  const home = locale === PUBLIC_DEFAULT_LOCALE ? '/' : landingPath(locale)
   return (
     // Mobile-first: one column, form first. The aside is supporting context,
     // so on a phone it follows the card instead of pushing it below the fold.
@@ -42,17 +64,17 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
 
       <section className="order-2 lg:order-1 min-w-0">
         <Link
-          href="/"
+          href={home}
           className="inline-flex items-center gap-2 min-h-[44px] text-sm text-ui-muted hover:text-ui-text transition-colors"
         >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-          {LOGIN_LABELS.backToHome}
+          {PUBLIC_CHROME[locale].backToHome}
         </Link>
 
         <h2 className="mt-4 text-2xl sm:text-3xl font-semibold tracking-heading text-ui-text text-balance">
-          {MARKETING_COPY.headline}
+          {pitch.headline}
         </h2>
-        <p className="mt-3 text-ui-muted max-w-prose">{MARKETING_COPY.subline}</p>
+        <p className="mt-3 text-ui-muted max-w-prose">{pitch.subline}</p>
 
         {/*
           TITLES ONLY, AND ALL OF THEM.
@@ -71,7 +93,7 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
           away for anyone who wants the bodies.
         */}
         <ul className="mt-6 flex flex-wrap gap-x-2 gap-y-2">
-          {MARKETING_COPY.features.map((feature) => (
+          {pitch.features.map((feature) => (
             <li key={feature.title} className="chip-neutral">
               {feature.title}
             </li>
@@ -86,7 +108,7 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
               accessible name pointing at the same place is a screen-reader
               stutter with nothing to choose between them. */}
           <Link
-            href="/"
+            href={home}
             aria-label={BRAND.productName}
             className="inline-flex flex-col items-center gap-2 transition-opacity hover:opacity-70"
           >
@@ -98,11 +120,15 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
         <div className="card p-6 sm:p-8">
           <h1 className="text-lg font-semibold text-ui-text mb-1 text-center">{title}</h1>
           {subtitle ? <p className="text-sm text-ui-muted mb-1 text-center">{subtitle}</p> : null}
-          <p className="text-xs text-ui-muted mb-6 text-center">{LOGIN_LABELS.audienceHint}</p>
+          <p className="text-xs text-ui-muted mb-6 text-center">
+            {LOGIN_COPY[locale].audienceHint}
+          </p>
           {children}
         </div>
 
         {footer}
+
+        <LegalLinks locale={locale} className="mt-6" />
       </div>
     </div>
   )
