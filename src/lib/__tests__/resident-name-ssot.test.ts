@@ -5,7 +5,7 @@
  * and degrade to the code on their own when someone chose no display name. A
  * component that renders `resident.code` directly type-checks, lints and
  * renders — as a bare code — which is how the chore board came to say
- * "erledigt von RES-LCCM7A" to the person's own flatmates, and how the staff
+ * "erledigt von RES-XXXXXX" to the person's own flatmates, and how the staff
  * queues showed codes for people whose names were sitting in the same row.
  *
  * Selecting only `{ code: true }` in Prisma causes the same defect one layer

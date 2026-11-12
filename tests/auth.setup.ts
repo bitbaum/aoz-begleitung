@@ -16,7 +16,7 @@ export default async function globalSetup(config: FullConfig) {
 
   const ctx = await request.newContext({ baseURL })
 
-  const staffCode = process.env.E2E_STAFF_CODE || `${BRAND.codePrefix}ADMIN1`
+  const staffCode = process.env.E2E_STAFF_CODE || `${BRAND.codePrefix}E2E001`
 
   // Login with staff code (assumes DB is seeded with this user).
   //

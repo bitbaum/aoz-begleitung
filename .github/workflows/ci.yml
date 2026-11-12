@@ -184,6 +184,9 @@ jobs:
           pnpm run db:seed:admin
         env:
           DATABASE_URL: 'postgresql://aoz_test:aoz_test@localhost:5432/aoz_housing_test'
+          # A test-only code, matching the default in tests/helpers.ts. The old
+          # seed default was published and is refused at login.
+          ADMIN_CODE: 'AOZ-E2E001'
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium

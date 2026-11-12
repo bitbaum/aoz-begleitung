@@ -28,7 +28,7 @@ export interface NamedResident {
  *
  * Spread this into every query whose rows reach the UI. Selecting only `code`
  * type-checks and renders — as a bare login code, silently — which is exactly
- * how the chore board came to tell people "erledigt von RES-LCCM7A".
+ * how the chore board came to tell people "erledigt von RES-XXXXXX".
  */
 export const RESIDENT_NAME_SELECT = {
   id: true,
