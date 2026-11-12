@@ -21,7 +21,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LegalLinks } from '@/components/marketing/LegalLinks'
-import { APP_LABELS, LOGIN_COPY, PUBLIC_CHROME, marketingCopy } from '@/lib/constants/labels'
+import { LOGIN_COPY, PUBLIC_CHROME, marketingCopy } from '@/lib/constants/labels'
 import { BRAND } from '@/lib/config/brand'
 import {
   PUBLIC_DEFAULT_LOCALE,
@@ -59,7 +59,7 @@ export function AuthShell({
     // so on a phone it follows the card instead of pushing it below the fold.
     <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,26rem)] lg:items-center gap-8 lg:gap-12">
       <div className="fixed right-4 top-4 z-10">
-        <ThemeToggle />
+        <ThemeToggle labels={PUBLIC_CHROME[locale].theme} />
       </div>
 
       <section className="order-2 lg:order-1 min-w-0">
@@ -113,7 +113,7 @@ export function AuthShell({
             className="inline-flex flex-col items-center gap-2 transition-opacity hover:opacity-70"
           >
             <Logo size="xl" />
-            <span className="text-ui-muted">{APP_LABELS.tagline}</span>
+            <span className="text-ui-muted">{PUBLIC_CHROME[locale].tagline}</span>
           </Link>
         </div>
 

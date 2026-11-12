@@ -11,12 +11,21 @@ created_date: 2026-01-15
 last_modified_date: 2026-11-12
 last_modified_summary: Each landing language is its own page to search engines.
 
-
 ## 2026-11-12 — Each landing language is its own page to search engines
 
 - `/en/willkommen` and `/fr/willkommen` name themselves as canonical instead
   of the German page, and a shared link shows the page itself, in its
   language, rather than the site root in German.
+
+## 2026-11-12 — The AI never sees health data, and only disclosed providers are called
+
+- The form assistant no longer receives the stored health and support
+  answers of a person (the whole "Unterstützungsbedarf" section, medical
+  devices and mobility), and cannot write them. `/ki-datenschutz` promised
+  this; until now the edit form sent them as current values.
+- AI calls go only to the providers `/ki-datenschutz` names. A key for any
+  other vendor on the server is ignored.
+
 ## 2026-11-12 — Published login codes are refused
 
 - Login codes that were printed in this public repository (the admin seed
