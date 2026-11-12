@@ -4,6 +4,7 @@ import { SiteFooter } from '@bitbaum/sitekit/react'
 import { PublicMasthead } from '@/components/marketing/PublicChrome'
 import { APP_LABELS, BLOG_LABELS } from '@/lib/constants/labels'
 import { AI_DISCLOSURE_HREF } from '@/lib/config/ai-disclosure'
+import { IMPRESSUM_HREF, LEGAL_LABELS, PRIVACY_HREF } from '@/lib/config/legal'
 
 /**
  * The route group for pages that are readable without an account.
@@ -42,6 +43,8 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           { href: '/roadmap', label: 'Roadmap' },
           { href: '/changelog', label: 'Changelog' },
           { href: AI_DISCLOSURE_HREF, label: 'KI und Datenschutz' },
+          { href: PRIVACY_HREF, label: LEGAL_LABELS.privacy },
+          { href: IMPRESSUM_HREF, label: LEGAL_LABELS.impressum },
         ]}
       />
       {/* The feedback widget lives HERE and nowhere else: public pages carry
