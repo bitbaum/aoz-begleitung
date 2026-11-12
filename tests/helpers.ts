@@ -3,7 +3,7 @@ import { BRAND } from '../src/lib/config/brand'
 import { LOGIN_LABELS } from '../src/lib/constants/labels'
 import { LOCALE_COOKIE } from '../src/lib/i18n/locales'
 
-const STAFF_CODE = process.env.E2E_STAFF_CODE || `${BRAND.codePrefix}ADMIN1`
+const STAFF_CODE = process.env.E2E_STAFF_CODE || `${BRAND.codePrefix}E2E001`
 
 /**
  * Ensure the page has a valid staff session.

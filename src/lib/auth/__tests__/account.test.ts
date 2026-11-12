@@ -83,7 +83,7 @@ import { account as accountTable, user as userTable } from '@/lib/db'
 
 const STAFF = {
   id: 'user-1',
-  code: 'AOZ-ADMIN1',
+  code: 'AOZ-K7M2QX',
   name: 'Admin',
   role: 'ADMIN' as const,
   active: true,
@@ -168,14 +168,14 @@ describe('registerAccount', () => {
     mockAccountById.mockResolvedValue(account({ id: 'acc-new', user: STAFF }))
 
     const result = await registerAccount({
-      code: 'AOZ-ADMIN1',
+      code: 'AOZ-K7M2QX',
       email: 'g@example.ch',
       password: 'secret-password',
     })
 
     expect(result.success).toBe(true)
     if (!result.success) return
-    expect(result.identities.staff).toMatchObject({ code: 'AOZ-ADMIN1', email: 'g@example.ch' })
+    expect(result.identities.staff).toMatchObject({ code: 'AOZ-K7M2QX', email: 'g@example.ch' })
     expect(result.identities.resident).toBeUndefined()
 
     const [table, created] = mockInsert.mock.calls[0]
@@ -218,7 +218,7 @@ describe('registerAccount', () => {
   it('rejects a DEACTIVATED staff code with the same message as an unknown one', async () => {
     mockUserFindFirst.mockResolvedValue({ id: STAFF.id, active: false })
     const result = await registerAccount({
-      code: 'AOZ-ADMIN1',
+      code: 'AOZ-K7M2QX',
       email: 'x@example.ch',
       password: 'secret-password',
     })
@@ -259,7 +259,7 @@ describe('registerAccount', () => {
     mockAccountById.mockResolvedValue(account({ user: STAFF }))
 
     const result = await registerAccount({
-      code: 'AOZ-ADMIN1',
+      code: 'AOZ-K7M2QX',
       email: 'g@example.ch',
       password: 'secret-password',
     })
@@ -274,11 +274,27 @@ describe('registerAccount', () => {
     mockSendEmail.mockRejectedValue(new Error('smtp down'))
 
     const result = await registerAccount({
-      code: 'AOZ-ADMIN1',
+      code: 'AOZ-K7M2QX',
       email: 'g@example.ch',
       password: 'secret-password',
     })
     expect(result.success).toBe(true)
+  })
+
+  it('refuses to attach an account to a published code', async () => {
+    // The seeded admin's default code was printed in this public repository.
+    // Registering with it would hand a stranger a password on that identity.
+    codeExists({ staff: true })
+
+    const result = await registerAccount({
+      code: 'AOZ-ADMIN1',
+      email: 'stranger@example.ch',
+      password: 'secret-password',
+    })
+
+    expect(result.success).toBe(false)
+    expect(mockInsert).not.toHaveBeenCalled()
+    expect(mockUpdate).not.toHaveBeenCalled()
   })
 })
 
@@ -302,7 +318,7 @@ describe('registerAccount — linking a SECOND role to one login', () => {
 
     expect(result.success).toBe(true)
     if (!result.success) return
-    expect(result.identities.staff).toMatchObject({ code: 'AOZ-ADMIN1' })
+    expect(result.identities.staff).toMatchObject({ code: 'AOZ-K7M2QX' })
     expect(result.identities.resident).toEqual({ id: 'res-1', code: 'RES-ABC123' })
 
     expect(mockUpdate).toHaveBeenCalledWith(

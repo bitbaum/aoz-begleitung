@@ -63,26 +63,36 @@ describe('loginByCode — staff routing', () => {
   it.each(Object.values(BRANDS).map((b) => [b.id, b.codePrefix]))(
     'accepts a %s-era staff code (%s)',
     async (_id, prefix) => {
-      const result = await loginByCode(`${prefix}ADMIN1`, '10.0.0.1')
+      const result = await loginByCode(`${prefix}K7M2QX`, '10.0.0.1')
 
       expect(result).toMatchObject({ success: true, type: 'staff' })
       // Looked up by the exact string — a prefix never rewrites a code.
       expect(eqParts(mockUserFindFirst.mock.calls[0][0].where)).toEqual({
         column: 'code',
-        value: `${prefix}ADMIN1`,
+        value: `${prefix}K7M2QX`,
       })
     },
   )
 
-  it('still admits the original seeded AOZ admin after the AOZH rebrand', async () => {
-    // The exact regression: this code exists in production today.
-    const result = await loginByCode('AOZ-ADMIN1', '10.0.0.1')
-    expect(result).toMatchObject({ success: true, type: 'staff' })
+  it.each(['AOZ-ADMIN1', 'AOZH-ADMIN1', 'WG-ADMIN1', 'WG-DEMO01'])(
+    'refuses the published staff code %s even though the account exists',
+    async (code) => {
+      // These codes were printed in this public repository, and the docs said
+      // which live accounts carried them. A published code is not a credential.
+      const result = await loginByCode(code, '10.0.0.1')
+      expect(result).toMatchObject({ success: false, error: 'Ungültiger Code' })
+      expect(mockUserFindFirst).not.toHaveBeenCalled()
+    },
+  )
+
+  it('refuses a published code whatever its case or padding', async () => {
+    expect(await loginByCode(' aoz-admin1 ', '10.0.0.1')).toMatchObject({ success: false })
   })
 
   it('rejects an inactive staff account', async () => {
     mockUserFindFirst.mockResolvedValue({ ...STAFF, active: false })
-    expect(await loginByCode('AOZH-ADMIN1', '10.0.0.1')).toMatchObject({ success: false })
+    expect(await loginByCode('AOZH-K7M2QX', '10.0.0.1')).toMatchObject({ success: false })
+    expect(mockUserFindFirst).toHaveBeenCalled()
   })
 })
 
