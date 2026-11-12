@@ -4,7 +4,7 @@ Related: [Changelog](../CHANGELOG.md) · [Blog](blog/README.md) · [Integration 
 
 created_date: 2026-01-15
 last_modified_date: 2026-11-12
-last_modified_summary: Impressum and privacy statement moved from Next to done. Earlier: Rewritten for the person-centred product and the people who fund and run this work. Investor framing removed; pilot targets are stated as hypotheses the pilot tests; language status corrected (6 offered, 3 speaker-reviewed).
+last_modified_summary: Done list matches what shipped (no demo instance; surveys shipped with their real minimum). Earlier: Impressum and privacy statement moved from Next to done. Earlier: Rewritten for the person-centred product and the people who fund and run this work. Investor framing removed; pilot targets are stated as hypotheses the pilot tests; language status corrected (6 offered, 3 speaker-reviewed).
 
 ## What this is for
 
@@ -55,15 +55,18 @@ Done:
   by speakers; Ukrainian, Russian and Arabic complete and marked as
   machine-assisted. Farsi/Dari, Tigrinya, Turkish, Albanian and Somali are in
   progress and not offered until complete.
-- A no-account demo on its own instance with invented data.
+- Staff accounts are claimed through personal, single-use links; the
+  invented demo world and the one-click doors were removed (2026-10-01).
+- Anonymous surveys for client groups, answered in the portal. Staff see a
+  result only once a minimum number of people have answered (5 by default,
+  never fewer than 3); free-text answers are shown as written.
 - AI use disclosed at `/ki-datenschutz` and wherever staff meet it.
 - Impressum (`/impressum`) and privacy statement (`/datenschutz`), with the
   list of subprocessors.
 
 Next:
-- Pilot measurement tooling: baseline import, staff time sampling, an
-  anonymous resident survey, aggregate-only reporting (no cell below six
-  people).
+- Pilot measurement tooling: baseline import, staff time sampling and
+  aggregate-only reporting for the pilot.
 - Human review of the portal languages most asylum seekers read — Tigrinya
   and Dari first.
 

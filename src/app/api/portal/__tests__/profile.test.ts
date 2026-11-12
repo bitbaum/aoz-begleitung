@@ -152,17 +152,17 @@ beforeEach(() => {
 describe('PATCH /api/portal/profile', () => {
   it('returns 401 without a session', async () => {
     mockGetPortalResident.mockResolvedValue(null)
-    const response = await patchProfile(jsonRequest('/api/portal/profile', { displayName: 'Alex' }))
+    const response = await patchProfile(jsonRequest('/api/portal/profile', { displayName: 'Max' }))
     expect(response.status).toBe(401)
   })
 
   it('updates displayName and bio', async () => {
     const response = await patchProfile(
-      jsonRequest('/api/portal/profile', { displayName: '  Alex ', bio: 'Zimmer 1' }),
+      jsonRequest('/api/portal/profile', { displayName: '  Max ', bio: 'Zimmer 1' }),
     )
     expect(response.status).toBe(200)
     expect(mockResidentUpdate.mock.calls[0][0].set).toEqual({
-      displayName: 'Alex',
+      displayName: 'Max',
       bio: 'Zimmer 1',
       updatedAt: expect.any(Date),
     })

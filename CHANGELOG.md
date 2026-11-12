@@ -11,7 +11,11 @@ created_date: 2026-01-15
 last_modified_date: 2026-11-12
 last_modified_summary: Filled the gap from 2026-09-08 to 2026-11-03 from the merged pull requests.
 
+## 2026-11-12 — The claim-link workflow no longer publishes a name
 
+- The operator workflow that issues a claim link takes the staff member's
+  user id instead of their name, and logs only the id. The repository's
+  Actions logs are public, and a name entered there was printed in them.
 
 
 ## 2026-11-12 — The privacy pages say what happens today
@@ -24,6 +28,7 @@ last_modified_summary: Filled the gap from 2026-09-08 to 2026-11-03 from the mer
   people only once an invitation or code links it, names the health, insurance
   and permit data the product holds, lists Google and GitHub as sign-in
   services, and says the feedback window can record voice and uses AI.
+
 
 ## 2026-11-12 — The AI never sees health data, and only disclosed providers are called
 
