@@ -7,7 +7,7 @@
  * one-seat. Empty care seats on active residents are filled with this person.
  *
  * Usage (from repo root, against the live DB env):
- *   OPERATOR_RESIDENT_NAME=Georgy npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/maintenance/ensure-operator.ts
+ *   OPERATOR_RESIDENT_NAME='<name as shown in the portal>' npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/maintenance/ensure-operator.ts
  */
 
 import { and, asc, eq, inArray } from 'drizzle-orm'
@@ -15,7 +15,17 @@ import { db, user, account, careAssignment, resident as residentTable } from '..
 import { generateStaffCode } from '../../src/lib/auth/code-generation'
 import { CARE_ROLES } from '../../src/lib/config/care'
 
-const RESIDENT_NAME = process.env.OPERATOR_RESIDENT_NAME || 'Georgy'
+// No default: the operator's name is not in this public repository, and a
+// guessed name would link the wrong resident to a staff identity.
+const RESIDENT_NAME = requiredName()
+
+function requiredName(): string {
+  const name = process.env.OPERATOR_RESIDENT_NAME?.trim()
+  if (!name) {
+    throw new Error("Set OPERATOR_RESIDENT_NAME to the operator's name as shown in the portal.")
+  }
+  return name
+}
 
 /**
  * What "may work all three care seats" is, now that it is sayable.

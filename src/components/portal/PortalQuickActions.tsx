@@ -13,7 +13,7 @@ interface PortalQuickActionsProps {
  * With no chores open it used to answer "Präferenzen — Nächste Aufgabe": a
  * description belonging to the chores branch, left on a card that links to a
  * settings page. So a resident with nothing to do was told a task was waiting,
- * and sent to a form to look for it. Found by reading George's own dashboard,
+ * and sent to a form to look for it. Found by reading the operator's own dashboard,
  * where the real answer is genuinely "nothing" — the demo resident always has
  * a chore, so the branch never showed up in a walkthrough.
  *

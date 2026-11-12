@@ -566,7 +566,7 @@ export const en: Dictionary = {
     'The code stays your login. Name, photo and text are optional and can be changed anytime.',
   'profile.codeLabel': 'Your login code',
   'profile.displayNameLabel': 'Name',
-  'profile.displayNamePlaceholder': 'e.g. Georgy',
+  'profile.displayNamePlaceholder': 'e.g. Alex',
   'profile.photoHint': 'JPG, PNG or WebP — resized automatically.',
   'profile.photoLabel': 'Photo',
   'profile.photoRemove': 'Remove photo',

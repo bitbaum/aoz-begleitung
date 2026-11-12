@@ -248,8 +248,8 @@ describe('role, scope and administration are independent', () => {
   })
 
   test('system administration holds EVERY permission, on any role', () => {
-    // George administers the product and must be able to open everything he
-    // configures. It used to add only the system and complaint permissions,
+    // The operator administers the product and must be able to open everything they
+    // configure. It used to add only the system and complaint permissions,
     // so an administrator on a narrow role could configure what they could
     // not see.
     for (const role of STAFF_ROLES) {

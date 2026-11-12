@@ -1,7 +1,7 @@
 import { monthlyStatements, monthKeyOf } from '../statement'
 import { splitEqually } from '../split'
 
-const MEMBERS = ['amara', 'georgy', 'hana', 'noor']
+const MEMBERS = ['amara', 'emil', 'hana', 'noor']
 
 function expense(
   paidById: string,
@@ -34,7 +34,7 @@ describe('monthlyStatements', () => {
     const statements = monthlyStatements(
       [
         expense('amara', 2000, '2026-08-13T10:00:00Z'),
-        expense('georgy', 600, '2026-08-13T11:00:00Z'),
+        expense('emil', 600, '2026-08-13T11:00:00Z'),
         expense('hana', 1000, '2026-07-05T10:00:00Z'),
       ],
       MEMBERS,
@@ -55,14 +55,14 @@ describe('monthlyStatements', () => {
       shareRappen: 500,
       netRappen: 1500,
     })
-    const georgy = rows.find((r) => r.residentId === 'georgy')!
-    expect(georgy.netRappen).toBe(-500)
+    const emil = rows.find((r) => r.residentId === 'emil')!
+    expect(emil.netRappen).toBe(-500)
     expect(rows.reduce((a, r) => a + r.netRappen, 0)).toBe(0)
   })
 
   it('handles partial splits: the uninvolved member shows a zero row', () => {
     const statements = monthlyStatements(
-      [expense('georgy', 600, '2026-08-13T10:00:00Z', ['georgy', 'hana', 'noor'])],
+      [expense('emil', 600, '2026-08-13T10:00:00Z', ['emil', 'hana', 'noor'])],
       MEMBERS,
     )
     const amara = statements[0].rows.find((r) => r.residentId === 'amara')!
@@ -71,7 +71,7 @@ describe('monthlyStatements', () => {
 
   it('includes past residents present in the data but not in memberIds', () => {
     const statements = monthlyStatements(
-      [expense('former', 1200, '2026-08-01T10:00:00Z', ['former', 'georgy'])],
+      [expense('former', 1200, '2026-08-01T10:00:00Z', ['former', 'emil'])],
       MEMBERS,
     )
     expect(statements[0].rows.some((r) => r.residentId === 'former')).toBe(true)
@@ -85,6 +85,6 @@ describe('monthlyStatements', () => {
       ],
       MEMBERS,
     )
-    expect(statements[0].rows.map((r) => r.residentId)).toEqual(['amara', 'noor', 'georgy', 'hana'])
+    expect(statements[0].rows.map((r) => r.residentId)).toEqual(['amara', 'noor', 'emil', 'hana'])
   })
 })
