@@ -4,7 +4,7 @@ import { NAV_ICONS } from '@/lib/config/navigation'
 import { productSurfaces } from '@/lib/config/product-surface'
 import { getAllPosts } from '@/lib/blog/posts'
 import { formatCalendarDateLong } from '@/lib/utils/formatting'
-import { BLOG_LABELS } from '@/lib/constants/labels'
+import { PUBLIC_CHROME } from '@/lib/constants/labels/public-chrome'
 import { LOCALES } from '@/lib/i18n/locales'
 import { loginPath } from '@/lib/config/public-locales'
 import {
@@ -68,7 +68,9 @@ export function Landing({ locale }: { locale: PublicLocaleId }) {
       <Science c={c} />
       <Ethics c={c} />
       <ProductDocs c={c} />
-      {posts.length > 0 && <FromTheBlog c={c} posts={posts} />}
+      {posts.length > 0 && (
+        <FromTheBlog c={c} posts={posts} blogName={PUBLIC_CHROME[locale].blogTitle} />
+      )}
       <Closing c={c} signIn={loginPath(locale)} />
     </div>
   )
@@ -231,7 +233,11 @@ function Ethics({ c }: CopyProps) {
   )
 }
 
-function FromTheBlog({ c, posts }: CopyProps & { posts: ReturnType<typeof getAllPosts> }) {
+function FromTheBlog({
+  c,
+  posts,
+  blogName,
+}: CopyProps & { posts: ReturnType<typeof getAllPosts>; blogName: string }) {
   return (
     <section className="py-14 sm:py-20 border-b border-ui-border">
       <p className="eyebrow">{c.blogEyebrow}</p>
@@ -257,7 +263,7 @@ function FromTheBlog({ c, posts }: CopyProps & { posts: ReturnType<typeof getAll
         {c.blogLink}
         <ArrowRight className="w-4 h-4" aria-hidden="true" />
       </Link>
-      <span className="sr-only">{BLOG_LABELS.title}</span>
+      <span className="sr-only">{blogName}</span>
     </section>
   )
 }

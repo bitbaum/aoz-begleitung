@@ -35,10 +35,11 @@ const sizeConfig: Record<LogoSize, { mark: string; tagline: string }> = {
 
 /**
  * Split the product name into the coloured acronym and the neutral remainder.
- * Every brand names itself "<acronym> <word>"; if one ever does not, the whole
- * name simply renders neutral rather than printing a wrong acronym.
+ * A brand names itself either "<acronym> <word>" or just "<acronym>" (AOZ
+ * does); any other name renders neutral rather than printing a wrong acronym.
  */
 function splitWordmark(productName: string, shortName: string): [string, string] {
+  if (productName === shortName) return [shortName, '']
   return productName.startsWith(`${shortName} `)
     ? [shortName, productName.slice(shortName.length)]
     : ['', productName]
@@ -51,7 +52,7 @@ function LogoMark({ size = 'md', showTagline = false, className = '' }: Omit<Log
     <div className={`flex items-baseline gap-2 ${className}`}>
       <span className={`font-semibold tracking-tight ${s.mark}`}>
         {mark ? <span className="text-brand-primary">{mark}</span> : null}
-        <span className="text-ui-text">{rest}</span>
+        {rest ? <span className="text-ui-text">{rest}</span> : null}
       </span>
       {showTagline && (
         <span className={`hidden lg:inline eyebrow ${s.tagline}`}>{APP_LABELS.tagline}</span>

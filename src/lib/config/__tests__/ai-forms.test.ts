@@ -14,15 +14,16 @@
  *     answers nobody gave and turn every instruction into a refine.
  */
 
-import { runFormAssist } from '@fleet/ai-forms'
+import { redactExcluded, runFormAssist } from '@fleet/ai-forms'
 import {
   RESIDENT_INTAKE_FIELDS,
   RESIDENT_INTAKE_FORM,
   residentIntakeInitialValues,
   AI_EXCLUDED_FACTOR_IDS,
+  AI_HEALTH_SECTION_ID,
 } from '../ai-forms'
 import { factorDisplayValue } from '../factor-fields'
-import { RESIDENT_FACTORS } from '../resident-factors'
+import { RESIDENT_FACTORS, getFactorsBySection } from '../resident-factors'
 import { ResidentInputSchema } from '@/lib/validation/schemas'
 
 const field = (name: string) => {
@@ -121,6 +122,32 @@ describe('resident intake registry — what the model may write', () => {
     expect(AI_EXCLUDED_FACTOR_IDS.has('code')).toBe(true)
     expect(field('code').aiExcluded).toBe(true)
     expect(writable).not.toContain('code')
+  })
+
+  it('never shows the model a health or support factor, nor lets it write one', () => {
+    // /ki-datenschutz promises that the form assistant never sends medical
+    // information. The edit form sends every non-excluded stored value as
+    // "current values", so an assistable health field is a broken promise.
+    const health = [
+      ...getFactorsBySection(AI_HEALTH_SECTION_ID).map((factor) => factor.id),
+      'medicalEquipment',
+      'mobilityNeeds',
+    ]
+    expect(health).toEqual(
+      expect.arrayContaining(['hasSleepEquipment', 'hasNightDisturbances', 'roomSharingStatus']),
+    )
+    for (const name of health) {
+      expect({ name, excluded: field(name).aiExcluded }).toEqual({ name, excluded: true })
+      expect(writable).not.toContain(name)
+    }
+  })
+
+  it('does not send stored health values as current values', () => {
+    const values = { medicalEquipment: true, hasSleepEquipment: true, noiseTolerance: 3 }
+    const sent = redactExcluded(values, RESIDENT_INTAKE_FIELDS)
+    expect(sent).not.toHaveProperty('medicalEquipment')
+    expect(sent).not.toHaveProperty('hasSleepEquipment')
+    expect(sent).toHaveProperty('noiseTolerance', 3)
   })
 
   it('keeps medical documentation entirely out of the registry', () => {
