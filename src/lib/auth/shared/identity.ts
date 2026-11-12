@@ -13,6 +13,7 @@ import { and, eq } from 'drizzle-orm'
 import { ALL_CODE_PREFIXES } from '@/lib/config/brand'
 import { ALL_RESIDENT_CODE_PREFIXES } from '@/lib/auth/code-prefixes'
 import { db, accountIdentity, accountSessionScope, resident, sharedAuthUser, user } from '@/lib/db'
+import { isPublishedCode } from '../published-codes'
 import { effectiveScope } from '../role-policy'
 import type { AuthResident, AuthUser } from '../index'
 
@@ -36,6 +37,8 @@ const NONE: SessionIdentities = { staff: null, resident: null }
 
 /** The side a login code belongs to, by every prefix ever issued. */
 export function sideOfCode(code: string): IdentitySide | null {
+  // A published code names nobody. @see ../published-codes.ts
+  if (isPublishedCode(code)) return null
   if (ALL_CODE_PREFIXES.some((prefix) => code.startsWith(prefix))) return 'staff'
   if (ALL_RESIDENT_CODE_PREFIXES.some((prefix) => code.startsWith(prefix))) return 'resident'
   return null

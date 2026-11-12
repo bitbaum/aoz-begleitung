@@ -1161,7 +1161,7 @@ portal lets them OPTIONALLY set `displayName`, `bio` and a photo:
   `displayName: string | null`; never widen it back to `?:`.
   This is enforced by `src/lib/__tests__/resident-name-ssot.test.ts`: it failed
   on 50+ surfaces, because rendering a bare code type-checks, lints and looks
-  fine — it just tells Georgy that "RES-LCCM7A" did the dishes instead of the flatmate by name,
+  fine — it just tells Georgy that "RES-XXXXXX" did the dishes instead of the flatmate by name,
   and shows AOZ staff codes for people whose names sat in the same row. The few
   places where the login code *is* the point (the portal's own "your code" card,
   the staff breadcrumb) opt out with a `resident-code-intentional` comment, so
@@ -1696,7 +1696,7 @@ model Account {
 | Audit logging | Active | `src/lib/audit.ts` |
 | Role switching | Active | UserMenu + PortalNav show cross-links |
 
-**To create initial admin:** Run `pnpm run db:seed:admin` (default code: `AOZ-ADMIN1`)
+**To create initial admin:** Run `pnpm run db:seed:admin`. It generates a random code and prints it once; there is no default code. Codes that were ever published in this repository are refused at login (`src/lib/auth/published-codes.ts`).
 
 ---
 
