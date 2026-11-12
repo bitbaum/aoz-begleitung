@@ -9,8 +9,19 @@ Related documents: [Roadmap](docs/ROADMAP.md) · [Blog](docs/blog/README.md)
 
 created_date: 2026-01-15
 last_modified_date: 2026-11-12
-last_modified_summary: Published login codes are refused; landing page claims match the deployment; Impressum and privacy statement on the public site.
+last_modified_summary: The privacy pages say what happens today.
 
+
+## 2026-11-12 — The privacy pages say what happens today
+
+- `/ki-datenschutz` no longer calls the AI a placeholder that is switched off
+  "before real data" is processed: the data in this product is real, and the
+  page now says that AI receives it today under free-tier terms.
+- `/datenschutz` no longer says an account exists only by invitation. It lists
+  the ways an account can be created, says an account reaches data about
+  people only once an invitation or code links it, names the health, insurance
+  and permit data the product holds, lists Google and GitHub as sign-in
+  services, and says the feedback window can record voice and uses AI.
 ## 2026-11-12 — Published login codes are refused
 
 - Login codes that were printed in this public repository (the admin seed

@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { PUBLIC_ROUTES } from '@/lib/auth/route-boundaries'
-import { AI_PROVIDERS_TODAY } from '../ai-disclosure'
+import { AI_DISCLOSURE_COPY, AI_PROVIDERS_TODAY } from '../ai-disclosure'
 import {
   IMPRESSUM_COPY,
   IMPRESSUM_HREF,
@@ -55,5 +55,30 @@ describe('legal pages', () => {
     ]) {
       expect(readFileSync(join(process.cwd(), gated), 'utf8')).not.toContain('widget.js')
     }
+  })
+
+  it('says what the signed-in area really holds and how an account really starts', () => {
+    // Found 2026-11-12: the statement claimed accounts exist only by invitation
+    // while the live sign-in offers open sign-up, and it left out the health,
+    // insurance and permit data the product stores.
+    const privacy = text(PRIVACY_COPY)
+    expect(privacy).not.toMatch(/Konto entsteht nur/)
+    for (const word of ['Krankenversicherung', 'Aufenthaltsausweis', 'medizinische Geräte']) {
+      expect(privacy).toContain(word)
+    }
+  })
+
+  it('discloses that the feedback window can record voice and uses AI', () => {
+    const privacy = text(PRIVACY_COPY)
+    expect(privacy).toMatch(/Mikrofon/)
+    expect(privacy).toMatch(/KI/)
+  })
+
+  it('never calls real data a placeholder', () => {
+    // The instance holds real data only; the AI page called the AI a
+    // placeholder that would be switched off "before real data" is used.
+    const ai = JSON.stringify(AI_DISCLOSURE_COPY)
+    expect(ai).not.toMatch(/Platzhalter|placeholders/)
+    expect(ai).not.toMatch(/bevor echte Daten|before real data/i)
   })
 })
