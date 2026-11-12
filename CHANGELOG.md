@@ -11,6 +11,16 @@ created_date: 2026-01-15
 last_modified_date: 2026-11-12
 last_modified_summary: Filled the gap from 2026-09-08 to 2026-11-03 from the merged pull requests.
 
+## 2026-11-12 — Every server action checks who is asking
+
+- Ten read functions exported as server actions (care team, assignable
+  staff, care attributes, appointments, staff event and marketplace lists,
+  unit addresses, system configuration) now check the session themselves
+  instead of relying on the page that calls them. Staff, or the client the
+  data is about, may read; nobody else.
+- A test fails when a new server action exports without a check.
+
+
 ## 2026-11-12 — The claim-link workflow no longer publishes a name
 
 - The operator workflow that issues a claim link takes the staff member's
