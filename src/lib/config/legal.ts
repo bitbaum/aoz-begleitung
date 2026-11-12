@@ -44,8 +44,13 @@ export const PROCESSORS = [
   ...AI_PROVIDERS_TODAY.map((provider) => ({
     name: provider.name,
     country: provider.country,
-    role: 'KI-Hilfen für Fachpersonen im Testbetrieb. Was übermittelt wird, steht auf der Seite «KI und Datenschutz».',
+    role: 'KI-Hilfen für Fachpersonen, über einen kostenlosen Zugang ohne Auftragsbearbeitungsvertrag. Übermittelt werden echte Angaben; was genau, steht auf der Seite «KI und Datenschutz».',
   })),
+  {
+    name: 'Google, GitHub',
+    country: 'USA',
+    role: 'Nur wenn Sie die Anmeldung über diesen Dienst wählen: Er bestätigt dem Produkt Ihre Identität und übermittelt Name und E-Mail-Adresse Ihres Kontos dort.',
+  },
 ] as const
 
 export interface LegalSection {
@@ -112,13 +117,16 @@ export const PRIVACY_COPY = {
       title: 'Rückmeldungen',
       paragraphs: [
         'Auf den öffentlichen Seiten wird ein Rückmelde-Fenster von loki.orangecat.ch geladen, einem Dienst desselben Betreibers. Dabei erhält auch dieser Dienst Ihre IP-Adresse. Was Sie dort eingeben und absenden, geht an den Betreiber und dient dazu, Fehler zu beheben. Im angemeldeten Bereich wird dieses Fenster nicht geladen.',
+        'Das Fenster kann eine Sprachnachricht aufnehmen, aber erst wenn Sie das Mikrofon antippen und Ihr Browser die Freigabe erhält. Die Aufnahme wird von einem externen KI-Dienst in Text umgeschrieben. Das Fenster bietet ausserdem einen Chat, dessen Antworten eine KI schreibt; was Sie dort schreiben, und ein Auszug der angezeigten Seite gehen dafür an diesen Dienst.',
       ],
     },
     {
       id: 'konto',
       title: 'Angemeldeter Bereich',
       paragraphs: [
-        'Ein Konto entsteht nur über eine Einladung oder einen persönlichen Code. Bearbeitet werden die Angaben zum Konto (E-Mail-Adresse oder Code; das Passwort nur als nicht umkehrbarer Hashwert) und die Angaben, die Fachpersonen und Klient*innen für die Begleitung erfassen: zum Wohnen, zum Alltag im Haus, zu Lernen und Arbeit sowie Nachrichten und Meldungen.',
+        'Ein Konto können Sie mit E-Mail und Passwort, mit einem Anmeldelink per E-Mail, mit einem Passkey, mit einer Lightning-Wallet oder über Google, GitHub oder OrangeCat anlegen. Zugang zu Angaben über Personen erhält ein Konto erst, wenn es über eine Einladung oder einen persönlichen Code mit einer Fachperson oder einer Klientin bzw. einem Klienten verbunden ist.',
+        'Bearbeitet werden die Angaben zum Konto (E-Mail-Adresse oder Code, bei Anmeldung über Google, GitHub oder OrangeCat auch der dort hinterlegte Name; das Passwort nur als nicht umkehrbarer Hashwert) und die Angaben, die Fachpersonen und Klient*innen für die Begleitung erfassen: zum Wohnen, zum Alltag im Haus, zu Lernen und Arbeit sowie Nachrichten und Meldungen.',
+        'Dazu gehören auch besonders schützenswerte Angaben, soweit sie für Wohnen und Begleitung gebraucht werden: Unterstützungsbedarf und gesundheitsbezogene Angaben wie medizinische Geräte, Schlafgeräte, Mobilität oder eine ärztliche Bestätigung für ein Einzelzimmer; Kontakte zu Fachpersonen der Gesundheit; die Krankenversicherung; sowie Art und Ablaufdatum des Aufenthaltsausweises, wenn Klient*innen sie selbst eintragen.',
         'Nicht erfasst werden medizinische Diagnosen, Religion, politische Überzeugung und Einzelheiten des Asylverfahrens.',
         'Im angemeldeten Bereich werden ausschliesslich technisch notwendige Cookies gesetzt: für die Anmeldung und, im Portal, für die gewählte Sprache.',
       ],
@@ -127,7 +135,7 @@ export const PRIVACY_COPY = {
       id: 'empfaenger',
       title: 'Wo die Daten liegen und wer sie erhält',
       paragraphs: [
-        'Die Daten werden nicht verkauft und nicht zu Werbezwecken weitergegeben. Folgende Dienstleister bearbeiten Daten im Auftrag; damit gelangen Daten nach Deutschland und, bei E-Mail-Versand und KI-Hilfen, in die USA:',
+        'Die Daten werden nicht verkauft und nicht zu Werbezwecken weitergegeben. Folgende Dienstleister bearbeiten Daten im Auftrag; damit gelangen Daten nach Deutschland und, bei E-Mail-Versand, KI-Hilfen und der Anmeldung über Google oder GitHub, in die USA:',
       ],
     },
     {
