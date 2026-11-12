@@ -21,7 +21,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Logo } from '@/components/ui/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LegalLinks } from '@/components/marketing/LegalLinks'
-import { APP_LABELS, LOGIN_COPY, PUBLIC_CHROME, marketingCopy } from '@/lib/constants/labels'
+import { LOGIN_COPY, PUBLIC_CHROME, marketingCopy } from '@/lib/constants/labels'
 import { BRAND } from '@/lib/config/brand'
 import {
   PUBLIC_DEFAULT_LOCALE,
@@ -113,7 +113,7 @@ export function AuthShell({
             className="inline-flex flex-col items-center gap-2 transition-opacity hover:opacity-70"
           >
             <Logo size="xl" />
-            <span className="text-ui-muted">{APP_LABELS.tagline}</span>
+            <span className="text-ui-muted">{PUBLIC_CHROME[locale].tagline}</span>
           </Link>
         </div>
 

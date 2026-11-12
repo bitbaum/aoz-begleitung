@@ -66,5 +66,7 @@ describe('account pages', () => {
     expect(html).toContain('href="/impressum"')
     expect(html).toContain('href="/datenschutz"')
     expect(html).toContain(PUBLIC_CHROME[locale].impressum)
+    // The tagline under the wordmark was German on /fr/login.
+    expect(html).toContain(PUBLIC_CHROME[locale].tagline)
   })
 })
